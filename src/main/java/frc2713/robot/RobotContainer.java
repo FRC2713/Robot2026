@@ -63,8 +63,8 @@ public class RobotContainer {
 
         launcher =
             new Launcher(
-                Constants.LauncherConstants.launcherConfig,
-                new TalonFXIO(Constants.LauncherConstants.launcherConfig));
+                Constants.Launcher.launcherConfig,
+                new TalonFXIO(Constants.Launcher.launcherConfig));
         break;
 
       case SIM:
@@ -79,8 +79,8 @@ public class RobotContainer {
 
         launcher =
             new Launcher(
-                Constants.LauncherConstants.launcherConfig,
-                new SimTalonFXIO(Constants.LauncherConstants.launcherConfig));
+                Constants.Launcher.launcherConfig,
+                new SimTalonFXIO(Constants.Launcher.launcherConfig));
         break;
 
       default:
@@ -95,8 +95,8 @@ public class RobotContainer {
 
         launcher =
             new Launcher(
-                Constants.LauncherConstants.launcherConfig,
-                new TalonFXIO(Constants.LauncherConstants.launcherConfig));
+                Constants.Launcher.launcherConfig,
+                new TalonFXIO(Constants.Launcher.launcherConfig));
         break;
     }
 

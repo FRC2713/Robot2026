@@ -37,7 +37,7 @@ public final class Constants {
     REPLAY
   }
 
-  public static final class LauncherConstants {
+  public static final class Launcher {
     public static final Distance bigWheelRadius =
         Distance.ofBaseUnits(Units.inchesToMeters(2.0), Meters);
     public static final Distance smallWheelRadius =
@@ -53,5 +53,35 @@ public final class Constants {
       launcherConfig.fxConfig.Slot0.kD = 0.0;
       launcherConfig.unitToRotorRatio = 1.0; // 1:1 ratio
     }
+  }
+
+  public static final class Turret {
+    public static final Distance turretRadius =
+        Distance.ofBaseUnits(Units.inchesToMeters(6.0), Meters);
+  }
+
+  public static final class Climber {
+    public static final Distance armLength =
+        Distance.ofBaseUnits(Units.inchesToMeters(12.0), Meters);
+  }
+
+  public static final class Indexer {
+    public static final Distance wheelRadius =
+        Distance.ofBaseUnits(Units.inchesToMeters(1.0), Meters);
+  }
+
+  public static final class Feeder {
+    public static final Distance wheelRadius =
+        Distance.ofBaseUnits(Units.inchesToMeters(1.0), Meters);
+  }
+
+  public static final class IntakeExtension {
+    public static final Distance armLength =
+        Distance.ofBaseUnits(Units.inchesToMeters(10.0), Meters);
+  }
+
+  public static final class IntakeRollers {
+    public static final Distance wheelRadius =
+        Distance.ofBaseUnits(Units.inchesToMeters(1.5), Meters);
   }
 }

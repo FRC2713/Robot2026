@@ -6,9 +6,6 @@ import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 
 public class Launcher extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO> {
-  TalonFXIO launcherMotorIO;
-
-  TalonFXSubsystemConfig launcherConfig = new TalonFXSubsystemConfig();
 
   public Launcher(final TalonFXSubsystemConfig config, final TalonFXIO launcherMotorIO) {
     super(config, new MotorInputsAutoLogged(), launcherMotorIO);
