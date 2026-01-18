@@ -16,6 +16,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc2713.lib.io.SimTalonFXIO;
+import frc2713.lib.io.TalonFXIO;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.generated.TunerConstants;
 import frc2713.robot.subsystems.drive.Drive;
@@ -24,6 +26,7 @@ import frc2713.robot.subsystems.drive.GyroIOPigeon2;
 import frc2713.robot.subsystems.drive.ModuleIO;
 import frc2713.robot.subsystems.drive.ModuleIOSim;
 import frc2713.robot.subsystems.drive.ModuleIOTalonFX;
+import frc2713.robot.subsystems.launcher.Launcher;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -35,6 +38,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
+  private final Launcher launcher;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -57,23 +61,10 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
 
-        // The ModuleIOTalonFXS implementation provides an example implementation for
-        // TalonFXS controller connected to a CANdi with a PWM encoder. The
-        // implementations
-        // of ModuleIOTalonFX, ModuleIOTalonFXS, and ModuleIOSpark (from the Spark
-        // swerve
-        // template) can be freely intermixed to support alternative hardware
-        // arrangements.
-        // Please see the AdvantageKit template documentation for more information:
-        // https://docs.advantagekit.org/getting-started/template-projects/talonfx-swerve-template#custom-module-implementations
-        //
-        // drive =
-        // new Drive(
-        // new GyroIOPigeon2(),
-        // new ModuleIOTalonFXS(TunerConstants.FrontLeft),
-        // new ModuleIOTalonFXS(TunerConstants.FrontRight),
-        // new ModuleIOTalonFXS(TunerConstants.BackLeft),
-        // new ModuleIOTalonFXS(TunerConstants.BackRight));
+        launcher =
+            new Launcher(
+                Constants.LauncherConstants.launcherConfig,
+                new TalonFXIO(Constants.LauncherConstants.launcherConfig));
         break;
 
       case SIM:
@@ -85,6 +76,11 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
+
+        launcher =
+            new Launcher(
+                Constants.LauncherConstants.launcherConfig,
+                new SimTalonFXIO(Constants.LauncherConstants.launcherConfig));
         break;
 
       default:
@@ -96,6 +92,11 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
+
+        launcher =
+            new Launcher(
+                Constants.LauncherConstants.launcherConfig,
+                new TalonFXIO(Constants.LauncherConstants.launcherConfig));
         break;
     }
 
@@ -160,6 +161,8 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
+
+    controller.rightBumper().whileTrue(launcher.dutyCycleCommand(() -> 0.5));
   }
 
   /**

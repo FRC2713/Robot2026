@@ -7,7 +7,13 @@
 
 package frc2713.robot;
 
+import static edu.wpi.first.units.Units.Meters;
+
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.RobotBase;
+import frc2713.lib.drivers.CANDeviceId;
+import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 
 /**
  * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
@@ -18,6 +24,8 @@ public final class Constants {
   public static final Mode simMode = Mode.SIM;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
 
+  public static final CANDeviceId launcherMotorDeviceId = new CANDeviceId(2);
+
   public static enum Mode {
     /** Running on a real robot. */
     REAL,
@@ -27,5 +35,23 @@ public final class Constants {
 
     /** Replaying from a log file. */
     REPLAY
+  }
+
+  public static final class LauncherConstants {
+    public static final Distance bigWheelRadius =
+        Distance.ofBaseUnits(Units.inchesToMeters(2.0), Meters);
+    public static final Distance smallWheelRadius =
+        Distance.ofBaseUnits(Units.inchesToMeters(1.0), Meters);
+
+    public static TalonFXSubsystemConfig launcherConfig = new TalonFXSubsystemConfig();
+
+    static {
+      launcherConfig.name = "Launcher";
+      launcherConfig.talonCANID = launcherMotorDeviceId;
+      launcherConfig.fxConfig.Slot0.kP = 0.1;
+      launcherConfig.fxConfig.Slot0.kI = 0.0;
+      launcherConfig.fxConfig.Slot0.kD = 0.0;
+      launcherConfig.unitToRotorRatio = 1.0; // 1:1 ratio
+    }
   }
 }

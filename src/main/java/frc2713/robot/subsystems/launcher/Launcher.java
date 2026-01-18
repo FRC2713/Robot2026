@@ -15,7 +15,7 @@ public class Launcher extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO> {
   }
 
   @Override
-  public void periodic() {    
+  public void periodic() {
     super.periodic();
     // Additional periodic code for Launcher can be added here
   }
