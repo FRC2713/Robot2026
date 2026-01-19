@@ -1,6 +1,5 @@
 package frc2713.lib.util;
 
-import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.units.measure.Time;

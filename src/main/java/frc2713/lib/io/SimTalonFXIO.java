@@ -30,8 +30,7 @@ public class SimTalonFXIO extends TalonFXIO {
   // Used to handle mechanisms that wrap.
   private boolean invertVoltage = false;
 
-  protected AtomicReference<Angle> lastPosition =
-      new AtomicReference<>((Angle) Rotations.of(0.0));
+  protected AtomicReference<Angle> lastPosition = new AtomicReference<>((Angle) Rotations.of(0.0));
   protected AtomicReference<AngularVelocity> lastVelocity =
       new AtomicReference<>((AngularVelocity) RadiansPerSecond.of(0.0));
 
@@ -114,8 +113,7 @@ public class SimTalonFXIO extends TalonFXIO {
 
     // Mutate rotor vel
     AngularVelocity rotorVel =
-        RadiansPerSecond.of(sim.getAngularVelocityRadPerSec())
-            .div(getSimRatio());
+        RadiansPerSecond.of(sim.getAngularVelocityRadPerSec()).div(getSimRatio());
     lastVelocity.set(rotorVel);
     simState.setRotorVelocity(overrideVelocity.isEmpty() ? rotorVel : overrideVelocity.get());
     Logger.recordOutput(
