@@ -385,10 +385,32 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
   public Command positionSetpointUntilOnTargetCommand(
       Supplier<Angle> positionSupplier, Supplier<Angle> epsilonSupplier) {
     return new ParallelDeadlineGroup(
-        new WaitUntilCommand(
-            () ->
-                Util.epsilonEquals(positionSupplier.get(), inputs.position, epsilonSupplier.get())),
-        positionSetpointCommand(positionSupplier));
+            new WaitUntilCommand(
+                () ->
+                    Util.epsilonEquals(
+                        positionSupplier.get(), inputs.position, epsilonSupplier.get())),
+            positionSetpointCommand(positionSupplier))
+        .withName(makeName("PositionUntilOnTargetControl"));
+  }
+
+  /**
+   * Creates a command that sets the motor to the specified velocity setpoint and ends when the
+   * velocity is within the specified epsilon of the target.
+   *
+   * @param velocitySupplier The desired velocity setpoint supplier.
+   * @param epsilonSupplier The acceptable error margin supplier.
+   * @return A command that sets the motor to the specified velocity setpoint and ends when on
+   *     target.
+   */
+  public Command velocitySetpointUntilOnTargetCommand(
+      Supplier<AngularVelocity> velocitySupplier, Supplier<AngularVelocity> epsilonSupplier) {
+    return new ParallelDeadlineGroup(
+            new WaitUntilCommand(
+                () ->
+                    Util.epsilonEquals(
+                        velocitySupplier.get(), inputs.velocity, epsilonSupplier.get())),
+            velocitySetpointCommand(velocitySupplier))
+        .withName(makeName("VelocityUntilOnTargetControl"));
   }
 
   /**
