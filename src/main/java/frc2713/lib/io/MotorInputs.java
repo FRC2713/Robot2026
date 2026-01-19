@@ -13,10 +13,10 @@ import org.littletonrobotics.junction.AutoLog;
 
 @AutoLog
 public class MotorInputs {
-  public AngularVelocity velocity = AngularVelocity.ofBaseUnits(0.0, RotationsPerSecond);
-  public Angle position = Angle.ofBaseUnits(0.0, Rotations);
-  public Voltage appliedVolts = Voltage.ofBaseUnits(0.0, Volts);
-  public Current currentStatorAmps = Current.ofBaseUnits(0.0, Amps);
-  public Current currentSupplyAmps = Current.ofBaseUnits(0.0, Amps);
-  public Angle rawRotorPosition = Angle.ofBaseUnits(0.0, Rotations);
+  public AngularVelocity velocity = RotationsPerSecond.of(0.0);
+  public Angle position = Rotations.of(0.0);
+  public Voltage appliedVolts = Volts.of(0.0)
+  public Current currentStatorAmps = Amps.of(0.0);
+  public Current currentSupplyAmps = Amps.of(0.0);
+  public Angle rawRotorPosition = Rotations.of(0.0);
 }

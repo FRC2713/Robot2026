@@ -34,8 +34,8 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
   protected final MI inputs;
   protected final TalonFXSubsystemConfig config;
 
-  protected Angle positionSetpoint = Angle.ofBaseUnits(0.0, Radians);
-  protected AngularVelocity velocitySetpoint = AngularVelocity.ofBaseUnits(0.0, RotationsPerSecond);
+  protected Angle positionSetpoint = Radians.of(0.0);
+  protected AngularVelocity velocitySetpoint = RotationsPerSecond.of(0.0);
 
   public MotorSubsystem(TalonFXSubsystemConfig config, MI inputs, IO io) {
     // Set the subsystem name

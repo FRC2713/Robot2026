@@ -23,7 +23,7 @@ import org.littletonrobotics.junction.Logger;
 public class SimTalonFXIO extends TalonFXIO {
   protected DCMotorSim sim;
   private Notifier simNotifier = null;
-  private Time lastUpdateTimestamp = Time.ofBaseUnits(0.0, Seconds);
+  private Time lastUpdateTimestamp = Seconds.of(0.0);
   private Optional<AngularVelocity> overrideVelocity = Optional.empty();
   private Optional<Angle> overridePosition = Optional.empty();
 
@@ -31,9 +31,9 @@ public class SimTalonFXIO extends TalonFXIO {
   private boolean invertVoltage = false;
 
   protected AtomicReference<Angle> lastPosition =
-      new AtomicReference<>((Angle) Angle.ofBaseUnits(0.0, Rotations));
+      new AtomicReference<>((Angle) Rotations.of(0.0));
   protected AtomicReference<AngularVelocity> lastVelocity =
-      new AtomicReference<>((AngularVelocity) AngularVelocity.ofBaseUnits(0.0, RadiansPerSecond));
+      new AtomicReference<>((AngularVelocity) RadiansPerSecond.of(0.0));
 
   protected double getSimRatio() {
     return config.unitToRotorRatio;
@@ -103,7 +103,7 @@ public class SimTalonFXIO extends TalonFXIO {
     overridePosition.ifPresent(anAngle -> sim.setAngle(anAngle.in(Radians)));
 
     // Find current state of sim in radians from 0 point
-    Angle simPosition = Angle.ofBaseUnits(sim.getAngularPositionRad(), Radians);
+    Angle simPosition = Radians.of(sim.getAngularPositionRad());
     Logger.recordOutput(config.name + "/Sim/SimulatorPositionRadians", simPosition.in(Radians));
 
     // Mutate rotor position
@@ -114,7 +114,7 @@ public class SimTalonFXIO extends TalonFXIO {
 
     // Mutate rotor vel
     AngularVelocity rotorVel =
-        AngularVelocity.ofBaseUnits(sim.getAngularVelocityRadPerSec(), RadiansPerSecond)
+        RadiansPerSecond.of(sim.getAngularVelocityRadPerSec())
             .div(getSimRatio());
     lastVelocity.set(rotorVel);
     simState.setRotorVelocity(overrideVelocity.isEmpty() ? rotorVel : overrideVelocity.get());

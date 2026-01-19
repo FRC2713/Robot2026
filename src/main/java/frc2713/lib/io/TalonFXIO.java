@@ -142,7 +142,7 @@ public class TalonFXIO implements MotorIO {
 
   @Override
   public void setCurrentPositionAsZero() {
-    setCurrentPosition(Angle.ofBaseUnits(0.0, Revolutions));
+    setCurrentPosition(Revolutions.of(0.0));
   }
 
   @Override
