@@ -62,7 +62,7 @@ public class TalonFXIO implements MotorIO {
 
     positionSignal = talon.getPosition();
     velocitySignal = talon.getVelocity();
-    voltageSignal = talon.getSupplyVoltage();
+    voltageSignal = talon.getMotorVoltage();
     currentStatorSignal = talon.getStatorCurrent();
     currentSupplySignal = talon.getSupplyCurrent();
     rawRotorPositionSignal = talon.getRotorPosition();
