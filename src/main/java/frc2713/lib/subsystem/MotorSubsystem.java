@@ -80,7 +80,7 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
    * @param mode The desired neutral mode.
    */
   protected void setNeutralModeImpl(NeutralModeValue mode) {
-    Logger.recordOutput(makePath("/API/setNeutralModeImpl/mode"), mode);
+    Logger.recordOutput(makePath("API/setNeutralModeImpl/mode"), mode);
     io.setNeutralMode(mode);
   }
 
@@ -90,7 +90,7 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
    * @param dutyCycle The desired duty cycle (-1.0 to 1.0).
    */
   protected void setOpenLoopDutyCycleImpl(double dutyCycle) {
-    Logger.recordOutput(makePath("/API/setOpenLoopDutyCycleImpl/dutyCycle"), dutyCycle);
+    Logger.recordOutput(makePath("API/setOpenLoopDutyCycleImpl/dutyCycle"), dutyCycle);
     io.setOpenLoopDutyCycle(dutyCycle);
   }
 
@@ -100,8 +100,8 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
    * @param voltage The desired voltage.
    */
   protected void setVoltageImpl(Voltage voltage) {
-    Logger.recordOutput(makePath("/API/setVoltageImpl/voltage"), voltage);
-    Logger.recordOutput(makePath("/API/setVoltageImpl/units"), voltage.unit().toString());
+    Logger.recordOutput(makePath("API/setVoltageImpl/voltage"), voltage);
+    Logger.recordOutput(makePath("API/setVoltageImpl/units"), voltage.unit().toString());
     io.setVoltageOutput(voltage);
   }
 
@@ -113,8 +113,8 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
    */
   protected void setPositionSetpointImpl(Angle position) {
     positionSetpoint = position;
-    Logger.recordOutput(makePath("/API/setPositionSetpointImpl/position"), position);
-    Logger.recordOutput(makePath("/API/setPositionSetpointImpl/units"), position.unit().toString());
+    Logger.recordOutput(makePath("API/setPositionSetpointImpl/position"), position);
+    Logger.recordOutput(makePath("API/setPositionSetpointImpl/units"), position.unit().toString());
     io.setPositionSetpoint(position);
   }
 
@@ -127,10 +127,10 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
    */
   protected void setMotionMagicSetpointImpl(Angle position, int slot) {
     positionSetpoint = position;
-    Logger.recordOutput(makePath("/API/setMotionMagicSetpointImpl/position"), position);
+    Logger.recordOutput(makePath("API/setMotionMagicSetpointImpl/position"), position);
     Logger.recordOutput(
-        makePath("/API/setMotionMagicSetpointImpl/units"), position.unit().toString());
-    Logger.recordOutput(makePath("/API/setMotionMagicSetpointImpl/slot"), slot);
+        makePath("API/setMotionMagicSetpointImpl/units"), position.unit().toString());
+    Logger.recordOutput(makePath("API/setMotionMagicSetpointImpl/slot"), slot);
     io.setMotionMagicSetpoint(position, slot);
   }
 
@@ -148,13 +148,13 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
     AngularVelocity velocity = config.getMotionMagicCruiseVelocityMeasure();
     AngularAcceleration acceleration = config.getMotionMagicAccelerationMeasure();
     Velocity<AngularAccelerationUnit> jerk = config.getMotionMagicJerkMeasure();
-    Logger.recordOutput(makePath("/API/setMotionMagicSetpointImpDynamic/Position"), position);
+    Logger.recordOutput(makePath("API/setMotionMagicSetpointImpDynamic/Position"), position);
     Logger.recordOutput(
-        makePath("/API/setMotionMagicSetpointImpDynamic/Units"), position.unit().toString());
-    Logger.recordOutput(makePath("/API/setMotionMagicSetpointImpDynamic/Velocity"), velocity);
-    Logger.recordOutput(makePath("/API/setMotionMagicSetpointImpDynamic/Accel"), acceleration);
-    Logger.recordOutput(makePath("/API/setMotionMagicSetpointImpDynamic/Jerk"), jerk);
-    Logger.recordOutput(makePath("/API/setMotionMagicSetpointImpDynamic/Slot"), slot);
+        makePath("API/setMotionMagicSetpointImpDynamic/Units"), position.unit().toString());
+    Logger.recordOutput(makePath("API/setMotionMagicSetpointImpDynamic/Velocity"), velocity);
+    Logger.recordOutput(makePath("API/setMotionMagicSetpointImpDynamic/Accel"), acceleration);
+    Logger.recordOutput(makePath("API/setMotionMagicSetpointImpDynamic/Jerk"), jerk);
+    Logger.recordOutput(makePath("API/setMotionMagicSetpointImpDynamic/Slot"), slot);
     io.setMotionMagicSetpoint(position, velocity, acceleration, jerk, slot);
   }
 
@@ -174,14 +174,14 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
     AngularVelocity velocity = config.getMotionMagicCruiseVelocityMeasure();
     AngularAcceleration acceleration = config.getMotionMagicAccelerationMeasure();
     Velocity<AngularAccelerationUnit> jerk = config.getMotionMagicJerkMeasure();
-    Logger.recordOutput(makePath("/API/setMotionMagicSetpointImpDynamic/Position"), position);
+    Logger.recordOutput(makePath("API/setMotionMagicSetpointImpDynamic/Position"), position);
     Logger.recordOutput(
-        makePath("/API/setMotionMagicSetpointImpDynamic/Units"), position.unit().toString());
-    Logger.recordOutput(makePath("/API/setMotionMagicSetpointImpDynamic/Velocity"), velocity);
-    Logger.recordOutput(makePath("/API/setMotionMagicSetpointImpDynamic/Accel"), acceleration);
-    Logger.recordOutput(makePath("/API/setMotionMagicSetpointImpDynamic/Jerk"), jerk);
-    Logger.recordOutput(makePath("/API/setMotionMagicSetpointImpDynamic/Slot"), slot);
-    Logger.recordOutput(makePath("/API/setMotionMagicSetpointImpDynamic/Feedforward"), feedfoward);
+        makePath("API/setMotionMagicSetpointImpDynamic/Units"), position.unit().toString());
+    Logger.recordOutput(makePath("API/setMotionMagicSetpointImpDynamic/Velocity"), velocity);
+    Logger.recordOutput(makePath("API/setMotionMagicSetpointImpDynamic/Accel"), acceleration);
+    Logger.recordOutput(makePath("API/setMotionMagicSetpointImpDynamic/Jerk"), jerk);
+    Logger.recordOutput(makePath("API/setMotionMagicSetpointImpDynamic/Slot"), slot);
+    Logger.recordOutput(makePath("API/setMotionMagicSetpointImpDynamic/Feedforward"), feedfoward);
     io.setMotionMagicSetpoint(position, velocity, acceleration, jerk, slot, feedfoward);
   }
 
@@ -194,9 +194,9 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
    */
   protected void setVelocitySetpointImpl(AngularVelocity setpoint, int slot) {
     velocitySetpoint = setpoint;
-    Logger.recordOutput(makePath("/API/setVelocitySetpointImpl/Velocity"), setpoint);
-    Logger.recordOutput(makePath("/API/setVelocitySetpointImpl/Units"), setpoint.unit().toString());
-    Logger.recordOutput(makePath("/API/setVelocitySetpointImpl/Slot"), slot);
+    Logger.recordOutput(makePath("API/setVelocitySetpointImpl/Velocity"), setpoint);
+    Logger.recordOutput(makePath("API/setVelocitySetpointImpl/Units"), setpoint.unit().toString());
+    Logger.recordOutput(makePath("API/setVelocitySetpointImpl/Slot"), slot);
     io.setVelocitySetpoint(setpoint, slot);
   }
 
@@ -234,8 +234,8 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
    * @param current The desired torque current.
    */
   public void setTorqueCurrentFOCImpl(Current current) {
-    Logger.recordOutput(makePath("/API/setTorqueCurrentFoC/Current"), current);
-    Logger.recordOutput(makePath("/API/setTorqueCurrentFoC/Units"), current.unit().toString());
+    Logger.recordOutput(makePath("API/setTorqueCurrentFoC/Current"), current);
+    Logger.recordOutput(makePath("API/setTorqueCurrentFoC/Units"), current.unit().toString());
 
     io.setTorqueCurrentFOC(current);
   }
