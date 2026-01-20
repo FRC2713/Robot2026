@@ -39,11 +39,11 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.robot.Constants;
 import frc2713.robot.Constants.Mode;
 import frc2713.robot.generated.TunerConstants;
 import frc2713.robot.util.LocalADStarAK;
-import frc2713.lib.io.AdvantageScopePathBuilder;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -116,8 +116,6 @@ public class Drive extends SubsystemBase {
     this.drivePb = new AdvantageScopePathBuilder("Drive");
     this.odometryPb = new AdvantageScopePathBuilder("Odometry");
 
-
-
     // Usage reporting for swerve template
     HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_AdvantageKit);
 
@@ -152,7 +150,7 @@ public class Drive extends SubsystemBase {
                 null,
                 null,
                 null,
-                (state) -> Logger.recordOutput( drivePb.makePath("SysIdState"), state.toString())),
+                (state) -> Logger.recordOutput(drivePb.makePath("SysIdState"), state.toString())),
             new SysIdRoutine.Mechanism(
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
   }
@@ -176,8 +174,10 @@ public class Drive extends SubsystemBase {
 
     // Log empty setpoint states when disabled
     if (DriverStation.isDisabled()) {
-      Logger.recordOutput( drivePb.makePath("SwerveStates","Setpoints"), new SwerveModuleState[] {});
-      Logger.recordOutput( drivePb.makePath("SwerveStates","SetpointsOptimized"), new SwerveModuleState[] {});
+      Logger.recordOutput(
+          drivePb.makePath("SwerveStates", "Setpoints"), new SwerveModuleState[] {});
+      Logger.recordOutput(
+          drivePb.makePath("SwerveStates", "SetpointsOptimized"), new SwerveModuleState[] {});
     }
 
     // Update odometry
@@ -228,8 +228,8 @@ public class Drive extends SubsystemBase {
     SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, TunerConstants.kSpeedAt12Volts);
 
     // Log unoptimized setpoints and setpoint speeds
-    Logger.recordOutput(drivePb.makePath("SwerveStates","Setpoints"), setpointStates);
-    Logger.recordOutput(drivePb.makePath("SwerveChassisSpeeds","Setpoints"), discreteSpeeds);
+    Logger.recordOutput(drivePb.makePath("SwerveStates", "Setpoints"), setpointStates);
+    Logger.recordOutput(drivePb.makePath("SwerveChassisSpeeds", "Setpoints"), discreteSpeeds);
 
     // Send setpoints to modules
     for (int i = 0; i < 4; i++) {
@@ -237,7 +237,7 @@ public class Drive extends SubsystemBase {
     }
 
     // Log optimized setpoints (runSetpoint mutates each state)
-    Logger.recordOutput(drivePb.makePath("SwerveStates","SetpointsOptimized"), setpointStates);
+    Logger.recordOutput(drivePb.makePath("SwerveStates", "SetpointsOptimized"), setpointStates);
   }
 
   /** Runs the drive in a straight line with the specified drive output. */

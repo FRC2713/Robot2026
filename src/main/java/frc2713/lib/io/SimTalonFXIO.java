@@ -70,7 +70,7 @@ public class SimTalonFXIO extends TalonFXIO {
     sim.setAngle(
         (config.fxConfig.MotorOutput.Inverted == InvertedValue.Clockwise_Positive ? -1.0 : 1.0)
             * rad);
-    Logger.recordOutput(pb.makePath("Sim","setPositionRad"), rad);
+    Logger.recordOutput(pb.makePath("Sim", "setPositionRad"), rad);
   }
 
   protected double addFriction(double motorVoltage, double frictionVoltage) {

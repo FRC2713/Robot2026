@@ -20,9 +20,9 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
-import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.util.RobotTime;
 import frc2713.lib.util.Util;
 import java.util.function.DoubleSupplier;
@@ -405,7 +405,7 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
                     Util.epsilonEquals(
                         positionSupplier.get(), inputs.position, epsilonSupplier.get())),
             positionSetpointCommand(positionSupplier))
-        .withName(makeName("PositionUntilOnTargetControl"));
+        .withName(pb.makeName("PositionUntilOnTargetControl"));
   }
 
   /**
@@ -425,7 +425,7 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
                     Util.epsilonEquals(
                         velocitySupplier.get(), inputs.velocity, epsilonSupplier.get())),
             velocitySetpointCommand(velocitySupplier))
-        .withName(makeName("VelocityUntilOnTargetControl"));
+        .withName(pb.makeName("VelocityUntilOnTargetControl"));
   }
 
   /**
