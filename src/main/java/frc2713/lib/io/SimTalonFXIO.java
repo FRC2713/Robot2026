@@ -70,7 +70,7 @@ public class SimTalonFXIO extends TalonFXIO {
     sim.setAngle(
         (config.fxConfig.MotorOutput.Inverted == InvertedValue.Clockwise_Positive ? -1.0 : 1.0)
             * rad);
-    Logger.recordOutput(config.name + "/Sim/setPositionRad", rad);
+    Logger.recordOutput(pb.makePath("Sim","setPositionRad"), rad);
   }
 
   protected double addFriction(double motorVoltage, double frictionVoltage) {
@@ -93,7 +93,7 @@ public class SimTalonFXIO extends TalonFXIO {
     double simVoltage = addFriction(simState.getMotorVoltage(), 0.25);
     simVoltage = (invertVoltage) ? -simVoltage : simVoltage;
     sim.setInput(simVoltage);
-    Logger.recordOutput(config.name + "/Sim/SimulatorVoltage", simVoltage);
+    Logger.recordOutput(pb.makePath("Sim", "SimulatorVoltage"), simVoltage);
 
     Time timestamp = RobotTime.getTimestamp();
     sim.update(timestamp.minus(lastUpdateTimestamp).in(Seconds));
@@ -103,13 +103,13 @@ public class SimTalonFXIO extends TalonFXIO {
 
     // Find current state of sim in radians from 0 point
     Angle simPosition = Radians.of(sim.getAngularPositionRad());
-    Logger.recordOutput(config.name + "/Sim/SimulatorPositionRadians", simPosition.in(Radians));
+    Logger.recordOutput(pb.makePath("Sim", "SimulatorPositionRadians"), simPosition.in(Radians));
 
     // Mutate rotor position
     Angle rotorPosition = simPosition.div(getSimRatio());
     lastPosition.set(rotorPosition);
     simState.setRawRotorPosition(rotorPosition);
-    Logger.recordOutput(config.name + "/Sim/setRawRotorPosition", rotorPosition);
+    Logger.recordOutput(pb.makePath("Sim", "setRawRotorPosition"), rotorPosition);
 
     // Mutate rotor vel
     AngularVelocity rotorVel =
@@ -117,7 +117,7 @@ public class SimTalonFXIO extends TalonFXIO {
     lastVelocity.set(rotorVel);
     simState.setRotorVelocity(overrideVelocity.isEmpty() ? rotorVel : overrideVelocity.get());
     Logger.recordOutput(
-        config.name + "/Sim/SimulatorVelocityRadS", sim.getAngularVelocityRadPerSec());
+        pb.makePath("Sim", "SimulatorVelocityRadS"), sim.getAngularVelocityRadPerSec());
   }
 
   public void overrideVelocity(Optional<AngularVelocity> rps) {
