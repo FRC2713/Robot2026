@@ -1,8 +1,8 @@
 package frc2713.lib.io;
 
 import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.units.measure.Angle;
@@ -13,11 +13,10 @@ import org.littletonrobotics.junction.AutoLog;
 
 @AutoLog
 public class MotorInputs {
-  public AngularVelocity velocityUnitsPerSecond =
-      AngularVelocity.ofBaseUnits(0.0, RadiansPerSecond);
-  public Angle unitPosition = Angle.ofBaseUnits(0.0, Radians);
-  public Voltage appliedVolts = Voltage.ofBaseUnits(0.0, Volts);
-  public Current currentStatorAmps = Current.ofBaseUnits(0.0, Amps);
-  public Current currentSupplyAmps = Current.ofBaseUnits(0.0, Amps);
-  public Angle rawRotorPosition = Angle.ofBaseUnits(0.0, Radians);
+  public AngularVelocity velocity = RotationsPerSecond.of(0.0);
+  public Angle position = Rotations.of(0.0);
+  public Voltage appliedVolts = Volts.of(0.0);
+  public Current currentStatorAmps = Amps.of(0.0);
+  public Current currentSupplyAmps = Amps.of(0.0);
+  public Angle rawRotorPosition = Rotations.of(0.0);
 }

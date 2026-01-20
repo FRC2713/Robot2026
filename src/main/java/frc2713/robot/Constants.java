@@ -8,6 +8,7 @@
 package frc2713.robot;
 
 import edu.wpi.first.wpilibj.RobotBase;
+import frc2713.lib.drivers.CANDeviceId;
 
 /**
  * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
@@ -17,6 +18,8 @@ import edu.wpi.first.wpilibj.RobotBase;
 public final class Constants {
   public static final Mode simMode = Mode.SIM;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
+
+  public static final CANDeviceId launcherMotorDeviceId = new CANDeviceId(2);
 
   public static enum Mode {
     /** Running on a real robot. */

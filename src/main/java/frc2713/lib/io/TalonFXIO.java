@@ -62,7 +62,7 @@ public class TalonFXIO implements MotorIO {
 
     positionSignal = talon.getPosition();
     velocitySignal = talon.getVelocity();
-    voltageSignal = talon.getSupplyVoltage();
+    voltageSignal = talon.getMotorVoltage();
     currentStatorSignal = talon.getStatorCurrent();
     currentSupplySignal = talon.getSupplyCurrent();
     rawRotorPositionSignal = talon.getRotorPosition();
@@ -84,8 +84,8 @@ public class TalonFXIO implements MotorIO {
   @Override
   public void readInputs(MotorInputs inputs) {
     BaseStatusSignal.refreshAll(signals);
-    inputs.unitPosition = positionSignal.getValue();
-    inputs.velocityUnitsPerSecond = velocitySignal.getValue();
+    inputs.position = positionSignal.getValue();
+    inputs.velocity = velocitySignal.getValue();
     inputs.appliedVolts = voltageSignal.getValue();
     inputs.currentStatorAmps = currentStatorSignal.getValue();
     inputs.currentSupplyAmps = currentSupplySignal.getValue();
@@ -142,7 +142,7 @@ public class TalonFXIO implements MotorIO {
 
   @Override
   public void setCurrentPositionAsZero() {
-    setCurrentPosition(Angle.ofBaseUnits(0.0, Revolutions));
+    setCurrentPosition(Revolutions.of(0.0));
   }
 
   @Override
