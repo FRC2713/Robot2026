@@ -2,8 +2,6 @@ package frc2713.robot.util;
 
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
@@ -11,10 +9,8 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.Time;
 
@@ -49,24 +45,13 @@ public class BallTrajectorySim {
 
     public void launch(
         Translation3d startPosition, // Input is now Translation3d
-        LinearVelocity speed,
-        Angle pitch,
-        Angle yaw,
+        Vector<N3> velocity,
         AngularVelocity spinSpeed) {
 
       this.position = startPosition;
       this.spinRateY = spinSpeed.in(RadiansPerSecond);
 
-      double speedMps = speed.in(MetersPerSecond);
-      double p = pitch.in(Radians);
-      double y = yaw.in(Radians);
-
-      this.velocity =
-          VecBuilder.fill(
-              speedMps * Math.cos(p) * Math.cos(y), // Vx
-              speedMps * Math.cos(p) * Math.sin(y), // Vy
-              speedMps * Math.sin(p) // Vz
-              );
+      this.velocity = velocity;
     }
 
     public void update(Time timeStep) {

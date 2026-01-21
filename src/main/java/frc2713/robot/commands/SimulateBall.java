@@ -1,33 +1,31 @@
 package frc2713.robot.commands;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc2713.lib.util.RobotTime;
 import frc2713.robot.util.BallTrajectorySim.Ball;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class SimulateBall extends Command {
   Mass ballMass = Pounds.of(0.5);
   Distance ballRadius = Inches.of(5.91 / 2); // 37 mm
   Ball ball = new Ball(ballMass, ballRadius, 0.47, 0.2); // mass(kg), radius
-  Translation3d startPos = new Translation3d(0, 0, 1); // 1 meter above ground
+  Supplier<Translation3d> initialPosSupplier = () -> new Translation3d();
+  Supplier<Vector<N3>> initialVelSupplier = () -> VecBuilder.fill(0, 0, 0);
+  Supplier<AngularVelocity> initialAngularVelSupplier = () -> RotationsPerSecond.of(0.0);
 
-  LinearVelocity speed = MetersPerSecond.of(10.0);
-  AngularVelocity spin = RotationsPerSecond.of(-10.0);
-  Angle pitch = Degrees.of(45.0); // 45 degrees = Upward
-  Angle yaw = Degrees.of(0.0); // 0 degrees = Straight down X axis
   Time lastTimeStamp = RobotTime.getTimestamp();
 
   public SimulateBall() {
@@ -35,11 +33,21 @@ public class SimulateBall extends Command {
   }
   ;
 
+  public SimulateBall(
+      Supplier<Translation3d> initialPosSupplier,
+      Supplier<Vector<N3>> initialVelSupplier,
+      Supplier<AngularVelocity> initialAngularVelSupplier) {
+    this.initialPosSupplier = initialPosSupplier;
+    this.initialVelSupplier = initialVelSupplier;
+    this.initialAngularVelSupplier = initialAngularVelSupplier;
+  }
+
   @Override
   public void initialize() {
     System.out.println("Starting Ball Trajectory Simulation...");
     lastTimeStamp = RobotTime.getTimestamp();
-    ball.launch(startPos, speed, pitch, yaw, spin);
+    ball.launch(
+        initialPosSupplier.get(), initialVelSupplier.get(), initialAngularVelSupplier.get());
     // Here you would call the BallTrajectorySim main method or equivalent logic
     // BallTrajectorySim.simulate();
   }

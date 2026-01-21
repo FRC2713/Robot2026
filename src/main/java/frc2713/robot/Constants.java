@@ -20,6 +20,7 @@ public final class Constants {
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
 
   public static final CANDeviceId launcherMotorDeviceId = new CANDeviceId(2);
+  public static boolean disableHAL = false;
 
   public static enum Mode {
     /** Running on a real robot. */

@@ -247,7 +247,13 @@ public class RobotContainer {
                 .ignoringDisable(true));
 
     controller.rightBumper().whileTrue(flywheels.dutyCycleCommand(() -> 0.5));
-    controller.leftBumper().onTrue(new SimulateBall());
+    controller
+        .leftBumper()
+        .onTrue(
+            new SimulateBall(
+                drive.getBallPosSupplier(),
+                drive.getBallVelSupplier(),
+                drive.getBallSpinSupplier()));
   }
 
   /**
