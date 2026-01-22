@@ -25,6 +25,7 @@ public class TalonFXIO implements MotorIO {
   // Base members
   protected final TalonFX talon;
   protected final TalonFXSubsystemConfig config;
+  public final AdvantageScopePathBuilder pb;
 
   // Control signals
   DutyCycleOut dutyCycleControl = new DutyCycleOut(0.0);
@@ -50,6 +51,8 @@ public class TalonFXIO implements MotorIO {
   public TalonFXIO(TalonFXSubsystemConfig config) {
     this.talon = new TalonFX(config.talonCANID.getDeviceNumber(), config.talonCANID.getBus());
     this.config = config;
+
+    this.pb = new AdvantageScopePathBuilder(this.config.name);
 
     // Current limits and ramp rates do not perform well in sim.
     if (Robot.isSimulation()) {
