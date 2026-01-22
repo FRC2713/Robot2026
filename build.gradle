@@ -3,6 +3,7 @@ plugins {
     id "edu.wpi.first.GradleRIO" version "2026.1.1"
     id "com.peterabeles.gversion" version "1.10"
     id "com.diffplug.spotless" version "6.12.0"
+    id("io.freefair.lombok") version "9.2.0"
 }
 
 java {
@@ -96,6 +97,9 @@ dependencies {
 
     def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
     annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
+
+    compileOnly 'org.projectlombok:lombok:1.18.34'
+    annotationProcessor 'org.projectlombok:lombok:1.18.34'
 }
 
 test {

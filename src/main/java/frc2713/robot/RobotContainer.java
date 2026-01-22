@@ -20,6 +20,7 @@ import frc2713.lib.io.SimTalonFXIO;
 import frc2713.lib.io.TalonFXIO;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.robot.commands.DriveCommands;
+import frc2713.robot.commands.SimulateBall;
 import frc2713.robot.generated.TunerConstants;
 import frc2713.robot.subsystems.climber.Climber;
 import frc2713.robot.subsystems.climber.ClimberConstants;
@@ -246,6 +247,13 @@ public class RobotContainer {
                 .ignoringDisable(true));
 
     controller.rightBumper().whileTrue(flywheels.dutyCycleCommand(() -> 0.5));
+    controller
+        .leftBumper()
+        .onTrue(
+            new SimulateBall(
+                drive.getBallPosSupplier(),
+                drive.getBallVelSupplier(),
+                drive.getBallSpinSupplier()));
   }
 
   /**
