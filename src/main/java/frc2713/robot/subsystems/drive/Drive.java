@@ -362,7 +362,6 @@ public class Drive extends SubsystemBase {
                   VecBuilder.fill(
                       currentSpeed.vxMetersPerSecond, currentSpeed.vyMetersPerSecond, 0));
 
-
       return launchVector;
     };
   }
