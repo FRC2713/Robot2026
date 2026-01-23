@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc2713.lib.io.ArticulatedComponentPublisher;
 import frc2713.lib.io.SimTalonFXIO;
 import frc2713.lib.io.TalonFXIO;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
@@ -59,6 +60,7 @@ public class RobotContainer {
   private final DyeRotor dyeRotor;
   private final Feeder feeder;
   private final Climber climber;
+  private final ArticulatedComponentPublisher acPublisher;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -106,6 +108,7 @@ public class RobotContainer {
                 SerializerConstants.Feeder.config,
                 new TalonFXIO(SerializerConstants.Feeder.config));
         climber = new Climber(ClimberConstants.config, new TalonFXIO(ClimberConstants.config));
+        acPublisher = new ArticulatedComponentPublisher(intakeExtension, dyeRotor, turret, hood);
         break;
 
       case SIM:
@@ -145,6 +148,7 @@ public class RobotContainer {
                 SerializerConstants.Feeder.config,
                 new SimTalonFXIO(SerializerConstants.Feeder.config));
         climber = new Climber(ClimberConstants.config, new SimTalonFXIO(ClimberConstants.config));
+        acPublisher = new ArticulatedComponentPublisher(intakeExtension, dyeRotor, turret, hood);
         break;
 
       default:
@@ -181,6 +185,7 @@ public class RobotContainer {
         climber =
             new Climber(
                 new TalonFXSubsystemConfig(), new SimTalonFXIO(new TalonFXSubsystemConfig()));
+        acPublisher = new ArticulatedComponentPublisher(intakeExtension, dyeRotor, turret, hood);
         break;
     }
 

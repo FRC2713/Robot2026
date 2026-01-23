@@ -1,6 +1,7 @@
 package frc2713.lib.subsystem;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import edu.wpi.first.math.geometry.Transform3d;
 import frc2713.lib.drivers.CANDeviceId;
 
 public class TalonFXSubsystemConfig {
@@ -21,4 +22,6 @@ public class TalonFXSubsystemConfig {
 
   // Moment of Inertia (KgMetersSquared) for sim
   public double momentOfInertia = 0.5;
+
+  public Transform3d initialTransform = new Transform3d();
 }

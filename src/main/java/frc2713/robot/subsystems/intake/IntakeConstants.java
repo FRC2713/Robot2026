@@ -33,7 +33,6 @@ public final class IntakeConstants {
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 0.0;
       config.unitToRotorRatio = 1.0; // 1:1 ratio
-      
     }
 
     public static Distance extendedPostion = Inches.of(12);
