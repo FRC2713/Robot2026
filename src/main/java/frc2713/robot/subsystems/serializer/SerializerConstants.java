@@ -11,7 +11,7 @@ public final class SerializerConstants {
 
     static {
       config.name = "Dye Rotor";
-      config.talonCANID = new CANDeviceId(15); // Example CAN ID, replace with actual ID
+      config.talonCANID = new CANDeviceId(10); // Example CAN ID, replace with actual ID
       config.fxConfig.Slot0.kP = 0.2;
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 0.0;
@@ -25,7 +25,7 @@ public final class SerializerConstants {
 
     static {
       config.name = "Feeder";
-      config.talonCANID = new CANDeviceId(16); // Example CAN ID, replace with actual ID
+      config.talonCANID = new CANDeviceId(11); // Example CAN ID, replace with actual ID
       config.fxConfig.Slot0.kP = 0.2;
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 0.0;

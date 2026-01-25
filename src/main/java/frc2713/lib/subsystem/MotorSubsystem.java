@@ -1,6 +1,8 @@
 package frc2713.lib.subsystem;
 
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -11,6 +13,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
@@ -64,6 +67,26 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
     Logger.recordOutput(
         pb.makePath("currentCommand"),
         (getCurrentCommand() == null) ? "Default" : getCurrentCommand().getName());
+  }
+
+  /**
+   * Multiply by the unit to rotor ratio to get motor rotations
+   * @param subsystemPosition 
+   * @return
+   */
+  protected Angle convertSubsystemPositionToMotorPosition(Angle subsystemPosition){
+    return subsystemPosition.times(config.unitToRotorRatio);
+  }
+
+
+  /**
+   * Convert a linear distance to motor rotations
+   * @param subsystemPosition Desired distance
+   * @return the number of rotations the motor must move to achieve that distance
+   */
+  protected Angle convertSubsystemPositionToMotorPosition(Distance subsystemPosition){
+    Angle rotationsPerMeter = Rotations.of(subsystemPosition.in(Meters) * config.unitRotationsPerMeter);
+    return convertSubsystemPositionToMotorPosition(rotationsPerMeter);
   }
 
   // IO Implementations
