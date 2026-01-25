@@ -29,6 +29,9 @@ public final class LauncherConstants {
               new Translation3d(0, Inches.of(1.75).in(Meters), Inches.of(18.484119).in(Meters)),
               new Rotation3d(0, 0, 0));
     }
+
+    public static int MODEL_INDEX = 3;
+    public static int PARENT_INDEX = 0; // drivetrain
   }
 
   public final class Flywheels {
@@ -62,5 +65,7 @@ public final class LauncherConstants {
     }
 
     public static Angle retractedPosition = Degrees.of(0);
+    public static int MODEL_INDEX = 4;
+    public static int PARENT_INDEX = 3; // turret
   }
 }

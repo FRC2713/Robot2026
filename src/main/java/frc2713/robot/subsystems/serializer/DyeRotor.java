@@ -29,12 +29,12 @@ public class DyeRotor extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
   @Override
   public int getModelIndex() {
-    return 2;
+    return SerializerConstants.DyeRotor.MODEL_INDEX;
   }
 
   @Override
   public int getParentModelIndex() {
-    return 0;
+    return SerializerConstants.DyeRotor.PARENT_INDEX;
   }
 
   @Override

@@ -37,5 +37,7 @@ public final class IntakeConstants {
 
     public static Distance extendedPostion = Inches.of(12);
     public static Distance retractedPosition = Inches.of(0);
+    public static int MODEL_INDEX = 1;
+    public static int PARENT_INDEX = 0; // drivetrain
   }
 }

@@ -32,22 +32,20 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
   @Override
   public void periodic() {
     super.periodic();
-    Logger.recordOutput(
-        pb.makePath("goalVector"),
-        new Pose3d[] {
-          this.getGlobalPose(), new Pose3d(FieldConstants.Hub.topCenterPoint, new Rotation3d())
-        });
+    Pose3d goalPose = new Pose3d(FieldConstants.Hub.topCenterPoint, new Rotation3d());
+
+    Logger.recordOutput(pb.makePath("goalVector"), new Pose3d[] {this.getGlobalPose(), goalPose});
   }
   ;
 
   @Override
   public int getModelIndex() {
-    return 3;
+    return LauncherConstants.Turret.MODEL_INDEX;
   }
 
   @Override
   public int getParentModelIndex() {
-    return 0;
+    return LauncherConstants.Turret.PARENT_INDEX;
   }
 
   @Override

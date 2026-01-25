@@ -25,6 +25,9 @@ public final class SerializerConstants {
       config.initialTransform =
           new Transform3d(new Translation3d(0, Inches.of(1.75).in(Meters), 0), new Rotation3d());
     }
+
+    public static int MODEL_INDEX = 2;
+    public static int PARENT_INDEX = 0; // drivetrain
   }
 
   public static final class Feeder {

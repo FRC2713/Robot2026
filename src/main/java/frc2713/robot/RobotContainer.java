@@ -256,7 +256,7 @@ public class RobotContainer {
         .leftBumper()
         .onTrue(
             new SimulateBall(
-                drive.getBallPosSupplier(),
+                () -> KinematicsManager.getInstance().getGlobalPose(3).getTranslation(),
                 drive.getBallVelSupplier(),
                 drive.getBallSpinSupplier()));
   }

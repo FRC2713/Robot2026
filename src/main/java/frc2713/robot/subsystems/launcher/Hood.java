@@ -40,12 +40,12 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
   @Override
   public int getModelIndex() {
-    return 4;
+    return LauncherConstants.Hood.MODEL_INDEX;
   }
 
   @Override
   public int getParentModelIndex() {
-    return 3;
+    return LauncherConstants.Hood.PARENT_INDEX;
   }
 
   @Override

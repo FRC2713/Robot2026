@@ -64,12 +64,12 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Talon
 
   @Override
   public int getModelIndex() {
-    return 1;
+    return IntakeConstants.Extension.MODEL_INDEX;
   }
 
   @Override
   public int getParentModelIndex() {
-    return 0;
+    return IntakeConstants.Extension.PARENT_INDEX;
   }
 
   @Override

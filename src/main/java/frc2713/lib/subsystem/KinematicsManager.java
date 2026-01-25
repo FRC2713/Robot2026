@@ -83,24 +83,24 @@ public class KinematicsManager extends SubsystemBase {
 
       if (parentIndex == -1) {
         // --- ROOT COMPONENT (Chassis / Index 0) ---
-        
+
         // Global: Relative to Field (Odometry)
         globalPoses[myIndex] = new Pose3d().plus(subsystemTransform);
-        
+
         // Local: Relative to Robot (It IS the Robot, so it is Identity/Zero)
-        localPoses[myIndex] = new Pose3d(); 
-      
+        localPoses[myIndex] = new Pose3d();
+
       } else {
         // --- CHILD COMPONENT ---
-        
+
         // Safety check
         if (parentIndex < globalPoses.length) {
-            // Global: Parent Global + Transform
-            globalPoses[myIndex] = globalPoses[parentIndex].plus(subsystemTransform);
-            
-            // Local: Parent Local + Transform
-            // This maintains the chain relative to the Chassis (Index 0)
-            localPoses[myIndex] = localPoses[parentIndex].plus(subsystemTransform);
+          // Global: Parent Global + Transform
+          globalPoses[myIndex] = globalPoses[parentIndex].plus(subsystemTransform);
+
+          // Local: Parent Local + Transform
+          // This maintains the chain relative to the Chassis (Index 0)
+          localPoses[myIndex] = localPoses[parentIndex].plus(subsystemTransform);
         }
       }
     }
