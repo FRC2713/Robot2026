@@ -48,6 +48,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc2713.lib.io.AdvantageScopePathBuilder;
+import frc2713.lib.io.ArticulatedComponent;
 import frc2713.robot.Constants;
 import frc2713.robot.Constants.Mode;
 import frc2713.robot.generated.TunerConstants;
@@ -58,7 +59,7 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class Drive extends SubsystemBase {
+public class Drive extends SubsystemBase implements ArticulatedComponent {
   // TunerConstants doesn't include these constants, so they are declared locally
   static final double ODOMETRY_FREQUENCY = TunerConstants.kCANBus.isNetworkFD() ? 250.0 : 100.0;
   public static final double DRIVE_BASE_RADIUS =
@@ -162,6 +163,22 @@ public class Drive extends SubsystemBase {
                 (state) -> Logger.recordOutput(drivePb.makePath("SysIdState"), state.toString())),
             new SysIdRoutine.Mechanism(
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
+  }
+
+  @Override
+  public int getModelIndex() {
+    return 0;
+  }
+
+  @Override
+  public int getParentModelIndex() {
+    return -1;
+  }
+
+  @Override
+  public Transform3d getTransform3d() {
+    Pose2d pos = this.poseEstimator.getEstimatedPosition();
+    return new Transform3d(pos.getX(), pos.getY(), 0, new Rotation3d(pos.getRotation()));
   }
 
   @Override

@@ -2,6 +2,7 @@ package frc2713.robot.subsystems.launcher;
 
 import static edu.wpi.first.units.Units.Radians;
 
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -12,7 +13,9 @@ import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.io.TalonFXIO;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
+import frc2713.robot.FieldConstants;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
     implements ArticulatedComponent {
@@ -29,17 +32,22 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
   @Override
   public void periodic() {
     super.periodic();
-    // Additional periodic code for turret can be added here`
+    Logger.recordOutput(
+        pb.makePath("goalVector"),
+        new Pose3d[] {
+          this.getGlobalPose(), new Pose3d(FieldConstants.Hub.topCenterPoint, new Rotation3d())
+        });
   }
+  ;
 
   @Override
   public int getModelIndex() {
-    return 2;
+    return 3;
   }
 
   @Override
   public int getParentModelIndex() {
-    return -1;
+    return 0;
   }
 
   @Override
