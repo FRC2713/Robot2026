@@ -1,13 +1,11 @@
 package frc2713.robot.subsystems.launcher;
 
 import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.Rotations;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc2713.lib.io.ArticulatedComponent;
 import frc2713.lib.io.MotorInputsAutoLogged;
@@ -46,8 +44,7 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
 
   @Override
   public Transform3d getTransform3d() {
-    // TODO: Get this from sensors
-    Angle rotations = Rotations.of(Math.sin(Timer.getFPGATimestamp()) * -1);
+    Angle rotations = super.getCurrentPosition().times(config.unitToRotorRatio);
     return config.initialTransform.plus(
         new Transform3d(new Translation3d(), new Rotation3d(0, 0, rotations.in(Radians))));
   }
