@@ -87,7 +87,7 @@ public class BallTrajectorySim {
       }
 
       // 4. Integration
-      Vector<N3> totalForce = gravityForce.plus(dragForce).plus(magnusForce);
+      Vector<N3> totalForce = gravityForce.plus(dragForce); // .plus(magnusForce);
       Vector<N3> acceleration = totalForce.div(massKg);
 
       velocity = velocity.plus(acceleration.times(dt));

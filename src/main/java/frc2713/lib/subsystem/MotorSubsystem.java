@@ -71,21 +71,23 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
 
   /**
    * Multiply by the unit to rotor ratio to get motor rotations
-   * @param subsystemPosition 
+   *
+   * @param subsystemPosition
    * @return
    */
-  protected Angle convertSubsystemPositionToMotorPosition(Angle subsystemPosition){
+  protected Angle convertSubsystemPositionToMotorPosition(Angle subsystemPosition) {
     return subsystemPosition.times(config.unitToRotorRatio);
   }
 
-
   /**
    * Convert a linear distance to motor rotations
+   *
    * @param subsystemPosition Desired distance
    * @return the number of rotations the motor must move to achieve that distance
    */
-  protected Angle convertSubsystemPositionToMotorPosition(Distance subsystemPosition){
-    Angle rotationsPerMeter = Rotations.of(subsystemPosition.in(Meters) * config.unitRotationsPerMeter);
+  protected Angle convertSubsystemPositionToMotorPosition(Distance subsystemPosition) {
+    Angle rotationsPerMeter =
+        Rotations.of(subsystemPosition.in(Meters) * config.unitRotationsPerMeter);
     return convertSubsystemPositionToMotorPosition(rotationsPerMeter);
   }
 

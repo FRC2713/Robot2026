@@ -7,6 +7,8 @@
 
 package frc2713.robot;
 
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -18,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc2713.lib.io.SimTalonFXIO;
 import frc2713.lib.io.TalonFXIO;
+import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.commands.SimulateBall;
@@ -49,6 +52,8 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+
+  private final KinematicsManager kinematicsManager = new KinematicsManager();
   // Subsystems
   private final Drive drive;
   private final Flywheels flywheels;
@@ -205,6 +210,30 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
+
+    // configure the kinematics calculations
+    configureKinematics();
+  }
+
+  /** Use this robot to configure the transforms between subsystems. */
+  private void configureKinematics() {
+    kinematicsManager.registerUnpublished(drive, 0, -1);
+    kinematicsManager.register(
+        intakeExtension,
+        IntakeConstants.Extension.MODEL_INDEX,
+        IntakeConstants.Extension.PARENT_INDEX);
+    kinematicsManager.register(
+        dyeRotor,
+        SerializerConstants.DyeRotor.MODEL_INDEX,
+        SerializerConstants.DyeRotor.PARENT_INDEX);
+    kinematicsManager.register(
+        turret, LauncherConstants.Turret.MODEL_INDEX, LauncherConstants.Turret.PARENT_INDEX);
+    kinematicsManager.register(
+        hood, LauncherConstants.Hood.MODEL_INDEX, LauncherConstants.Hood.PARENT_INDEX);
+    kinematicsManager.registerUnpublished(
+        flywheels,
+        LauncherConstants.Flywheels.MODEL_INDEX,
+        LauncherConstants.Flywheels.PARENT_INDEX);
   }
 
   /**
@@ -251,9 +280,9 @@ public class RobotContainer {
         .leftBumper()
         .onTrue(
             new SimulateBall(
-                drive.getBallPosSupplier(),
-                drive.getBallVelSupplier(),
-                drive.getBallSpinSupplier()));
+                () -> flywheels.getGlobalPose().getTranslation(),
+                () -> flywheels.getGlobalLinearVelocity(),
+                () -> RotationsPerSecond.of(0)));
   }
 
   /**

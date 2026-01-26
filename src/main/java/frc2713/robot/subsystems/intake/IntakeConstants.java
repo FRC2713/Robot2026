@@ -33,10 +33,11 @@ public final class IntakeConstants {
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 0.0;
       config.unitToRotorRatio = 1.0; // 1:1 ratio
-      
     }
 
     public static Distance extendedPostion = Inches.of(12);
     public static Distance retractedPosition = Inches.of(0);
+    public static int MODEL_INDEX = 1;
+    public static int PARENT_INDEX = 0; // drivetrain
   }
 }
