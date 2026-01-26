@@ -63,16 +63,6 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Talon
   }
 
   @Override
-  public int getModelIndex() {
-    return IntakeConstants.Extension.MODEL_INDEX;
-  }
-
-  @Override
-  public int getParentModelIndex() {
-    return IntakeConstants.Extension.PARENT_INDEX;
-  }
-
-  @Override
   public Transform3d getTransform3d() {
     // TODO: Get this from sensors
     Distance distance = Inches.of(Math.sin(Timer.getFPGATimestamp()) + 1).times(6);

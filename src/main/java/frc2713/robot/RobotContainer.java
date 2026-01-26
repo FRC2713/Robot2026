@@ -7,6 +7,8 @@
 
 package frc2713.robot;
 
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -50,6 +52,8 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+
+  private final KinematicsManager kinematicsManager = new KinematicsManager();
   // Subsystems
   private final Drive drive;
   private final Flywheels flywheels;
@@ -60,7 +64,6 @@ public class RobotContainer {
   private final DyeRotor dyeRotor;
   private final Feeder feeder;
   private final Climber climber;
-  private final KinematicsManager kinematicsManager;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -108,7 +111,6 @@ public class RobotContainer {
                 SerializerConstants.Feeder.config,
                 new TalonFXIO(SerializerConstants.Feeder.config));
         climber = new Climber(ClimberConstants.config, new TalonFXIO(ClimberConstants.config));
-        kinematicsManager = new KinematicsManager(drive, intakeExtension, dyeRotor, turret, hood);
         break;
 
       case SIM:
@@ -148,7 +150,6 @@ public class RobotContainer {
                 SerializerConstants.Feeder.config,
                 new SimTalonFXIO(SerializerConstants.Feeder.config));
         climber = new Climber(ClimberConstants.config, new SimTalonFXIO(ClimberConstants.config));
-        kinematicsManager = new KinematicsManager(drive, intakeExtension, dyeRotor, turret, hood);
         break;
 
       default:
@@ -185,7 +186,6 @@ public class RobotContainer {
         climber =
             new Climber(
                 new TalonFXSubsystemConfig(), new SimTalonFXIO(new TalonFXSubsystemConfig()));
-        kinematicsManager = new KinematicsManager(drive, intakeExtension, dyeRotor, turret, hood);
         break;
     }
 
@@ -210,6 +210,30 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
+
+    // configure the kinematics calculations
+    configureKinematics();
+  }
+
+  /** Use this robot to configure the transforms between subsystems. */
+  private void configureKinematics() {
+    kinematicsManager.registerUnpublished(drive, 0, -1);
+    kinematicsManager.register(
+        intakeExtension,
+        IntakeConstants.Extension.MODEL_INDEX,
+        IntakeConstants.Extension.PARENT_INDEX);
+    kinematicsManager.register(
+        dyeRotor,
+        SerializerConstants.DyeRotor.MODEL_INDEX,
+        SerializerConstants.DyeRotor.PARENT_INDEX);
+    kinematicsManager.register(
+        turret, LauncherConstants.Turret.MODEL_INDEX, LauncherConstants.Turret.PARENT_INDEX);
+    kinematicsManager.register(
+        hood, LauncherConstants.Hood.MODEL_INDEX, LauncherConstants.Hood.PARENT_INDEX);
+    kinematicsManager.registerUnpublished(
+        flywheels,
+        LauncherConstants.Flywheels.MODEL_INDEX,
+        LauncherConstants.Flywheels.PARENT_INDEX);
   }
 
   /**
@@ -256,9 +280,9 @@ public class RobotContainer {
         .leftBumper()
         .onTrue(
             new SimulateBall(
-                () -> KinematicsManager.getInstance().getGlobalPose(3).getTranslation(),
-                drive.getBallVelSupplier(),
-                drive.getBallSpinSupplier()));
+                () -> flywheels.getGlobalPose().getTranslation(),
+                () -> flywheels.getGlobalLinearVelocity(),
+                () -> RotationsPerSecond.of(0)));
   }
 
   /**

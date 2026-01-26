@@ -28,16 +28,6 @@ public class DyeRotor extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
   }
 
   @Override
-  public int getModelIndex() {
-    return SerializerConstants.DyeRotor.MODEL_INDEX;
-  }
-
-  @Override
-  public int getParentModelIndex() {
-    return SerializerConstants.DyeRotor.PARENT_INDEX;
-  }
-
-  @Override
   public Transform3d getTransform3d() {
     // TODO: Get this from sensors
     Angle rotations = Rotations.of(Math.sin(Timer.getFPGATimestamp()) - 1);

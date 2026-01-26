@@ -166,19 +166,22 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
   }
 
   @Override
-  public int getModelIndex() {
-    return 0;
-  }
-
-  @Override
-  public int getParentModelIndex() {
-    return -1;
-  }
-
-  @Override
   public Transform3d getTransform3d() {
     Pose2d pos = this.poseEstimator.getEstimatedPosition();
     return new Transform3d(pos.getX(), pos.getY(), 0, new Rotation3d(pos.getRotation()));
+  }
+
+  @Override
+  public Vector<N3> getRelativeLinearVelocity() {
+    ChassisSpeeds speeds = getChassisSpeeds();
+
+    return VecBuilder.fill(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, 0);
+  }
+
+  @Override
+  public Vector<N3> getRelativeAngularVelocity() {
+    ChassisSpeeds speeds = getChassisSpeeds();
+    return VecBuilder.fill(0, 0, speeds.omegaRadiansPerSecond);
   }
 
   @Override

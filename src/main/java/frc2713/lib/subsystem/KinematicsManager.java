@@ -1,62 +1,143 @@
 package frc2713.lib.subsystem;
 
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.io.ArticulatedComponent;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import org.littletonrobotics.junction.Logger;
 
 public class KinematicsManager extends SubsystemBase {
-  // 1. Static instance for global access
   private static KinematicsManager instance;
 
-  private final ArticulatedComponent[] orderedComponents;
-  private final Pose3d[] globalPoses;
-  private final Pose3d[] localPoses;
-  private final AdvantageScopePathBuilder pb = new AdvantageScopePathBuilder("Robot");
+  // Data Classes
+  private static class Node {
+    final ArticulatedComponent component;
+    final int id;
+    final int parentId;
+    final boolean publishable;
 
-  public KinematicsManager(ArticulatedComponent... articulatedComponents) {
-    // 2. Set the singleton instance
-    instance = this;
-
-    int maxIndex = 0;
-    for (ArticulatedComponent ac : articulatedComponents) {
-      maxIndex = Math.max(maxIndex, ac.getModelIndex());
+    public Node(ArticulatedComponent component, int id, int parentId, boolean publishable) {
+      this.component = component;
+      this.id = id;
+      this.parentId = parentId;
+      this.publishable = publishable;
     }
-
-    // Safety: +1 size to handle 0-based indexing
-    this.globalPoses = new Pose3d[maxIndex + 1];
-    Arrays.fill(this.globalPoses, new Pose3d());
-    this.localPoses = new Pose3d[maxIndex + 1];
-    Arrays.fill(this.localPoses, new Pose3d());
-
-    this.orderedComponents = topologicalSort(articulatedComponents);
   }
 
-  /** Static accessor for the interface to use. */
+  // State
+  private final List<Node> nodes = new ArrayList<>();
+  private Node[] orderedNodes = new Node[0]; // Cached sorted array
+  private Pose3d[] globalPoses = new Pose3d[0];
+  private Pose3d[] localPoses = new Pose3d[0];
+  // Cache the IDs of nodes that need publishing so we don't search for them every loop
+  private int[] publishableIndices = new int[0];
+
+  // Cache the output array to avoid allocation
+  private Pose3d[] mechanismPosesBuffer = new Pose3d[0];
+
+  // Storage for velocities
+  private Vector<N3>[] globalLinVels = new Vector[0];
+  private Vector<N3>[] globalAngVels = new Vector[0];
+
+  // Lookup map for O(1) access by Component instance
+  private final Map<ArticulatedComponent, Integer> componentToIdMap = new HashMap<>();
+
+  private final AdvantageScopePathBuilder pb = new AdvantageScopePathBuilder("Kinematics");
+  private boolean isDirty = false; // Tracks if we need to re-sort
+
+  public KinematicsManager() {
+    if (instance != null) {
+      throw new IllegalStateException("KinematicsManager already initialized!");
+    }
+    instance = this;
+  }
+
   public static KinematicsManager getInstance() {
+    // Lazy load logic could go here, but for Subsystems, constructor is better
     return instance;
   }
 
-  /* ... topologicalSort method (same as previous) ... */
-  private ArticulatedComponent[] topologicalSort(ArticulatedComponent[] input) {
-    // (Include the topological sort logic from the previous response here)
-    // Condensed for brevity in this snippet
-    List<ArticulatedComponent> sorted = new ArrayList<>();
-    List<ArticulatedComponent> remaining = new ArrayList<>(Arrays.asList(input));
+  /**
+   * Registers a component into the kinematic chain. Call this in RobotContainer after creating the
+   * subsystem. * @param component The subsystem/component instance
+   *
+   * @param id The unique ID for this node (e.g. 0 for Chassis)
+   * @param parentId The ID of the parent node (-1 for Root)
+   */
+  public void register(ArticulatedComponent component, int id, int parentId) {
+    nodes.add(new Node(component, id, parentId, true));
+    componentToIdMap.put(component, id);
+    isDirty = true; // Mark for re-sort on next loop
+  }
+
+  /**
+   * Registers a component into the kinematic chain. Call this in RobotContainer after creating the
+   * subsystem. * @param component The subsystem/component instance
+   *
+   * @param id The unique ID for this node (e.g. 0 for Chassis)
+   * @param parentId The ID of the parent node (-1 for Root)
+   */
+  public void registerUnpublished(ArticulatedComponent component, int id, int parentId) {
+    nodes.add(new Node(component, id, parentId, false));
+    componentToIdMap.put(component, id);
+    isDirty = true; // Mark for re-sort on next loop
+  }
+
+  @Override
+  public void periodic() {
+    // 1. Rebuild topology if new components were added
+    if (isDirty) {
+      rebuildTopology();
+    }
+
+    // 2. Update Kinematics
+    updateKinematics();
+    // Fast Copy: Only iterate the specific indices we care about
+    for (int i = 0; i < publishableIndices.length; i++) {
+      int nodeID = publishableIndices[i];
+      mechanismPosesBuffer[i] = localPoses[nodeID];
+    }
+
+    // Log the pre-filled buffer
+    if (mechanismPosesBuffer.length > 0) {
+      Logger.recordOutput(pb.makePath("mechanismPoses"), mechanismPosesBuffer);
+    }
+    Logger.recordOutput(pb.makePath("localPoses"), localPoses);
+    Logger.recordOutput(pb.makePath("globalPoses"), globalPoses);
+  }
+
+  private void rebuildTopology() {
+    // Find max ID to size arrays
+    int maxId = nodes.stream().mapToInt(n -> n.id).max().orElse(0);
+
+    this.globalPoses = new Pose3d[maxId + 1];
+    this.localPoses = new Pose3d[maxId + 1];
+    Arrays.fill(this.globalPoses, new Pose3d());
+    Arrays.fill(this.localPoses, new Pose3d());
+
+    // Topological Sort
+    // We sort the 'nodes' list so parents appear before children
+    List<Node> sorted = new ArrayList<>();
+    List<Node> remaining = new ArrayList<>(nodes);
+
     boolean progress = true;
     while (!remaining.isEmpty() && progress) {
       progress = false;
       for (int i = 0; i < remaining.size(); i++) {
-        ArticulatedComponent current = remaining.get(i);
-        int parentId = current.getParentModelIndex();
-        boolean parentIsProcessed =
-            (parentId == -1) || sorted.stream().anyMatch(c -> c.getModelIndex() == parentId);
-        if (parentIsProcessed) {
+        Node current = remaining.get(i);
+
+        // Check if parent is processed
+        boolean parentProcessed =
+            (current.parentId == -1) || sorted.stream().anyMatch(n -> n.id == current.parentId);
+
+        if (parentProcessed) {
           sorted.add(current);
           remaining.remove(i);
           i--;
@@ -64,52 +145,121 @@ public class KinematicsManager extends SubsystemBase {
         }
       }
     }
-    if (!remaining.isEmpty()) sorted.addAll(remaining);
-    return sorted.toArray(new ArticulatedComponent[0]);
-  }
 
-  @Override
-  public void periodic() {
-    updateKinematics();
-    Pose3d[] mechanismPoses = Arrays.copyOfRange(localPoses, 1, localPoses.length);
-    Logger.recordOutput(pb.makePath("components", "transforms"), mechanismPoses);
+    // Add any stragglers (cycles/missing parents) to prevent crash
+    sorted.addAll(remaining);
+
+    this.orderedNodes = sorted.toArray(new Node[0]);
+
+    // Resize velocity arrays
+    int size = globalPoses.length;
+    this.globalLinVels = new Vector[size];
+    this.globalAngVels = new Vector[size];
+    Arrays.fill(this.globalLinVels, VecBuilder.fill(0, 0, 0));
+    Arrays.fill(this.globalAngVels, VecBuilder.fill(0, 0, 0));
+
+    // 1. Filter nodes to find which ones are publishable
+    List<Integer> indicesList = new ArrayList<>();
+    for (Node node : orderedNodes) {
+      if (node.publishable) {
+        indicesList.add(node.id);
+      }
+    }
+
+    // 2. specific optimization: Pre-allocate the primitive arrays once
+    this.publishableIndices = indicesList.stream().mapToInt(i -> i).toArray();
+    this.mechanismPosesBuffer = new Pose3d[this.publishableIndices.length];
+
+    // Initialize buffer to prevent nulls if logged before first update
+    Arrays.fill(this.mechanismPosesBuffer, new Pose3d());
+
+    this.isDirty = false;
   }
 
   private void updateKinematics() {
-    for (ArticulatedComponent ac : orderedComponents) {
-      int myIndex = ac.getModelIndex();
-      int parentIndex = ac.getParentModelIndex();
-      Transform3d subsystemTransform = ac.getTransform3d();
+    for (Node node : orderedNodes) {
+      Transform3d transform = node.component.getTransform3d();
 
-      if (parentIndex == -1) {
-        // --- ROOT COMPONENT (Chassis / Index 0) ---
+      // Get local velocities and rotate them into the GLOBAL frame immediately
+      // This simplifies the math: Global = Parent_Global + Local_Rotated_To_Global
+      Rotation3d globalRot =
+          (node.parentId == -1)
+              ? transform.getRotation()
+              : globalPoses[node.parentId].getRotation().plus(transform.getRotation());
 
-        // Global: Relative to Field (Odometry)
-        globalPoses[myIndex] = new Pose3d().plus(subsystemTransform);
+      // Rotate local vectors to global frame
+      Vector<N3> localLinDelta =
+          rotateVector(node.component.getRelativeLinearVelocity(), globalRot);
+      Vector<N3> localAngDelta =
+          rotateVector(node.component.getRelativeAngularVelocity(), globalRot);
 
-        // Local: Relative to Robot (It IS the Robot, so it is Identity/Zero)
-        localPoses[myIndex] = new Pose3d();
+      if (node.parentId == -1) {
+        // --- ROOT (Chassis) ---
+
+        // Assume Root's "Relative" velocity is actually Field-Relative velocity
+        globalPoses[node.id] = new Pose3d().plus(transform);
+        localPoses[node.id] = new Pose3d();
+        globalLinVels[node.id] = localLinDelta;
+        globalAngVels[node.id] = localAngDelta;
 
       } else {
-        // --- CHILD COMPONENT ---
+        // --- CHILD ---
+        // 1. Update Pose
+        globalPoses[node.id] = globalPoses[node.parentId].plus(transform);
 
-        // Safety check
-        if (parentIndex < globalPoses.length) {
-          // Global: Parent Global + Transform
-          globalPoses[myIndex] = globalPoses[parentIndex].plus(subsystemTransform);
-
-          // Local: Parent Local + Transform
-          // This maintains the chain relative to the Chassis (Index 0)
-          localPoses[myIndex] = localPoses[parentIndex].plus(subsystemTransform);
+        // This ensures the mechanism chain is built relative to the robot root
+        if (node.parentId < localPoses.length) {
+          localPoses[node.id] = localPoses[node.parentId].plus(transform);
         }
+
+        // 2. Update Angular Velocity: Parent Global + Local Delta
+        globalAngVels[node.id] = globalAngVels[node.parentId].plus(localAngDelta);
+
+        // 3. Update Linear Velocity:
+        // V_child = V_parent + (Omega_parent x Radius_vector) + V_local_delta
+
+        // Radius vector: Vector from Parent Origin -> Child Origin (in Global Frame)
+        Translation3d radius =
+            globalPoses[node.id]
+                .getTranslation()
+                .minus(globalPoses[node.parentId].getTranslation());
+        Vector<N3> radiusVec = VecBuilder.fill(radius.getX(), radius.getY(), radius.getZ());
+
+        // Cross Product: Omega x Radius (Tangential Velocity)
+        Vector<N3> tangentialVel = Vector.cross(globalAngVels[node.parentId], radiusVec);
+
+        globalLinVels[node.id] =
+            globalLinVels[node.parentId].plus(tangentialVel).plus(localLinDelta);
       }
     }
   }
 
-  // --- Lookup API ---
+  // --- API ---
 
-  public Pose3d getGlobalPose(int modelIndex) {
-    if (modelIndex < 0 || modelIndex >= globalPoses.length) return new Pose3d();
-    return globalPoses[modelIndex];
+  public Pose3d getGlobalPoseFor(ArticulatedComponent component) {
+    Integer id = componentToIdMap.get(component);
+    if (id == null) return new Pose3d(); // Not registered
+    return getGlobalPose(id);
+  }
+
+  public Pose3d getGlobalPose(int id) {
+    if (id < 0 || id >= globalPoses.length) return new Pose3d();
+    return globalPoses[id];
+  }
+
+  // --- Helpers ---
+
+  public Vector<N3> getGlobalLinearVelocity(ArticulatedComponent c) {
+    Integer id = componentToIdMap.get(c);
+    if (id == null || id >= globalLinVels.length) return VecBuilder.fill(0, 0, 0);
+    return globalLinVels[id];
+  }
+
+  /** Rotates a vector by a Rotation3d */
+  private Vector<N3> rotateVector(Vector<N3> vec, Rotation3d rot) {
+    // Hack: use Pose3d to rotate a translation, then extract it back
+    Translation3d t = new Translation3d(vec.get(0), vec.get(1), vec.get(2));
+    Translation3d rotated = t.rotateBy(rot);
+    return VecBuilder.fill(rotated.getX(), rotated.getY(), rotated.getZ());
   }
 }

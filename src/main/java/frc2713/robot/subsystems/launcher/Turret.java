@@ -1,11 +1,15 @@
 package frc2713.robot.subsystems.launcher;
 
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc2713.lib.io.ArticulatedComponent;
@@ -39,19 +43,14 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
   ;
 
   @Override
-  public int getModelIndex() {
-    return LauncherConstants.Turret.MODEL_INDEX;
-  }
-
-  @Override
-  public int getParentModelIndex() {
-    return LauncherConstants.Turret.PARENT_INDEX;
-  }
-
-  @Override
   public Transform3d getTransform3d() {
     Angle rotations = super.getCurrentPosition().times(config.unitToRotorRatio);
     return config.initialTransform.plus(
         new Transform3d(new Translation3d(), new Rotation3d(0, 0, rotations.in(Radians))));
+  }
+
+  @Override
+  public Vector<N3> getRelativeAngularVelocity() {
+    return VecBuilder.fill(0, 0, super.getCurrentVelocity().in(RadiansPerSecond));
   }
 }

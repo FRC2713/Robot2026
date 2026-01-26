@@ -46,6 +46,9 @@ public final class LauncherConstants {
       config.fxConfig.Slot0.kD = 0.0;
       config.unitToRotorRatio = 1.0; // 1:1 ratio
     }
+
+    public static int MODEL_INDEX = 5;
+    public static int PARENT_INDEX = 4;
   }
 
   public final class Hood {
