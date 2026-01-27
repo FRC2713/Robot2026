@@ -5,10 +5,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
@@ -19,8 +16,8 @@ public class BallTrajectorySim {
     // Position is Translation3d (Best for Visualization/Field2d)
     public Translation3d position;
 
-    // Velocity is Vector<N3> (Best for Physics Math)
-    public Vector<N3> velocity;
+    // Velocity is Translation3d (can be treated like a vector)
+    public Translation3d velocity;
 
     // Simplified: Spin is just a scalar speed around the Y-axis.
     // Negative = Backspin (Lift), Positive = Topspin (Dive)
@@ -40,12 +37,12 @@ public class BallTrajectorySim {
       this.areaM2 = Math.PI * radiusM * radiusM;
 
       this.position = new Translation3d();
-      this.velocity = VecBuilder.fill(0, 0, 0);
+      this.velocity = new Translation3d();
     }
 
     public void launch(
         Translation3d startPosition, // Input is now Translation3d
-        Vector<N3> velocity,
+        Translation3d velocity,
         AngularVelocity spinSpeed) {
 
       this.position = startPosition;
@@ -59,48 +56,62 @@ public class BallTrajectorySim {
       double airDensity = 1.225;
 
       // 1. Gravity
-      Vector<N3> gravityForce = VecBuilder.fill(0, 0, -9.81 * massKg);
+      Translation3d gravityForce = new Translation3d(0, 0, -9.81 * massKg);
 
-      // 2. Drag (Standard Formula)
-      double vMag = velocity.norm();
-      Vector<N3> dragForce = velocity.times(-0.5 * airDensity * areaM2 * dragCoeff * vMag);
+      // 2. Drag
+      double vMag = velocity.getNorm();
+      Translation3d dragForce =
+          (vMag < 1e-6)
+              ? new Translation3d()
+              : velocity.times(-0.5 * airDensity * areaM2 * dragCoeff * vMag);
 
-      // 3. Magnus Lift (CORRECTED FORMULA)
-      // We first calculate the direction of the lift (perpendicular to spin & velocity)
-      // Direction = Normalized(Spin x Velocity)
-      // Magnitude = 0.5 * rho * Area * CL * v^2
+      // 3. Magnus Lift (CORRECTED)
+      Translation3d magnusForce = new Translation3d();
 
-      Vector<N3> spinVec = VecBuilder.fill(0, spinRateY, 0); // Assuming Y-axis spin
-      Vector<N3> magnusDir = Vector.cross(spinVec, velocity);
+      // We assume "spinRateY" actually means "Backspin Rate" regardless of direction.
+      // To get the Backspin Axis, we cross Global Z (Up) with Velocity.
+      // This creates a vector pointing to the "Left" relative to travel.
+      Translation3d up = new Translation3d(0, 0, 1);
 
-      Vector<N3> magnusForce = VecBuilder.fill(0, 0, 0);
+      // Use the .cross() method (returns Vector<N3>)
+      var axisVec = up.cross(velocity);
 
-      // Only apply lift if we are moving and spinning
-      if (magnusDir.norm() > 1e-6) {
-        // Normalize direction so it has length 1.0
-        magnusDir = magnusDir.div(magnusDir.norm());
+      // Convert Vector<N3> back to Translation3d
+      Translation3d spinAxis =
+          new Translation3d(axisVec.get(0, 0), axisVec.get(1, 0), axisVec.get(2, 0));
 
-        // Calculate standard Aerodynamic Lift Force
-        double liftMagnitude = 0.5 * airDensity * areaM2 * liftCoeff * (vMag * vMag);
+      // Only apply if we have horizontal movement (prevent divide by zero)
+      if (spinAxis.getNorm() > 1e-6) {
+        // Normalize the axis to length 1, then scale by spin rate
+        Translation3d spinVec = spinAxis.div(spinAxis.getNorm()).times(spinRateY);
 
-        magnusForce = magnusDir.times(liftMagnitude);
+        // Calculate Magnus Direction: Spin x Velocity
+        var magnusVec = spinVec.cross(velocity);
+        Translation3d magnusDir =
+            new Translation3d(magnusVec.get(0, 0), magnusVec.get(1, 0), magnusVec.get(2, 0));
+
+        if (magnusDir.getNorm() > 1e-6) {
+          magnusDir = magnusDir.div(magnusDir.getNorm());
+          double liftMagnitude = 0.5 * airDensity * areaM2 * liftCoeff * (vMag * vMag);
+          magnusForce = magnusDir.times(liftMagnitude);
+        }
       }
 
       // 4. Integration
-      Vector<N3> totalForce = gravityForce.plus(dragForce); // .plus(magnusForce);
-      Vector<N3> acceleration = totalForce.div(massKg);
+      // Make sure to UNCOMMENT the magnusForce!
+      Translation3d totalForce = gravityForce.plus(dragForce); // .plus(magnusForce);
+      Translation3d acceleration = totalForce.div(massKg);
 
       velocity = velocity.plus(acceleration.times(dt));
-
-      // Update Position (Bridge to Translation3d)
-      Translation3d stepMove =
-          new Translation3d(
-              velocity.get(0, 0) * dt, velocity.get(1, 0) * dt, velocity.get(2, 0) * dt);
-      position = position.plus(stepMove);
+      position = position.plus(velocity.times(dt));
     }
 
     public Translation3d getPosition() {
       return position;
+    }
+
+    public Translation3d getVelocity() {
+      return velocity;
     }
   }
 }

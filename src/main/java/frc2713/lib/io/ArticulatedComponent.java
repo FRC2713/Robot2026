@@ -3,13 +3,10 @@ package frc2713.lib.io;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import frc2713.lib.subsystem.KinematicsManager;
@@ -25,22 +22,22 @@ public interface ArticulatedComponent {
    * * The linear velocity of this component relative to its parent, in this component's LOCAL
    * frame. Example: Elevator moving up = VecBuilder.fill(0, 0, 0.5)
    */
-  default Vector<N3> getRelativeLinearVelocity() {
-    return VecBuilder.fill(0, 0, 0);
+  default Translation3d getRelativeLinearVelocity() {
+    return new Translation3d();
   }
 
   /**
    * * The angular velocity of this component relative to its parent, in this component's LOCAL
    * frame. Example: Turret spinning left = VecBuilder.fill(0, 0, 2.5)
    */
-  default Vector<N3> getRelativeAngularVelocity() {
-    return VecBuilder.fill(0, 0, 0);
+  default Translation3d getRelativeAngularVelocity() {
+    return new Translation3d();
   }
 
   // --- Helpers ---
 
-  default Vector<N3> getGlobalLinearVelocity() {
-    if (KinematicsManager.getInstance() == null) return VecBuilder.fill(0, 0, 0);
+  default Translation3d getGlobalLinearVelocity() {
+    if (KinematicsManager.getInstance() == null) return new Translation3d();
     return KinematicsManager.getInstance().getGlobalLinearVelocity(this);
   }
 
@@ -146,11 +143,16 @@ public interface ArticulatedComponent {
 
   default Distance getDistance2d(Pose3d target) {
     if (KinematicsManager.getInstance() == null) return Meters.of(0.0);
-    Translation3d myTrans = this.getGlobalPose().getTranslation();
     Translation3d targetTrans = target.getTranslation();
 
-    return Meters.of(
-        Math.hypot(targetTrans.getX() - myTrans.getX(), targetTrans.getY() - myTrans.getY()));
+    return getDistance2d(targetTrans);
+  }
+
+  default Distance getDistance2d(Translation3d target) {
+    if (KinematicsManager.getInstance() == null) return Meters.of(0.0);
+    Translation3d myTrans = this.getGlobalPose().getTranslation();
+
+    return Meters.of(Math.hypot(target.getX() - myTrans.getX(), target.getY() - myTrans.getY()));
   }
 
   /**
@@ -175,15 +177,21 @@ public interface ArticulatedComponent {
   }
 
   /** Returns a 3D Vector (x, y, z) pointing FROM this component TO the target. */
-  default Vector<N3> getVectorTo(Pose3d target) {
+  default Translation3d getTranslationTo(Transform3d target) {
     if (KinematicsManager.getInstance() == null) {
-      return new Vector<>(N3.instance);
+      return new Translation3d();
     }
 
-    // Calculate difference using Translation3d first
-    Translation3d diff = target.getTranslation().minus(this.getGlobalPose().getTranslation());
+    return this.getTranslationTo(target.getTranslation());
+  }
 
-    // Convert to Vector<N3>
-    return VecBuilder.fill(diff.getX(), diff.getY(), diff.getZ());
+  default Translation3d getTranslationTo(Translation3d target) {
+    if (KinematicsManager.getInstance() == null) {
+      return new Translation3d();
+    }
+
+    Translation3d diff = target.minus(this.getGlobalPose().getTranslation());
+
+    return diff;
   }
 }

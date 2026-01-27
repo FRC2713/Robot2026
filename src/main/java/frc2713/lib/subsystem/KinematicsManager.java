@@ -1,12 +1,9 @@
 package frc2713.lib.subsystem;
 
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.io.ArticulatedComponent;
@@ -43,8 +40,8 @@ public class KinematicsManager extends SubsystemBase {
   private Pose3d[] mechanismPosesBuffer = new Pose3d[0];
 
   // Storage for velocities
-  private Vector<N3>[] globalLinVels = new Vector[0];
-  private Vector<N3>[] globalAngVels = new Vector[0];
+  private Translation3d[] globalLinVels = new Translation3d[0];
+  private Translation3d[] globalAngVels = new Translation3d[0];
 
   // Lookup map for O(1) access by Component instance
   private final Map<ArticulatedComponent, Integer> componentToIdMap = new HashMap<>();
@@ -153,10 +150,10 @@ public class KinematicsManager extends SubsystemBase {
 
     // Resize velocity arrays
     int size = globalPoses.length;
-    this.globalLinVels = new Vector[size];
-    this.globalAngVels = new Vector[size];
-    Arrays.fill(this.globalLinVels, VecBuilder.fill(0, 0, 0));
-    Arrays.fill(this.globalAngVels, VecBuilder.fill(0, 0, 0));
+    this.globalLinVels = new Translation3d[size];
+    this.globalAngVels = new Translation3d[size];
+    Arrays.fill(this.globalLinVels, new Translation3d());
+    Arrays.fill(this.globalAngVels, new Translation3d());
 
     // 1. Filter nodes to find which ones are publishable
     List<Integer> indicesList = new ArrayList<>();
@@ -188,10 +185,8 @@ public class KinematicsManager extends SubsystemBase {
               : globalPoses[node.parentId].getRotation().plus(transform.getRotation());
 
       // Rotate local vectors to global frame
-      Vector<N3> localLinDelta =
-          rotateVector(node.component.getRelativeLinearVelocity(), globalRot);
-      Vector<N3> localAngDelta =
-          rotateVector(node.component.getRelativeAngularVelocity(), globalRot);
+      Translation3d localLinDelta = node.component.getRelativeLinearVelocity().rotateBy(globalRot);
+      Translation3d localAngDelta = node.component.getRelativeAngularVelocity().rotateBy(globalRot);
 
       if (node.parentId == -1) {
         // --- ROOT (Chassis) ---
@@ -223,10 +218,9 @@ public class KinematicsManager extends SubsystemBase {
             globalPoses[node.id]
                 .getTranslation()
                 .minus(globalPoses[node.parentId].getTranslation());
-        Vector<N3> radiusVec = VecBuilder.fill(radius.getX(), radius.getY(), radius.getZ());
 
         // Cross Product: Omega x Radius (Tangential Velocity)
-        Vector<N3> tangentialVel = Vector.cross(globalAngVels[node.parentId], radiusVec);
+        Translation3d tangentialVel = new Translation3d(globalAngVels[node.parentId].cross(radius));
 
         globalLinVels[node.id] =
             globalLinVels[node.parentId].plus(tangentialVel).plus(localLinDelta);
@@ -249,17 +243,13 @@ public class KinematicsManager extends SubsystemBase {
 
   // --- Helpers ---
 
-  public Vector<N3> getGlobalLinearVelocity(ArticulatedComponent c) {
+  public Translation3d getGlobalLinearVelocity(ArticulatedComponent c) {
     Integer id = componentToIdMap.get(c);
-    if (id == null || id >= globalLinVels.length) return VecBuilder.fill(0, 0, 0);
+    if (id == null || id >= globalLinVels.length) return new Translation3d();
     return globalLinVels[id];
   }
 
-  /** Rotates a vector by a Rotation3d */
-  private Vector<N3> rotateVector(Vector<N3> vec, Rotation3d rot) {
-    // Hack: use Pose3d to rotate a translation, then extract it back
-    Translation3d t = new Translation3d(vec.get(0), vec.get(1), vec.get(2));
-    Translation3d rotated = t.rotateBy(rot);
-    return VecBuilder.fill(rotated.getX(), rotated.getY(), rotated.getZ());
+  public Translation3d getGlobalLinearVelocity(int index) {
+    return globalLinVels[index];
   }
 }

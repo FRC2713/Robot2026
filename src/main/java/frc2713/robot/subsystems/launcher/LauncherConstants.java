@@ -3,10 +3,12 @@ package frc2713.robot.subsystems.launcher;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.units.measure.Angle;
 import frc2713.lib.drivers.CANDeviceId;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
@@ -49,6 +51,22 @@ public final class LauncherConstants {
 
     public static int MODEL_INDEX = 5;
     public static int PARENT_INDEX = 4;
+
+    public static Transform3d localTransform =
+        new Transform3d(
+            new Translation3d(Inches.of(-5).in(Meters), 0, Inches.of(2).in(Meters)),
+            new Rotation3d(0, Degrees.of(-90).in(Radians), 0));
+
+    public static InterpolatingDoubleTreeMap velocityMap = new InterpolatingDoubleTreeMap();
+
+    static {
+      // Distance (m) -> Ball Velocity (ft/s)
+      velocityMap.put(1.0, 20.0);
+      velocityMap.put(1.5, 20.0);
+      velocityMap.put(3.0, 23.0);
+      velocityMap.put(4.0, 25.0);
+      velocityMap.put(5.17, 28.0);
+    }
   }
 
   public final class Hood {
@@ -70,5 +88,15 @@ public final class LauncherConstants {
     public static Angle retractedPosition = Degrees.of(0);
     public static int MODEL_INDEX = 4;
     public static int PARENT_INDEX = 3; // turret
+
+    public static InterpolatingDoubleTreeMap angleMap = new InterpolatingDoubleTreeMap();
+
+    static {
+      // Distance (m) -> Hood Pitch (Degrees)
+      angleMap.put(1.0, 15.0);
+      angleMap.put(1.5, 22.0);
+      angleMap.put(3.0, 30.0);
+      angleMap.put(4.0, 40.0);
+    }
   }
 }

@@ -7,8 +7,6 @@
 
 package frc2713.robot;
 
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -23,7 +21,6 @@ import frc2713.lib.io.TalonFXIO;
 import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.robot.commands.DriveCommands;
-import frc2713.robot.commands.SimulateBall;
 import frc2713.robot.generated.TunerConstants;
 import frc2713.robot.subsystems.climber.Climber;
 import frc2713.robot.subsystems.climber.ClimberConstants;
@@ -39,6 +36,7 @@ import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.launcher.Flywheels;
 import frc2713.robot.subsystems.launcher.Hood;
 import frc2713.robot.subsystems.launcher.LauncherConstants;
+import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
 import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
@@ -54,6 +52,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
 
   private final KinematicsManager kinematicsManager = new KinematicsManager();
+  private final LaunchingSolutionManager launchingSolutionManager = new LaunchingSolutionManager();
   // Subsystems
   private final Drive drive;
   private final Flywheels flywheels;
@@ -279,10 +278,8 @@ public class RobotContainer {
     controller
         .leftBumper()
         .onTrue(
-            new SimulateBall(
-                () -> flywheels.getGlobalPose().getTranslation(),
-                () -> flywheels.getGlobalLinearVelocity(),
-                () -> RotationsPerSecond.of(0)));
+            Commands.runOnce(
+                () -> flywheels.launchFuel(LaunchingSolutionManager.getInstance().getSolution())));
   }
 
   /**

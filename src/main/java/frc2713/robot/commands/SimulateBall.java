@@ -4,10 +4,7 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
@@ -23,7 +20,7 @@ public class SimulateBall extends Command {
   Distance ballRadius = Inches.of(5.91 / 2); // 37 mm
   Ball ball = new Ball(ballMass, ballRadius, 0.47, 0.2); // mass(kg), radius
   Supplier<Translation3d> initialPosSupplier = () -> new Translation3d();
-  Supplier<Vector<N3>> initialVelSupplier = () -> VecBuilder.fill(0, 0, 0);
+  Supplier<Translation3d> initialVelSupplier = () -> new Translation3d();
   Supplier<AngularVelocity> initialAngularVelSupplier = () -> RotationsPerSecond.of(0.0);
 
   Time lastTimeStamp = RobotTime.getTimestamp();
@@ -35,7 +32,7 @@ public class SimulateBall extends Command {
 
   public SimulateBall(
       Supplier<Translation3d> initialPosSupplier,
-      Supplier<Vector<N3>> initialVelSupplier,
+      Supplier<Translation3d> initialVelSupplier,
       Supplier<AngularVelocity> initialAngularVelSupplier) {
     this.initialPosSupplier = initialPosSupplier;
     this.initialVelSupplier = initialVelSupplier;
