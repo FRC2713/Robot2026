@@ -20,11 +20,8 @@ import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -38,8 +35,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -55,7 +50,6 @@ import frc2713.robot.generated.TunerConstants;
 import frc2713.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -172,16 +166,16 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
   }
 
   @Override
-  public Vector<N3> getRelativeLinearVelocity() {
+  public Translation3d getRelativeLinearVelocity() {
     ChassisSpeeds speeds = getChassisSpeeds();
 
-    return VecBuilder.fill(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, 0);
+    return new Translation3d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, 0);
   }
 
   @Override
-  public Vector<N3> getRelativeAngularVelocity() {
+  public Translation3d getRelativeAngularVelocity() {
     ChassisSpeeds speeds = getChassisSpeeds();
-    return VecBuilder.fill(0, 0, speeds.omegaRadiansPerSecond);
+    return new Translation3d(0, 0, speeds.omegaRadiansPerSecond);
   }
 
   @Override
@@ -353,41 +347,6 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
   @AutoLogOutput(key = "Odometry/Robot")
   public Pose2d getPose() {
     return poseEstimator.getEstimatedPosition();
-  }
-
-  public Supplier<Translation3d> getBallPosSupplier() {
-    return () -> new Translation3d(getPose().getTranslation()).plus(new Translation3d(0, 0, 1));
-  }
-
-  public Supplier<Vector<N3>> getBallVelSupplier() {
-    return () -> {
-      ChassisSpeeds currentSpeed = getChassisSpeeds();
-      LinearVelocity launchSpeed = FeetPerSecond.of(20);
-      Pose3d pose = new Pose3d(poseEstimator.getEstimatedPosition());
-
-      // Pure forward direction vector (unit vector), not offset
-      Pose3d localForward = pose.plus(new Transform3d(-1, 0, 0, new Rotation3d()));
-      Logger.recordOutput("Drive/localForward", localForward);
-      Translation3d worldForward =
-          localForward
-              .getTranslation()
-              .rotateBy(pose.getRotation())
-              .rotateBy(new Rotation3d(0, Degrees.of(45).in(Radians), 0));
-
-      Vector<N3> launchVector =
-          worldForward
-              .toVector()
-              .times(launchSpeed.in(MetersPerSecond))
-              .plus(
-                  VecBuilder.fill(
-                      currentSpeed.vxMetersPerSecond, currentSpeed.vyMetersPerSecond, 0));
-
-      return launchVector;
-    };
-  }
-
-  public Supplier<AngularVelocity> getBallSpinSupplier() {
-    return () -> RotationsPerSecond.of(0);
   }
 
   /** Returns the current odometry rotation. */
