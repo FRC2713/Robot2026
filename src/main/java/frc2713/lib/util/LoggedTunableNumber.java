@@ -99,7 +99,7 @@ public class LoggedTunableNumber implements DoubleSupplier {
   /**
    * Runs action if any of the tunableNumbers have changed
    *
-   * @param id Unique identifier for the caller to avoid conflicts when shared between multiple *
+   * @param id Unique identifier for the caller to avoid conflicts when shared between multiple
    *     objects. Recommended approach is to pass the result of "hashCode()"
    * @param action Callback to run when any of the tunable numbers have changed. Access tunable
    *     numbers in order inputted in method

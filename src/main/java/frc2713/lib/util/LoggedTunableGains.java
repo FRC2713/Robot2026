@@ -2,6 +2,7 @@ package frc2713.lib.util;
 
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import frc2713.lib.io.AdvantageScopePathBuilder;
 import java.util.function.BiConsumer;
 import lombok.Getter;
 
@@ -28,33 +29,34 @@ public class LoggedTunableGains {
 
   /**
    * Create tunables for the provided Slot0Configs. The helper will write values back into the
-   * provided Slot0Configs when changes are detected via {@link #ifChanged(int, Runnable)}.
+   * provided Slot0Configs when changes are detected via {@link #ifChanged(int, BiConsumer)}.
    *
-   * @param baseKey base dashboard key (use subsystem name)
-   * @param slot0 Slot0Configs instance to mirror and update
+   * @param name base dashboard key (use subsystem name)
+   * @param gains Slot0Configs instance to mirror and update
+   * @param motionMagic MotionMagicConfigs instance to mirror and update
    */
   public LoggedTunableGains(String name, Slot0Configs gains, MotionMagicConfigs motionMagic) {
-    String gainsKey = name + "/Gains";
-    this.P = new LoggedTunableNumber(gainsKey + "/P", gains.kP);
-    this.I = new LoggedTunableNumber(gainsKey + "/I", gains.kI);
-    this.D = new LoggedTunableNumber(gainsKey + "/D", gains.kD);
-    this.S = new LoggedTunableNumber(gainsKey + "/FF/S", gains.kS);
-    this.V = new LoggedTunableNumber(gainsKey + "/FF/V", gains.kV);
-    this.A = new LoggedTunableNumber(gainsKey + "/FF/A", gains.kA);
-    this.G = new LoggedTunableNumber(gainsKey + "/FF/G", gains.kG);
+    AdvantageScopePathBuilder pb = new AdvantageScopePathBuilder(name + "/Gains");
+    this.P = new LoggedTunableNumber(pb.makePath("P"), gains.kP);
+    this.I = new LoggedTunableNumber(pb.makePath("I"), gains.kI);
+    this.D = new LoggedTunableNumber(pb.makePath("D"), gains.kD);
+    this.S = new LoggedTunableNumber(pb.makePath("FF", "S"), gains.kS);
+    this.V = new LoggedTunableNumber(pb.makePath("FF", "V"), gains.kV);
+    this.A = new LoggedTunableNumber(pb.makePath("FF", "A"), gains.kA);
+    this.G = new LoggedTunableNumber(pb.makePath("FF", "G"), gains.kG);
 
     this.motionMagicCruiseVelocity =
         new LoggedTunableNumber(
-            gainsKey + "/MM/CruiseVelocity", motionMagic.MotionMagicCruiseVelocity);
+            pb.makePath("MM", "CruiseVelocity"), motionMagic.MotionMagicCruiseVelocity);
     this.motionMagicAcceleration =
-        new LoggedTunableNumber(gainsKey + "/MM/Acceleration", motionMagic.MotionMagicAcceleration);
+        new LoggedTunableNumber(
+            pb.makePath("MM", "Acceleration"), motionMagic.MotionMagicAcceleration);
     this.motionMagicJerk =
-        new LoggedTunableNumber(gainsKey + "/MM/Jerk", motionMagic.MotionMagicJerk);
+        new LoggedTunableNumber(pb.makePath("MM", "Jerk"), motionMagic.MotionMagicJerk);
     this.motionMagicExpo_V =
-        new LoggedTunableNumber(gainsKey + "/MM/Expo/V", motionMagic.MotionMagicExpo_kV);
+        new LoggedTunableNumber(pb.makePath("MM", "Expo", "V"), motionMagic.MotionMagicExpo_kV);
     this.motionMagicExpo_A =
-        new LoggedTunableNumber(gainsKey + "/MM/Expo/A", motionMagic.MotionMagicExpo_kA);
-
+        new LoggedTunableNumber(pb.makePath("MM", "Expo", "A"), motionMagic.MotionMagicExpo_kA);
     this.slot0Ref = gains;
     this.motionMagicRef = motionMagic;
   }
