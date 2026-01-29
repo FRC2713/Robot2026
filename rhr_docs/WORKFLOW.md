@@ -3,7 +3,7 @@
 We use `git` for making code changes, with a 3-branch approach:
 - `main`: This branch contains only code tested on the actual robot. It's where we merge our changes after testing.
 - `dev`: This is the integration branch. This is where code comes together for testing on the robot.
-- `yourname-feature`: Your work. Example: `alex-shooter`, `maya-auto`, `sam-vision`
+- `yourname/feature`: Your work. Example: `alex/shooter`, `maya/auto`, `sam/vision`
 
 <details>
 <summary>What is git or branches or GitHub?</summary>
@@ -40,7 +40,7 @@ When you start work on anything, first, we branch off of the `dev` branch.
 ```bash
 git switch dev                        # change into the dev branch
 git pull                              # get all latest changes
-git switch -c yourname-whatyouredoing # create your feature branch
+git switch -c yourname/what-youre-doing # create your feature branch
 ```
 
 ### Code & Commit Often
@@ -66,6 +66,7 @@ Push early and often! This backs up your work and shows your build status on Git
 - **Title**: Short description (e.g. `Fix shooter speed`, `Add auto mode 2`)
 - **Description**: What changed and why
 - **Testing**: How you tested it (sim, robot)
+- **Reviewers**: Feel free anyone on the team, including the Software Director and Software Mentors.
 
 ## Workflow when going to competitions
 1. Open a competition specific branch following the pattern `event-{eventName}`, for example `event-botb`

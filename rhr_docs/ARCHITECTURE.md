@@ -12,6 +12,13 @@
   * Whenever possible extend generic  
   * [See general constant rules](#constants)
 
+## Command Patterns
+
+* Commands patterns we've used in the past:
+  * atomic commands (e.g `InstantCommands`) are defined as class methods in their Subsystems
+  * more complex commands are defined in their own .java in \[SUBSYSTEM\_NAME\]Commands
+  * subsystems are defined as state machines and commands handle transitioning from state to state ([example](https://github.com/Mechanical-Advantage/RobotCode2026Public/blob/main/src/main/java/org/littletonrobotics/frc2026/subsystems/intake/Intake.java))
+
 # Constants {#constants}
 
 * Use SI WPI units wherever possible  
