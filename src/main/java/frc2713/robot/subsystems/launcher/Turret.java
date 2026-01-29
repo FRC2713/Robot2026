@@ -3,6 +3,9 @@ package frc2713.robot.subsystems.launcher;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.FORWARD_LIMIT_DEGREES;
+import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.REVERSE_LIMIT_DEGREES;
+import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.SLOPE;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -10,6 +13,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc2713.lib.io.ArticulatedComponent;
@@ -29,6 +33,64 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
     super(config, new MotorInputsAutoLogged(), turretMotorIO);
   }
 
+  public static double turretPositionFromEncoders(double e1, double e2) {
+      // 1. Calculate the 'Difference' (The Phase)
+      double diff = e2 - e1;
+      
+      // Normalize to [-180, 180]. This is the "Vernier Lock"
+      while (diff <= -180) diff += 360;
+      while (diff > 180) diff -= 360;
+
+      // 2. Coarse Estimate (The "Big Picture")
+      // This uses the phase shift to guess the rough position.
+      double coarseAngle = diff * SLOPE;
+
+      // 3. The Ratio (How many times E1 spins per 1 Turret degree)
+      double encoderToTurretRatio = 8.5;
+      
+      // 4. Lap Calculation (The "Fine" logic)
+      // We calculate how many full 360s E1 has likely traveled.
+      // 'expectedE1' is where the encoder SHOULD be if coarseAngle was perfect.
+      double expectedE1 = coarseAngle * encoderToTurretRatio;
+      
+      // Determine the 'Lap' by finding how many 360s are between 
+      // the expected position and the actual sensor reading (e1).
+      double lap = Math.round((expectedE1 - e1) / 360.0);
+      
+      // 5. High-Resolution Output
+      // Combine the Lap (coarse) with the Sensor Reading (fine)
+      return (lap * 360.0 + e1) / encoderToTurretRatio;
+  }
+  public static double convertToClosestBoundedTurretAngleDegrees(
+            double targetAngleDegrees, Rotation2d current) {
+        double currentTotalRadians = (current.getRotations() * 2 * Math.PI);
+        double closestOffset = Units.degreesToRadians(targetAngleDegrees) - current.getRadians();
+        if (closestOffset > Math.PI) {
+
+            closestOffset -= 2 * Math.PI;
+
+        } else if (closestOffset < -Math.PI) {
+            closestOffset += 2 * Math.PI;
+        }
+
+        double finalOffset = currentTotalRadians + closestOffset;
+        if ((currentTotalRadians + closestOffset) % (2 * Math.PI)
+                == (currentTotalRadians - closestOffset)
+                        % (2 * Math.PI)) { // If the offset can go either way, go closer to zero
+            if (finalOffset > 0) {
+                finalOffset = currentTotalRadians - Math.abs(closestOffset);
+            } else {
+                finalOffset = currentTotalRadians + Math.abs(closestOffset);
+            }
+        }
+        if (finalOffset > Units.degreesToRadians(FORWARD_LIMIT_DEGREES)) { // if past upper rotation limit
+            finalOffset -= (2 * Math.PI);
+        } else if (finalOffset < Units.degreesToRadians(REVERSE_LIMIT_DEGREES)) { // if below lower rotation limit
+            finalOffset += (2 * Math.PI);
+        }
+
+        return Units.radiansToDegrees(finalOffset);
+  }
   public Command setAngle(Supplier<Angle> desiredAngle) {
     return motionMagicSetpointCommand(
         () -> convertSubsystemPositionToMotorPosition(desiredAngle.get()));
