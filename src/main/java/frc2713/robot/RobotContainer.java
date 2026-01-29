@@ -38,6 +38,9 @@ import frc2713.robot.subsystems.launcher.Hood;
 import frc2713.robot.subsystems.launcher.LauncherConstants;
 import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
 import frc2713.robot.subsystems.launcher.Turret;
+import frc2713.robot.subsystems.launcher.TurretMotorIOSim;
+import frc2713.robot.subsystems.launcher.TurretMotorIOTalonFX;
+import frc2713.robot.subsystems.launcher.TurretSubsystemConfig;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 import frc2713.robot.subsystems.serializer.SerializerConstants;
@@ -94,7 +97,8 @@ public class RobotContainer {
 
         turret =
             new Turret(
-                LauncherConstants.Turret.config, new TalonFXIO(LauncherConstants.Turret.config));
+                LauncherConstants.Turret.config,
+                new TurretMotorIOTalonFX(LauncherConstants.Turret.config));
         intakeRoller =
             new IntakeRoller(
                 IntakeConstants.Roller.config, new TalonFXIO(IntakeConstants.Roller.config));
@@ -132,7 +136,8 @@ public class RobotContainer {
 
         turret =
             new Turret(
-                LauncherConstants.Turret.config, new SimTalonFXIO(LauncherConstants.Turret.config));
+                LauncherConstants.Turret.config,
+                new TurretMotorIOSim(LauncherConstants.Turret.config));
         intakeRoller =
             new IntakeRoller(
                 IntakeConstants.Roller.config, new SimTalonFXIO(IntakeConstants.Roller.config));
@@ -169,7 +174,7 @@ public class RobotContainer {
 
         turret =
             new Turret(
-                new TalonFXSubsystemConfig(), new SimTalonFXIO(new TalonFXSubsystemConfig()));
+                new TurretSubsystemConfig(), new TurretMotorIOSim(new TurretSubsystemConfig()));
         intakeRoller =
             new IntakeRoller(
                 new TalonFXSubsystemConfig(), new SimTalonFXIO(new TalonFXSubsystemConfig()));

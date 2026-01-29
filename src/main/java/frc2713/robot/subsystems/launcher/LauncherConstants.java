@@ -17,14 +17,16 @@ public final class LauncherConstants {
 
   public static final class Turret {
 
-    public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
+    public static TurretSubsystemConfig config = new TurretSubsystemConfig();
 
     static {
       config.name = "Turret";
       config.talonCANID = new CANDeviceId(12); // Example CAN ID, replace with actual ID
+      config.canCoderCANID = new CANDeviceId(13); // CANCoder CAN ID, replace with actual ID
       config.fxConfig.Slot0.kP = 0.2;
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 0.0;
+      // rotations of subsystem for every 1 rotation of motor
       config.unitToRotorRatio = 1.0; // 1:1 ratio
       config.initialTransform =
           new Transform3d(
@@ -36,13 +38,14 @@ public final class LauncherConstants {
     public static int PARENT_INDEX = 0; // drivetrain
 
     // Gear tooth counts for turret angle calculation
-    //Pinion on motor
+    // Pinion on motor
     public static final double GEAR_0_TOOTH_COUNT = 60.0; // TODO: Replace with actual value
-    //attached to e1
+    // attached to e1
     public static final double GEAR_1_TOOTH_COUNT = 120.0; // TODO: Replace with actual value
-    //attached to e2
+    // attached to e2
     public static final double GEAR_2_TOOTH_COUNT = 80.0; // TODO: Replace with actual value
-    public static final double SLOPE = (GEAR_2_TOOTH_COUNT * GEAR_1_TOOTH_COUNT)
+    public static final double SLOPE =
+        (GEAR_2_TOOTH_COUNT * GEAR_1_TOOTH_COUNT)
             / ((GEAR_1_TOOTH_COUNT - GEAR_2_TOOTH_COUNT) * GEAR_0_TOOTH_COUNT);
 
     // Turret rotation limits
