@@ -44,7 +44,7 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Motor
    * @return
    */
   public Command extendCommand() {
-    return setDistanceCommand(() -> IntakeConstants.Extension.extendedPostion);
+    return setDistanceCommand(IntakeConstants.Extension.extendedPosition);
   }
 
   /**
