@@ -121,7 +121,6 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
    */
   protected void setMotionMagicConfigImpl(MotionMagicConfigs config) {
     leftIO.setMotionMagicConfig(config);
-    rightIO.setMotionMagicConfig(config);
   }
 
   /**
@@ -132,7 +131,6 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
   protected void setNeutralModeImpl(NeutralModeValue mode) {
     Logger.recordOutput(pb.makePath("API", "setNeutralModeImpl", "mode"), mode);
     leftIO.setNeutralMode(mode);
-    rightIO.setNeutralMode(mode);
   }
 
   /**
@@ -143,7 +141,6 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
   protected void setOpenLoopDutyCycleImpl(double dutyCycle) {
     Logger.recordOutput(pb.makePath("API", "setOpenLoopDutyCycleImpl", "dutyCycle"), dutyCycle);
     leftIO.setOpenLoopDutyCycle(dutyCycle);
-    rightIO.setOpenLoopDutyCycle(dutyCycle);
   }
 
   /**
@@ -155,7 +152,6 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
     Logger.recordOutput(pb.makePath("API", "setVoltageImpl", "voltage"), voltage);
     Logger.recordOutput(pb.makePath("API", "setVoltageImpl", "units"), voltage.unit().toString());
     leftIO.setVoltageOutput(voltage);
-    rightIO.setVoltageOutput(voltage);
   }
 
   /**
@@ -170,7 +166,6 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
     Logger.recordOutput(
         pb.makePath("API", "setPositionSetpointImpl", "units"), position.unit().toString());
     leftIO.setPositionSetpoint(position);
-    rightIO.setPositionSetpoint(position);
   }
 
   /**
@@ -187,7 +182,6 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
         pb.makePath("API", "setMotionMagicSetpointImpl", "units"), position.unit().toString());
     Logger.recordOutput(pb.makePath("API", "setMotionMagicSetpointImpl", "slot"), slot);
     leftIO.setMotionMagicSetpoint(position, slot);
-    rightIO.setMotionMagicSetpoint(position, slot);
   }
 
   /**
@@ -216,7 +210,6 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
     Logger.recordOutput(pb.makePath("API", "setMotionMagicSetpointImpDynamic", "Jerk"), jerk);
     Logger.recordOutput(pb.makePath("API", "setMotionMagicSetpointImpDynamic", "Slot"), slot);
     leftIO.setMotionMagicSetpoint(position, velocity, acceleration, jerk, slot);
-    rightIO.setMotionMagicSetpoint(position, velocity, acceleration, jerk, slot);
   }
 
   /**
@@ -249,7 +242,6 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
     Logger.recordOutput(
         pb.makePath("API", "setMotionMagicSetpointImpDynamic", "Feedforward"), feedfoward);
     leftIO.setMotionMagicSetpoint(position, velocity, acceleration, jerk, slot, feedfoward);
-    rightIO.setMotionMagicSetpoint(position, velocity, acceleration, jerk, slot, feedfoward);
   }
 
   /**
@@ -266,7 +258,6 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
         pb.makePath("API", "setVelocitySetpointImpl", "Units"), setpoint.unit().toString());
     Logger.recordOutput(pb.makePath("API", "setVelocitySetpointImpl", "Slot"), slot);
     leftIO.setVelocitySetpoint(setpoint, slot);
-    rightIO.setVelocitySetpoint(setpoint, slot);
   }
 
   // Getters
@@ -326,13 +317,11 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
         pb.makePath("API", "setTorqueCurrentFoC", "Units"), current.unit().toString());
 
     leftIO.setTorqueCurrentFOC(current);
-    rightIO.setTorqueCurrentFOC(current);
   }
 
   /** Sets the current position of both motors as zero. */
   protected void setCurrentPositionAsZero() {
     leftIO.setCurrentPositionAsZero();
-    rightIO.setCurrentPositionAsZero();
   }
 
   /**
@@ -342,7 +331,6 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
    */
   public void setCurrentPosition(Angle position) {
     leftIO.setCurrentPosition(position);
-    rightIO.setCurrentPosition(position);
   }
 
   // Command Generators
@@ -691,23 +679,16 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
           boolean fwd = false;
           boolean rev = false;
         };
-    var prevRight =
-        new Object() {
-          boolean fwd = false;
-          boolean rev = false;
-        };
+
     return Commands.startEnd(
         () -> {
           prevLeft.fwd = leftConfig.fxConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable;
           prevLeft.rev = leftConfig.fxConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable;
-          prevRight.fwd = rightConfig.fxConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable;
-          prevRight.rev = rightConfig.fxConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable;
+
           leftIO.setEnableSoftLimits(false, false);
-          rightIO.setEnableSoftLimits(false, false);
         },
         () -> {
           leftIO.setEnableSoftLimits(prevLeft.fwd, prevLeft.rev);
-          rightIO.setEnableSoftLimits(prevRight.fwd, prevRight.rev);
         });
   }
 }

@@ -35,7 +35,6 @@ public class TalonFXIO implements MotorIO {
   private final MotionMagicVoltage motionMagicPositionControl = new MotionMagicVoltage(0.0);
   private final DynamicMotionMagicVoltage dynamicMotionMagicVoltage =
       new DynamicMotionMagicVoltage(0.0, 0.0, 0.0);
-  private final Follower followerControl = new Follower(0, MotorAlignmentValue.Aligned);
   private final TorqueCurrentFOC torqueCurrentFOC = new TorqueCurrentFOC(0.0);
 
   // Status signals
@@ -181,11 +180,7 @@ public class TalonFXIO implements MotorIO {
     MotorAlignmentValue alignment =
         opposeLeaderDirection ? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned;
     CTREUtil.tryUntilOK(
-        () ->
-            talon.setControl(
-                followerControl
-                    .withLeaderID(leaderId.getDeviceNumber())
-                    .withMotorAlignment(alignment)),
+        () -> talon.setControl(new Follower(leaderId.getDeviceNumber(), alignment)),
         this.config.talonCANID.getDeviceNumber());
   }
 
