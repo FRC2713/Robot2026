@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc2713.lib.io.ArticulatedComponent;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
-import frc2713.lib.subsystem.MotorSubsystem;
+import frc2713.lib.subsystem.MotorFollowerSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.RobotTime;
 import frc2713.robot.FieldConstants;
@@ -27,19 +27,30 @@ import frc2713.robot.subsystems.launcher.LaunchingSolutionManager.LaunchSolution
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
-public class Flywheels extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
+public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, MotorIO>
     implements ArticulatedComponent {
 
   private FuelTrajectories fuelTrajectories = new FuelTrajectories();
   private Time lastUpdateTime = RobotTime.getTimestamp();
 
-  public Flywheels(final TalonFXSubsystemConfig config, final MotorIO launcherMotorIO) {
-    super(config, new MotorInputsAutoLogged(), launcherMotorIO);
+  public Flywheels(
+      final TalonFXSubsystemConfig leftConfig,
+      final TalonFXSubsystemConfig rightConfig,
+      final MotorIO leftLauncherMotorIO,
+      final MotorIO rightLauncherMotorIO) {
+    super(
+        "Flywheel",
+        leftConfig,
+        rightConfig,
+        new MotorInputsAutoLogged(),
+        new MotorInputsAutoLogged(),
+        leftLauncherMotorIO,
+        rightLauncherMotorIO);
     this.fuelTrajectories = new FuelTrajectories();
   }
 
   public Command setVelocity(Supplier<AngularVelocity> desiredVelocity) {
-    return velocitySetpointCommand(() -> desiredVelocity.get().times(config.unitToRotorRatio));
+    return velocitySetpointCommand(() -> desiredVelocity.get().times(leftConfig.unitToRotorRatio));
   }
 
   public Command stop() {
@@ -79,7 +90,7 @@ public class Flywheels extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   }
 
   public LinearVelocity getSurfaceSpeed() {
-    AngularVelocity wheelSpeed = super.getCurrentVelocity().div(config.unitToRotorRatio);
+    AngularVelocity wheelSpeed = super.getLeftCurrentVelocity().div(leftConfig.unitToRotorRatio);
     Distance wheelDiameter = Inches.of(4);
     Distance wheelCircumference = wheelDiameter.times(Math.PI);
     return InchesPerSecond.of(wheelSpeed.in(RotationsPerSecond) * wheelCircumference.in(Inches));

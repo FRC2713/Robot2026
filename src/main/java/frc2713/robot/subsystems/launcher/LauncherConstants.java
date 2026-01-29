@@ -38,15 +38,23 @@ public final class LauncherConstants {
 
   public final class Flywheels {
 
-    public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
+    public static TalonFXSubsystemConfig leftConfig = new TalonFXSubsystemConfig();
+    public static TalonFXSubsystemConfig rightConfig = new TalonFXSubsystemConfig();
 
     static {
-      config.name = "Flywheels";
-      config.talonCANID = new CANDeviceId(13); // Example CAN ID, replace with actual ID
-      config.fxConfig.Slot0.kP = 0.2;
-      config.fxConfig.Slot0.kI = 0.0;
-      config.fxConfig.Slot0.kD = 0.0;
-      config.unitToRotorRatio = 1.0; // 1:1 ratio
+      leftConfig.name = "Flywheel Left";
+      leftConfig.talonCANID = new CANDeviceId(2); // Example CAN ID, replace with actual ID
+      // leftConfig.fxConfig.Slot0.kP = 0.2;
+      // leftConfig.fxConfig.Slot0.kI = 0.0;
+      // leftConfig.fxConfig.Slot0.kD = 0.0;
+      leftConfig.unitToRotorRatio = 1.0; // 1:1 ratio
+
+      rightConfig.name = "Flywheel Right";
+      rightConfig.talonCANID = new CANDeviceId(1); // Example CAN ID, replace with actual ID
+      // rightConfig.fxConfig.Slot0.kP = 0.2;
+      // rightConfig.fxConfig.Slot0.kI = 0.0;
+      // rightConfig.fxConfig.Slot0.kD = 0.0;
+      rightConfig.unitToRotorRatio = 1.0; // 1:1 ratio
     }
 
     public static int MODEL_INDEX = 5;

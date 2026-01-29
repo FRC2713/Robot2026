@@ -5,7 +5,6 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -20,7 +19,6 @@ import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.robot.FieldConstants;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.Logger;
 
 public class Turret extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
     implements ArticulatedComponent {
@@ -37,10 +35,11 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   @Override
   public void periodic() {
     super.periodic();
-    Pose3d goalPose = new Pose3d(FieldConstants.Hub.topCenterPoint, new Rotation3d());
+    // Pose3d goalPose = new Pose3d(FieldConstants.Hub.topCenterPoint, new Rotation3d());
 
-    Logger.recordOutput(pb.makePath("goalVector"), new Pose3d[] {this.getGlobalPose(), goalPose});
-    super.setCurrentPosition(getLauncOnTheFlyAngle());
+    // Logger.recordOutput(pb.makePath("goalVector"), new Pose3d[] {this.getGlobalPose(),
+    // goalPose});
+    // super.setCurrentPosition(getLauncOnTheFlyAngle());
   }
   ;
 
