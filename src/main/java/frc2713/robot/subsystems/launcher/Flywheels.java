@@ -17,8 +17,8 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc2713.lib.io.ArticulatedComponent;
+import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
-import frc2713.lib.io.TalonFXIO;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.RobotTime;
@@ -27,13 +27,13 @@ import frc2713.robot.subsystems.launcher.LaunchingSolutionManager.LaunchSolution
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
-public class Flywheels extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
+public class Flywheels extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
     implements ArticulatedComponent {
 
   private FuelTrajectories fuelTrajectories = new FuelTrajectories();
   private Time lastUpdateTime = RobotTime.getTimestamp();
 
-  public Flywheels(final TalonFXSubsystemConfig config, final TalonFXIO launcherMotorIO) {
+  public Flywheels(final TalonFXSubsystemConfig config, final MotorIO launcherMotorIO) {
     super(config, new MotorInputsAutoLogged(), launcherMotorIO);
     this.fuelTrajectories = new FuelTrajectories();
   }

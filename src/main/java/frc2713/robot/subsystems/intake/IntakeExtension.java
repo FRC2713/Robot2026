@@ -13,17 +13,17 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc2713.lib.io.ArticulatedComponent;
+import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
-import frc2713.lib.io.TalonFXIO;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import java.util.function.Supplier;
 
-public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
+public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
     implements ArticulatedComponent {
 
   public IntakeExtension(
-      final TalonFXSubsystemConfig config, final TalonFXIO intakeExtensionMotorIO) {
+      final TalonFXSubsystemConfig config, final MotorIO intakeExtensionMotorIO) {
     super(config, new MotorInputsAutoLogged(), intakeExtensionMotorIO);
   }
 
