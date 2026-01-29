@@ -34,6 +34,20 @@ public final class LauncherConstants {
 
     public static int MODEL_INDEX = 3;
     public static int PARENT_INDEX = 0; // drivetrain
+
+    // Gear tooth counts for turret angle calculation
+    //Pinion on motor
+    public static final double GEAR_0_TOOTH_COUNT = 60.0; // TODO: Replace with actual value
+    //attached to e1
+    public static final double GEAR_1_TOOTH_COUNT = 120.0; // TODO: Replace with actual value
+    //attached to e2
+    public static final double GEAR_2_TOOTH_COUNT = 80.0; // TODO: Replace with actual value
+    public static final double SLOPE = (GEAR_2_TOOTH_COUNT * GEAR_1_TOOTH_COUNT)
+            / ((GEAR_1_TOOTH_COUNT - GEAR_2_TOOTH_COUNT) * GEAR_0_TOOTH_COUNT);
+
+    // Turret rotation limits
+    public static final double FORWARD_LIMIT_DEGREES = 180.0; // TODO: Replace with actual value
+    public static final double REVERSE_LIMIT_DEGREES = -180.0; // TODO: Replace with actual value
   }
 
   public final class Flywheels {
