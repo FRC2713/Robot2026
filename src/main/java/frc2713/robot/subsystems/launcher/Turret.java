@@ -8,6 +8,7 @@ import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.REVERSE
 import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.SLOPE;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -21,75 +22,82 @@ import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
+import frc2713.lib.subsystem.KinematicsManager;
+import frc2713.lib.subsystem.MotorSubsystem;
+import frc2713.robot.FieldConstants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class Turret extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
+public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO>
     implements ArticulatedComponent {
 
-  public Turret(final TalonFXSubsystemConfig config, final MotorIO turretMotorIO) {
-    super(config, new MotorInputsAutoLogged(), turretMotorIO);
+  public Turret(final TurretSubsystemConfig config, final TurretMotorIO turretMotorIO) {
+    super(config, new TurretInputsAutoLogged(), turretMotorIO);
   }
 
   public static double turretPositionFromEncoders(double e1, double e2) {
-      // 1. Calculate the 'Difference' (The Phase)
-      double diff = e2 - e1;
-      
-      // Normalize to [-180, 180]. This is the "Vernier Lock"
-      while (diff <= -180) diff += 360;
-      while (diff > 180) diff -= 360;
+    // 1. Calculate the 'Difference' (The Phase)
+    double diff = e2 - e1;
 
-      // 2. Coarse Estimate (The "Big Picture")
-      // This uses the phase shift to guess the rough position.
-      double coarseAngle = diff * SLOPE;
+    // Normalize to [-180, 180]. This is the "Vernier Lock"
+    while (diff <= -180) diff += 360;
+    while (diff > 180) diff -= 360;
 
-      // 3. The Ratio (How many times E1 spins per 1 Turret degree)
-      double encoderToTurretRatio = 8.5;
-      
-      // 4. Lap Calculation (The "Fine" logic)
-      // We calculate how many full 360s E1 has likely traveled.
-      // 'expectedE1' is where the encoder SHOULD be if coarseAngle was perfect.
-      double expectedE1 = coarseAngle * encoderToTurretRatio;
-      
-      // Determine the 'Lap' by finding how many 360s are between 
-      // the expected position and the actual sensor reading (e1).
-      double lap = Math.round((expectedE1 - e1) / 360.0);
-      
-      // 5. High-Resolution Output
-      // Combine the Lap (coarse) with the Sensor Reading (fine)
-      return (lap * 360.0 + e1) / encoderToTurretRatio;
+    // 2. Coarse Estimate (The "Big Picture")
+    // This uses the phase shift to guess the rough position.
+    double coarseAngle = diff * SLOPE;
+
+    // 3. The Ratio (How many times E1 spins per 1 Turret degree)
+    double encoderToTurretRatio = 8.5;
+
+    // 4. Lap Calculation (The "Fine" logic)
+    // We calculate how many full 360s E1 has likely traveled.
+    // 'expectedE1' is where the encoder SHOULD be if coarseAngle was perfect.
+    double expectedE1 = coarseAngle * encoderToTurretRatio;
+
+    // Determine the 'Lap' by finding how many 360s are between
+    // the expected position and the actual sensor reading (e1).
+    double lap = Math.round((expectedE1 - e1) / 360.0);
+
+    // 5. High-Resolution Output
+    // Combine the Lap (coarse) with the Sensor Reading (fine)
+    return (lap * 360.0 + e1) / encoderToTurretRatio;
   }
+
   public static double convertToClosestBoundedTurretAngleDegrees(
-            double targetAngleDegrees, Rotation2d current) {
-        double currentTotalRadians = (current.getRotations() * 2 * Math.PI);
-        double closestOffset = Units.degreesToRadians(targetAngleDegrees) - current.getRadians();
-        if (closestOffset > Math.PI) {
+      double targetAngleDegrees, Rotation2d current) {
+    double currentTotalRadians = (current.getRotations() * 2 * Math.PI);
+    double closestOffset = Units.degreesToRadians(targetAngleDegrees) - current.getRadians();
+    if (closestOffset > Math.PI) {
 
-            closestOffset -= 2 * Math.PI;
+      closestOffset -= 2 * Math.PI;
 
-        } else if (closestOffset < -Math.PI) {
-            closestOffset += 2 * Math.PI;
-        }
+    } else if (closestOffset < -Math.PI) {
+      closestOffset += 2 * Math.PI;
+    }
 
-        double finalOffset = currentTotalRadians + closestOffset;
-        if ((currentTotalRadians + closestOffset) % (2 * Math.PI)
-                == (currentTotalRadians - closestOffset)
-                        % (2 * Math.PI)) { // If the offset can go either way, go closer to zero
-            if (finalOffset > 0) {
-                finalOffset = currentTotalRadians - Math.abs(closestOffset);
-            } else {
-                finalOffset = currentTotalRadians + Math.abs(closestOffset);
-            }
-        }
-        if (finalOffset > Units.degreesToRadians(FORWARD_LIMIT_DEGREES)) { // if past upper rotation limit
-            finalOffset -= (2 * Math.PI);
-        } else if (finalOffset < Units.degreesToRadians(REVERSE_LIMIT_DEGREES)) { // if below lower rotation limit
-            finalOffset += (2 * Math.PI);
-        }
+    double finalOffset = currentTotalRadians + closestOffset;
+    if ((currentTotalRadians + closestOffset) % (2 * Math.PI)
+        == (currentTotalRadians - closestOffset)
+            % (2 * Math.PI)) { // If the offset can go either way, go closer to zero
+      if (finalOffset > 0) {
+        finalOffset = currentTotalRadians - Math.abs(closestOffset);
+      } else {
+        finalOffset = currentTotalRadians + Math.abs(closestOffset);
+      }
+    }
+    if (finalOffset
+        > Units.degreesToRadians(FORWARD_LIMIT_DEGREES)) { // if past upper rotation limit
+      finalOffset -= (2 * Math.PI);
+    } else if (finalOffset
+        < Units.degreesToRadians(REVERSE_LIMIT_DEGREES)) { // if below lower rotation limit
+      finalOffset += (2 * Math.PI);
+    }
 
-        return Units.radiansToDegrees(finalOffset);
+    return Units.radiansToDegrees(finalOffset);
   }
+
   public Command setAngle(Supplier<Angle> desiredAngle) {
     return motionMagicSetpointCommand(
         () -> convertSubsystemPositionToMotorPosition(desiredAngle.get()));
@@ -123,11 +131,54 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   @AutoLogOutput
   public boolean atTarget() {
     return this.io.isMagicMotionAtTarget();
+  /**
+   * Gets the current turret position computed from the dual encoder system.
+   *
+   * @return The computed turret position in degrees
+   */
+  public Angle getComputedTurretPosition() {
+    return inputs.computedTurretPositionDegrees;
+  }
+
+  /**
+   * Gets the current turret position as a Rotation2d for use with bounded angle calculations.
+   *
+   * @return The current turret position as a Rotation2d
+   */
+  public Rotation2d getCurrentTurretRotation() {
+    return Rotation2d.fromDegrees(inputs.computedTurretPositionDegrees.in(Degrees));
   }
 
   @Override
   public void periodic() {
     super.periodic();
+
+    // Read turret-specific inputs (includes dual encoder data)
+    io.readInputs(inputs);
+
+    // Log the goal pose for visualization
+    Pose3d goalPose = new Pose3d(FieldConstants.Hub.topCenterPoint, new Rotation3d());
+    Logger.recordOutput(pb.makePath("goalVector"), new Pose3d[] {this.getGlobalPose(), goalPose});
+
+    // Get the target angle from launch-on-the-fly calculation
+    Angle targetAngle = getLauncOnTheFlyAngle();
+
+    // Convert to bounded angle using the computed turret position from dual encoders
+    double boundedAngleDegrees =
+        convertToClosestBoundedTurretAngleDegrees(
+            targetAngle.in(Degrees), getCurrentTurretRotation());
+
+    // Convert subsystem angle to motor position and set the setpoint
+    Angle motorPosition = convertSubsystemPositionToMotorPosition(Degrees.of(boundedAngleDegrees));
+    super.setCurrentPosition(motorPosition);
+
+    // Log encoder values for debugging
+    Logger.recordOutput(pb.makePath("encoder1Degrees"), inputs.encoder1PositionDegrees.in(Degrees));
+    Logger.recordOutput(pb.makePath("encoder2Degrees"), inputs.encoder2PositionDegrees.in(Degrees));
+    Logger.recordOutput(
+        pb.makePath("computedTurretDegrees"), inputs.computedTurretPositionDegrees.in(Degrees));
+    Logger.recordOutput(pb.makePath("targetAngleDegrees"), targetAngle.in(Degrees));
+    Logger.recordOutput(pb.makePath("boundedSetpointDegrees"), boundedAngleDegrees);
   }
 
   @Override

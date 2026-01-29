@@ -36,6 +36,9 @@ import frc2713.robot.subsystems.launcher.Hood;
 import frc2713.robot.subsystems.launcher.LauncherConstants;
 import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
 import frc2713.robot.subsystems.launcher.Turret;
+import frc2713.robot.subsystems.launcher.TurretMotorIOSim;
+import frc2713.robot.subsystems.launcher.TurretMotorIOTalonFX;
+import frc2713.robot.subsystems.launcher.TurretSubsystemConfig;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 import frc2713.robot.subsystems.serializer.SerializerConstants;
@@ -92,18 +95,25 @@ public class RobotContainer {
 
         hood = new Hood(LauncherConstants.Hood.config, new MotorIO() {});
 
-        turret = new Turret(LauncherConstants.Turret.config, new MotorIO() {});
-
-        intakeRoller = new IntakeRoller(IntakeConstants.Roller.config, new MotorIO() {});
-
-        intakeExtension = new IntakeExtension(IntakeConstants.Extension.config, new MotorIO() {});
-
-        dyeRotor = new DyeRotor(SerializerConstants.DyeRotor.config, new MotorIO() {});
-
-        feeder = new Feeder(SerializerConstants.Feeder.config, new MotorIO() {});
-
-        climber = new Climber(ClimberConstants.config, new MotorIO() {});
-
+        turret =
+            new Turret(
+                LauncherConstants.Turret.config,
+                new TurretMotorIOTalonFX(LauncherConstants.Turret.config));
+        intakeRoller =
+            new IntakeRoller(
+                IntakeConstants.Roller.config, new TalonFXIO(IntakeConstants.Roller.config));
+        intakeExtension =
+            new IntakeExtension(
+                IntakeConstants.Extension.config, new TalonFXIO(IntakeConstants.Extension.config));
+        dyeRotor =
+            new DyeRotor(
+                SerializerConstants.DyeRotor.config,
+                new TalonFXIO(SerializerConstants.DyeRotor.config));
+        feeder =
+            new Feeder(
+                SerializerConstants.Feeder.config,
+                new TalonFXIO(SerializerConstants.Feeder.config));
+        climber = new Climber(ClimberConstants.config, new TalonFXIO(ClimberConstants.config));
         break;
 
       case SIM:
@@ -128,7 +138,8 @@ public class RobotContainer {
 
         turret =
             new Turret(
-                LauncherConstants.Turret.config, new SimTalonFXIO(LauncherConstants.Turret.config));
+                LauncherConstants.Turret.config,
+                new TurretMotorIOSim(LauncherConstants.Turret.config));
         intakeRoller =
             new IntakeRoller(
                 IntakeConstants.Roller.config, new SimTalonFXIO(IntakeConstants.Roller.config));
@@ -164,19 +175,24 @@ public class RobotContainer {
                 new MotorIO() {},
                 new MotorIO() {});
 
-        hood = new Hood(LauncherConstants.Hood.config, new MotorIO() {});
-
-        turret = new Turret(LauncherConstants.Turret.config, new MotorIO() {});
-
-        intakeRoller = new IntakeRoller(IntakeConstants.Roller.config, new MotorIO() {});
-
-        intakeExtension = new IntakeExtension(IntakeConstants.Extension.config, new MotorIO() {});
-
-        dyeRotor = new DyeRotor(SerializerConstants.DyeRotor.config, new MotorIO() {});
-
-        feeder = new Feeder(SerializerConstants.Feeder.config, new MotorIO() {});
-
-        climber = new Climber(ClimberConstants.config, new MotorIO() {});
+        turret =
+            new Turret(
+                new TurretSubsystemConfig(), new TurretMotorIOSim(new TurretSubsystemConfig()));
+        intakeRoller =
+            new IntakeRoller(
+                new TalonFXSubsystemConfig(), new SimTalonFXIO(new TalonFXSubsystemConfig()));
+        intakeExtension =
+            new IntakeExtension(
+                new TalonFXSubsystemConfig(), new SimTalonFXIO(new TalonFXSubsystemConfig()));
+        dyeRotor =
+            new DyeRotor(
+                new TalonFXSubsystemConfig(), new SimTalonFXIO(new TalonFXSubsystemConfig()));
+        feeder =
+            new Feeder(
+                new TalonFXSubsystemConfig(), new SimTalonFXIO(new TalonFXSubsystemConfig()));
+        climber =
+            new Climber(
+                new TalonFXSubsystemConfig(), new SimTalonFXIO(new TalonFXSubsystemConfig()));
         break;
     }
 
