@@ -12,6 +12,7 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.units.measure.Angle;
 import frc2713.lib.drivers.CANDeviceId;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
+import frc2713.lib.util.LoggedTunableNumber;
 
 public final class LauncherConstants {
 
@@ -37,6 +38,8 @@ public final class LauncherConstants {
   }
 
   public final class Flywheels {
+    public static final LoggedTunableNumber dutyCycleTest =
+        new LoggedTunableNumber("Flywheels/DutyCycleTest", 0.1);
 
     public static TalonFXSubsystemConfig leftConfig = new TalonFXSubsystemConfig();
     public static TalonFXSubsystemConfig rightConfig = new TalonFXSubsystemConfig();

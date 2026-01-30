@@ -266,7 +266,9 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    controller.rightBumper().whileTrue(flywheels.dutyCycleCommand(() -> 0.1));
+    controller
+        .rightBumper()
+        .whileTrue(flywheels.dutyCycleCommand(LauncherConstants.Flywheels.dutyCycleTest));
     controller
         .leftBumper()
         .onTrue(
