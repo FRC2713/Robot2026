@@ -34,23 +34,23 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   private Time lastUpdateTime = RobotTime.getTimestamp();
 
   public Flywheels(
-      final TalonFXSubsystemConfig leftConfig,
-      final TalonFXSubsystemConfig rightConfig,
-      final MotorIO leftLauncherMotorIO,
-      final MotorIO rightLauncherMotorIO) {
+      final TalonFXSubsystemConfig leaderConfig,
+      final TalonFXSubsystemConfig followerConfig,
+      final MotorIO leaderLauncherMotorIO,
+      final MotorIO followerLauncherMotorIO) {
     super(
         "Flywheel",
-        leftConfig,
-        rightConfig,
+        leaderConfig,
+        followerConfig,
         new MotorInputsAutoLogged(),
         new MotorInputsAutoLogged(),
-        leftLauncherMotorIO,
-        rightLauncherMotorIO);
+        leaderLauncherMotorIO,
+        followerLauncherMotorIO);
     this.fuelTrajectories = new FuelTrajectories();
   }
 
   public Command setVelocity(Supplier<AngularVelocity> desiredVelocity) {
-    return velocitySetpointCommand(() -> desiredVelocity.get().times(leftConfig.unitToRotorRatio));
+    return velocitySetpointCommand(() -> desiredVelocity.get().times(config.unitToRotorRatio));
   }
 
   public Command stop() {
@@ -90,7 +90,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   }
 
   public LinearVelocity getSurfaceSpeed() {
-    AngularVelocity wheelSpeed = super.getLeftCurrentVelocity().div(leftConfig.unitToRotorRatio);
+    AngularVelocity wheelSpeed = super.getLeaderCurrentVelocity().div(config.unitToRotorRatio);
     Distance wheelDiameter = Inches.of(4);
     Distance wheelCircumference = wheelDiameter.times(Math.PI);
     return InchesPerSecond.of(wheelSpeed.in(RotationsPerSecond) * wheelCircumference.in(Inches));

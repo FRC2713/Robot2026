@@ -42,27 +42,27 @@ public final class LauncherConstants {
 
   public final class Flywheels {
     public static final LoggedTunableMeasure<AngularVelocity> PIDTest =
-        new LoggedTunableMeasure<>("Flywheel Left/PIDTest", RPM.of(2000));
+        new LoggedTunableMeasure<>("Flywheel/PIDTest", RPM.of(2000));
 
-    public static TalonFXSubsystemConfig leftConfig = new TalonFXSubsystemConfig();
-    public static TalonFXSubsystemConfig rightConfig = new TalonFXSubsystemConfig();
+    public static TalonFXSubsystemConfig leaderConfig = new TalonFXSubsystemConfig();
+    public static TalonFXSubsystemConfig followerConfig = new TalonFXSubsystemConfig();
 
     static {
-      leftConfig.name = "Flywheel Left";
-      leftConfig.talonCANID = new CANDeviceId(2); // Example CAN ID, replace with actual ID
-      leftConfig.fxConfig.Slot0.kP = 0.3;
-      leftConfig.fxConfig.Slot0.kI = 0.0;
-      leftConfig.fxConfig.Slot0.kD = 0.0;
-      leftConfig.fxConfig.Slot0.kS = 0.15;
-      leftConfig.fxConfig.Slot0.kV = 0.114;
-      leftConfig.unitToRotorRatio = 1.0; // 1:1 ratio
-      leftConfig.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-      leftConfig.fxConfig.MotorOutput.PeakReverseDutyCycle = 0;
-      leftConfig.tunable = true;
+      leaderConfig.name = "Flywheel Leader";
+      leaderConfig.talonCANID = new CANDeviceId(2); // Example CAN ID, replace with actual ID
+      leaderConfig.fxConfig.Slot0.kP = 0.3;
+      leaderConfig.fxConfig.Slot0.kI = 0.0;
+      leaderConfig.fxConfig.Slot0.kD = 0.0;
+      leaderConfig.fxConfig.Slot0.kS = 0.15;
+      leaderConfig.fxConfig.Slot0.kV = 0.114;
+      leaderConfig.unitToRotorRatio = 1.0; // 1:1 ratio
+      leaderConfig.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+      leaderConfig.fxConfig.MotorOutput.PeakReverseDutyCycle = 0;
+      leaderConfig.tunable = true;
 
-      rightConfig.name = "Flywheel Right";
-      rightConfig.talonCANID = new CANDeviceId(1); // Example CAN ID, replace with actual ID
-      rightConfig.unitToRotorRatio = 1.0; // 1:1 ratio
+      followerConfig.name = "Flywheel Follower";
+      followerConfig.talonCANID = new CANDeviceId(1); // Example CAN ID, replace with actual ID
+      followerConfig.unitToRotorRatio = 1.0; // 1:1 ratio
     }
 
     public static int MODEL_INDEX = 5;
