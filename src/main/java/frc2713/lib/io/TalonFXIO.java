@@ -3,6 +3,7 @@ package frc2713.lib.io;
 import static edu.wpi.first.units.Units.Revolutions;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.*;
@@ -19,6 +20,7 @@ import edu.wpi.first.units.measure.Voltage;
 import frc2713.lib.drivers.CANDeviceId;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.CTREUtil;
+import frc2713.lib.util.LoggedTunableGains;
 import frc2713.robot.Robot;
 
 public class TalonFXIO implements MotorIO {
@@ -35,7 +37,6 @@ public class TalonFXIO implements MotorIO {
   private final MotionMagicVoltage motionMagicPositionControl = new MotionMagicVoltage(0.0);
   private final DynamicMotionMagicVoltage dynamicMotionMagicVoltage =
       new DynamicMotionMagicVoltage(0.0, 0.0, 0.0);
-  private final Follower followerControl = new Follower(0, MotorAlignmentValue.Aligned);
   private final TorqueCurrentFOC torqueCurrentFOC = new TorqueCurrentFOC(0.0);
 
   // Status signals
@@ -48,8 +49,12 @@ public class TalonFXIO implements MotorIO {
 
   private final BaseStatusSignal[] signals;
 
+  // Tunables for Slot0 and MotionMagic (created when config.tunable == true)
+  private LoggedTunableGains tunableGains = null;
+
   public TalonFXIO(TalonFXSubsystemConfig config) {
-    this.talon = new TalonFX(config.talonCANID.getDeviceNumber(), config.talonCANID.getBus());
+    this.talon =
+        new TalonFX(config.talonCANID.getDeviceNumber(), new CANBus(config.talonCANID.getBus()));
     this.config = config;
 
     this.pb = new AdvantageScopePathBuilder(this.config.name);
@@ -82,6 +87,13 @@ public class TalonFXIO implements MotorIO {
     CTREUtil.tryUntilOK(
         () -> BaseStatusSignal.setUpdateFrequencyForAll(50.0, signals), talon.getDeviceID());
     CTREUtil.tryUntilOK(() -> talon.optimizeBusUtilization(), talon.getDeviceID());
+
+    // If this Talon is marked tunable, create dashboard tunables for PID gains
+    if (this.config.tunable) {
+      tunableGains =
+          new LoggedTunableGains(
+              this.config.name, this.config.fxConfig.Slot0, this.config.fxConfig.MotionMagic);
+    }
   }
 
   @Override
@@ -93,6 +105,18 @@ public class TalonFXIO implements MotorIO {
     inputs.currentStatorAmps = currentStatorSignal.getValue();
     inputs.currentSupplyAmps = currentSupplySignal.getValue();
     inputs.rawRotorPosition = rawRotorPositionSignal.getValue();
+
+    // Update PID gains from dashboard if tunable and any value changed
+    if (this.config.tunable && tunableGains != null) {
+      tunableGains.ifChanged(
+          this.hashCode(),
+          (Slot0Configs gains, MotionMagicConfigs motionMagic) -> {
+            // Apply updated PID/FF gains
+            this.config.fxConfig.Slot0 = gains;
+            this.config.fxConfig.MotionMagic = motionMagic;
+            CTREUtil.applyConfiguration(talon, this.config.fxConfig);
+          });
+    }
   }
 
   @Override
@@ -181,11 +205,7 @@ public class TalonFXIO implements MotorIO {
     MotorAlignmentValue alignment =
         opposeLeaderDirection ? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned;
     CTREUtil.tryUntilOK(
-        () ->
-            talon.setControl(
-                followerControl
-                    .withLeaderID(leaderId.getDeviceNumber())
-                    .withMotorAlignment(alignment)),
+        () -> talon.setControl(new Follower(leaderId.getDeviceNumber(), alignment)),
         this.config.talonCANID.getDeviceNumber());
   }
 

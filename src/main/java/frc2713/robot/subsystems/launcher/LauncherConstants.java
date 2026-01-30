@@ -3,15 +3,19 @@ package frc2713.robot.subsystems.launcher;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Radians;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import frc2713.lib.drivers.CANDeviceId;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
+import frc2713.lib.util.LoggedTunableMeasure;
 
 public final class LauncherConstants {
 
@@ -37,16 +41,28 @@ public final class LauncherConstants {
   }
 
   public final class Flywheels {
+    public static final LoggedTunableMeasure<AngularVelocity> PIDTest =
+        new LoggedTunableMeasure<>("Flywheel Left/PIDTest", RPM.of(2000));
 
-    public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
+    public static TalonFXSubsystemConfig leftConfig = new TalonFXSubsystemConfig();
+    public static TalonFXSubsystemConfig rightConfig = new TalonFXSubsystemConfig();
 
     static {
-      config.name = "Flywheels";
-      config.talonCANID = new CANDeviceId(13); // Example CAN ID, replace with actual ID
-      config.fxConfig.Slot0.kP = 0.2;
-      config.fxConfig.Slot0.kI = 0.0;
-      config.fxConfig.Slot0.kD = 0.0;
-      config.unitToRotorRatio = 1.0; // 1:1 ratio
+      leftConfig.name = "Flywheel Left";
+      leftConfig.talonCANID = new CANDeviceId(2); // Example CAN ID, replace with actual ID
+      leftConfig.fxConfig.Slot0.kP = 0.3;
+      leftConfig.fxConfig.Slot0.kI = 0.0;
+      leftConfig.fxConfig.Slot0.kD = 0.0;
+      leftConfig.fxConfig.Slot0.kS = 0.15;
+      leftConfig.fxConfig.Slot0.kV = 0.114;
+      leftConfig.unitToRotorRatio = 1.0; // 1:1 ratio
+      leftConfig.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+      leftConfig.fxConfig.MotorOutput.PeakReverseDutyCycle = 0;
+      leftConfig.tunable = true;
+
+      rightConfig.name = "Flywheel Right";
+      rightConfig.talonCANID = new CANDeviceId(1); // Example CAN ID, replace with actual ID
+      rightConfig.unitToRotorRatio = 1.0; // 1:1 ratio
     }
 
     public static int MODEL_INDEX = 5;
