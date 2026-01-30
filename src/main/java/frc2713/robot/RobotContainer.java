@@ -7,6 +7,8 @@
 
 package frc2713.robot;
 
+import static edu.wpi.first.units.Units.RPM;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -268,7 +270,9 @@ public class RobotContainer {
 
     controller
         .rightBumper()
-        .whileTrue(flywheels.dutyCycleCommand(LauncherConstants.Flywheels.dutyCycleTest));
+        .onTrue(flywheels.velocitySetpointCommand(LauncherConstants.Flywheels.PIDTest))
+        .onFalse(flywheels.velocitySetpointCommand(() -> RPM.of(0)));
+
     controller
         .leftBumper()
         .onTrue(
