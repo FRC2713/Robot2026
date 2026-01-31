@@ -1,15 +1,13 @@
 package frc2713.robot.subsystems.launcher;
 
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
+
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import frc2713.lib.drivers.CANDeviceId;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
-
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.Rotations;
 
 public final class LauncherConstants {
 
@@ -24,11 +22,11 @@ public final class LauncherConstants {
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 0.0;
       config.unitToRotorRatio = 1.0; // 1:1 ratio
-      config.initialTransform = new Transform3d(
-        new Translation3d(0, Inches.of(1.75).in(Meters), Inches.of(18.484119).in(Meters)),
-        new Rotation3d(0, 0, 0));
+      config.initialTransform =
+          new Transform3d(
+              new Translation3d(0, Inches.of(1.75).in(Meters), Inches.of(18.484119).in(Meters)),
+              new Rotation3d(0, 0, 0));
     }
-
   }
 
   public final class Flywheels {
@@ -56,12 +54,9 @@ public final class LauncherConstants {
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 0.0;
       config.unitToRotorRatio = 1.0; // 1:1 ratio
-      config.initialTransform = new Transform3d(
-        new Translation3d(
-            Inches.of(4.086915).in(Meters),
-            0,
-            0),
-        new Rotation3d());
+      config.initialTransform =
+          new Transform3d(
+              new Translation3d(Inches.of(4.086915).in(Meters), 0, 0), new Rotation3d());
     }
   }
 }

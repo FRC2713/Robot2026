@@ -1,13 +1,13 @@
 package frc2713.robot.subsystems.serializer;
 
+import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
-import frc2713.lib.io.TalonFXIO;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 
-public class Feeder extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO> {
+public class Feeder extends MotorSubsystem<MotorInputsAutoLogged, MotorIO> {
 
-  public Feeder(final TalonFXSubsystemConfig config, final TalonFXIO feederMotorIO) {
+  public Feeder(final TalonFXSubsystemConfig config, final MotorIO feederMotorIO) {
     super(config, new MotorInputsAutoLogged(), feederMotorIO);
   }
 

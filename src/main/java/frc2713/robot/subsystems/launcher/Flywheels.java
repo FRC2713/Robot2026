@@ -1,13 +1,13 @@
 package frc2713.robot.subsystems.launcher;
 
+import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
-import frc2713.lib.io.TalonFXIO;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 
-public class Flywheels extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO> {
+public class Flywheels extends MotorSubsystem<MotorInputsAutoLogged, MotorIO> {
 
-  public Flywheels(final TalonFXSubsystemConfig config, final TalonFXIO launcherMotorIO) {
+  public Flywheels(final TalonFXSubsystemConfig config, final MotorIO launcherMotorIO) {
     super(config, new MotorInputsAutoLogged(), launcherMotorIO);
   }
 

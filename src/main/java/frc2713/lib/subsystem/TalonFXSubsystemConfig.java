@@ -1,7 +1,6 @@
 package frc2713.lib.subsystem;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-
 import edu.wpi.first.math.geometry.Transform3d;
 import frc2713.lib.drivers.CANDeviceId;
 
