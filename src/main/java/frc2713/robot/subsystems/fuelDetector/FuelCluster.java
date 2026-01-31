@@ -46,6 +46,20 @@ public class FuelCluster {
     return sum;
   }
 
+  public double findAngleTranslation(double FOV, int xResolution, int pixelsPerHorizontalGrid) {
+    double avgX = 0;
+    for (int i = 0; i < fuelSquares.size(); i++) {
+      avgX += ((fuelSquares.get(i).getGridX() - (xResolution / 2)) * pixelsPerHorizontalGrid);
+    }
+    avgX /= fuelSquares.size();
+    double centerDeg = avgX * (FOV / xResolution);
+    // double centerRad = centerDeg * (Math.PI / 180);
+    // double centerDistX = Math.cos(centerRad);
+    // double centerDistY = Math.sin(centerRad);
+    // return new Translation2d(centerDistX, centerDistY);
+    return centerDeg;
+  }
+
   public String toString() {
     return "fuelSquare count: "
         + fuelSquares.size()

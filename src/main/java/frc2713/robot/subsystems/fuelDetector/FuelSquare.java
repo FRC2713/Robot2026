@@ -29,7 +29,10 @@ public class FuelSquare {
     gridY = y;
   }
 
-  public FuelSquare() {}
+  public FuelSquare() {
+    gridX = 0;
+    gridY = 0;
+  }
 
   public void addFuel(FuelCoordinates fuel) {
     fuelList.add(fuel);
@@ -57,6 +60,14 @@ public class FuelSquare {
     }
     sum /= size;
     return sum;
+  }
+
+  public int getGridX() {
+    return gridX;
+  }
+
+  public int getGridY() {
+    return gridY;
   }
 
   public String toString() {
