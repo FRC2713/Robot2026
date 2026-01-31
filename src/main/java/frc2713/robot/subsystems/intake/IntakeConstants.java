@@ -5,7 +5,6 @@ import static edu.wpi.first.units.Units.Inches;
 import edu.wpi.first.units.measure.Distance;
 import frc2713.lib.drivers.CANDeviceId;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
-import frc2713.lib.util.LoggedTunableMeasure;
 
 public final class IntakeConstants {
 
@@ -37,8 +36,9 @@ public final class IntakeConstants {
       config.tunable = true;
     }
 
-    public static LoggedTunableMeasure<Distance> extendedPosition =
-        new LoggedTunableMeasure<>(config.name + "/Extended Position", Inches.of(12.0));
+    // public static LoggedTunableMeasure<Distance> extendedPosition =
+    //     new LoggedTunableMeasure<>(config.name + "/Extended Position", Inches.of(12.0));
+    public static Distance extendedPosition = Inches.of(12);
     public static Distance retractedPosition = Inches.of(0);
     public static int MODEL_INDEX = 1;
     public static int PARENT_INDEX = 0; // drivetrain

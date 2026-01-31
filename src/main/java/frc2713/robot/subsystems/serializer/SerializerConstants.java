@@ -2,15 +2,12 @@ package frc2713.robot.subsystems.serializer;
 
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.units.measure.Distance;
 import frc2713.lib.drivers.CANDeviceId;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
-import frc2713.lib.util.LoggedTunableMeasure;
 import frc2713.lib.util.LoggedTunableNumber;
 
 public final class SerializerConstants {
@@ -34,7 +31,8 @@ public final class SerializerConstants {
     public static int PARENT_INDEX = 0; // drivetrain
 
     public static LoggedTunableNumber feedingSpeed =
-        new LoggedTunableNumber(config.name + "/Feeding Speed", 12.0);  }
+        new LoggedTunableNumber(config.name + "/Feeding Speed", 12.0);
+  }
 
   public static final class Feeder {
 

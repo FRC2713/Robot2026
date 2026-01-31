@@ -257,7 +257,7 @@ public class RobotContainer {
 
     controller
         .leftBumper()
-        .onTrue(
+        .whileTrue(
             Commands.parallel(
                 intakeRoller.voltageCommand(() -> Volts.of(5)), intakeExtension.extendCommand()))
         .onFalse(

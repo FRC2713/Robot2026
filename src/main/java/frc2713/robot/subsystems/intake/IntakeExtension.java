@@ -1,6 +1,7 @@
 package frc2713.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotation;
@@ -17,6 +18,7 @@ import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
     implements ArticulatedComponent {
@@ -33,6 +35,8 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Motor
    * @return
    */
   public Command setDistanceCommand(Supplier<Distance> desiredDistance) {
+    Logger.recordOutput(pb.makePath("lastDistanceCommand"), desiredDistance.get().in(Inches));
+
     return motionMagicSetpointCommand(
         () -> convertSubsystemPositionToMotorPosition(desiredDistance.get()));
   }
@@ -43,7 +47,7 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Motor
    * @return
    */
   public Command extendCommand() {
-    return setDistanceCommand(IntakeConstants.Extension.extendedPosition);
+    return setDistanceCommand(() -> IntakeConstants.Extension.extendedPosition);
   }
 
   /**
@@ -59,6 +63,7 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Motor
   public void periodic() {
     super.periodic();
     // Additional periodic code for intake can be added here
+
   }
 
   @Override
