@@ -32,11 +32,6 @@ public class FuelCoordinates {
     }
   }
 
-  private static double pointFromDistance(double point, double length) {
-    // Get a second point from one point and a distance
-    return point + length;
-  }
-
   public void computeCenterPoint(double x, double y, double x2, double y2) {
     centerX = (x2 - x) / 2;
     centerY = (y2 - y) / 2;
