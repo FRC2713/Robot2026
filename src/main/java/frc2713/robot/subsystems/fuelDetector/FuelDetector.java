@@ -4,6 +4,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringSubscriber;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.ArrayList;
+import org.littletonrobotics.junction.Logger;
 
 public class FuelDetector extends SubsystemBase {
   public final double fuelChanceThreshold = 0.8; // Percentage in decimal format
@@ -19,11 +20,16 @@ public class FuelDetector extends SubsystemBase {
   public void periodic() {
     // get fuel information, call algorithm
     String fuelData = fuelSub.get("");
-    // fuelData = "0.5,0.5,0.5,0.5,1,;"; //Use for testing algorithm
     // System.out.println("fuelData: " + fuelData);
     FuelCoordinates[] fuels = FuelDetector.dataToFuelCoordinates(fuelData);
-    System.out.println(
-        findFuelClusters(fuels, kGridWidth, kGridHeight).toString() + " fuel clusters");
+    ArrayList<FuelCluster> fuelClusters = findFuelClusters(fuels, kGridWidth, kGridHeight);
+    if (fuelClusters.size() > 0) {
+      double vector =
+          fuelClusters.get(0).findAngleTranslation(60.0, kImageWidth, (kImageWidth / kGridWidth));
+      Logger.recordOutput("First Fuel Cluster", vector);
+    }
+    // System.out.println(
+    //    findFuelClusters(fuels, kGridWidth, kGridHeight).toString() + " fuel clusters");
   }
 
   public ArrayList<FuelCoordinates> filterByHighChance(FuelCoordinates[] inputs) {
