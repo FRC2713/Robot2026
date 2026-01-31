@@ -257,8 +257,12 @@ public class RobotContainer {
 
     controller
         .leftBumper()
-        .onTrue(intakeRoller.voltageCommand(() -> Volts.of(5)))
-        .onFalse(intakeRoller.voltageCommand(() -> Volts.of(0)));
+        .onTrue(
+            Commands.parallel(
+                intakeRoller.voltageCommand(() -> Volts.of(5)), intakeExtension.extendCommand()))
+        .onFalse(
+            Commands.parallel(
+                intakeRoller.voltageCommand(() -> Volts.of(0)), intakeExtension.retractCommand()));
 
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
@@ -279,11 +283,12 @@ public class RobotContainer {
         .onTrue(flywheels.velocitySetpointCommand(LauncherConstants.Flywheels.PIDTest))
         .onFalse(flywheels.velocitySetpointCommand(() -> RPM.of(0)));
 
-    controller
-        .leftBumper()
-        .onTrue(
-            Commands.runOnce(
-                () -> flywheels.launchFuel(LaunchingSolutionManager.getInstance().getSolution())));
+    // controller
+    //     .leftBumper()
+    //     .onTrue(
+    //         Commands.runOnce(
+    //             () ->
+    // flywheels.launchFuel(LaunchingSolutionManager.getInstance().getSolution())));
 
     // controller.rightBumper().whileTrue(flywheels.dutyCycleCommand(() -> 0.5));
     // controller

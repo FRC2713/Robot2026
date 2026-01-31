@@ -9,8 +9,10 @@ import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.VoltageConfigs;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
@@ -26,6 +28,7 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc2713.lib.drivers.CANDeviceId;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
+import frc2713.lib.util.CTREUtil;
 import frc2713.lib.util.RobotTime;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -170,12 +173,6 @@ public class SimTalonFXIO implements MotorIO {
   }
 
   @Override
-  public void setMotionMagicSetpoint(Angle setpoint, int slot) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'setMotionMagicSetpoint'");
-  }
-
-  @Override
   public void setMotionMagicSetpoint(
       Angle setpoint,
       AngularVelocity velocity,
@@ -238,8 +235,11 @@ public class SimTalonFXIO implements MotorIO {
 
   @Override
   public void follow(CANDeviceId leaderId, boolean opposeLeaderDirection) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'follow'");
+    MotorAlignmentValue alignment =
+        opposeLeaderDirection ? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned;
+    CTREUtil.tryUntilOK(
+        () -> talon.setControl(new Follower(leaderId.getDeviceNumber(), alignment)),
+        this.config.talonCANID.getDeviceNumber());
   }
 
   @Override
