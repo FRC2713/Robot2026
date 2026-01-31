@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc2713.robot.subsystems.fuelDetector.FuelDetector;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.SimTalonFXIO;
 import frc2713.lib.io.TalonFXIO;
@@ -63,6 +64,7 @@ public class RobotContainer {
   private final DyeRotor dyeRotor;
   private final Feeder feeder;
   private final Climber climber;
+  private final FuelDetector fuels;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -106,6 +108,8 @@ public class RobotContainer {
 
         climber = new Climber(ClimberConstants.config, new MotorIO() {});
 
+        fuels = new FuelDetector();
+
         break;
 
       case SIM:
@@ -147,6 +151,7 @@ public class RobotContainer {
                 SerializerConstants.Feeder.config,
                 new SimTalonFXIO(SerializerConstants.Feeder.config));
         climber = new Climber(ClimberConstants.config, new SimTalonFXIO(ClimberConstants.config));
+        fuels = new FuelDetector();
         break;
 
       default:
@@ -179,6 +184,7 @@ public class RobotContainer {
         feeder = new Feeder(SerializerConstants.Feeder.config, new MotorIO() {});
 
         climber = new Climber(ClimberConstants.config, new MotorIO() {});
+        fuels = new FuelDetector();
         break;
     }
 
