@@ -1,31 +1,46 @@
 package frc2713.lib.io;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
 
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.VoltageConfigs;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.sim.ChassisReference;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.units.AngularAccelerationUnit;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.units.measure.Velocity;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import frc2713.lib.drivers.CANDeviceId;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.RobotTime;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import org.littletonrobotics.junction.Logger;
 
-public class SimTalonFXIO extends TalonFXIO {
+public class SimTalonFXIO implements MotorIO {
   protected DCMotorSim sim;
   private Notifier simNotifier = null;
   private Time lastUpdateTimestamp = Seconds.of(0.0);
   private Optional<AngularVelocity> overrideVelocity = Optional.empty();
   private Optional<Angle> overridePosition = Optional.empty();
+
+  protected final TalonFX talon;
+  protected final TalonFXSubsystemConfig config;
+  public final AdvantageScopePathBuilder pb;
 
   // Used to handle mechanisms that wrap.
   private boolean invertVoltage = false;
@@ -50,12 +65,11 @@ public class SimTalonFXIO extends TalonFXIO {
   }
 
   public SimTalonFXIO(TalonFXSubsystemConfig config, DCMotorSim sim) {
-    super(config);
+    this.config = config;
     this.sim = sim;
-    talon.getSimState().Orientation =
-        (config.fxConfig.MotorOutput.Inverted == InvertedValue.Clockwise_Positive)
-            ? ChassisReference.Clockwise_Positive
-            : ChassisReference.CounterClockwise_Positive;
+    this.pb = new AdvantageScopePathBuilder(this.config.name);
+    this.talon = new TalonFX(config.talonCANID.getDeviceNumber(), config.talonCANID.getBus());
+
     /* Run simulation at a faster rate so PID gains behave more reasonably */
     simNotifier =
         new Notifier(
@@ -90,10 +104,12 @@ public class SimTalonFXIO extends TalonFXIO {
 
   protected void updateSimState() {
     var simState = talon.getSimState();
-    double simVoltage = addFriction(simState.getMotorVoltage(), 0.25);
-    simVoltage = (invertVoltage) ? -simVoltage : simVoltage;
-    sim.setInput(simVoltage);
-    Logger.recordOutput(pb.makePath("Sim", "SimulatorVoltage"), simVoltage);
+
+    // double simVoltage = addFriction(simState.getMotorVoltage(), 0.25);
+    // simVoltage = (invertVoltage) ? -simVoltage : simVoltage;
+    // simState.setSupplyVoltage(simVoltage);
+    // sim.setInput(simVoltage);
+    // Logger.recordOutput(pb.makePath("Sim", "SimulatorVoltage"), simVoltage);
 
     Time timestamp = RobotTime.getTimestamp();
     sim.update(timestamp.minus(lastUpdateTimestamp).in(Seconds));
@@ -130,5 +146,117 @@ public class SimTalonFXIO extends TalonFXIO {
 
   public AngularVelocity getIntendedVelocity() {
     return lastVelocity.get();
+  }
+
+  @Override
+  public void readInputs(MotorInputs inputs) {
+    inputs.position = sim.getAngularPosition();
+    inputs.velocity = sim.getAngularVelocity();
+    inputs.currentStatorAmps = Amps.of(0.0);
+    inputs.currentSupplyAmps = Amps.of(0.0);
+    inputs.rawRotorPosition = Rotations.of(0.0);
+  }
+
+  @Override
+  public void setOpenLoopDutyCycle(double dutyCycle) {
+    // TODO Auto-generated method stub
+    sim.setInputVoltage(dutyCycle * 12);
+  }
+
+  @Override
+  public void setPositionSetpoint(Angle setpoint) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'setPositionSetpoint'");
+  }
+
+  @Override
+  public void setMotionMagicSetpoint(Angle setpoint, int slot) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'setMotionMagicSetpoint'");
+  }
+
+  @Override
+  public void setMotionMagicSetpoint(
+      Angle setpoint,
+      AngularVelocity velocity,
+      AngularAcceleration acceleration,
+      Velocity<AngularAccelerationUnit> jerk,
+      int slot,
+      double feedforward) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'setMotionMagicSetpoint'");
+  }
+
+  @Override
+  public void setNeutralMode(NeutralModeValue mode) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'setNeutralMode'");
+  }
+
+  @Override
+  public void setVelocitySetpoint(AngularVelocity unitsPerSecond, int slot) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'setVelocitySetpoint'");
+  }
+
+  @Override
+  public void setVoltageOutput(Voltage voltage) {
+    // TODO Auto-generated method stub
+    System.out.println("Being called " + voltage);
+    sim.setInputVoltage(voltage.in(Volts));
+  }
+
+  @Override
+  public void setCurrentPositionAsZero() {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'setCurrentPositionAsZero'");
+  }
+
+  @Override
+  public void setCurrentPosition(Angle position) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'setCurrentPosition'");
+  }
+
+  @Override
+  public void setEnableSoftLimits(boolean forward, boolean reverse) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'setEnableSoftLimits'");
+  }
+
+  @Override
+  public void setEnableHardLimits(boolean forward, boolean reverse) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'setEnableHardLimits'");
+  }
+
+  @Override
+  public void setEnableAutosetPositionValue(boolean forward, boolean reverse) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'setEnableAutosetPositionValue'");
+  }
+
+  @Override
+  public void follow(CANDeviceId leaderId, boolean opposeLeaderDirection) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'follow'");
+  }
+
+  @Override
+  public void setTorqueCurrentFOC(Current current) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'setTorqueCurrentFOC'");
+  }
+
+  @Override
+  public void setMotionMagicConfig(MotionMagicConfigs config) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'setMotionMagicConfig'");
+  }
+
+  @Override
+  public void setVoltageConfig(VoltageConfigs config) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'setVoltageConfig'");
   }
 }

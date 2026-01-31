@@ -1,16 +1,15 @@
 package frc2713.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Rotation;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc2713.lib.io.ArticulatedComponent;
 import frc2713.lib.io.MotorIO;
@@ -64,8 +63,8 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Motor
 
   @Override
   public Transform3d getTransform3d() {
-    // TODO: Get this from sensors
-    Distance distance = Inches.of(Math.sin(Timer.getFPGATimestamp()) + 1).times(6);
+    Angle motorAngle = inputs.position;
+    Distance distance = Meters.of(motorAngle.in(Rotation) * config.unitToRotorRatio);
     Angle sliderAngle = Degrees.of(-4.479515);
 
     Distance distanceX = distance.times(Math.cos(sliderAngle.in(Radians)));

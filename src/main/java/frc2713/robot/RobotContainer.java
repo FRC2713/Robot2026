@@ -8,6 +8,7 @@
 package frc2713.robot;
 
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -240,8 +241,8 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
+            () -> controller.getLeftY(),
+            () -> controller.getLeftX(),
             () -> -controller.getRightX()));
 
     // Lock to 0° when A button is held
@@ -253,6 +254,11 @@ public class RobotContainer {
                 () -> -controller.getLeftY(),
                 () -> -controller.getLeftX(),
                 () -> Rotation2d.kZero));
+
+    controller
+        .leftBumper()
+        .onTrue(intakeRoller.voltageCommand(() -> Volts.of(5)))
+        .onFalse(intakeRoller.voltageCommand(() -> Volts.of(0)));
 
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
@@ -278,6 +284,15 @@ public class RobotContainer {
         .onTrue(
             Commands.runOnce(
                 () -> flywheels.launchFuel(LaunchingSolutionManager.getInstance().getSolution())));
+
+    // controller.rightBumper().whileTrue(flywheels.dutyCycleCommand(() -> 0.5));
+    // controller
+    //     .leftBumper()
+    //     .onTrue(
+    //         new SimulateBall(
+    //             drive.getBallPosSupplier(),
+    //             drive.getBallVelSupplier(),
+    //             drive.getBallSpinSupplier()));
   }
 
   /**
