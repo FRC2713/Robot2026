@@ -168,8 +168,13 @@ public class SimTalonFXIO implements MotorIO {
 
   @Override
   public void setPositionSetpoint(Angle setpoint) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'setPositionSetpoint'");
+    this.setCurrentPosition(setpoint);
+  }
+
+  @Override
+  public void setMotionMagicSetpoint(Angle setpoint, int slot) {
+    var currOmega = sim.getAngularVelocityRadPerSec();
+    sim.setState(setpoint.in(Radians), currOmega);
   }
 
   @Override
@@ -180,8 +185,8 @@ public class SimTalonFXIO implements MotorIO {
       Velocity<AngularAccelerationUnit> jerk,
       int slot,
       double feedforward) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'setMotionMagicSetpoint'");
+
+    sim.setState(setpoint.in(Radians), velocity.in(RadiansPerSecond));
   }
 
   @Override
@@ -192,45 +197,46 @@ public class SimTalonFXIO implements MotorIO {
 
   @Override
   public void setVelocitySetpoint(AngularVelocity unitsPerSecond, int slot) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'setVelocitySetpoint'");
-  }
+    var currTheta = sim.getAngularPosition();
+    sim.setState(currTheta.in(Radians), unitsPerSecond.in(RadiansPerSecond));  }
 
   @Override
   public void setVoltageOutput(Voltage voltage) {
-    // TODO Auto-generated method stub
-    System.out.println("Being called " + voltage);
     sim.setInputVoltage(voltage.in(Volts));
   }
 
   @Override
   public void setCurrentPositionAsZero() {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'setCurrentPositionAsZero'");
+    this.setCurrentPosition(Radians.of(0));
   }
 
   @Override
   public void setCurrentPosition(Angle position) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'setCurrentPosition'");
+    var currOmega = sim.getAngularVelocityRadPerSec();
+    sim.setState(position.in(Radians), currOmega);
   }
 
   @Override
   public void setEnableSoftLimits(boolean forward, boolean reverse) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'setEnableSoftLimits'");
+    config.fxConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = forward;
+    config.fxConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = reverse;
+    CTREUtil.applyConfiguration(talon, config.fxConfig);
   }
 
   @Override
   public void setEnableHardLimits(boolean forward, boolean reverse) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'setEnableHardLimits'");
+    config.fxConfig.HardwareLimitSwitch.ForwardLimitEnable = forward;
+    config.fxConfig.HardwareLimitSwitch.ReverseLimitEnable = reverse;
+    CTREUtil.applyConfiguration(talon, config.fxConfig);
   }
 
   @Override
   public void setEnableAutosetPositionValue(boolean forward, boolean reverse) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'setEnableAutosetPositionValue'");
+    config.fxConfig.HardwareLimitSwitch.ForwardLimitAutosetPositionEnable = forward;
+    config.fxConfig.HardwareLimitSwitch.ReverseLimitAutosetPositionEnable = reverse;
+    config.fxConfig.HardwareLimitSwitch.ForwardLimitEnable = forward;
+    config.fxConfig.HardwareLimitSwitch.ReverseLimitEnable = reverse;
+    CTREUtil.applyConfiguration(talon, config.fxConfig.HardwareLimitSwitch);
   }
 
   @Override
@@ -250,13 +256,12 @@ public class SimTalonFXIO implements MotorIO {
 
   @Override
   public void setMotionMagicConfig(MotionMagicConfigs config) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'setMotionMagicConfig'");
+    this.config.fxConfig.MotionMagic = config;
+    CTREUtil.applyConfiguration(talon, this.config.fxConfig.MotionMagic);
   }
 
   @Override
   public void setVoltageConfig(VoltageConfigs config) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'setVoltageConfig'");
+    CTREUtil.applyConfigurationNonBlocking(talon, config);
   }
 }
