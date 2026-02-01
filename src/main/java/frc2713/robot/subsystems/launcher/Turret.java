@@ -106,31 +106,7 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
   public Command hubCommand() {
     return setAngle(() -> LauncherConstants.Turret.staticHubAngle);
   }
-  /**
-   * Supplier that continuously calculates the on-the-fly turret angle. Uses the launch solution if
-   * valid, otherwise falls back to simple hub tracking.
-   */
-  public final Supplier<Angle> otfAngleSupplier =
-      () -> {
-        Angle angle = getLauncOnTheFlyAngle();
-        // If no valid solution, fall back to simple hub angle
-        boolean solutionIsValid = true;
-        if (angle.equals(Degrees.of(0))) {
-          solutionIsValid = false;
-          angle = getHubAngle();
-        }
-        Logger.recordOutput(super.pb.makePath("OTF", "solutionIsValid"), solutionIsValid);
-        Logger.recordOutput(pb.makePath("OTF", "targetAngle"), angle);
-        return angle;
-      };
-
-  public Command oftCommand() {
-    return setAngle(otfAngleSupplier);
-  }
-
-  @AutoLogOutput
-  public boolean atTarget() {
-    return this.io.isMagicMotionAtTarget();
+  
   /**
    * Gets the current turret position computed from the dual encoder system.
    *
