@@ -224,4 +224,12 @@ public class TalonFXIO implements MotorIO {
   public void setVoltageConfig(VoltageConfigs config) {
     CTREUtil.applyConfigurationNonBlocking(talon, config);
   }
+
+  public double getClosedLoopError() {
+    return talon.getClosedLoopError().getValue();
+  }
+
+  public boolean isMagicMotionAtTarget() {
+    return talon.getMotionMagicAtTarget(true).getValue();
+  }
 }

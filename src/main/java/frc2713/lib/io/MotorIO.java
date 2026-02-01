@@ -72,4 +72,12 @@ public interface MotorIO {
   default void setMotionMagicConfig(MotionMagicConfigs config) {}
 
   default void setVoltageConfig(VoltageConfigs config) {}
+
+  default double getClosedLoopError() {
+    return 0.0;
+  }
+
+  default boolean isMagicMotionAtTarget() {
+    return true;
+  }
 }

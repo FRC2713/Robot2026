@@ -7,8 +7,6 @@
 
 package frc2713.robot;
 
-import static edu.wpi.first.units.Units.RPM;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -268,13 +266,13 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    controller
-        .rightBumper()
-        .onTrue(flywheels.velocitySetpointCommand(LauncherConstants.Flywheels.PIDTest))
-        .onFalse(flywheels.velocitySetpointCommand(() -> RPM.of(0)));
+    // controller
+    //     .rightBumper()
+    //     .onTrue(flywheels.velocitySetpointCommand(LauncherConstants.Flywheels.PIDTest))
+    //     .onFalse(flywheels.velocitySetpointCommand(() -> RPM.of(0)));
 
     controller
-        .leftBumper()
+        .rightBumper()
         .whileTrue(
             Commands.parallel(intakeRoller.intake(), intakeExtension.extendCommand())
                 .withName("Intaking"))
@@ -285,10 +283,23 @@ public class RobotContainer {
     controller
         .leftTrigger(0.25)
         .whileTrue(
-            Commands.runOnce(
-                    () ->
-                        flywheels.launchFuel(LaunchingSolutionManager.getInstance().getSolution()))
-                .withName("Shooting OTF"));
+            Commands.parallel(
+                    flywheels.otfCommand(),
+                    hood.otfCommand(),
+                    turret.oftCommand(),
+                    flywheels.simulateLaunchedFuel(
+                        () -> {
+                          return flywheels.atTarget() && hood.atTarget() && turret.atTarget();
+                        }),
+                    feeder.feedWhenReady(
+                        () -> {
+                          return flywheels.atTarget() && hood.atTarget() && turret.atTarget();
+                        }),
+                    dyeRotor.feedWhenReady(
+                        () -> {
+                          return flywheels.atTarget() && hood.atTarget() && turret.atTarget();
+                        }))
+                .withName("OTF Shooting"));
   }
 
   /**

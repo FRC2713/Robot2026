@@ -15,22 +15,32 @@ public class LaunchingSolutionManager extends SubsystemBase {
 
   // --- Data Structures ---
   public static record LaunchSolution(
-      Rotation2d turretFieldRelativeYaw, // Target global yaw for the turret
+      Rotation2d turretFieldRelativeYaw, // desired global yaw for the turret
       double flywheelSpeedMetersPerSecond, // Required exit velocity
       Rotation2d hoodPitch, // Required vertical angle
       double effectiveDistanceMeters,
       boolean isValid // False if target is out of range or blocked
       ) {}
+  
+  public static record FieldGoal(
+    Translation3d flywheelTarget,
+    Translation3d positionalTarget
+  ) {}
 
   // Default to an empty/invalid solution
   private LaunchSolution currentSolution =
       new LaunchSolution(new Rotation2d(), 0, new Rotation2d(), 0, false);
-
+  
   public LaunchingSolutionManager() {
     if (instance != null) {
       throw new IllegalStateException("LaunchingSolutionManager already initialized!");
     }
     instance = this;
+  }
+
+  public static FieldGoal currentGoal = new FieldGoal(FieldConstants.Hub.innerCenterPoint, FieldConstants.Hub.topCenterPoint)
+  public static void setFieldGoal(Translation3d flywheelTarget, Translation3d positionalTarget) {
+    LaunchingSolutionManager.currentGoal = new FieldGoal(flywheelTarget, positionalTarget);
   }
 
   public static LaunchingSolutionManager getInstance() {
@@ -45,7 +55,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
     Translation3d robotVel = KinematicsManager.getInstance().getGlobalLinearVelocity(0);
 
     // 2. Solve for the Launch Vector
-    currentSolution = calculate(robotPose, robotVel, FieldConstants.Hub.topCenterPoint);
+    currentSolution = calculate(robotPose, robotVel, LaunchingSolutionManager.currentGoal.positionalTarget);
   }
 
   public LaunchSolution getSolution() {

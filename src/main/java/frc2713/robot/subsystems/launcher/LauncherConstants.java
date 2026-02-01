@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -22,14 +23,28 @@ public final class LauncherConstants {
   public static final class Turret {
 
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
+    public static Angle acceptableError = Degrees.of(10);
 
     static {
       config.name = "Turret";
       config.talonCANID = new CANDeviceId(12); // Example CAN ID, replace with actual ID
-      config.fxConfig.Slot0.kP = 0.2;
+
+      // PID gains for Motion Magic
+      config.fxConfig.Slot0.kP = 50.0;
       config.fxConfig.Slot0.kI = 0.0;
-      config.fxConfig.Slot0.kD = 0.0;
+      config.fxConfig.Slot0.kD = 4.0;
+      config.fxConfig.Slot0.kS = 0.15; // static friction compensation
+      config.fxConfig.Slot0.kV = 0.12; // velocity feedforward
+      config.fxConfig.Slot0.kA = 0.0;
+
+      // Motion Magic parameters
+      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 3.0; // rotations per second
+      config.fxConfig.MotionMagic.MotionMagicAcceleration = 6.0; // rotations per second^2
+      config.fxConfig.MotionMagic.MotionMagicJerk = 0; // no jerk limit
+
       config.unitToRotorRatio = 1.0; // 1:1 ratio
+      config.momentOfInertia = 0.02; // kg*m^2 for simulation (turret is heavier than hood)
+
       config.initialTransform =
           new Transform3d(
               new Translation3d(0, Inches.of(1.75).in(Meters), Inches.of(18.484119).in(Meters)),
@@ -68,6 +83,8 @@ public final class LauncherConstants {
     public static int MODEL_INDEX = 5;
     public static int PARENT_INDEX = 4;
 
+    public static AngularVelocity acceptableError = RotationsPerSecond.of(50);
+
     public static Transform3d localTransform =
         new Transform3d(
             new Translation3d(Inches.of(-5).in(Meters), 0, Inches.of(2).in(Meters)),
@@ -88,14 +105,28 @@ public final class LauncherConstants {
   public final class Hood {
 
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
+    public static Angle acceptableError = Degrees.of(5);
 
     static {
       config.name = "Hood";
       config.talonCANID = new CANDeviceId(14); // Example CAN ID, replace with actual ID
-      config.fxConfig.Slot0.kP = 0.2;
+
+      // PID gains for Motion Magic
+      config.fxConfig.Slot0.kP = 60.0;
       config.fxConfig.Slot0.kI = 0.0;
-      config.fxConfig.Slot0.kD = 0.0;
+      config.fxConfig.Slot0.kD = 5.0;
+      config.fxConfig.Slot0.kS = 0.1; // static friction compensation
+      config.fxConfig.Slot0.kV = 0.12; // velocity feedforward
+      config.fxConfig.Slot0.kA = 0.0;
+
+      // Motion Magic parameters
+      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 2.0; // rotations per second
+      config.fxConfig.MotionMagic.MotionMagicAcceleration = 4.0; // rotations per second^2
+      config.fxConfig.MotionMagic.MotionMagicJerk = 0; // no jerk limit
+
       config.unitToRotorRatio = 1.0; // 1:1 ratio
+      config.momentOfInertia = 0.005; // kg*m^2 for simulation
+
       config.initialTransform =
           new Transform3d(
               new Translation3d(Inches.of(4.086915).in(Meters), 0, 0), new Rotation3d());

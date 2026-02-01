@@ -19,6 +19,8 @@ import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.robot.FieldConstants;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 public class Turret extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
     implements ArticulatedComponent {
@@ -32,16 +34,37 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
         () -> convertSubsystemPositionToMotorPosition(desiredAngle.get()));
   }
 
+  /**
+   * Supplier that continuously calculates the on-the-fly turret angle. Uses the launch solution if
+   * valid, otherwise falls back to simple hub tracking.
+   */
+  public final Supplier<Angle> otfAngleSupplier =
+      () -> {
+        Angle angle = getLauncOnTheFlyAngle();
+        // If no valid solution, fall back to simple hub angle
+        boolean solutionIsValid = true;
+        if (angle.equals(Degrees.of(0))) {
+          solutionIsValid = false;
+          angle = getHubAngle();
+        }
+        Logger.recordOutput(super.pb.makePath("OTF", "solutionIsValid"), solutionIsValid);
+        Logger.recordOutput(pb.makePath("OTF", "targetAngle"), angle);
+        return angle;
+      };
+
+  public Command oftCommand() {
+    return setAngle(otfAngleSupplier);
+  }
+
+  @AutoLogOutput
+  public boolean atTarget() {
+    return this.io.isMagicMotionAtTarget();
+  }
+
   @Override
   public void periodic() {
     super.periodic();
-    // Pose3d goalPose = new Pose3d(FieldConstants.Hub.topCenterPoint, new Rotation3d());
-
-    // Logger.recordOutput(pb.makePath("goalVector"), new Pose3d[] {this.getGlobalPose(),
-    // goalPose});
-    // super.setCurrentPosition(getLauncOnTheFlyAngle());
   }
-  ;
 
   @Override
   public Transform3d getTransform3d() {
@@ -56,7 +79,7 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   }
 
   public Angle getHubAngle() {
-    Translation3d diff = this.getTranslationTo(FieldConstants.Hub.topCenterPoint);
+    Translation3d diff = this.getTranslationTo(LaunchingSolutionManager.currentGoal.positionalTarget());
     // 2. Calculate the Global Yaw needed to face the target
     // Math.atan2(y, x) handles all quadrants correctly
     double globalTargetRadians = Math.atan2(diff.getY(), diff.getX());
