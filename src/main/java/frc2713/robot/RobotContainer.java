@@ -8,7 +8,6 @@
 package frc2713.robot;
 
 import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.Volts;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -241,8 +240,8 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> controller.getLeftY(),
-            () -> controller.getLeftX(),
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
 
     // Lock to 0° when A button is held
@@ -254,15 +253,6 @@ public class RobotContainer {
                 () -> -controller.getLeftY(),
                 () -> -controller.getLeftX(),
                 () -> Rotation2d.kZero));
-
-    controller
-        .leftBumper()
-        .whileTrue(
-            Commands.parallel(
-                intakeRoller.voltageCommand(() -> Volts.of(5)), intakeExtension.extendCommand()))
-        .onFalse(
-            Commands.parallel(
-                intakeRoller.voltageCommand(() -> Volts.of(0)), intakeExtension.retractCommand()));
 
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
@@ -283,21 +273,22 @@ public class RobotContainer {
         .onTrue(flywheels.velocitySetpointCommand(LauncherConstants.Flywheels.PIDTest))
         .onFalse(flywheels.velocitySetpointCommand(() -> RPM.of(0)));
 
-    // controller
-    //     .leftBumper()
-    //     .onTrue(
-    //         Commands.runOnce(
-    //             () ->
-    // flywheels.launchFuel(LaunchingSolutionManager.getInstance().getSolution())));
+    controller
+        .leftBumper()
+        .whileTrue(
+            Commands.parallel(intakeRoller.intake(), intakeExtension.extendCommand())
+                .withName("Intaking"))
+        .onFalse(
+            Commands.parallel(intakeRoller.stop(), intakeExtension.retractCommand())
+                .withName("Intake Idle"));
 
-    // controller.rightBumper().whileTrue(flywheels.dutyCycleCommand(() -> 0.5));
-    // controller
-    //     .leftBumper()
-    //     .onTrue(
-    //         new SimulateBall(
-    //             drive.getBallPosSupplier(),
-    //             drive.getBallVelSupplier(),
-    //             drive.getBallSpinSupplier()));
+    controller
+        .leftTrigger(0.25)
+        .whileTrue(
+            Commands.runOnce(
+                    () ->
+                        flywheels.launchFuel(LaunchingSolutionManager.getInstance().getSolution()))
+                .withName("Shooting OTF"));
   }
 
   /**

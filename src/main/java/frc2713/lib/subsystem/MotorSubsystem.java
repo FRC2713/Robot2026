@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -352,7 +353,9 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
             () -> {
               setVoltageImpl(voltage.get());
             },
-            () -> {})
+            () -> {
+              setVoltageImpl(Volts.of(0.0));
+            })
         .withName(pb.makeName("VoltageControl"));
   }
 

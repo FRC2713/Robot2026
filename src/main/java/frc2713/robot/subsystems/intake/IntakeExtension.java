@@ -1,10 +1,9 @@
 package frc2713.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.Rotation;
+import static edu.wpi.first.units.Units.Rotations;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -35,8 +34,6 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Motor
    * @return
    */
   public Command setDistanceCommand(Supplier<Distance> desiredDistance) {
-    Logger.recordOutput(pb.makePath("lastDistanceCommand"), desiredDistance.get().in(Inches));
-
     return motionMagicSetpointCommand(
         () -> convertSubsystemPositionToMotorPosition(desiredDistance.get()));
   }
@@ -47,7 +44,7 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Motor
    * @return
    */
   public Command extendCommand() {
-    return setDistanceCommand(() -> IntakeConstants.Extension.extendedPosition);
+    return setDistanceCommand(IntakeConstants.Extension.extendedPosition);
   }
 
   /**
@@ -62,14 +59,19 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Motor
   @Override
   public void periodic() {
     super.periodic();
-    // Additional periodic code for intake can be added here
 
+    double currentDistanceMeters = inputs.position.in(Rotations) / config.unitRotationsPerMeter;
+    Logger.recordOutput(pb.makePath("CurrentDistanceMeters"), currentDistanceMeters);
+
+    double setpointDistanceMeters = positionSetpoint.in(Rotations) / config.unitRotationsPerMeter;
+    Logger.recordOutput(pb.makePath("SetpointDistanceMeters"), setpointDistanceMeters);
   }
 
   @Override
   public Transform3d getTransform3d() {
-    Angle motorAngle = inputs.position;
-    Distance distance = Meters.of(motorAngle.in(Rotation) * config.unitToRotorRatio);
+    // inputs.position is in rotations, convert to meters
+    // distance = rotations / (rotations per meter)
+    Distance distance = Meters.of(inputs.position.in(Rotations) / config.unitRotationsPerMeter);
     Angle sliderAngle = Degrees.of(-4.479515);
 
     Distance distanceX = distance.times(Math.cos(sliderAngle.in(Radians)));
