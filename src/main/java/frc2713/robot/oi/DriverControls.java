@@ -63,6 +63,43 @@ public class DriverControls {
                     RobotContainer.drive, () -> -1 * DriveCommands.INCH_SPEED.getAsDouble()),
                 "Inch Right"))
         .onFalse(this.setToNormalDriveCmd());
+
+  
+    // controller
+    //     .rightBumper()
+    //     .onTrue(flywheels.velocitySetpointCommand(LauncherConstants.Flywheels.PIDTest))
+    //     .onFalse(flywheels.velocitySetpointCommand(() -> RPM.of(0)));
+
+    controller
+        .rightBumper()
+        .whileTrue(
+            Commands.parallel(intakeRoller.intake(), intakeExtension.extendCommand())
+                .withName("Intaking"))
+        .onFalse(
+            Commands.parallel(intakeRoller.stop(), intakeExtension.retractCommand())
+                .withName("Intake Idle"));
+
+    controller
+        .leftTrigger(0.25)
+        .whileTrue(
+            Commands.parallel(
+                    flywheels.otfCommand(),
+                    hood.otfCommand(),
+                    turret.oftCommand(),
+                    flywheels.simulateLaunchedFuel(
+                        () -> {
+                          return flywheels.atTarget() && hood.atTarget() && turret.atTarget();
+                        }),
+                    feeder.feedWhenReady(
+                        () -> {
+                          return flywheels.atTarget() && hood.atTarget() && turret.atTarget();
+                        }),
+                    dyeRotor.feedWhenReady(
+                        () -> {
+                          return flywheels.atTarget() && hood.atTarget() && turret.atTarget();
+                        }))
+                .withName("OTF Shooting"));
+
   }
 
   public double getLeftY() {

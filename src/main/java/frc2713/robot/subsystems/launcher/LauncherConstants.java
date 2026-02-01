@@ -24,7 +24,7 @@ public final class LauncherConstants {
   public static final class Turret {
 
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
-    public static Angle acceptableError = Degrees.of(3);
+    public static Angle acceptableError = Degrees.of(5);
     public static Angle staticHubAngle = Degrees.of(0);
 
     static {
@@ -32,20 +32,20 @@ public final class LauncherConstants {
       config.talonCANID = new CANDeviceId(13); // Example CAN ID, replace with actual ID
 
       // PID gains for Motion Magic
-      config.fxConfig.Slot0.kP = 120.0;
+      config.fxConfig.Slot0.kP = 50.0;
       config.fxConfig.Slot0.kI = 0.0;
-      config.fxConfig.Slot0.kD = 8.0;
+      config.fxConfig.Slot0.kD = 4.0;
       config.fxConfig.Slot0.kS = 0.15; // static friction compensation
       config.fxConfig.Slot0.kV = 0.12; // velocity feedforward
-      config.fxConfig.Slot0.kA = 0.01;
+      config.fxConfig.Slot0.kA = 0.0;
 
       // Motion Magic parameters
-      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 5.0; // rotations per second
-      config.fxConfig.MotionMagic.MotionMagicAcceleration = 15.0; // rotations per second^2
-      config.fxConfig.MotionMagic.MotionMagicJerk = 100; // limit jerk for smooth motion
+      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 3.0; // rotations per second
+      config.fxConfig.MotionMagic.MotionMagicAcceleration = 6.0; // rotations per second^2
+      config.fxConfig.MotionMagic.MotionMagicJerk = 0; // no jerk limit
 
       config.unitToRotorRatio = 1.0; // 1:1 ratio
-      config.momentOfInertia = 0.02; // kg*m^2 for simulation
+      config.momentOfInertia = 0.02; // kg*m^2 for simulation (turret is heavier than hood)
 
       config.initialTransform =
           new Transform3d(
