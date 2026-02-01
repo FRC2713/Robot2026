@@ -17,7 +17,6 @@ import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
-import frc2713.robot.FieldConstants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -34,6 +33,9 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
         () -> convertSubsystemPositionToMotorPosition(desiredAngle.get()));
   }
 
+  public Command hubCommand() {
+    return setAngle(() -> LauncherConstants.Turret.staticHubAngle);
+  }
   /**
    * Supplier that continuously calculates the on-the-fly turret angle. Uses the launch solution if
    * valid, otherwise falls back to simple hub tracking.
@@ -79,7 +81,8 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   }
 
   public Angle getHubAngle() {
-    Translation3d diff = this.getTranslationTo(LaunchingSolutionManager.currentGoal.positionalTarget());
+    Translation3d diff =
+        this.getTranslationTo(LaunchingSolutionManager.currentGoal.positionalTarget());
     // 2. Calculate the Global Yaw needed to face the target
     // Math.atan2(y, x) handles all quadrants correctly
     double globalTargetRadians = Math.atan2(diff.getY(), diff.getX());

@@ -23,7 +23,6 @@ import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.MotorFollowerSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.RobotTime;
-import frc2713.robot.FieldConstants;
 import frc2713.robot.subsystems.launcher.LaunchingSolutionManager.LaunchSolution;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
@@ -58,6 +57,10 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
 
   public Command stop() {
     return setVelocity(() -> RotationsPerSecond.of(0));
+  }
+
+  public Command hubCommand() {
+    return setVelocity(() -> LauncherConstants.Flywheels.staticHubVelocity);
   }
 
   /**

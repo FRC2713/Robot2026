@@ -1,5 +1,6 @@
 package frc2713.robot.subsystems.launcher;
 
+import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
@@ -23,27 +24,28 @@ public final class LauncherConstants {
   public static final class Turret {
 
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
-    public static Angle acceptableError = Degrees.of(10);
+    public static Angle acceptableError = Degrees.of(3);
+    public static Angle staticHubAngle = Degrees.of(0);
 
     static {
       config.name = "Turret";
       config.talonCANID = new CANDeviceId(12); // Example CAN ID, replace with actual ID
 
       // PID gains for Motion Magic
-      config.fxConfig.Slot0.kP = 50.0;
+      config.fxConfig.Slot0.kP = 120.0;
       config.fxConfig.Slot0.kI = 0.0;
-      config.fxConfig.Slot0.kD = 4.0;
+      config.fxConfig.Slot0.kD = 8.0;
       config.fxConfig.Slot0.kS = 0.15; // static friction compensation
       config.fxConfig.Slot0.kV = 0.12; // velocity feedforward
-      config.fxConfig.Slot0.kA = 0.0;
+      config.fxConfig.Slot0.kA = 0.01;
 
       // Motion Magic parameters
-      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 3.0; // rotations per second
-      config.fxConfig.MotionMagic.MotionMagicAcceleration = 6.0; // rotations per second^2
-      config.fxConfig.MotionMagic.MotionMagicJerk = 0; // no jerk limit
+      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 5.0; // rotations per second
+      config.fxConfig.MotionMagic.MotionMagicAcceleration = 15.0; // rotations per second^2
+      config.fxConfig.MotionMagic.MotionMagicJerk = 100; // limit jerk for smooth motion
 
       config.unitToRotorRatio = 1.0; // 1:1 ratio
-      config.momentOfInertia = 0.02; // kg*m^2 for simulation (turret is heavier than hood)
+      config.momentOfInertia = 0.02; // kg*m^2 for simulation
 
       config.initialTransform =
           new Transform3d(
@@ -90,6 +92,7 @@ public final class LauncherConstants {
             new Translation3d(Inches.of(-5).in(Meters), 0, Inches.of(2).in(Meters)),
             new Rotation3d(0, Degrees.of(-90).in(Radians), 0));
 
+    public static AngularVelocity staticHubVelocity = RotationsPerSecond.of(20);
     public static InterpolatingDoubleTreeMap velocityMap = new InterpolatingDoubleTreeMap();
 
     static {
@@ -136,14 +139,16 @@ public final class LauncherConstants {
     public static int MODEL_INDEX = 4;
     public static int PARENT_INDEX = 3; // turret
 
+    public static Angle staticHubAngle = Degree.of(10);
     public static InterpolatingDoubleTreeMap angleMap = new InterpolatingDoubleTreeMap();
 
     static {
       // Distance (m) -> Hood Pitch (Degrees)
-      angleMap.put(1.0, 15.0);
-      angleMap.put(1.5, 22.0);
-      angleMap.put(3.0, 30.0);
-      angleMap.put(4.0, 40.0);
+      angleMap.put(1.0, 9.0);
+      angleMap.put(1.5, 16.0);
+      angleMap.put(3.0, 24.0);
+      angleMap.put(4.0, 28.0);
+      angleMap.put(4.5, 32.0);
     }
   }
 }

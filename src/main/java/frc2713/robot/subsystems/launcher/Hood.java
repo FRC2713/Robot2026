@@ -16,7 +16,6 @@ import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
-import frc2713.robot.FieldConstants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -37,6 +36,10 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
     return setAngleCommand(() -> LauncherConstants.Hood.retractedPosition);
   }
 
+  public Command hubCommand() {
+    return setAngleCommand(() -> LauncherConstants.Hood.staticHubAngle);
+  }
+
   public Command otfCommand() {
     return setAngleCommand(otfAngSupplier);
   }
@@ -44,7 +47,8 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   public final Supplier<Angle> otfAngSupplier =
       () -> {
         var solution = LaunchingSolutionManager.getInstance().getSolution();
-        Distance toGoal = this.getDistance2d(LaunchingSolutionManager.currentGoal.positionalTarget());
+        Distance toGoal =
+            this.getDistance2d(LaunchingSolutionManager.currentGoal.positionalTarget());
         Angle aimAngle = solution.hoodPitch().getMeasure();
         boolean launchSolutionValid = solution.isValid();
         if (!launchSolutionValid) {

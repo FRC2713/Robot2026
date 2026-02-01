@@ -21,6 +21,8 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.RobotTime;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class SimTalonFXIO extends TalonFXIO {
@@ -180,6 +182,7 @@ public class SimTalonFXIO extends TalonFXIO {
     sim.setState(positionRad, currentVelocityRadPerSec);
   }
 
+  @AutoLogOutput
   public double getClosedLoopError() {
     return this.lastClosedLoopError;
   }

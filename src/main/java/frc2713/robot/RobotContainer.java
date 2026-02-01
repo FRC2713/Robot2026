@@ -281,6 +281,27 @@ public class RobotContainer {
                 .withName("Intake Idle"));
 
     controller
+        .leftBumper()
+        .whileTrue(
+            Commands.parallel(
+                    flywheels.hubCommand(),
+                    hood.hubCommand(),
+                    turret.hubCommand(),
+                    flywheels.simulateLaunchedFuel(
+                        () -> {
+                          return flywheels.atTarget() && hood.atTarget() && turret.atTarget();
+                        }),
+                    feeder.feedWhenReady(
+                        () -> {
+                          return flywheels.atTarget() && hood.atTarget() && turret.atTarget();
+                        }),
+                    dyeRotor.feedWhenReady(
+                        () -> {
+                          return flywheels.atTarget() && hood.atTarget() && turret.atTarget();
+                        }))
+                .withName("Hub Shot"));
+
+    controller
         .leftTrigger(0.25)
         .whileTrue(
             Commands.parallel(
