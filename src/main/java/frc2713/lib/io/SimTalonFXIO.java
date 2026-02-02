@@ -104,15 +104,6 @@ public class SimTalonFXIO extends TalonFXIO {
     double motorRotPerSec = simVelocityRadPerSec / (2.0 * Math.PI);
     motorState.setRawRotorPosition(motorRotations);
     motorState.setRotorVelocity(motorRotPerSec);
-
-    Logger.recordOutput(pb.makePath("Sim", "Plant Input Voltage"), sim.getInputVoltage());
-    Logger.recordOutput(pb.makePath("Sim", "Motor Position Rotations"), motorRotations);
-    Logger.recordOutput(pb.makePath("Sim", "Motor Velocity RPS"), motorRotPerSec);
-    Logger.recordOutput(
-        pb.makePath("Sim", "TalonFX Reported Position"), talon.getPosition().getValueAsDouble());
-    Logger.recordOutput(
-        pb.makePath("Sim", "TalonFX Reported Rotor Position"),
-        talon.getRotorPosition().getValueAsDouble());
   }
 
   @Override
