@@ -36,9 +36,13 @@ import frc2713.robot.subsystems.launcher.Hood;
 import frc2713.robot.subsystems.launcher.LauncherConstants;
 import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
 import frc2713.robot.subsystems.launcher.Turret;
+import frc2713.robot.subsystems.launcher.TurretMotorIO;
 import frc2713.robot.subsystems.launcher.TurretMotorIOSim;
+<<<<<<< HEAD
 import frc2713.robot.subsystems.launcher.TurretMotorIOTalonFX;
 import frc2713.robot.subsystems.launcher.TurretSubsystemConfig;
+=======
+>>>>>>> 348edbf (default IO implementation)
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 import frc2713.robot.subsystems.serializer.SerializerConstants;
@@ -99,6 +103,7 @@ public class RobotContainer {
             new Turret(
                 LauncherConstants.Turret.config,
                 new TurretMotorIOTalonFX(LauncherConstants.Turret.config));
+                
         intakeRoller =
             new IntakeRoller(
                 IntakeConstants.Roller.config, new TalonFXIO(IntakeConstants.Roller.config));
@@ -175,6 +180,7 @@ public class RobotContainer {
                 new MotorIO() {},
                 new MotorIO() {});
 
+<<<<<<< HEAD
         turret =
             new Turret(
                 new TurretSubsystemConfig(), new TurretMotorIOSim(new TurretSubsystemConfig()));
@@ -193,6 +199,21 @@ public class RobotContainer {
         climber =
             new Climber(
                 new TalonFXSubsystemConfig(), new SimTalonFXIO(new TalonFXSubsystemConfig()));
+=======
+        hood = new Hood(LauncherConstants.Hood.config, new MotorIO() {});
+
+        turret = new Turret(LauncherConstants.Turret.config, new TurretMotorIO() {});
+
+        intakeRoller = new IntakeRoller(IntakeConstants.Roller.config, new MotorIO() {});
+
+        intakeExtension = new IntakeExtension(IntakeConstants.Extension.config, new MotorIO() {});
+
+        dyeRotor = new DyeRotor(SerializerConstants.DyeRotor.config, new MotorIO() {});
+
+        feeder = new Feeder(SerializerConstants.Feeder.config, new MotorIO() {});
+
+        climber = new Climber(ClimberConstants.config, new MotorIO() {});
+>>>>>>> 348edbf (default IO implementation)
         break;
     }
 

@@ -3,6 +3,7 @@ package frc2713.robot.subsystems.launcher;
 import static edu.wpi.first.units.Units.Degrees;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.CANcoder;
 import edu.wpi.first.units.measure.Angle;
@@ -28,7 +29,8 @@ public class TurretMotorIOTalonFX extends TalonFXIO implements TurretMotorIO {
 
     // Initialize CANCoder
     this.canCoder =
-        new CANcoder(config.canCoderCANID.getDeviceNumber(), config.canCoderCANID.getBus());
+        new CANcoder(
+            config.canCoderCANID.getDeviceNumber(), new CANBus(config.canCoderCANID.getBus()));
 
     // Get position signal from CANCoder
     canCoderPositionSignal = canCoder.getAbsolutePosition();
