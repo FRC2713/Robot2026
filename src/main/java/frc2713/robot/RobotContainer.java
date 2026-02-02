@@ -278,9 +278,20 @@ public class RobotContainer {
 
     controller
         .leftBumper()
-        .onTrue(
+        .whileTrue(
+            Commands.parallel(intakeRoller.intake(), intakeExtension.extendCommand())
+                .withName("Intaking"))
+        .onFalse(
+            Commands.parallel(intakeRoller.stop(), intakeExtension.retractCommand())
+                .withName("Intake Idle"));
+
+    controller
+        .leftTrigger(0.25)
+        .whileTrue(
             Commands.runOnce(
-                () -> flywheels.launchFuel(LaunchingSolutionManager.getInstance().getSolution())));
+                    () ->
+                        flywheels.launchFuel(LaunchingSolutionManager.getInstance().getSolution()))
+                .withName("Shooting OTF"));
   }
 
   /**
