@@ -9,5 +9,5 @@ public interface TurretMotorIO extends MotorIO {
    *
    * @param inputs The TurretInputs object to populate with sensor data
    */
-  void readInputs(TurretInputs inputs);
+  default void readInputs(TurretInputs inputs) {}
 }
