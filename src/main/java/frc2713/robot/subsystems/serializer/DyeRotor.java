@@ -9,15 +9,15 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.Timer;
 import frc2713.lib.io.ArticulatedComponent;
+import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
-import frc2713.lib.io.TalonFXIO;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 
-public class DyeRotor extends MotorSubsystem<MotorInputsAutoLogged, TalonFXIO>
+public class DyeRotor extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
     implements ArticulatedComponent {
 
-  public DyeRotor(final TalonFXSubsystemConfig config, final TalonFXIO indexerMotorIO) {
+  public DyeRotor(final TalonFXSubsystemConfig config, final MotorIO indexerMotorIO) {
     super(config, new MotorInputsAutoLogged(), indexerMotorIO);
   }
 

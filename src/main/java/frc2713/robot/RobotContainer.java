@@ -7,6 +7,8 @@
 
 package frc2713.robot;
 
+import static edu.wpi.first.units.Units.RPM;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -16,20 +18,18 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.SimTalonFXIO;
 import frc2713.lib.io.TalonFXIO;
 import frc2713.lib.subsystem.KinematicsManager;
-import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.generated.TunerConstants;
 import frc2713.robot.subsystems.climber.Climber;
 import frc2713.robot.subsystems.climber.ClimberConstants;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.drive.GyroIO;
-import frc2713.robot.subsystems.drive.GyroIOPigeon2;
 import frc2713.robot.subsystems.drive.ModuleIO;
 import frc2713.robot.subsystems.drive.ModuleIOSim;
-import frc2713.robot.subsystems.drive.ModuleIOTalonFX;
 import frc2713.robot.subsystems.intake.IntakeConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
@@ -40,7 +40,6 @@ import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
 import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.launcher.TurretMotorIOSim;
 import frc2713.robot.subsystems.launcher.TurretMotorIOTalonFX;
-import frc2713.robot.subsystems.launcher.TurretSubsystemConfig;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 import frc2713.robot.subsystems.serializer.SerializerConstants;
@@ -82,38 +81,36 @@ public class RobotContainer {
         // a CANcoder
         drive =
             new Drive(
-                new GyroIOPigeon2(),
-                new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                new ModuleIOTalonFX(TunerConstants.FrontRight),
-                new ModuleIOTalonFX(TunerConstants.BackLeft),
-                new ModuleIOTalonFX(TunerConstants.BackRight));
+                new GyroIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {});
 
         flywheels =
             new Flywheels(
-                LauncherConstants.Flywheels.config,
-                new TalonFXIO(LauncherConstants.Flywheels.config));
-        hood =
-            new Hood(LauncherConstants.Hood.config, new TalonFXIO(LauncherConstants.Hood.config));
+                LauncherConstants.Flywheels.leftConfig,
+                LauncherConstants.Flywheels.rightConfig,
+                new TalonFXIO(LauncherConstants.Flywheels.leftConfig),
+                new TalonFXIO(LauncherConstants.Flywheels.rightConfig));
+
+        hood = new Hood(LauncherConstants.Hood.config, new MotorIO() {});
 
         turret =
             new Turret(
                 LauncherConstants.Turret.config,
                 new TurretMotorIOTalonFX(LauncherConstants.Turret.config));
-        intakeRoller =
-            new IntakeRoller(
-                IntakeConstants.Roller.config, new TalonFXIO(IntakeConstants.Roller.config));
-        intakeExtension =
-            new IntakeExtension(
-                IntakeConstants.Extension.config, new TalonFXIO(IntakeConstants.Extension.config));
-        dyeRotor =
-            new DyeRotor(
-                SerializerConstants.DyeRotor.config,
-                new TalonFXIO(SerializerConstants.DyeRotor.config));
-        feeder =
-            new Feeder(
-                SerializerConstants.Feeder.config,
-                new TalonFXIO(SerializerConstants.Feeder.config));
-        climber = new Climber(ClimberConstants.config, new TalonFXIO(ClimberConstants.config));
+
+        intakeRoller = new IntakeRoller(IntakeConstants.Roller.config, new MotorIO() {});
+
+        intakeExtension = new IntakeExtension(IntakeConstants.Extension.config, new MotorIO() {});
+
+        dyeRotor = new DyeRotor(SerializerConstants.DyeRotor.config, new MotorIO() {});
+
+        feeder = new Feeder(SerializerConstants.Feeder.config, new MotorIO() {});
+
+        climber = new Climber(ClimberConstants.config, new MotorIO() {});
+
         break;
 
       case SIM:
@@ -128,8 +125,10 @@ public class RobotContainer {
 
         flywheels =
             new Flywheels(
-                LauncherConstants.Flywheels.config,
-                new SimTalonFXIO(LauncherConstants.Flywheels.config));
+                LauncherConstants.Flywheels.leftConfig,
+                LauncherConstants.Flywheels.rightConfig,
+                new SimTalonFXIO(LauncherConstants.Flywheels.leftConfig),
+                new SimTalonFXIO(LauncherConstants.Flywheels.rightConfig));
         hood =
             new Hood(
                 LauncherConstants.Hood.config, new SimTalonFXIO(LauncherConstants.Hood.config));
@@ -168,28 +167,27 @@ public class RobotContainer {
 
         flywheels =
             new Flywheels(
-                new TalonFXSubsystemConfig(), new SimTalonFXIO(new TalonFXSubsystemConfig()));
-        hood =
-            new Hood(new TalonFXSubsystemConfig(), new SimTalonFXIO(new TalonFXSubsystemConfig()));
+                LauncherConstants.Flywheels.leftConfig,
+                LauncherConstants.Flywheels.rightConfig,
+                new MotorIO() {},
+                new MotorIO() {});
+
+        hood = new Hood(LauncherConstants.Hood.config, new MotorIO() {});
 
         turret =
             new Turret(
-                new TurretSubsystemConfig(), new TurretMotorIOSim(new TurretSubsystemConfig()));
-        intakeRoller =
-            new IntakeRoller(
-                new TalonFXSubsystemConfig(), new SimTalonFXIO(new TalonFXSubsystemConfig()));
-        intakeExtension =
-            new IntakeExtension(
-                new TalonFXSubsystemConfig(), new SimTalonFXIO(new TalonFXSubsystemConfig()));
-        dyeRotor =
-            new DyeRotor(
-                new TalonFXSubsystemConfig(), new SimTalonFXIO(new TalonFXSubsystemConfig()));
-        feeder =
-            new Feeder(
-                new TalonFXSubsystemConfig(), new SimTalonFXIO(new TalonFXSubsystemConfig()));
-        climber =
-            new Climber(
-                new TalonFXSubsystemConfig(), new SimTalonFXIO(new TalonFXSubsystemConfig()));
+                LauncherConstants.Turret.config,
+                new TurretMotorIOSim(LauncherConstants.Turret.config));
+
+        intakeRoller = new IntakeRoller(IntakeConstants.Roller.config, new MotorIO() {});
+
+        intakeExtension = new IntakeExtension(IntakeConstants.Extension.config, new MotorIO() {});
+
+        dyeRotor = new DyeRotor(SerializerConstants.DyeRotor.config, new MotorIO() {});
+
+        feeder = new Feeder(SerializerConstants.Feeder.config, new MotorIO() {});
+
+        climber = new Climber(ClimberConstants.config, new MotorIO() {});
         break;
     }
 
@@ -279,7 +277,11 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    controller.rightBumper().whileTrue(flywheels.dutyCycleCommand(() -> 0.5));
+    controller
+        .rightBumper()
+        .onTrue(flywheels.velocitySetpointCommand(LauncherConstants.Flywheels.PIDTest))
+        .onFalse(flywheels.velocitySetpointCommand(() -> RPM.of(0)));
+
     controller
         .leftBumper()
         .onTrue(
