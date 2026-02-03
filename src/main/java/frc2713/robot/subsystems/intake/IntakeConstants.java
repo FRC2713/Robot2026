@@ -1,6 +1,7 @@
 package frc2713.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
 
 import edu.wpi.first.units.measure.Distance;
 import frc2713.lib.drivers.CANDeviceId;
@@ -30,10 +31,22 @@ public final class IntakeConstants {
     static {
       config.name = "Intake Extension";
       config.talonCANID = new CANDeviceId(8); // Example CAN ID, replace with actual ID
-      config.fxConfig.Slot0.kP = 0.2;
+      config.fxConfig.Slot0.kP = 65.0;
       config.fxConfig.Slot0.kI = 0.0;
-      config.fxConfig.Slot0.kD = 0.0;
-      config.unitToRotorRatio = 1.0; // 1:1 ratio
+      config.fxConfig.Slot0.kD = 15.0;
+      config.fxConfig.Slot0.kS = 0.125;
+      config.fxConfig.Slot0.kV = 0.11;
+      config.fxConfig.Slot0.kA = 0.0;
+      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 4.0; // target crusing vel rps
+      config.fxConfig.MotionMagic.MotionMagicAcceleration = 6.0;
+      config.fxConfig.MotionMagic.MotionMagicJerk = 0;
+
+      config.unitToRotorRatio = 1.0; // assumes 1:1 gearbox
+      config.unitRotationsPerMeter =
+          1.0 / Inches.of(12).in(Meters); // assumes 1 ft of travel per rotation
+
+      // Moment of inertia for sim - reasonable for light linear mechanism
+      config.momentOfInertia = 0.01;
       config.tunable = true;
     }
 

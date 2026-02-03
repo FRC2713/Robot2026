@@ -1,9 +1,11 @@
 package frc2713.lib.io;
 
-import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.sim.ChassisReference;
@@ -13,10 +15,10 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.Notifier;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.RobotTime;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import org.littletonrobotics.junction.Logger;
 
@@ -24,8 +26,6 @@ public class SimTalonFXIO extends TalonFXIO {
   protected DCMotorSim sim;
   private Notifier simNotifier = null;
   private Time lastUpdateTimestamp = Seconds.of(0.0);
-  private Optional<AngularVelocity> overrideVelocity = Optional.empty();
-  private Optional<Angle> overridePosition = Optional.empty();
 
   // Used to handle mechanisms that wrap.
   private boolean invertVoltage = false;
@@ -39,6 +39,9 @@ public class SimTalonFXIO extends TalonFXIO {
   }
 
   public SimTalonFXIO(TalonFXSubsystemConfig config) {
+    // the TalonFX in the parent class will store and update the motor charecteristics in simulation
+    // the DCMotorSim has the plant model that lets up update the motor state while running in
+    // simulation
     this(
         config,
         new DCMotorSim(
@@ -65,15 +68,10 @@ public class SimTalonFXIO extends TalonFXIO {
     simNotifier.startPeriodic(0.005);
   }
 
-  // Need to use rad of the mechanism itself.
-  public void setPositionRad(double rad) {
-    sim.setAngle(
-        (config.fxConfig.MotorOutput.Inverted == InvertedValue.Clockwise_Positive ? -1.0 : 1.0)
-            * rad);
-    Logger.recordOutput(pb.makePath("Sim", "setPositionRad"), rad);
-  }
+  protected double getPlantModelInput(double frictionVoltage) {
+    double motorVoltage = talon.getSimState().getMotorVoltage();
 
-  protected double addFriction(double motorVoltage, double frictionVoltage) {
+    // Apply static friction
     if (Math.abs(motorVoltage) < frictionVoltage) {
       motorVoltage = 0.0;
     } else if (motorVoltage > 0.0) {
@@ -81,7 +79,9 @@ public class SimTalonFXIO extends TalonFXIO {
     } else {
       motorVoltage += frictionVoltage;
     }
-    return motorVoltage;
+
+    // Apply motor inversion
+    return invertVoltage ? -motorVoltage : motorVoltage;
   }
 
   public void setInvertVoltage(boolean invertVoltage) {
@@ -89,46 +89,40 @@ public class SimTalonFXIO extends TalonFXIO {
   }
 
   protected void updateSimState() {
-    var simState = talon.getSimState();
-    double simVoltage = addFriction(simState.getMotorVoltage(), 0.25);
-    simVoltage = (invertVoltage) ? -simVoltage : simVoltage;
-    sim.setInput(simVoltage);
-    Logger.recordOutput(pb.makePath("Sim", "SimulatorVoltage"), simVoltage);
+    var motorState = talon.getSimState();
+    motorState.setSupplyVoltage((invertVoltage ? -1 : 1) * RobotController.getBatteryVoltage());
+    sim.setInputVoltage(getPlantModelInput(0.25));
 
     Time timestamp = RobotTime.getTimestamp();
     sim.update(timestamp.minus(lastUpdateTimestamp).in(Seconds));
     lastUpdateTimestamp = timestamp;
 
-    overridePosition.ifPresent(anAngle -> sim.setAngle(anAngle.in(Radians)));
+    double simPositionRad = sim.getAngularPositionRad(); // sim in rads
+    double simVelocityRadPerSec = sim.getAngularVelocityRadPerSec();
 
-    // Find current state of sim in radians from 0 point
-    Angle simPosition = Radians.of(sim.getAngularPositionRad());
-    Logger.recordOutput(pb.makePath("Sim", "SimulatorPositionRadians"), simPosition.in(Radians));
-
-    // Mutate rotor position
-    Angle rotorPosition = simPosition.div(getSimRatio());
-    lastPosition.set(rotorPosition);
-    simState.setRawRotorPosition(rotorPosition);
-    Logger.recordOutput(pb.makePath("Sim", "setRawRotorPosition"), rotorPosition);
-
-    // Mutate rotor vel
-    AngularVelocity rotorVel =
-        RadiansPerSecond.of(sim.getAngularVelocityRadPerSec()).div(getSimRatio());
-    lastVelocity.set(rotorVel);
-    simState.setRotorVelocity(overrideVelocity.isEmpty() ? rotorVel : overrideVelocity.get());
-    Logger.recordOutput(
-        pb.makePath("Sim", "SimulatorVelocityRadS"), sim.getAngularVelocityRadPerSec());
+    double motorRotations = simPositionRad / (2.0 * Math.PI); // ctre expects rotations
+    double motorRotPerSec = simVelocityRadPerSec / (2.0 * Math.PI);
+    motorState.setRawRotorPosition(motorRotations);
+    motorState.setRotorVelocity(motorRotPerSec);
   }
 
-  public void overrideVelocity(Optional<AngularVelocity> rps) {
-    overrideVelocity = rps;
-  }
+  @Override
+  public void readInputs(MotorInputs inputs) {
+    // Note that in SIM we dont call BaseStatusSignal.refreshAll(signals) to avoid CAN errors
+    // so the inputs have to come from the sim. There might still be some CAN errors at init.
 
-  public void overridePosition(Optional<Angle> pos) {
-    overridePosition = pos;
-  }
+    double simPositionRad = sim.getAngularPositionRad();
+    double simVelocityRadPerSec = sim.getAngularVelocityRadPerSec();
 
-  public AngularVelocity getIntendedVelocity() {
-    return lastVelocity.get();
+    // Convert from radians to rotations (mechanism position, not rotor)
+    double mechanismRotations = simPositionRad / (2.0 * Math.PI) * config.unitToRotorRatio;
+    double mechanismRotPerSec = simVelocityRadPerSec / (2.0 * Math.PI) * config.unitToRotorRatio;
+
+    inputs.position = Rotations.of(mechanismRotations);
+    inputs.velocity = RotationsPerSecond.of(mechanismRotPerSec);
+    inputs.appliedVolts = Volts.of(sim.getInputVoltage());
+    inputs.currentStatorAmps = Amps.of(sim.getCurrentDrawAmps());
+    inputs.currentSupplyAmps = Amps.of(sim.getCurrentDrawAmps());
+    inputs.rawRotorPosition = Rotations.of(simPositionRad / (2.0 * Math.PI));
   }
 }
