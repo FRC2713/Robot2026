@@ -12,7 +12,6 @@ import frc2713.robot.commands.DriveCommands;
 public class DriverControls {
   private final CommandXboxController controller = new CommandXboxController(0);
 
-  public void configureTriggers() {}
 
   public void configureButtonBindings() {
 

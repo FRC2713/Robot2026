@@ -252,11 +252,8 @@ public class RobotContainer {
   private void configureButtonBindings() {
     // Default command, normal field-relative drive
     driverControls.configureButtonBindings();
-    driverControls.configureTriggers();
     // operatorControls.configureButtonBindings();
-    // operatorControls.configureTriggers();
     // devControls.configureButtonBindings();
-    // devControls.configureTriggers();
 
     // Default command, normal field-relative drive
     driverControls.setToNormalDrive();
