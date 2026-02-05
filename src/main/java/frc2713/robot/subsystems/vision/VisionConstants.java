@@ -2,6 +2,7 @@ package frc2713.robot.subsystems.vision;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radian;
 
 import edu.wpi.first.math.Matrix;
@@ -10,10 +11,11 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 
 public class VisionConstants {
-  public static double MAX_POSE_JUMP_METERS = 2;
-  public static double MAX_SPEED = 0.02;
+  public static Distance MAX_POSE_JUMP = Meters.of(2);
+  public static LinearVelocity MAX_SPEED = MetersPerSecond.of(0.02);
 
   public record PoseEstimatorErrorStDevs(Distance translationalStDev, Angle rotationalStDev) {
     public PoseEstimatorErrorStDevs multiplyByRange(double range) {

@@ -1,5 +1,6 @@
 package frc2713.robot.subsystems.vision;
 
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -21,7 +22,6 @@ public class VisionIOSLAMDunk implements VisionIO {
   private double lastTimestamp = -1;
 
   public VisionIOSLAMDunk() {
-
     inst = NetworkTableInstance.getDefault();
     table = inst.getTable("slamdunk");
     sub = table.getDoubleArrayTopic("pose_robot").subscribe(new double[0]);
@@ -77,7 +77,7 @@ public class VisionIOSLAMDunk implements VisionIO {
                 .pose
                 .getTranslation()
                 .getDistance(RobotContainer.drive.getPose().getTranslation())
-            > VisionConstants.MAX_POSE_JUMP_METERS)) {
+            > VisionConstants.MAX_POSE_JUMP.in(Meters))) {
           inputs.reasoning = "Jump protection";
           inputs.applying = false;
           return;
