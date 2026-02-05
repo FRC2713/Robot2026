@@ -49,15 +49,11 @@ public class FuelCluster {
   public double findAngleTranslation(double FOV, int xResolution, int pixelsPerHorizontalGrid) {
     double avgX = 0;
     for (int i = 0; i < fuelSquares.size(); i++) {
-      avgX += ((fuelSquares.get(i).getGridX() - (xResolution / 2)) * pixelsPerHorizontalGrid);
+      avgX += ((fuelSquares.get(i).getGridX()) * pixelsPerHorizontalGrid);
     }
     avgX /= fuelSquares.size();
-    double centerDeg = avgX * (FOV / xResolution);
-    // double centerRad = centerDeg * (Math.PI / 180);
-    // double centerDistX = Math.cos(centerRad);
-    // double centerDistY = Math.sin(centerRad);
-    // return new Translation2d(centerDistX, centerDistY);
-    return centerDeg;
+    double degreesPerPixel = FOV / xResolution;
+    return avgX * degreesPerPixel;
   }
 
   public String toString() {

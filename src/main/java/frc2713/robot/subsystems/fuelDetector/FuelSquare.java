@@ -52,11 +52,11 @@ public class FuelSquare {
     cluster = c;
   }
 
-  public double averageFuelDepth() {
+  public double averageFuelWidth() {
     int size = fuelList.size();
     double sum = 0;
     for (int i = 0; i < size; i++) {
-      sum += fuelList.get(i).depth;
+      sum += fuelList.get(i).width;
     }
     sum /= size;
     return sum;
