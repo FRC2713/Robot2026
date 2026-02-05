@@ -1,5 +1,7 @@
 package frc2713.robot.oi;
 
+import static edu.wpi.first.units.Units.Degrees;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -9,8 +11,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc2713.robot.RobotContainer;
 import frc2713.robot.commands.DriveCommands;
 
-public class DriverControls {
-  private final CommandXboxController controller = new CommandXboxController(0);
+public class DevControls {
+  private final CommandXboxController controller = new CommandXboxController(1);
 
   public void configureButtonBindings() {
 
@@ -62,6 +64,10 @@ public class DriverControls {
                     RobotContainer.drive, () -> -1 * DriveCommands.INCH_SPEED.getAsDouble()),
                 "Inch Right"))
         .onFalse(this.setToNormalDriveCmd());
+
+    // Turret angle controls
+    controller.leftBumper().onTrue(RobotContainer.turret.setAngle(() -> Degrees.of(90)));
+    controller.rightBumper().onTrue(RobotContainer.turret.setAngle(() -> Degrees.of(-300)));
   }
 
   public double getLeftY() {

@@ -18,6 +18,7 @@ import frc2713.lib.io.TalonFXIO;
 import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.generated.TunerConstants;
+import frc2713.robot.oi.DevControls;
 import frc2713.robot.oi.DriverControls;
 import frc2713.robot.subsystems.climber.Climber;
 import frc2713.robot.subsystems.climber.ClimberConstants;
@@ -53,7 +54,7 @@ public class RobotContainer {
   // Subsystems
   public static Drive drive;
   private final Flywheels flywheels;
-  private final Turret turret;
+  public static Turret turret;
   private final Hood hood;
   private final IntakeRoller intakeRoller;
   private final IntakeExtension intakeExtension;
@@ -62,6 +63,7 @@ public class RobotContainer {
   private final Climber climber;
   // Controllers
   public static DriverControls driverControls = new DriverControls();
+  public static DevControls devControls = new DevControls();
 
   // Controller
 
@@ -238,10 +240,11 @@ public class RobotContainer {
     // Default command, normal field-relative drive
     driverControls.configureButtonBindings();
     // operatorControls.configureButtonBindings();
-    // devControls.configureButtonBindings();
+    devControls.configureButtonBindings();
 
     // Default command, normal field-relative drive
     driverControls.setToNormalDrive();
+    devControls.setToNormalDrive();
   }
 
   /**

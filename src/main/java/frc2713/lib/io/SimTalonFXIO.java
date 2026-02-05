@@ -18,14 +18,24 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
+import frc2713.lib.util.LoggedTunableNumber;
 import frc2713.lib.util.RobotTime;
 import java.util.concurrent.atomic.AtomicReference;
-import org.littletonrobotics.junction.Logger;
 
 public class SimTalonFXIO extends TalonFXIO {
   protected DCMotorSim sim;
   private Notifier simNotifier = null;
   private Time lastUpdateTimestamp = Seconds.of(0.0);
+
+  // Tunable PID gains for simulation closed-loop control
+  private static final LoggedTunableNumber simPidKp =
+      new LoggedTunableNumber("SimTalonFX/PID/kP", 12.0);
+  private static final LoggedTunableNumber simPidKi =
+      new LoggedTunableNumber("SimTalonFX/PID/kI", 0.0);
+  private static final LoggedTunableNumber simPidKd =
+      new LoggedTunableNumber("SimTalonFX/PID/kD", 3.0);
+  private static final LoggedTunableNumber simPidIZone =
+      new LoggedTunableNumber("SimTalonFX/PID/iZone", 2.0);
 
   // Used to handle mechanisms that wrap.
   private boolean invertVoltage = false;
@@ -91,7 +101,15 @@ public class SimTalonFXIO extends TalonFXIO {
   protected void updateSimState() {
     var motorState = talon.getSimState();
     motorState.setSupplyVoltage((invertVoltage ? -1 : 1) * RobotController.getBatteryVoltage());
-    sim.setInputVoltage(getPlantModelInput(0.25));
+
+    // Use our closed-loop voltage if we have a setpoint, otherwise use Phoenix voltage
+    double voltage;
+    if (positionSetpointRotations != null) {
+      voltage = getClosedLoopVoltage();
+    } else {
+      voltage = getPlantModelInput(0.25);
+    }
+    sim.setInputVoltage(voltage);
 
     Time timestamp = RobotTime.getTimestamp();
     sim.update(timestamp.minus(lastUpdateTimestamp).in(Seconds));
@@ -124,5 +142,96 @@ public class SimTalonFXIO extends TalonFXIO {
     inputs.currentStatorAmps = Amps.of(sim.getCurrentDrawAmps());
     inputs.currentSupplyAmps = Amps.of(sim.getCurrentDrawAmps());
     inputs.rawRotorPosition = Rotations.of(simPositionRad / (2.0 * Math.PI));
+  }
+
+  // Setpoint for simulated closed-loop control (in motor rotations)
+  private volatile Double positionSetpointRotations = null;
+  private double errorIntegral = 0.0;
+  private double lastError = 0.0;
+  private long lastPidTimeNanos = 0;
+
+  @Override
+  public void setMotionMagicSetpoint(Angle setpoint, int slot) {
+    // Store setpoint for our sim closed-loop control (in motor rotations)
+    double newSetpoint = setpoint.in(Rotations) / config.unitToRotorRatio;
+    if (positionSetpointRotations == null
+        || Math.abs(newSetpoint - positionSetpointRotations) > 0.001) {
+      // Reset integral and derivative state on new setpoint
+      errorIntegral = 0.0;
+      lastError = 0.0;
+      lastPidTimeNanos = System.nanoTime();
+    }
+    positionSetpointRotations = newSetpoint;
+    super.setMotionMagicSetpoint(setpoint, slot);
+  }
+
+  @Override
+  public void setPositionSetpoint(Angle setpoint) {
+    // Store setpoint for our sim closed-loop control (in motor rotations)
+    double newSetpoint = setpoint.in(Rotations) / config.unitToRotorRatio;
+    if (positionSetpointRotations == null
+        || Math.abs(newSetpoint - positionSetpointRotations) > 0.001) {
+      // Reset integral and derivative state on new setpoint
+      errorIntegral = 0.0;
+      lastError = 0.0;
+      lastPidTimeNanos = System.nanoTime();
+    }
+    positionSetpointRotations = newSetpoint;
+    super.setPositionSetpoint(setpoint);
+  }
+
+  /**
+   * Calculate voltage for closed-loop position control in simulation. Phoenix 6's closed-loop sim
+   * doesn't generate proper voltage with DCMotorSim, so we implement our own PID controller.
+   */
+  protected double getClosedLoopVoltage() {
+    if (positionSetpointRotations == null) {
+      return 0.0;
+    }
+
+    // Reset PID state if any gains changed
+    LoggedTunableNumber.ifChanged(
+        hashCode(),
+        (values) -> {
+          errorIntegral = 0.0;
+          lastError = 0.0;
+        },
+        simPidKp,
+        simPidKi,
+        simPidKd,
+        simPidIZone);
+
+    long currentTimeNanos = System.nanoTime();
+    double dt = (currentTimeNanos - lastPidTimeNanos) / 1e9; // Convert to seconds
+    if (dt <= 0 || dt > 0.1) {
+      dt = 0.005; // Default to 5ms if invalid
+    }
+    lastPidTimeNanos = currentTimeNanos;
+
+    double currentPositionRotations = sim.getAngularPositionRad() / (2.0 * Math.PI);
+    double errorRotations = positionSetpointRotations - currentPositionRotations;
+
+    // PID gains from tunable constants
+    double kP = simPidKp.get();
+    double kI = simPidKi.get();
+    double kD = simPidKd.get();
+    double iZone = simPidIZone.get();
+
+    // Integrate error (with anti-windup)
+    errorIntegral += errorRotations * dt;
+    errorIntegral = Math.max(-iZone, Math.min(iZone, errorIntegral)); // Clamp integral
+
+    // Derivative of error
+    double errorDerivative = (errorRotations - lastError) / dt;
+    lastError = errorRotations;
+
+    // Calculate voltage
+    double voltage = (kP * errorRotations) + (kI * errorIntegral) + (kD * errorDerivative);
+
+    // Clamp to battery voltage
+    double maxVoltage = RobotController.getBatteryVoltage();
+    voltage = Math.max(-maxVoltage, Math.min(maxVoltage, voltage));
+
+    return invertVoltage ? -voltage : voltage;
   }
 }

@@ -26,11 +26,10 @@ public final class LauncherConstants {
     static {
       config.name = "Turret";
       config.talonCANID = new CANDeviceId(12); // Example CAN ID, replace with actual ID
-      config.canCoderCANID = new CANDeviceId(13); // CANCoder CAN ID, replace with actual ID
+      config.canCoderCANID = new CANDeviceId(13); // CANCoder CAN ID
       config.fxConfig.Slot0.kP = 0.2;
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 0.0;
-      // rotations of subsystem for every 1 rotation of motor
       config.unitToRotorRatio = 1.0; // 1:1 ratio
       config.initialTransform =
           new Transform3d(
@@ -52,9 +51,12 @@ public final class LauncherConstants {
         (GEAR_2_TOOTH_COUNT * GEAR_1_TOOTH_COUNT)
             / ((GEAR_1_TOOTH_COUNT - GEAR_2_TOOTH_COUNT) * GEAR_0_TOOTH_COUNT);
 
+    // How many times encoder 1 spins per 1 degree of turret rotation
+    public static final double ENCODER_1_TO_TURRET_RATIO = GEAR_1_TOOTH_COUNT / GEAR_0_TOOTH_COUNT;
+
     // Turret rotation limits
-    public static final double FORWARD_LIMIT_DEGREES = 180.0; // TODO: Replace with actual value
-    public static final double REVERSE_LIMIT_DEGREES = -180.0; // TODO: Replace with actual value
+    public static final double FORWARD_LIMIT_DEGREES = 270.0; // TODO: Replace with actual value
+    public static final double REVERSE_LIMIT_DEGREES = -270.0; // TODO: Replace with actual value
   }
 
   public final class Flywheels {
