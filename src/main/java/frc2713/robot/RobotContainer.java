@@ -38,6 +38,9 @@ import frc2713.robot.subsystems.launcher.TurretMotorIOSim;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 import frc2713.robot.subsystems.serializer.SerializerConstants;
+import frc2713.robot.subsystems.vision.Vision;
+import frc2713.robot.subsystems.vision.VisionIO;
+import frc2713.robot.subsystems.vision.VisionIOSLAMDunk;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -60,6 +63,7 @@ public class RobotContainer {
   private final DyeRotor dyeRotor;
   private final Feeder feeder;
   private final Climber climber;
+  private final Vision vision;
   // Controllers
   public static DriverControls driverControls = new DriverControls();
 
@@ -104,6 +108,8 @@ public class RobotContainer {
 
         climber = new Climber(ClimberConstants.config, new MotorIO() {});
 
+        vision = new Vision(new VisionIOSLAMDunk());
+
         break;
 
       case SIM:
@@ -146,6 +152,9 @@ public class RobotContainer {
                 SerializerConstants.Feeder.config,
                 new SimTalonFXIO(SerializerConstants.Feeder.config));
         climber = new Climber(ClimberConstants.config, new SimTalonFXIO(ClimberConstants.config));
+
+        vision = new Vision(new VisionIO() {});
+
         break;
 
       default:
@@ -178,6 +187,9 @@ public class RobotContainer {
         feeder = new Feeder(SerializerConstants.Feeder.config, new MotorIO() {});
 
         climber = new Climber(ClimberConstants.config, new MotorIO() {});
+
+        vision = new Vision(new VisionIO() {});
+
         break;
     }
 

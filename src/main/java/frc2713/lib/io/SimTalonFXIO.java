@@ -20,7 +20,6 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.RobotTime;
 import java.util.concurrent.atomic.AtomicReference;
-import org.littletonrobotics.junction.Logger;
 
 public class SimTalonFXIO extends TalonFXIO {
   protected DCMotorSim sim;
