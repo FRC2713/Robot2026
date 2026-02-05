@@ -37,7 +37,7 @@ public class VisionIOSLAMDunk implements VisionIO {
 
     var speed = RobotContainer.drive.getSpeed();
     Logger.recordOutput("SLAMDunk/Speed", speed);
-    Logger.recordOutput("SLAMDunk/tFGPA", Timer.getFPGATimestamp());
+    Logger.recordOutput("SLAMDunk/tFPGA", Timer.getFPGATimestamp());
 
     var poseArray = sub.get();
     if (poseArray.length > 0) {
