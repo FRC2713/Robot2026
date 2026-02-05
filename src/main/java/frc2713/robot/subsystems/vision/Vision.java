@@ -5,13 +5,13 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc2713.robot.RobotContainer;
 import frc2713.robot.subsystems.vision.VisionConstants.PoseEstimatorErrorStDevs;
-import frc2713.robot.subsystems.vision.VisionIO.VisionInputs;
 import java.util.Optional;
+import org.littletonrobotics.junction.Logger;
 
 public class Vision extends SubsystemBase {
 
   private final VisionIO io;
-  private final VisionInputs inputs;
+  private final VisionInputsAutoLogged inputs;
 
   public Vision(VisionIO io) {
     this.io = io;
@@ -20,7 +20,9 @@ public class Vision extends SubsystemBase {
 
   @Override
   public void periodic() {
-    io.update(inputs);
+    io.updateInputs(inputs);
+    Logger.processInputs("Vision", inputs);
+
     if (inputs.applying && DriverStation.isEnabled()) {
       RobotContainer.drive.addVisionMeasurement(
           inputs.pose,

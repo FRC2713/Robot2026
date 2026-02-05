@@ -1,5 +1,7 @@
 package frc2713.robot.subsystems.vision;
 
+import static edu.wpi.first.units.Units.Seconds;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Quaternion;
@@ -17,7 +19,6 @@ public class VisionIOSLAMDunk implements VisionIO {
   private NetworkTable table;
   private DoubleArraySubscriber sub;
   private double lastTimestamp = -1;
-  private Pose2d pose2d = new Pose2d();
 
   public VisionIOSLAMDunk() {
 
@@ -27,7 +28,7 @@ public class VisionIOSLAMDunk implements VisionIO {
   }
 
   @Override
-  public void update(VisionInputs inputs) {
+  public void updateInputs(VisionInputs inputs) {
     inputs.translationStdDev = VisionConstants.POSE_ESTIMATOR_STATE_STDEVS.translationalStDev();
     inputs.rotationStdDev = VisionConstants.POSE_ESTIMATOR_STATE_STDEVS.rotationalStDev();
 
@@ -41,11 +42,12 @@ public class VisionIOSLAMDunk implements VisionIO {
     var poseArray = sub.get();
     if (poseArray.length > 0) {
       double t = poseArray[0];
-      double latency = (Timer.getFPGATimestamp()) - t;
 
       if (lastTimestamp != t) {
-        Logger.recordOutput("SLAMDunk/t", t);
-        Logger.recordOutput("SLAMDunk/Latency", latency);
+
+        inputs.timestamp = t;
+        double latency = Timer.getFPGATimestamp() - t;
+        inputs.latency = Seconds.of(latency);
 
         lastTimestamp = t;
         inputs.pose3d =
@@ -65,13 +67,16 @@ public class VisionIOSLAMDunk implements VisionIO {
           inputs.applying = false;
           return;
         }
-        if (latency > 1) {
-          inputs.reasoning = "Latency > 1";
+        if (inputs.latency.compareTo(Seconds.of(0.2)) > 0) {
+          inputs.reasoning = "Latency > 0.2s";
           inputs.applying = false;
           return;
         }
 
-        if ((pose2d.getTranslation().getDistance(RobotContainer.drive.getPose().getTranslation())
+        if ((inputs
+                .pose
+                .getTranslation()
+                .getDistance(RobotContainer.drive.getPose().getTranslation())
             > VisionConstants.MAX_POSE_JUMP_METERS)) {
           inputs.reasoning = "Jump protection";
           inputs.applying = false;
@@ -80,7 +85,7 @@ public class VisionIOSLAMDunk implements VisionIO {
 
         if (Math.abs(inputs.pose3d.getTranslation().getZ()) > 0.1) {
           inputs.applying = false;
-          inputs.reasoning = "Z > 0.1";
+          inputs.reasoning = "Z > 0.1m";
           return;
         }
 

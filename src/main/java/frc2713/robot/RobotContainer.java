@@ -63,7 +63,7 @@ public class RobotContainer {
   private final DyeRotor dyeRotor;
   private final Feeder feeder;
   private final Climber climber;
-  private final Vision vision;
+  public final Vision vision;
   // Controllers
   public static DriverControls driverControls = new DriverControls();
 
@@ -153,7 +153,7 @@ public class RobotContainer {
                 new SimTalonFXIO(SerializerConstants.Feeder.config));
         climber = new Climber(ClimberConstants.config, new SimTalonFXIO(ClimberConstants.config));
 
-        vision = new Vision(new VisionIO() {});
+        vision = new Vision(new VisionIOSLAMDunk());
 
         break;
 
