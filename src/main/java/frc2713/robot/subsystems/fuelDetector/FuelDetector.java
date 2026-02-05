@@ -9,7 +9,7 @@ import org.littletonrobotics.junction.Logger;
 public class FuelDetector extends SubsystemBase {
   public final double fuelChanceThreshold = 0.8; // Percentage in decimal format
   public final int fuelDensityThreshold = 1; // fuels per grid square
-  public final int kGridWidth = 3; // number of horizontal grid cells - 1
+  public final int kGridWidth = 9; // number of horizontal grid cells - 1
   public final int kGridHeight = 3; // number of vertical grid cells - 1
   public final int kImageWidth = 640;
   public final int kImageHeight = 480;
