@@ -1,5 +1,6 @@
 package frc2713.robot.subsystems.fuelDetector;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringSubscriber;
@@ -29,25 +30,9 @@ public class FuelDetector extends SubsystemBase {
 
   public void periodic() {
     // get fuel information, call algorithm
-    FuelCoordinates[] fuels;
-    if (realFuelSub.exists()) {
-      fuels = FuelDetector.dataToFuelCoordinates(realFuelSub.get(new double[0]));
-
-    } else if (simFuelSub.exists()) {
-      fuels = FuelDetector.dataToFuelCoordinates(simFuelSub.get(""));
-    } else {
-      fuels = new FuelCoordinates[0];
-    }
-    if (fuels.length <= 0) {
-      System.out.println("No fuel data");
-    }
+    FuelCoordinates[] fuels = getDataFromNT();
     // System.out.println("fuelData: " + fuelData);
-    ArrayList<FuelCluster> fuelClusters = findFuelClusters(fuels, kGridWidth, kGridHeight);
-    if (fuelClusters.size() > 0) {
-      double vector =
-          fuelClusters.get(0).findAngleTranslation(60.0, kImageWidth, (kImageWidth / kGridWidth));
-      Logger.recordOutput("First Fuel Cluster", vector);
-    }
+    Logger.recordOutput("First Fuel Cluster", getRotation2D(fuels));
     // System.out.println(
     //    findFuelClusters(fuels, kGridWidth, kGridHeight).toString() + " fuel clusters");
   }
@@ -142,5 +127,41 @@ public class FuelDetector extends SubsystemBase {
       output[i] = new FuelCoordinates(fuels[i], fuels[i + 1]);
     }
     return output;
+  }
+
+  public FuelCoordinates[] getDataFromNT() {
+    FuelCoordinates[] fuels;
+    if (realFuelSub.exists()) {
+      fuels = FuelDetector.dataToFuelCoordinates(realFuelSub.get(new double[0]));
+
+    } else if (simFuelSub.exists()) {
+      fuels = FuelDetector.dataToFuelCoordinates(simFuelSub.get(""));
+    } else {
+      fuels = new FuelCoordinates[0];
+    }
+    if (fuels.length <= 0) {
+      System.out.println("No fuel data");
+    }
+    return fuels;
+  }
+
+  public Rotation2d getRotation2D(FuelCoordinates[] fuels) {
+    ArrayList<FuelCluster> fuelClusters = findFuelClusters(fuels, kGridWidth, kGridHeight);
+    if (fuelClusters.size() > 0) {
+      FuelCluster largestCluster = new FuelCluster(); // Note: this is the largest in terms of fuel count, not visiual size.
+      int maxFuels = 0;
+      for (int i = 0; i < fuelClusters.size(); i++) {
+        int size = fuelClusters.get(i).fuelCount;
+        if (size > maxFuels) {
+          maxFuels = size;
+          largestCluster = fuelClusters.get(i);
+        }
+      }
+      Rotation2d vector =
+          largestCluster.findAngleTranslation(60.0, kImageWidth, (kImageWidth / kGridWidth));
+      return vector;
+    } else {
+      return new Rotation2d(0); //Default value
+    }
   }
 }
