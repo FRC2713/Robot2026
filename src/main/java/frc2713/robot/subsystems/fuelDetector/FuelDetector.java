@@ -1,8 +1,10 @@
 package frc2713.robot.subsystems.fuelDetector;
 
+import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringSubscriber;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc2713.robot.Constants;
 import java.util.ArrayList;
 import org.littletonrobotics.junction.Logger;
 
@@ -14,14 +16,40 @@ public class FuelDetector extends SubsystemBase {
   public final int kImageWidth = 640;
   public final int kImageHeight = 480;
 
-  private final StringSubscriber fuelSub =
-      NetworkTableInstance.getDefault().getStringTopic("/fuelDetector/fuelData").subscribe("");
+  private StringSubscriber simFuelSub;
+  private DoubleArraySubscriber realFuelSub;
+
+  public FuelDetector() {
+    switch (Constants.currentMode) {
+      case REAL:
+        realFuelSub =
+            NetworkTableInstance.getDefault()
+                .getDoubleArrayTopic("/limelight/tcornxy")
+                .subscribe(new double[0]);
+        simFuelSub = null;
+      case SIM:
+        realFuelSub = null;
+        simFuelSub =
+            NetworkTableInstance.getDefault()
+                .getStringTopic("/fuelDetector/fuelData")
+                .subscribe("");
+      default:
+        realFuelSub = null;
+        simFuelSub = null;
+    }
+  }
 
   public void periodic() {
     // get fuel information, call algorithm
-    String fuelData = fuelSub.get("");
+    FuelCoordinates[] fuels;
+    if(simFuelSub != null) {
+      fuels = FuelDetector.dataToFuelCoordinates(simFuelSub.get(""));
+    } else if (realFuelSub != null) {
+      fuels = FuelDetector.dataToFuelCoordinates(realFuelSub.get(new double[0]));
+    } else {
+      fuels = new FuelCoordinates[0];
+    }
     // System.out.println("fuelData: " + fuelData);
-    FuelCoordinates[] fuels = FuelDetector.dataToFuelCoordinates(fuelData);
     ArrayList<FuelCluster> fuelClusters = findFuelClusters(fuels, kGridWidth, kGridHeight);
     if (fuelClusters.size() > 0) {
       double vector =
@@ -107,6 +135,18 @@ public class FuelDetector extends SubsystemBase {
     FuelCoordinates[] output = new FuelCoordinates[fuels.length];
     for (int i = 0; i < fuels.length; i++) {
       output[i] = new FuelCoordinates(fuels[i]);
+    }
+    return output;
+  }
+  public static FuelCoordinates[] dataToFuelCoordinates(double[] data) {
+    // data is essentially a special type of .csv file
+    // a ; seperates fuels, a , seperates fuel properties
+    // In order of properties: x, y, width, height, chance
+
+    double[] fuels = data;
+    FuelCoordinates[] output = new FuelCoordinates[fuels.length];
+    for (int i = 0; i < fuels.length; i += 2) {
+      output[i] = new FuelCoordinates(fuels[i], fuels[i + 1]);
     }
     return output;
   }
