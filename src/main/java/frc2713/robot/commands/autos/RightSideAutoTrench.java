@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc2713.robot.subsystems.drive.Drive;
+import frc2713.robot.subsystems.intake.IntakeConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.launcher.Flywheels;
@@ -50,9 +51,8 @@ public class RightSideAutoTrench {
         .onTrue(
             Commands.sequence(
                 Commands.print("Moving to shooting position"),
-                // intakeAndShooter.voltageCmd(IntakeAndLauncherConstants.intakeVoltage.get()),
-                // new InstantCommand(() -> driveSubsystem.stop()),
-                new WaitCommand(2),
+                intakeRoller.intake(),
+                new WaitCommand(1),
                 moveToLaunchBump.cmd()));
     moveToLaunchBump
         .done()
@@ -61,7 +61,6 @@ public class RightSideAutoTrench {
                 Commands.print("Starting launch sequence"),
                 Commands.race(
                     Commands.parallel(
-                        // IntakeRoller.voltageCmd(IntakeConstants.extendedPosition.get()),
                         // Turret.voltageCmd(LauncherConstants.launchVoltage.get()),
                         Commands.sequence(
                             // Commands.waitSeconds(IntakeAndLauncherConstants.launchWarmUpTime.get()),
