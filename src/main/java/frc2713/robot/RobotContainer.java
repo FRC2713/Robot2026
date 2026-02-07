@@ -7,6 +7,7 @@
 
 package frc2713.robot;
 
+import choreo.auto.AutoFactory;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -20,7 +21,9 @@ import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.SimTalonFXIO;
 import frc2713.lib.io.TalonFXIO;
 import frc2713.lib.subsystem.KinematicsManager;
+import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.commands.DriveCommands;
+import frc2713.robot.commands.autos.RightSideAutoTrench;
 import frc2713.robot.generated.TunerConstants;
 import frc2713.robot.subsystems.climber.Climber;
 import frc2713.robot.subsystems.climber.ClimberConstants;
@@ -39,6 +42,8 @@ import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 import frc2713.robot.subsystems.serializer.SerializerConstants;
+import java.util.Arrays;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -66,6 +71,7 @@ public class RobotContainer {
   private final CommandXboxController controller = new CommandXboxController(0);
 
   // Dashboard inputs
+  private final AutoFactory autoFactory;
   private final LoggedDashboardChooser<Command> autoChooser;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -179,6 +185,22 @@ public class RobotContainer {
         climber = new Climber(ClimberConstants.config, new MotorIO() {});
         break;
     }
+    //
+    autoFactory =
+        new AutoFactory(
+            drive::getPose, // Function that returns the current robot pose
+            drive::setPose, // Function that resets the current robot pose to the provided Pose2d
+            drive::followTrajectory, // The drive subsystem trajectory follower
+            true, // If alliance flipping should be enabled
+            drive,
+            (sample, isStart) -> {
+              Logger.recordOutput(
+                  "TrajectoryFollowing/ActiveTrajectory",
+                  Arrays.stream(sample.getPoses())
+                      .map(AllianceFlipUtil::apply)
+                      .toArray(Pose2d[]::new));
+            } // The drive subsystem
+            );
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -198,6 +220,10 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+        "Right side trench auto",
+        RightSideAutoTrench.routine(
+            autoFactory, drive, intakeExtension, intakeRoller, flywheels, dyeRotor, feeder));
 
     // Configure the button bindings
     configureButtonBindings();

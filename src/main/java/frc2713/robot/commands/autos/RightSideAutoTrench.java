@@ -1,26 +1,34 @@
-package frc2713.robot.commands;
+package frc2713.robot.commands.autos;
 
 import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
-import com.ctre.phoenix6.swerve.jni.SwerveJNI.DriveState;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
+import frc2713.robot.subsystems.intake.IntakeRoller;
+import frc2713.robot.subsystems.launcher.Flywheels;
+import frc2713.robot.subsystems.serializer.DyeRotor;
+import frc2713.robot.subsystems.serializer.Feeder;
 
-public class AutoCommand {
+public class RightSideAutoTrench {
   public static AutoRoutine getRoutine(
       AutoFactory factory,
-      DriveState driveSubsystem,
-      IntakeExtension IntakeRoller,
+      Drive driveSubsystem,
+      IntakeExtension intakeExtension,
+      IntakeRoller intakeRoller,
+      Flywheels launcher,
+      DyeRotor cerealiser,
       //   Launcher intakeAndShooter,
-      frc2713.robot.subsystems.serializer.Feeder feederAndIndexer) {
+      Feeder feederAndIndexer) {
     AutoRoutine routine = factory.newRoutine("Start Collect Shoot");
 
-    AutoTrajectory faceFuelTrench = routine.trajectory("FaceFuel");
-    AutoTrajectory IntakeFuel = routine.trajectory("CollectFuel");
-    AutoTrajectory MoveToLaunchTrench = routine.trajectory("FuelToShotT");
+    AutoTrajectory faceFuelTrench = routine.trajectory("FaceFuelTrench");
+    AutoTrajectory intakeFuel = routine.trajectory("IntakeFuel");
+    AutoTrajectory moveToLaunchBump = routine.trajectory("moveToLaunchBump");
 
     routine
         .active()
@@ -35,18 +43,19 @@ public class AutoCommand {
         .onTrue(
             Commands.sequence(
                 Commands.print("Starting intake and collecting fuel"),
-                Commands.parallel(
-                    // intakeAndShooter.voltageCmd(IntakeAndLauncherConstants.intakeVoltage.get()),
-                    IntakeFuel.cmd())));
-    IntakeFuel.done()
+                Commands.parallel(intakeExtension.extendCommand(), intakeFuel.cmd())));
+                
+    intakeFuel
+        .done()
         .onTrue(
             Commands.sequence(
                 Commands.print("Moving to shooting position"),
                 // intakeAndShooter.voltageCmd(IntakeAndLauncherConstants.intakeVoltage.get()),
                 // new InstantCommand(() -> driveSubsystem.stop()),
                 new WaitCommand(2),
-                MoveToLaunchTrench.cmd()));
-    MoveToLaunchTrench.done()
+                moveToLaunchBump.cmd()));
+    moveToLaunchBump
+        .done()
         .onTrue(
             Commands.sequence(
                 Commands.print("Starting launch sequence"),
@@ -61,7 +70,25 @@ public class AutoCommand {
                                 // feederAndIndexer.voltageCmd(FeederConstants.launchVoltage.get())))),
                                 // Commands.waitSeconds(AutoConstants.launchDuration.get()))));
                                 ))))));
-
     return routine;
+  }
+
+  public static Command routine(
+      AutoFactory factory,
+      Drive driveSubsystem,
+      IntakeExtension intakeExtension,
+      IntakeRoller intakeRoller,
+      Flywheels launcher,
+      DyeRotor cerealiser,
+      Feeder feederAndIndexer) {
+    return RightSideAutoTrench.getRoutine(
+            factory,
+            driveSubsystem,
+            intakeExtension,
+            intakeRoller,
+            launcher,
+            cerealiser,
+            feederAndIndexer)
+        .cmd();
   }
 }

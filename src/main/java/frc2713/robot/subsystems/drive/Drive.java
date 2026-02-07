@@ -9,6 +9,7 @@ package frc2713.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.*;
 
+import choreo.trajectory.SwerveSample;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
@@ -378,6 +379,44 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
     return getMaxLinearSpeedMetersPerSec() / DRIVE_BASE_RADIUS;
   }
 
+  // Trajectory Following
+  public void followTrajectory(SwerveSample sample) {
+    // Get the current pose of the robot
+    Pose2d pose = getPose();
+    Pose2d samplePose2d =
+        new Pose2d(
+            new Translation2d(sample.x, sample.y), new Rotation2d(Radians.of(sample.heading)));
+    Logger.recordOutput("TrajectoryFollowing/pose2d", samplePose2d);
+    Logger.recordOutput("TrajectoryFollowing/posex", pose.getX());
+    Logger.recordOutput("TrajectoryFollowing/samplex", sample.x);
+
+    Logger.recordOutput("TrajectoryFollowing/posey", pose.getY());
+    Logger.recordOutput("TrajectoryFollowing/sampley", sample.y);
+
+    Logger.recordOutput(
+        "TrajectoryFollowing/heading", pose.getRotation().getRadians() + Math.PI * 2);
+    Logger.recordOutput(
+        "TrajectoryFollowing/sampleheading", Rotation2d.fromRadians(sample.heading).getRadians());
+    // Generate the next speeds for the robot
+    ChassisSpeeds speeds =
+        new ChassisSpeeds(
+            sample.vx
+                + DriveConstants.AutoConstants.xTrajectoryController
+                    .createPIDController()
+                    .calculate(pose.getX(), sample.x),
+            sample.vy
+                + DriveConstants.AutoConstants.yTrajectoryController
+                    .createPIDController()
+                    .calculate(pose.getY(), sample.y),
+            sample.omega
+                + DriveConstants.AutoConstants.headingTrajectoryController
+                    .createAngularPIDController()
+                    .calculate(
+                        pose.getRotation().getRadians(),
+                        Rotation2d.fromRadians(sample.heading).getRadians()));
+
+    this.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, this.getRotation()));
+  }
   /** Returns an array of module translations. */
   public static Translation2d[] getModuleTranslations() {
     return new Translation2d[] {
