@@ -2,8 +2,6 @@ package frc2713.lib.io;
 
 import static edu.wpi.first.units.Units.Revolutions;
 
-import org.littletonrobotics.junction.AutoLogOutput;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
@@ -24,6 +22,7 @@ import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.CTREUtil;
 import frc2713.lib.util.LoggedTunableGains;
 import frc2713.robot.Robot;
+import org.littletonrobotics.junction.AutoLogOutput;
 
 public class TalonFXIO implements MotorIO {
   // Base members
