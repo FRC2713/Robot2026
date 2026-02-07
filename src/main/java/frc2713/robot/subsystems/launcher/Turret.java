@@ -131,19 +131,23 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
    */
   public final Supplier<Angle> otfAngleSupplier =
       () -> {
-        Angle angle = getLauncOnTheFlyAngle();
+        Angle angle = getLaunchOnTheFlyAngle();
         // If no valid solution, fall back to simple hub angle
         boolean solutionIsValid = true;
         if (angle.equals(Degrees.of(0))) {
           solutionIsValid = false;
           angle = getHubAngle();
         }
+        angle =
+            Degrees.of(
+                convertToClosestBoundedTurretAngleDegrees(
+                    angle.in(Degrees), getCurrentTurretRotation()));
         Logger.recordOutput(super.pb.makePath("OTF", "solutionIsValid"), solutionIsValid);
         Logger.recordOutput(pb.makePath("OTF", "targetAngle"), angle);
         return angle;
       };
 
-  public Command oftCommand() {
+  public Command otfCommand() {
     return setAngle(otfAngleSupplier);
   }
 
@@ -164,24 +168,25 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
     Logger.recordOutput(pb.makePath("goalVector"), new Pose3d[] {this.getGlobalPose(), goalPose});
 
     // Get the target angle from launch-on-the-fly calculation
-    Angle targetAngle = getLauncOnTheFlyAngle();
+    // Angle targetAngle = getLaunchOnTheFlyAngle();
 
     // Convert to bounded angle using the computed turret position from dual encoders
-    double boundedAngleDegrees =
-        convertToClosestBoundedTurretAngleDegrees(
-            targetAngle.in(Degrees), getCurrentTurretRotation());
+    // double boundedAngleDegrees =
+    //     convertToClosestBoundedTurretAngleDegrees(
+    //         targetAngle.in(Degrees), getCurrentTurretRotation());
 
-    // Convert subsystem angle to motor position and set the setpoint
-    Angle motorPosition = convertSubsystemPositionToMotorPosition(Degrees.of(boundedAngleDegrees));
-    super.setCurrentPosition(motorPosition);
+    // // Convert subsystem angle to motor position and set the setpoint
+    // Angle motorPosition =
+    // convertSubsystemPositionToMotorPosition(Degrees.of(boundedAngleDegrees));
+    // super.setCurrentPosition(motorPosition);
 
     // Log encoder values for debugging
     Logger.recordOutput(pb.makePath("encoder1Degrees"), inputs.encoder1PositionDegrees.in(Degrees));
     Logger.recordOutput(pb.makePath("encoder2Degrees"), inputs.encoder2PositionDegrees.in(Degrees));
     Logger.recordOutput(
         pb.makePath("computedTurretDegrees"), inputs.computedTurretPositionDegrees.in(Degrees));
-    Logger.recordOutput(pb.makePath("targetAngleDegrees"), targetAngle.in(Degrees));
-    Logger.recordOutput(pb.makePath("boundedSetpointDegrees"), boundedAngleDegrees);
+    // Logger.recordOutput(pb.makePath("targetAngleDegrees"), targetAngle.in(Degrees));
+    // Logger.recordOutput(pb.makePath("boundedSetpointDegrees"), boundedAngleDegrees);
   }
 
   @Override
@@ -219,7 +224,7 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
     return Radians.of(normalizedRadians);
   }
 
-  public Angle getLauncOnTheFlyAngle() {
+  public Angle getLaunchOnTheFlyAngle() {
     // 1. Get the latest solution
     var solution = LaunchingSolutionManager.getInstance().getSolution();
 

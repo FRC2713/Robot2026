@@ -98,6 +98,10 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
       };
 
   /** Command to continuously track the on-the-fly flywheel velocity */
+  public Command idleSpeedCommand() {
+    return setVelocity(() -> LauncherConstants.Flywheels.idleVelocity);
+  }
+
   public Command otfCommand() {
     return setVelocity(otfVelocitySupplier);
   }

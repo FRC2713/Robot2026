@@ -2,17 +2,24 @@ package frc2713.robot.subsystems.launcher;
 
 import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.FieldConstants;
+import org.littletonrobotics.junction.Logger;
 
 public class LaunchingSolutionManager extends SubsystemBase {
   private static LaunchingSolutionManager instance;
+
+  AdvantageScopePathBuilder pb = new AdvantageScopePathBuilder("LaunchingSolutionManager");
 
   // --- Data Structures ---
   public static record LaunchSolution(
@@ -53,15 +60,38 @@ public class LaunchingSolutionManager extends SubsystemBase {
   public void periodic() {
     // 1. Get Robot State (ID 0 = Chassis)
     Pose3d robotPose = KinematicsManager.getInstance().getGlobalPose(0);
-    Translation3d robotVel = KinematicsManager.getInstance().getGlobalLinearVelocity(0);
+    Translation3d robotLinVel = KinematicsManager.getInstance().getGlobalLinearVelocity(0);
 
     // 2. Solve for the Launch Vector
-    currentSolution =
-        calculate(robotPose, robotVel, LaunchingSolutionManager.currentGoal.positionalTarget);
+    if (LauncherConstants.otfFutureProjectionEnabled.get()) {
+      Rotation3d robotAngVel = KinematicsManager.getInstance().getGlobalAngularVelocity(0);
+      currentSolution =
+          calculate(
+              robotPose,
+              robotLinVel,
+              robotAngVel,
+              LaunchingSolutionManager.currentGoal.positionalTarget);
+    } else {
+      currentSolution =
+          calculate(robotPose, robotLinVel, LaunchingSolutionManager.currentGoal.positionalTarget);
+    }
   }
 
   public LaunchSolution getSolution() {
     return currentSolution;
+  }
+
+  private LaunchSolution calculate(
+      Pose3d robotPose, Translation3d linearVel, Rotation3d angularVel, Translation3d targetPose) {
+    Time timeToProject = LauncherConstants.otfFutureProjectionSeconds.get();
+    Pose3d projectedPose =
+        KinematicsManager.getInstance()
+            .limitPoseToField(
+                new Pose3d(
+                    robotPose.getTranslation().plus(linearVel.times(timeToProject.in(Seconds))),
+                    robotPose.getRotation().plus(angularVel.times(timeToProject.in(Seconds)))));
+    Logger.recordOutput(pb.makePath("projected_pose"), projectedPose);
+    return calculate(robotPose, linearVel, targetPose);
   }
 
   private LaunchSolution calculate(

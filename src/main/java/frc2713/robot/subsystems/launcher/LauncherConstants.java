@@ -7,6 +7,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -15,8 +16,10 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Time;
 import frc2713.lib.drivers.CANDeviceId;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
+import frc2713.lib.util.LoggedTunableBoolean;
 import frc2713.lib.util.LoggedTunableMeasure;
 
 public final class LauncherConstants {
@@ -32,9 +35,9 @@ public final class LauncherConstants {
       config.talonCANID = new CANDeviceId(13); // Example CAN ID, replace with actual ID
 
       // PID gains for Motion Magic
-      config.fxConfig.Slot0.kP = 120.0;
+      config.fxConfig.Slot0.kP = 80.0;
       config.fxConfig.Slot0.kI = 0.0;
-      config.fxConfig.Slot0.kD = 8.0;
+      config.fxConfig.Slot0.kD = 16.0;
       config.fxConfig.Slot0.kS = 0.15; // static friction compensation
       config.fxConfig.Slot0.kV = 0.12; // velocity feedforward
       config.fxConfig.Slot0.kA = 0.01;
@@ -100,7 +103,8 @@ public final class LauncherConstants {
     public static int MODEL_INDEX = 5;
     public static int PARENT_INDEX = 4;
 
-    public static AngularVelocity acceptableError = RotationsPerSecond.of(50);
+    public static AngularVelocity acceptableError = RotationsPerSecond.of(12);
+    public static AngularVelocity idleVelocity = RotationsPerSecond.of(20);
 
     public static Transform3d localTransform =
         new Transform3d(
@@ -166,4 +170,9 @@ public final class LauncherConstants {
       angleMap.put(4.5, 32.0);
     }
   }
+
+  public static LoggedTunableMeasure<Time> otfFutureProjectionSeconds =
+      new LoggedTunableMeasure<Time>("LaunchingSolutionManager/time_to_project", Seconds.of(0.125));
+  public static LoggedTunableBoolean otfFutureProjectionEnabled =
+      new LoggedTunableBoolean("LaunchingSolutionManager/projection_enabled", true);
 }

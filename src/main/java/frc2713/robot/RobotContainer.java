@@ -19,8 +19,6 @@ import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.generated.TunerConstants;
 import frc2713.robot.oi.DriverControls;
-import frc2713.robot.subsystems.climber.Climber;
-import frc2713.robot.subsystems.climber.ClimberConstants;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.drive.GyroIO;
 import frc2713.robot.subsystems.drive.ModuleIO;
@@ -53,17 +51,18 @@ public class RobotContainer {
   private final KinematicsManager kinematicsManager = new KinematicsManager();
   private final LaunchingSolutionManager launchingSolutionManager = new LaunchingSolutionManager();
   // Subsystems
-  public static Drive drive;
-  private final Flywheels flywheels;
-  private final Turret turret;
-  private final Hood hood;
-  private final IntakeRoller intakeRoller;
-  private final IntakeExtension intakeExtension;
-  private final DyeRotor dyeRotor;
-  private final Feeder feeder;
-  private final Climber climber;
+  private static Drive drive;
+  private static Flywheels flywheels;
+  private static Turret turret;
+  private static Hood hood;
+  private static IntakeRoller intakeRoller;
+  private static IntakeExtension intakeExtension;
+  private static DyeRotor dyeRotor;
+  private static Feeder feeder;
+  //   private static Climber climber;
+
   // Controllers
-  public static DriverControls driverControls = new DriverControls();
+  public static DriverControls driverControls;
 
   // Controller
 
@@ -94,26 +93,18 @@ public class RobotContainer {
 
         hood = new Hood(LauncherConstants.Hood.config, new MotorIO() {});
 
-        turret =
-            new Turret(
-                LauncherConstants.Turret.config,
-                new TurretMotorIOTalonFX(LauncherConstants.Turret.config));
-                
-        intakeRoller =
-            new IntakeRoller(
-                IntakeConstants.Roller.config, new TalonFXIO(IntakeConstants.Roller.config));
-        intakeExtension =
-            new IntakeExtension(
-                IntakeConstants.Extension.config, new TalonFXIO(IntakeConstants.Extension.config));
-        dyeRotor =
-            new DyeRotor(
-                SerializerConstants.DyeRotor.config,
-                new TalonFXIO(SerializerConstants.DyeRotor.config));
-        feeder =
-            new Feeder(
-                SerializerConstants.Feeder.config,
-                new TalonFXIO(SerializerConstants.Feeder.config));
-        climber = new Climber(ClimberConstants.config, new TalonFXIO(ClimberConstants.config));
+        turret = new Turret(LauncherConstants.Turret.config, new TurretMotorIO() {});
+
+        intakeRoller = new IntakeRoller(IntakeConstants.Roller.config, new MotorIO() {});
+
+        intakeExtension = new IntakeExtension(IntakeConstants.Extension.config, new MotorIO() {});
+
+        dyeRotor = new DyeRotor(SerializerConstants.DyeRotor.config, new MotorIO() {});
+
+        feeder = new Feeder(SerializerConstants.Feeder.config, new MotorIO() {});
+
+        // climber = new Climber(ClimberConstants.config, new MotorIO() {});
+
         break;
 
       case SIM:
@@ -155,7 +146,8 @@ public class RobotContainer {
             new Feeder(
                 SerializerConstants.Feeder.config,
                 new SimTalonFXIO(SerializerConstants.Feeder.config));
-        climber = new Climber(ClimberConstants.config, new SimTalonFXIO(ClimberConstants.config));
+        // climber = new Climber(ClimberConstants.config, new
+        // SimTalonFXIO(ClimberConstants.config));
         break;
 
       default:
@@ -175,26 +167,26 @@ public class RobotContainer {
                 new MotorIO() {},
                 new MotorIO() {});
 
-        turret =
-            new Turret(
-                new TurretSubsystemConfig(), new TurretMotorIOSim(new TurretSubsystemConfig()));
-        intakeRoller =
-            new IntakeRoller(
-                new TalonFXSubsystemConfig(), new SimTalonFXIO(new TalonFXSubsystemConfig()));
-        intakeExtension =
-            new IntakeExtension(
-                new TalonFXSubsystemConfig(), new SimTalonFXIO(new TalonFXSubsystemConfig()));
-        dyeRotor =
-            new DyeRotor(
-                new TalonFXSubsystemConfig(), new SimTalonFXIO(new TalonFXSubsystemConfig()));
-        feeder =
-            new Feeder(
-                new TalonFXSubsystemConfig(), new SimTalonFXIO(new TalonFXSubsystemConfig()));
-        climber =
-            new Climber(
-                new TalonFXSubsystemConfig(), new SimTalonFXIO(new TalonFXSubsystemConfig()));
+        hood = new Hood(LauncherConstants.Hood.config, new MotorIO() {});
+
+        turret = new Turret(LauncherConstants.Turret.config, new TurretMotorIO() {});
+
+        intakeRoller = new IntakeRoller(IntakeConstants.Roller.config, new MotorIO() {});
+
+        intakeExtension = new IntakeExtension(IntakeConstants.Extension.config, new MotorIO() {});
+
+        dyeRotor = new DyeRotor(SerializerConstants.DyeRotor.config, new MotorIO() {});
+
+        feeder = new Feeder(SerializerConstants.Feeder.config, new MotorIO() {});
+
+        // climber = new Climber(ClimberConstants.config, new MotorIO() {});
         break;
     }
+
+    // Set up driver controller
+    driverControls =
+        new DriverControls(
+            drive, flywheels, turret, hood, intakeRoller, intakeExtension, dyeRotor, feeder);
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -255,8 +247,13 @@ public class RobotContainer {
     // operatorControls.configureButtonBindings();
     // devControls.configureButtonBindings();
 
-    // Default command, normal field-relative drive
+    // Default commands
     driverControls.setToNormalDrive();
+    turret.setDefaultCommand(turret.otfCommand().withName("OTF Tracking"));
+    hood.setDefaultCommand(
+        hood.otfCommand()
+            .withName("OTF Tracking")); // TODO: conditional command to account for trench
+    flywheels.setDefaultCommand(flywheels.idleSpeedCommand().withName("Idle Tracking"));
   }
 
   /**

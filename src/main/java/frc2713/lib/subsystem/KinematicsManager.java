@@ -7,6 +7,8 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.io.ArticulatedComponent;
+import frc2713.robot.FieldConstants;
+import frc2713.robot.subsystems.drive.Drive;
 import java.util.*;
 import org.littletonrobotics.junction.Logger;
 
@@ -251,5 +253,22 @@ public class KinematicsManager extends SubsystemBase {
 
   public Translation3d getGlobalLinearVelocity(int index) {
     return globalLinVels[index];
+  }
+
+  public Rotation3d getGlobalAngularVelocity(int index) {
+    return new Rotation3d(
+        globalAngVels[index].getX(), globalAngVels[index].getY(), globalAngVels[index].getZ());
+  }
+
+  public Pose3d limitPoseToField(Pose3d pose) {
+    double clampedX =
+        Math.min(
+            Math.max(Drive.DRIVE_BASE_RADIUS, pose.getTranslation().getX()),
+            FieldConstants.fieldLength - Drive.DRIVE_BASE_RADIUS);
+    double clampedY =
+        Math.min(
+            Math.max(Drive.DRIVE_BASE_RADIUS, pose.getTranslation().getY()),
+            FieldConstants.fieldWidth - Drive.DRIVE_BASE_RADIUS);
+    return new Pose3d(clampedX, clampedY, pose.getTranslation().getZ(), pose.getRotation());
   }
 }
