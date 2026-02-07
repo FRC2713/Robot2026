@@ -9,7 +9,9 @@ public class FuelCluster {
   public int fuelCount = 0;
   public double clusterDepth;
 
-  public FuelCluster() {} //Used for an edge case in FuelDetector where an instance of this class had to be initialized because Java was being dumb. Do not delete.
+  public
+  FuelCluster() {} // Used for an edge case in FuelDetector where an instance of this class had to
+  // be initialized because Java was being dumb. Do not delete.
 
   public FuelCluster(ArrayList<FuelSquare> squares) {
     fuelSquares = squares;
@@ -54,8 +56,9 @@ public class FuelCluster {
       avgX += ((fuelSquares.get(i).getGridX()) * pixelsPerHorizontalGrid);
     }
     avgX /= fuelSquares.size();
+    avgX -= xResolution / 2;
     double degreesPerPixel = FOV / xResolution;
-    return new Rotation2d(Units.degreesToRadians(avgX * degreesPerPixel));
+    return new Rotation2d(Units.degreesToRadians(-(avgX * degreesPerPixel)));
   }
 
   public String toString() {

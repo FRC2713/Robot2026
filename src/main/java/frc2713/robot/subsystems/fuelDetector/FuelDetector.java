@@ -32,7 +32,7 @@ public class FuelDetector extends SubsystemBase {
     // get fuel information, call algorithm
     FuelCoordinates[] fuels = getDataFromNT();
     // System.out.println("fuelData: " + fuelData);
-    Logger.recordOutput("First Fuel Cluster", getRotation2D(fuels));
+    Logger.recordOutput("First Fuel Cluster", getRotation2D(fuels).getDegrees());
     // System.out.println(
     //    findFuelClusters(fuels, kGridWidth, kGridHeight).toString() + " fuel clusters");
   }
@@ -148,7 +148,8 @@ public class FuelDetector extends SubsystemBase {
   public Rotation2d getRotation2D(FuelCoordinates[] fuels) {
     ArrayList<FuelCluster> fuelClusters = findFuelClusters(fuels, kGridWidth, kGridHeight);
     if (fuelClusters.size() > 0) {
-      FuelCluster largestCluster = new FuelCluster(); // Note: this is the largest in terms of fuel count, not visiual size.
+      FuelCluster largestCluster =
+          new FuelCluster(); // Note: this is the largest in terms of fuel count, not visiual size.
       int maxFuels = 0;
       for (int i = 0; i < fuelClusters.size(); i++) {
         int size = fuelClusters.get(i).fuelCount;
@@ -161,7 +162,7 @@ public class FuelDetector extends SubsystemBase {
           largestCluster.findAngleTranslation(60.0, kImageWidth, (kImageWidth / kGridWidth));
       return vector;
     } else {
-      return new Rotation2d(0); //Default value
+      return new Rotation2d(0); // Default value
     }
   }
 }
