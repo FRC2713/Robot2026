@@ -1,5 +1,7 @@
 package frc2713.robot.subsystems.fuelDetector;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import java.util.ArrayList;
 
 public class FuelCluster {
@@ -7,7 +9,7 @@ public class FuelCluster {
   public int fuelCount = 0;
   public double clusterDepth;
 
-  public FuelCluster() {}
+  public FuelCluster() {} //Used for an edge case in FuelDetector where an instance of this class had to be initialized because Java was being dumb. Do not delete.
 
   public FuelCluster(ArrayList<FuelSquare> squares) {
     fuelSquares = squares;
@@ -46,14 +48,14 @@ public class FuelCluster {
     return sum;
   }
 
-  public double findAngleTranslation(double FOV, int xResolution, int pixelsPerHorizontalGrid) {
+  public Rotation2d findAngleTranslation(double FOV, int xResolution, int pixelsPerHorizontalGrid) {
     double avgX = 0;
     for (int i = 0; i < fuelSquares.size(); i++) {
       avgX += ((fuelSquares.get(i).getGridX()) * pixelsPerHorizontalGrid);
     }
     avgX /= fuelSquares.size();
     double degreesPerPixel = FOV / xResolution;
-    return avgX * degreesPerPixel;
+    return new Rotation2d(Units.degreesToRadians(avgX * degreesPerPixel));
   }
 
   public String toString() {
