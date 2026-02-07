@@ -4,7 +4,6 @@ import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringSubscriber;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc2713.robot.Constants;
 import java.util.ArrayList;
 import org.littletonrobotics.junction.Logger;
 
@@ -20,34 +19,27 @@ public class FuelDetector extends SubsystemBase {
   private DoubleArraySubscriber realFuelSub;
 
   public FuelDetector() {
-    switch (Constants.currentMode) {
-      case REAL:
-        realFuelSub =
-            NetworkTableInstance.getDefault()
-                .getDoubleArrayTopic("/limelight/tcornxy")
-                .subscribe(new double[0]);
-        simFuelSub = null;
-      case SIM:
-        realFuelSub = null;
-        simFuelSub =
-            NetworkTableInstance.getDefault()
-                .getStringTopic("/fuelDetector/fuelData")
-                .subscribe("");
-      default:
-        realFuelSub = null;
-        simFuelSub = null;
-    }
+    simFuelSub =
+        NetworkTableInstance.getDefault().getStringTopic("/fuelDetector/fuelData").subscribe("");
+    realFuelSub =
+        NetworkTableInstance.getDefault()
+            .getDoubleArrayTopic("/limelight/tcornxy")
+            .subscribe(new double[0]);
   }
 
   public void periodic() {
     // get fuel information, call algorithm
     FuelCoordinates[] fuels;
-    if(simFuelSub != null) {
-      fuels = FuelDetector.dataToFuelCoordinates(simFuelSub.get(""));
-    } else if (realFuelSub != null) {
+    if (realFuelSub.exists()) {
       fuels = FuelDetector.dataToFuelCoordinates(realFuelSub.get(new double[0]));
+
+    } else if (simFuelSub.exists()) {
+      fuels = FuelDetector.dataToFuelCoordinates(simFuelSub.get(""));
     } else {
       fuels = new FuelCoordinates[0];
+    }
+    if (fuels.length <= 0) {
+      System.out.println("No fuel data");
     }
     // System.out.println("fuelData: " + fuelData);
     ArrayList<FuelCluster> fuelClusters = findFuelClusters(fuels, kGridWidth, kGridHeight);
@@ -138,6 +130,7 @@ public class FuelDetector extends SubsystemBase {
     }
     return output;
   }
+
   public static FuelCoordinates[] dataToFuelCoordinates(double[] data) {
     // data is essentially a special type of .csv file
     // a ; seperates fuels, a , seperates fuel properties
