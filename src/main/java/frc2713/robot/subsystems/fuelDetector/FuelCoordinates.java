@@ -17,8 +17,12 @@ public class FuelCoordinates {
     centerY = y;
     width = boxWidth;
     height = boxHeight;
-    computeDepth(60); // TODO: replace with constant for camera FOV
     chance = c;
+  }
+
+  public FuelCoordinates(double x, double y) {
+    centerX = x;
+    centerY = y;
   }
 
   public FuelCoordinates(String args) {
