@@ -21,7 +21,7 @@ public class RightSideAutoTrench {
       IntakeExtension intakeExtension,
       IntakeRoller intakeRoller,
       Flywheels launcher,
-      DyeRotor cerealiser,
+      DyeRotor serializer,
       //   Launcher intakeAndShooter,
       Feeder feederAndIndexer) {
     AutoRoutine routine = factory.newRoutine("Start Collect Shoot");
@@ -44,7 +44,7 @@ public class RightSideAutoTrench {
             Commands.sequence(
                 Commands.print("Starting intake and collecting fuel"),
                 Commands.parallel(intakeExtension.extendCommand(), intakeFuel.cmd())));
-                
+
     intakeFuel
         .done()
         .onTrue(
@@ -79,7 +79,7 @@ public class RightSideAutoTrench {
       IntakeExtension intakeExtension,
       IntakeRoller intakeRoller,
       Flywheels launcher,
-      DyeRotor cerealiser,
+      DyeRotor serializer,
       Feeder feederAndIndexer) {
     return RightSideAutoTrench.getRoutine(
             factory,
@@ -87,7 +87,7 @@ public class RightSideAutoTrench {
             intakeExtension,
             intakeRoller,
             launcher,
-            cerealiser,
+            serializer,
             feederAndIndexer)
         .cmd();
   }
