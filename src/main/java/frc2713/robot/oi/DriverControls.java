@@ -12,7 +12,6 @@ import frc2713.robot.commands.DriveCommands;
 public class DriverControls {
   private final CommandXboxController controller = new CommandXboxController(0);
 
-
   public void configureButtonBindings() {
 
     // Reset gyro to 0 deg when start button is pressed

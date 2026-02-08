@@ -96,7 +96,13 @@ public class Robot extends LoggedRobot {
 
   /** This function is called periodically when disabled. */
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+    // Reset pose to vision pose if available whilst disabled
+    var visionPose = robotContainer.vision.getPose();
+    if (visionPose.isPresent()) {
+      RobotContainer.drive.setPose(visionPose.get());
+    }
+  }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
