@@ -95,7 +95,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
       Translation3d targetPose) {
     Time timeToProject = LauncherConstants.otfFutureProjectionSeconds.get();
     Translation3d projectedLinVel = linearVel.plus(linearAccel.times(timeToProject.in(Seconds)));
-    Rotation3d projectedAngVel = angularAccel.plus(angularAccel.times(timeToProject.in(Seconds)));
+    Rotation3d projectedAngVel = angularVel.plus(angularAccel.times(timeToProject.in(Seconds)));
     Pose3d projectedPose =
         KinematicsManager.getInstance()
             .limitPoseToField(

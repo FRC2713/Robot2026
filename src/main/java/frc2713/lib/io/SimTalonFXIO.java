@@ -143,6 +143,7 @@ public class SimTalonFXIO extends TalonFXIO {
     inputs.currentSupplyAmps = Amps.of(sim.getCurrentDrawAmps());
     inputs.rawRotorPosition = Rotations.of(simPositionRad / (2.0 * Math.PI));
     inputs.closedLoopError = this.lastClosedLoopError;
+    inputs.isMotionMagicAtTarget = this.lastCheckedMMAtTarget;
   }
 
   @Override
@@ -171,11 +172,13 @@ public class SimTalonFXIO extends TalonFXIO {
     sim.setState(positionRad, currentVelocityRadPerSec);
   }
 
+  @Override
   @AutoLogOutput
   public double getClosedLoopError() {
     return this.lastClosedLoopError;
   }
 
+  @Override
   public boolean isMagicMotionAtTarget() {
     return this.lastCheckedMMAtTarget;
   }

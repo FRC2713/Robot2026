@@ -226,11 +226,13 @@ public class TalonFXIO implements MotorIO {
     CTREUtil.applyConfigurationNonBlocking(talon, config);
   }
 
+  @Override
   @AutoLogOutput
   public double getClosedLoopError() {
     return talon.getClosedLoopError().getValue();
   }
 
+  @Override
   public boolean isMagicMotionAtTarget() {
     return talon.getMotionMagicAtTarget(true).getValue();
   }
