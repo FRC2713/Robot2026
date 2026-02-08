@@ -22,7 +22,6 @@ import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.RobotTime;
 import java.util.concurrent.atomic.AtomicReference;
 import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
 
 public class SimTalonFXIO extends TalonFXIO {
   protected DCMotorSim sim;
@@ -123,15 +122,6 @@ public class SimTalonFXIO extends TalonFXIO {
 
     this.lastClosedLoopError = talon.getClosedLoopError().getValueAsDouble();
     this.lastCheckedMMAtTarget = talon.getMotionMagicAtTarget().getValue();
-
-    Logger.recordOutput(pb.makePath("Sim", "Plant Input Voltage"), sim.getInputVoltage());
-    Logger.recordOutput(pb.makePath("Sim", "Motor Position Rotations"), motorRotations);
-    Logger.recordOutput(pb.makePath("Sim", "Motor Velocity RPS"), motorRotPerSec);
-    Logger.recordOutput(
-        pb.makePath("Sim", "TalonFX Reported Position"), talon.getPosition().getValueAsDouble());
-    Logger.recordOutput(
-        pb.makePath("Sim", "TalonFX Reported Rotor Position"),
-        talon.getRotorPosition().getValueAsDouble());
   }
 
   @Override

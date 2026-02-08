@@ -27,12 +27,14 @@ public final class LauncherConstants {
   public static final class Turret {
 
     public static TurretSubsystemConfig config = new TurretSubsystemConfig();
+
     public static Angle acceptableError = Degrees.of(10);
     public static Angle staticHubAngle = Degrees.of(0);
 
     static {
       config.name = "Turret";
-      config.talonCANID = new CANDeviceId(13); // Example CAN ID, replace with actual ID
+      config.talonCANID = new CANDeviceId(12); // Example CAN ID, replace with actual ID
+      config.canCoderCANID = new CANDeviceId(13); // CANCoder CAN ID, replace with actual ID
 
       // PID gains for Motion Magic
       config.fxConfig.Slot0.kP = 80.0;

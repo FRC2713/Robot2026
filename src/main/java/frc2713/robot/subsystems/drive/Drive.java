@@ -35,6 +35,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -335,6 +337,20 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
   @AutoLogOutput(key = "SwerveChassisSpeeds/Measured")
   private ChassisSpeeds getChassisSpeeds() {
     return kinematics.toChassisSpeeds(getModuleStates());
+  }
+
+  /** Returns the linear speed of the robot */
+  @AutoLogOutput(key = "Drive/MeasuredLinearSpeed")
+  public LinearVelocity getSpeed() {
+    ChassisSpeeds speeds = getChassisSpeeds();
+    double linearSpeed = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
+    return MetersPerSecond.of(linearSpeed);
+  }
+
+  @AutoLogOutput(key = "Drive/MeasuredAngularSpeed")
+  public AngularVelocity getAngularSpeed() {
+    ChassisSpeeds speeds = getChassisSpeeds();
+    return RadiansPerSecond.of(speeds.omegaRadiansPerSecond);
   }
 
   /** Returns the position of each module in radians. */

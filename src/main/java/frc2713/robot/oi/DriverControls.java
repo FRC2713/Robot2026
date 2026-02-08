@@ -107,6 +107,7 @@ public class DriverControls {
             Commands.parallel(intakeRoller.stop(), intakeExtension.retractCommand())
                 .withName("Intake Retracted"));
 
+    // shoot against the hubwhen flywheels and hub are ready
     controller
         .rightBumper()
         .whileTrue(
@@ -114,12 +115,13 @@ public class DriverControls {
                     flywheels.hubCommand(),
                     hood.hubCommand(),
                     turret.hubCommand(drive::getPose),
-                    flywheels.simulateLaunchedFuel(flywheels::atTarget),
-                    feeder.feedWhenReady(flywheels::atTarget),
-                    dyeRotor.feedWhenReady(flywheels::atTarget))
+                    flywheels.simulateLaunchedFuel(() -> flywheels.atTarget() && hood.atTarget()),
+                    feeder.feedWhenReady(() -> flywheels.atTarget() && hood.atTarget()),
+                    dyeRotor.feedWhenReady(() -> flywheels.atTarget() && hood.atTarget()))
                 .withName("Hub Shooting"))
-        .onFalse(Commands.parallel(feeder.stop(), dyeRotor.stopCommand()));
+        .onFalse(Commands.parallel(feeder.stop(), dyeRotor.stopCommand()).withName("Stopped"));
 
+    // shoot when flywheels are ready
     controller
         .rightTrigger(0.25)
         .whileTrue(
@@ -131,7 +133,7 @@ public class DriverControls {
                     feeder.feedWhenReady(flywheels::atTarget),
                     dyeRotor.feedWhenReady(flywheels::atTarget))
                 .withName("OTF Shooting"))
-        .onFalse(Commands.parallel(feeder.stop(), dyeRotor.stopCommand()));
+        .onFalse(Commands.parallel(feeder.stop(), dyeRotor.stopCommand()).withName("Stopped"));
   }
 
   public double getLeftY() {

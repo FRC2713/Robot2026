@@ -154,7 +154,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
     Rotation2d newFieldRelativeYaw =
         new Rotation2d(Math.atan2(neededMuzzleVelocity.getY(), neededMuzzleVelocity.getX()))
             .minus(robotPose.getRotation().toRotation2d());
-            
+
     return new LaunchSolution(newFieldRelativeYaw, newSpeed, new Rotation2d(newPitch), dist, true);
   }
 }

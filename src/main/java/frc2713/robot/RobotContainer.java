@@ -41,6 +41,9 @@ import frc2713.robot.subsystems.launcher.TurretSubsystemConfig;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 import frc2713.robot.subsystems.serializer.SerializerConstants;
+import frc2713.robot.subsystems.vision.Vision;
+import frc2713.robot.subsystems.vision.VisionIO;
+import frc2713.robot.subsystems.vision.VisionIOSLAMDunk;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -52,7 +55,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
 
   // Subsystems
-  private static Drive drive;
+  public static Drive drive;
   private static Flywheels flywheels;
   private static Turret turret;
   private static Hood hood;
@@ -60,6 +63,7 @@ public class RobotContainer {
   private static IntakeExtension intakeExtension;
   private static DyeRotor dyeRotor;
   private static Feeder feeder;
+  public static Vision vision;
 
   // Lazy loaders
   private final KinematicsManager kinematicsManager = new KinematicsManager();
@@ -111,6 +115,7 @@ public class RobotContainer {
             new Feeder(
                 SerializerConstants.Feeder.config,
                 new TalonFXIO(SerializerConstants.Feeder.config));
+        vision = new Vision(new VisionIOSLAMDunk());
         break;
 
       case SIM:
@@ -150,6 +155,7 @@ public class RobotContainer {
             new Feeder(
                 SerializerConstants.Feeder.config,
                 new SimTalonFXIO(SerializerConstants.Feeder.config));
+        vision = new Vision(new VisionIOSLAMDunk());
         break;
 
       default:
@@ -173,6 +179,7 @@ public class RobotContainer {
         intakeExtension = new IntakeExtension(new TalonFXSubsystemConfig(), new MotorIO() {});
         dyeRotor = new DyeRotor(new TalonFXSubsystemConfig(), new MotorIO() {});
         feeder = new Feeder(new TalonFXSubsystemConfig(), new MotorIO() {});
+        vision = new Vision(new VisionIO() {});
         break;
     }
 
