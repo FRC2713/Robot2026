@@ -8,6 +8,7 @@ import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.REVERSE
 import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.SLOPE;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -17,13 +18,9 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc2713.lib.io.ArticulatedComponent;
-import frc2713.lib.io.MotorIO;
-import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.subsystem.MotorSubsystem;
-import frc2713.lib.subsystem.TalonFXSubsystemConfig;
-import frc2713.lib.subsystem.KinematicsManager;
-import frc2713.lib.subsystem.MotorSubsystem;
+import frc2713.lib.util.Util;
 import frc2713.robot.FieldConstants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -98,15 +95,18 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
     return Units.radiansToDegrees(finalOffset);
   }
 
+  /**
+   * Input should be robot relative (i.e. encoder-reported angle)
+   */
   public Command setAngle(Supplier<Angle> desiredAngle) {
     return motionMagicSetpointCommand(
         () -> convertSubsystemPositionToMotorPosition(desiredAngle.get()));
   }
 
-  public Command hubCommand() {
-    return setAngle(() -> LauncherConstants.Turret.staticHubAngle);
+  public Command hubCommand(Supplier<Pose2d> robotPose) {
+    return setAngle(() -> Util.convertRobotRelativeToFieldRelative(LauncherConstants.Turret.staticHubAngle, robotPose.get()));
   }
-  
+
   /**
    * Gets the current turret position computed from the dual encoder system.
    *

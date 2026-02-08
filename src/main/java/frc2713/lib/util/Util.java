@@ -1,5 +1,10 @@
 package frc2713.lib.util;
 
+import static edu.wpi.first.units.Units.Radians;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 
@@ -27,5 +32,10 @@ public class Util {
   public static boolean epsilonEquals(
       AngularVelocity a, AngularVelocity b, AngularVelocity epsilon) {
     return (a.minus(epsilon).lte(b)) && (a.plus(epsilon).gte(b));
+  }
+ 
+  public static Angle convertRobotRelativeToFieldRelative(Angle robotRelative, Pose2d robotPose) {
+    Rotation2d converted = new Rotation2d(robotRelative.in(Radians)).minus(robotPose.getRotation());
+    return converted.getMeasure();
   }
 }

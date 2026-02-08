@@ -63,6 +63,11 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
     return setVelocity(() -> LauncherConstants.Flywheels.staticHubVelocity);
   }
 
+  /** Command to continuously track the on-the-fly flywheel velocity */
+  public Command idleSpeedCommand() {
+    return setVelocity(() -> LauncherConstants.Flywheels.idleVelocity);
+  }
+
   /**
    * Supplier that continuously calculates the on-the-fly flywheel velocity. Uses the launch
    * solution if valid, otherwise falls back to distance-based lookup.
@@ -96,11 +101,6 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
         Logger.recordOutput(super.pb.makePath("OTF", "targetVelocity"), targetVelocity);
         return targetVelocity;
       };
-
-  /** Command to continuously track the on-the-fly flywheel velocity */
-  public Command idleSpeedCommand() {
-    return setVelocity(() -> LauncherConstants.Flywheels.idleVelocity);
-  }
 
   public Command otfCommand() {
     return setVelocity(otfVelocitySupplier);

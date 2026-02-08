@@ -98,8 +98,7 @@ public class BallTrajectorySim {
       }
 
       // 4. Integration
-      // Make sure to UNCOMMENT the magnusForce!
-      Translation3d totalForce = gravityForce.plus(dragForce); // .plus(magnusForce);
+      Translation3d totalForce = gravityForce.plus(dragForce).plus(magnusForce);
       Translation3d acceleration = totalForce.div(massKg);
 
       velocity = velocity.plus(acceleration.times(dt));

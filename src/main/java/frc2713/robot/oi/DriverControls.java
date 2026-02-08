@@ -99,55 +99,37 @@ public class DriverControls {
     //     .onFalse(flywheels.velocitySetpointCommand(() -> RPM.of(0)));
 
     controller
-        .rightBumper()
+        .leftBumper()
         .whileTrue(
             Commands.parallel(intakeRoller.intake(), intakeExtension.extendCommand())
                 .withName("Intaking"))
         .onFalse(
             Commands.parallel(intakeRoller.stop(), intakeExtension.retractCommand())
-                .withName("Intake Idle"));
+                .withName("Intake Retracted"));
 
     controller
-        .leftBumper()
+        .rightBumper()
         .whileTrue(
             Commands.parallel(
                     flywheels.hubCommand(),
                     hood.hubCommand(),
-                    turret.hubCommand(),
-                    flywheels.simulateLaunchedFuel(
-                        () -> {
-                          return flywheels.atTarget();
-                        }),
-                    feeder.feedWhenReady(
-                        () -> {
-                          return flywheels.atTarget();
-                        }),
-                    dyeRotor.feedWhenReady(
-                        () -> {
-                          return flywheels.atTarget();
-                        }))
+                    turret.hubCommand(drive::getPose),
+                    flywheels.simulateLaunchedFuel(flywheels::atTarget),
+                    feeder.feedWhenReady(flywheels::atTarget),
+                    dyeRotor.feedWhenReady(flywheels::atTarget))
                 .withName("Hub Shooting"))
         .onFalse(Commands.parallel(feeder.stop(), dyeRotor.stopCommand()));
 
     controller
-        .leftTrigger(0.25)
+        .rightTrigger(0.25)
         .whileTrue(
             Commands.parallel(
                     flywheels.otfCommand(),
                     hood.otfCommand(),
                     turret.otfCommand(),
-                    flywheels.simulateLaunchedFuel(
-                        () -> {
-                          return flywheels.atTarget();
-                        }),
-                    feeder.feedWhenReady(
-                        () -> {
-                          return flywheels.atTarget();
-                        }),
-                    dyeRotor.feedWhenReady(
-                        () -> {
-                          return flywheels.atTarget();
-                        }))
+                    flywheels.simulateLaunchedFuel(flywheels::atTarget),
+                    feeder.feedWhenReady(flywheels::atTarget),
+                    dyeRotor.feedWhenReady(flywheels::atTarget))
                 .withName("OTF Shooting"))
         .onFalse(Commands.parallel(feeder.stop(), dyeRotor.stopCommand()));
   }
