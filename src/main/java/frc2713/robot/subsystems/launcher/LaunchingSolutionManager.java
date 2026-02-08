@@ -23,7 +23,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
 
   // --- Data Structures ---
   public static record LaunchSolution(
-      Rotation2d turretFieldRelativeYaw, // desired global yaw for the turret
+      Rotation2d turretFieldYaw, // desired global yaw for the turret
       double flywheelSpeedMetersPerSecond, // Required exit velocity
       Rotation2d hoodPitch, // Required vertical angle
       double effectiveDistanceMeters,
@@ -65,11 +65,15 @@ public class LaunchingSolutionManager extends SubsystemBase {
     // 2. Solve for the Launch Vector
     if (LauncherConstants.otfFutureProjectionEnabled.get()) {
       Rotation3d robotAngVel = KinematicsManager.getInstance().getGlobalAngularVelocity(0);
+      Translation3d robotLinAccel = KinematicsManager.getInstance().getGlobalLinearAcceleration(0);
+      Rotation3d robotAngAccel = KinematicsManager.getInstance().getGlobalAngularAcceleration(0);
       currentSolution =
           calculate(
               robotPose,
               robotLinVel,
               robotAngVel,
+              robotLinAccel,
+              robotAngAccel,
               LaunchingSolutionManager.currentGoal.positionalTarget);
     } else {
       currentSolution =
@@ -82,16 +86,27 @@ public class LaunchingSolutionManager extends SubsystemBase {
   }
 
   private LaunchSolution calculate(
-      Pose3d robotPose, Translation3d linearVel, Rotation3d angularVel, Translation3d targetPose) {
+      Pose3d robotPose,
+      Translation3d linearVel,
+      Rotation3d angularVel,
+      Translation3d linearAccel,
+      Rotation3d angularAccel,
+      Translation3d targetPose) {
     Time timeToProject = LauncherConstants.otfFutureProjectionSeconds.get();
+    Translation3d projectedLinVel = linearVel.plus(linearAccel.times(timeToProject.in(Seconds)));
+    Rotation3d projectedAngVel = angularAccel.plus(angularAccel.times(timeToProject.in(Seconds)));
     Pose3d projectedPose =
         KinematicsManager.getInstance()
             .limitPoseToField(
                 new Pose3d(
-                    robotPose.getTranslation().plus(linearVel.times(timeToProject.in(Seconds))),
-                    robotPose.getRotation().plus(angularVel.times(timeToProject.in(Seconds)))));
+                    robotPose
+                        .getTranslation()
+                        .plus(projectedLinVel.times(timeToProject.in(Seconds))),
+                    robotPose
+                        .getRotation()
+                        .plus(projectedAngVel.times(timeToProject.in(Seconds)))));
     Logger.recordOutput(pb.makePath("projected_pose"), projectedPose);
-    return calculate(robotPose, linearVel, targetPose);
+    return calculate(projectedPose, projectedLinVel, targetPose);
   }
 
   private LaunchSolution calculate(
@@ -135,9 +150,9 @@ public class LaunchingSolutionManager extends SubsystemBase {
             Math.hypot(neededMuzzleVelocity.getX(), neededMuzzleVelocity.getY()));
 
     // Horizontal Angle (Yaw)
-    double newYaw = Math.atan2(neededMuzzleVelocity.getY(), neededMuzzleVelocity.getX());
-
-    return new LaunchSolution(
-        new Rotation2d(newYaw), newSpeed, new Rotation2d(newPitch), dist, true);
+    Rotation2d newFieldRelativeYaw =
+        new Rotation2d(Math.atan2(neededMuzzleVelocity.getY(), neededMuzzleVelocity.getX()))
+            .minus(robotPose.getRotation().toRotation2d());
+    return new LaunchSolution(newFieldRelativeYaw, newSpeed, new Rotation2d(newPitch), dist, true);
   }
 }

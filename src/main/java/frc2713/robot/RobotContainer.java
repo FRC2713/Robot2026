@@ -254,6 +254,9 @@ public class RobotContainer {
         hood.otfCommand()
             .withName("OTF Tracking")); // TODO: conditional command to account for trench
     flywheels.setDefaultCommand(flywheels.idleSpeedCommand().withName("Idle Tracking"));
+
+    // Trigger example = KinematicsManager.trenchTrigger();
+    // example.onTrue(hood.duck());
   }
 
   /**

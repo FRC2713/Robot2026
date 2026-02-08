@@ -172,7 +172,7 @@ public final class LauncherConstants {
   }
 
   public static LoggedTunableMeasure<Time> otfFutureProjectionSeconds =
-      new LoggedTunableMeasure<Time>("LaunchingSolutionManager/time_to_project", Seconds.of(0.125));
+      new LoggedTunableMeasure<Time>("LaunchingSolutionManager/time_to_project", Seconds.of(1.0));
   public static LoggedTunableBoolean otfFutureProjectionEnabled =
       new LoggedTunableBoolean("LaunchingSolutionManager/projection_enabled", true);
 }

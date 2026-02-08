@@ -179,6 +179,18 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
   }
 
   @Override
+  public Translation3d getRelativeLinearAcceleration() {
+    // TODO: Implement acceleration tracking from gyro or differentiated velocity
+    return new Translation3d();
+  }
+
+  @Override
+  public Translation3d getRelativeAngularAcceleration() {
+    // TODO: Implement angular acceleration tracking from gyro or differentiated velocity
+    return new Translation3d();
+  }
+
+  @Override
   public void periodic() {
     odometryLock.lock(); // Prevents odometry updates while reading data
     gyroIO.updateInputs(gyroInputs);

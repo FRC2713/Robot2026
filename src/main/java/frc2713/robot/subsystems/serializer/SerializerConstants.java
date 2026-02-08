@@ -36,8 +36,8 @@ public final class SerializerConstants {
           new Transform3d(new Translation3d(0, Inches.of(1.75).in(Meters), 0), new Rotation3d());
     }
 
-    public static AngularVelocity indexingSpeed = RotationsPerSecond.of(-30);
-    public static AngularVelocity outdexingSpeed = RotationsPerSecond.of(10);
+    public static AngularVelocity indexingSpeed = RotationsPerSecond.of(-3);
+    public static AngularVelocity outdexingSpeed = RotationsPerSecond.of(3);
 
     public static int MODEL_INDEX = 2;
     public static int PARENT_INDEX = 0; // drivetrain

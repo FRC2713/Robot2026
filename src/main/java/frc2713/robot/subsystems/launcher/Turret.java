@@ -131,20 +131,18 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
    */
   public final Supplier<Angle> otfAngleSupplier =
       () -> {
-        Angle angle = getLaunchOnTheFlyAngle();
-        // If no valid solution, fall back to simple hub angle
-        boolean solutionIsValid = true;
-        if (angle.equals(Degrees.of(0))) {
-          solutionIsValid = false;
-          angle = getHubAngle();
-        }
-        angle =
+        Angle currentAngle = Degrees.of(getCurrentTurretRotation().getDegrees());
+        var solution = LaunchingSolutionManager.getInstance().getSolution();
+        Angle targetAngle =
+            solution.isValid() ? Degrees.of(solution.turretFieldYaw().getDegrees()) : currentAngle;
+
+        targetAngle =
             Degrees.of(
                 convertToClosestBoundedTurretAngleDegrees(
-                    angle.in(Degrees), getCurrentTurretRotation()));
-        Logger.recordOutput(super.pb.makePath("OTF", "solutionIsValid"), solutionIsValid);
-        Logger.recordOutput(pb.makePath("OTF", "targetAngle"), angle);
-        return angle;
+                    targetAngle.in(Degrees), getCurrentTurretRotation()));
+        Logger.recordOutput(super.pb.makePath("OTF", "solutionIsValid"), solution.isValid());
+        Logger.recordOutput(pb.makePath("OTF", "targetAngle"), targetAngle);
+        return targetAngle;
       };
 
   public Command otfCommand() {
@@ -236,7 +234,7 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
           KinematicsManager.getInstance().getGlobalPose(0).getRotation().toRotation2d();
 
       // TargetYaw - ChassisYaw = TurretSetpoint
-      Rotation2d localSetpoint = solution.turretFieldRelativeYaw().minus(chassisHeading);
+      Rotation2d localSetpoint = solution.turretFieldYaw().minus(chassisHeading);
 
       return localSetpoint.getMeasure();
     }
