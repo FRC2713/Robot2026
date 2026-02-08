@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.sim.ChassisReference;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
@@ -32,6 +33,8 @@ public class SimTalonFXIO extends TalonFXIO {
   protected AtomicReference<Angle> lastPosition = new AtomicReference<>((Angle) Rotations.of(0.0));
   protected AtomicReference<AngularVelocity> lastVelocity =
       new AtomicReference<>((AngularVelocity) RadiansPerSecond.of(0.0));
+  protected double lastClosedLoopError = 0.0;
+  protected boolean lastCheckedMMAtTarget = false;
 
   protected double getSimRatio() {
     return config.unitToRotorRatio;
@@ -70,9 +73,21 @@ public class SimTalonFXIO extends TalonFXIO {
   protected double getPlantModelInput(double frictionVoltage) {
     double motorVoltage = talon.getSimState().getMotorVoltage();
 
-    // Apply static friction
+    // Apply static friction and brake mode
     if (Math.abs(motorVoltage) < frictionVoltage) {
-      motorVoltage = 0.0;
+      if (config.fxConfig.MotorOutput.NeutralMode == NeutralModeValue.Brake) {
+        double currentVelocity = sim.getAngularVelocityRadPerSec();
+        double brakeVoltage = 6.0; // Voltage to apply for braking (tune as needed)
+
+        if (Math.abs(currentVelocity) > 0.01) {
+          // Apply opposing voltage proportional to velocity to simulate braking
+          motorVoltage = -Math.signum(currentVelocity) * brakeVoltage;
+        } else {
+          motorVoltage = 0.0;
+        }
+      } else {
+        motorVoltage = 0.0;
+      }
     } else if (motorVoltage > 0.0) {
       motorVoltage -= frictionVoltage;
     } else {
@@ -103,6 +118,9 @@ public class SimTalonFXIO extends TalonFXIO {
     double motorRotPerSec = simVelocityRadPerSec / (2.0 * Math.PI);
     motorState.setRawRotorPosition(motorRotations);
     motorState.setRotorVelocity(motorRotPerSec);
+
+    this.lastClosedLoopError = talon.getClosedLoopError().getValueAsDouble();
+    this.lastCheckedMMAtTarget = talon.getMotionMagicAtTarget().getValue();
   }
 
   @Override
@@ -123,5 +141,33 @@ public class SimTalonFXIO extends TalonFXIO {
     inputs.currentStatorAmps = Amps.of(sim.getCurrentDrawAmps());
     inputs.currentSupplyAmps = Amps.of(sim.getCurrentDrawAmps());
     inputs.rawRotorPosition = Rotations.of(simPositionRad / (2.0 * Math.PI));
+    inputs.closedLoopError = this.lastClosedLoopError;
+    inputs.isMotionMagicAtTarget = this.lastCheckedMMAtTarget;
+  }
+
+  @Override
+  public void setCurrentPositionAsZero() {
+    // Call parent to set TalonFX encoder position to zero
+    super.setCurrentPositionAsZero();
+
+    // Also reset the DCMotorSim state, preserving current velocity
+    double currentVelocityRadPerSec = sim.getAngularVelocityRadPerSec();
+    sim.setState(0.0, currentVelocityRadPerSec);
+  }
+
+  @Override
+  public void setCurrentPosition(Angle position) {
+    // Call parent to set TalonFX encoder position
+    super.setCurrentPosition(position);
+
+    // Also update the DCMotorSim state so readInputs returns the correct position
+    // Position comes in as mechanism rotations, convert to radians for the sim
+    double mechanismRotations = position.in(Rotations);
+    double motorRotations = mechanismRotations / config.unitToRotorRatio;
+    double positionRad = motorRotations * 2.0 * Math.PI;
+
+    // Preserve current velocity when setting position
+    double currentVelocityRadPerSec = sim.getAngularVelocityRadPerSec();
+    sim.setState(positionRad, currentVelocityRadPerSec);
   }
 }
