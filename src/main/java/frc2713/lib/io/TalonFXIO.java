@@ -22,6 +22,7 @@ import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.CTREUtil;
 import frc2713.lib.util.LoggedTunableGains;
 import frc2713.robot.Robot;
+import org.littletonrobotics.junction.AutoLogOutput;
 
 public class TalonFXIO implements MotorIO {
   // Base members
@@ -50,7 +51,7 @@ public class TalonFXIO implements MotorIO {
   private final BaseStatusSignal[] signals;
 
   // Tunables for Slot0 and MotionMagic (created when config.tunable == true)
-  private LoggedTunableGains tunableGains = null;
+  protected LoggedTunableGains tunableGains = null;
 
   public TalonFXIO(TalonFXSubsystemConfig config) {
     this.talon =
@@ -223,5 +224,14 @@ public class TalonFXIO implements MotorIO {
   @Override
   public void setVoltageConfig(VoltageConfigs config) {
     CTREUtil.applyConfigurationNonBlocking(talon, config);
+  }
+
+  @AutoLogOutput
+  public double getClosedLoopError() {
+    return talon.getClosedLoopError().getValue();
+  }
+
+  public boolean isMagicMotionAtTarget() {
+    return talon.getMotionMagicAtTarget(true).getValue();
   }
 }

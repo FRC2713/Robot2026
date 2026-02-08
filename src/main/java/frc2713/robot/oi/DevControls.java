@@ -67,7 +67,8 @@ public class DevControls {
 
     // Turret angle controls
     controller.leftBumper().onTrue(RobotContainer.turret.setAngle(() -> Degrees.of(90)));
-    controller.rightBumper().onTrue(RobotContainer.turret.setAngle(() -> Degrees.of(-300)));
+    controller.rightBumper().onTrue(RobotContainer.turret.setAngle(() -> Degrees.of(-270)));
+    controller.leftTrigger().whileTrue(RobotContainer.turret.oftCommand());
   }
 
   public double getLeftY() {

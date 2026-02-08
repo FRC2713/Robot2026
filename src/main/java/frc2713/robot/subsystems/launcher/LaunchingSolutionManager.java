@@ -8,19 +8,21 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc2713.lib.subsystem.KinematicsManager;
-import frc2713.robot.FieldConstants;
+import frc2713.lib.util.AllianceFlipUtil;
 
 public class LaunchingSolutionManager extends SubsystemBase {
   private static LaunchingSolutionManager instance;
 
   // --- Data Structures ---
   public static record LaunchSolution(
-      Rotation2d turretFieldRelativeYaw, // Target global yaw for the turret
+      Rotation2d turretFieldRelativeYaw, // desired global yaw for the turret
       double flywheelSpeedMetersPerSecond, // Required exit velocity
       Rotation2d hoodPitch, // Required vertical angle
       double effectiveDistanceMeters,
       boolean isValid // False if target is out of range or blocked
       ) {}
+
+  public static record FieldGoal(Translation3d flywheelTarget, Translation3d positionalTarget) {}
 
   // Default to an empty/invalid solution
   private LaunchSolution currentSolution =
@@ -31,6 +33,14 @@ public class LaunchingSolutionManager extends SubsystemBase {
       throw new IllegalStateException("LaunchingSolutionManager already initialized!");
     }
     instance = this;
+  }
+
+  public static FieldGoal currentGoal = new FieldGoal(new Translation3d(), new Translation3d());
+
+  public static void setFieldGoal(Translation3d flywheelTarget, Translation3d positionalTarget) {
+    LaunchingSolutionManager.currentGoal =
+        new FieldGoal(
+            AllianceFlipUtil.apply(flywheelTarget), AllianceFlipUtil.apply(positionalTarget));
   }
 
   public static LaunchingSolutionManager getInstance() {
@@ -45,7 +55,8 @@ public class LaunchingSolutionManager extends SubsystemBase {
     Translation3d robotVel = KinematicsManager.getInstance().getGlobalLinearVelocity(0);
 
     // 2. Solve for the Launch Vector
-    currentSolution = calculate(robotPose, robotVel, FieldConstants.Hub.topCenterPoint);
+    currentSolution =
+        calculate(robotPose, robotVel, LaunchingSolutionManager.currentGoal.positionalTarget);
   }
 
   public LaunchSolution getSolution() {
