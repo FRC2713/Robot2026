@@ -96,6 +96,11 @@ public class VisionIOSLAMDunk implements VisionIO {
       }
     }
 
+    if (poseArray.length == 0) {
+      inputs.reasoning = "No pose data available";
+    } else {
+      inputs.reasoning = "Stale timestamp";
+    }
     inputs.applying = false;
     return;
   }

@@ -30,6 +30,10 @@ public class VisionConstants {
     }
   }
 
+  // Use a very large rotational standard deviation so that the pose estimator
+  // effectively ignores the rotation component of vision measurements and relies
+  // on other sensors (e.g., gyro/odometry) for heading, since vision rotation
+  // data is considered too unreliable/noisy for this robot.
   public static PoseEstimatorErrorStDevs POSE_ESTIMATOR_STATE_STDEVS =
       new PoseEstimatorErrorStDevs(Meters.of(0.01), Degrees.of(999));
 }
