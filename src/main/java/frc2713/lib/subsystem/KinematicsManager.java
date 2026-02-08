@@ -293,8 +293,8 @@ public class KinematicsManager extends SubsystemBase {
     return globalLinVels[index];
   }
 
-  public Rotation3d getGlobalAngularVelocity(int index) {
-    return new Rotation3d(
+  public Translation3d getGlobalAngularVelocity(int index) {
+    return new Translation3d(
         globalAngVels[index].getX(), globalAngVels[index].getY(), globalAngVels[index].getZ());
   }
 
@@ -314,8 +314,8 @@ public class KinematicsManager extends SubsystemBase {
     return globalAngAccels[id];
   }
 
-  public Rotation3d getGlobalAngularAcceleration(int index) {
-    return new Rotation3d(
+  public Translation3d getGlobalAngularAcceleration(int index) {
+    return new Translation3d(
         globalAngAccels[index].getX(),
         globalAngAccels[index].getY(),
         globalAngAccels[index].getZ());

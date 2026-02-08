@@ -116,9 +116,9 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
 
   @AutoLogOutput
   public boolean atTarget() {
-    return Math.abs(this.leftIO.getClosedLoopError())
+    return Math.abs(this.leftInputs.closedLoopError)
             <= LauncherConstants.Flywheels.acceptableError.in(RotationsPerSecond)
-        && Math.abs(this.rightIO.getClosedLoopError())
+        && Math.abs(this.rightInputs.closedLoopError)
             <= LauncherConstants.Flywheels.acceptableError.in(RotationsPerSecond);
   }
 

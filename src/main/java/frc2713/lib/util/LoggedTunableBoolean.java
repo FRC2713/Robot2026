@@ -96,23 +96,27 @@ public class LoggedTunableBoolean implements BooleanSupplier {
   }
 
   /**
-   * Runs action if any of the tunableNumbers have changed
+   * Runs action if any of the tunableBooleans have changed
    *
    * @param id Unique identifier for the caller to avoid conflicts when shared between multiple
    *     objects. Recommended approach is to pass the result of "hashCode()"
    * @param action Callback to run when any of the tunable numbers have changed. Access tunable
    *     numbers in order inputted in method
-   * @param tunableNumbers All tunable numbers to check
+   * @param tunableBooleans All tunable numbers to check
    */
   public static void ifChanged(
-      int id, Consumer<double[]> action, LoggedTunableNumber... tunableNumbers) {
-    if (Arrays.stream(tunableNumbers).anyMatch(tunableNumber -> tunableNumber.hasChanged(id))) {
-      action.accept(Arrays.stream(tunableNumbers).mapToDouble(LoggedTunableNumber::get).toArray());
+      int id, Consumer<boolean[]> action, LoggedTunableBoolean... tunableBooleans) {
+    if (Arrays.stream(tunableBooleans).anyMatch(bool -> bool.hasChanged(id))) {
+      boolean[] values = new boolean[tunableBooleans.length];
+      for (int i = 0; i < tunableBooleans.length; i++) {
+        values[i] = tunableBooleans[i].get();
+      }
+      action.accept(values);
     }
   }
 
   /** Runs action if any of the tunableNumbers have changed */
-  public static void ifChanged(int id, Runnable action, LoggedTunableNumber... tunableNumbers) {
+  public static void ifChanged(int id, Runnable action, LoggedTunableBoolean... tunableNumbers) {
     ifChanged(id, values -> action.run(), tunableNumbers);
   }
 

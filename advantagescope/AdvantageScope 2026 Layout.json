@@ -1,13 +1,13 @@
 {
   "hubs": [
     {
-      "x": 1620,
-      "y": 31,
-      "width": 1820,
-      "height": 1317,
+      "x": -1512,
+      "y": 680,
+      "width": 1512,
+      "height": 948,
       "state": {
         "sidebar": {
-          "width": 500,
+          "width": 453,
           "expanded": [
             "/AdvantageKit",
             "/AdvantageKit/RealOutputs/Drive/SwerveStates",
@@ -27,8 +27,13 @@
             "/AdvantageKit/RealOutputs/Flywheel",
             "/AdvantageKit/Flywheels/Left",
             "/AdvantageKit/Flywheels/Right",
-            "/AdvantageKit/RealOutputs/Hood/API",
-            "/AdvantageKit/RealOutputs/Hood/API/setMotionMagicSetpointImpl"
+            "/AdvantageKit/RealOutputs/Hood/API/setMotionMagicSetpointImpl",
+            "/AdvantageKit/RealOutputs/Hood/OTF",
+            "/AdvantageKit/Vision",
+            "/AdvantageKit/Flywheels",
+            "/AdvantageKit/RealOutputs/Flywheels",
+            "/AdvantageKit/RealOutputs/Flywheels/API/setVelocitySetpointImpl",
+            "/AdvantageKit/RealOutputs/Flywheels/OTF"
           ]
         },
         "tabs": {
@@ -46,7 +51,7 @@
               "type": 8,
               "title": "Joysticks",
               "controller": [
-                "Generic Joystick",
+                "Xbox Controller (White)",
                 "None",
                 "None",
                 "None",
@@ -96,6 +101,26 @@
                     "options": {
                       "variant": "Fuel"
                     }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/LaunchingSolutionManager/projected_pose",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {
+                      "model": "2713 2026 Robot",
+                      "color": "#ff00ff"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/AdvantageKit/Vision/Pose3d",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {
+                      "model": "2713 2026 Robot",
+                      "color": "#00ff00"
+                    }
                   }
                 ],
                 "game": "FRC:2026 Field"
@@ -105,14 +130,14 @@
                 "cameraIndex": -1,
                 "orbitFov": 50,
                 "cameraPosition": [
-                  -10.016507949737509,
-                  3.348312288173128,
-                  15.301818625814501
+                  -13.782100472527157,
+                  13.695177630445054,
+                  0.3040068758546638
                 ],
                 "cameraTarget": [
-                  -7.0960792677248445,
-                  -1.0358141417468507,
-                  -1.0465472040920567
+                  -4.251612280691649,
+                  1.4122057463119604,
+                  0.2961853994555342
                 ]
               },
               "controlsHeight": 200
@@ -194,22 +219,12 @@
             },
             {
               "type": 1,
-              "title": "Launcher",
+              "title": "Muzzle",
               "controller": {
                 "leftSources": [
                   {
                     "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/Hood/Position",
-                    "logType": "Number",
-                    "visible": true,
-                    "options": {
-                      "color": "#2b66a2",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/Turret/Position",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Turret/computedTurretDegrees",
                     "logType": "Number",
                     "visible": true,
                     "options": {
@@ -221,21 +236,11 @@
                 "rightSources": [
                   {
                     "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/Flywheels/Left/Velocity",
+                    "logKey": "NT:/AdvantageKit/Hood/Position",
                     "logType": "Number",
                     "visible": true,
                     "options": {
-                      "color": "#af2437",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/Flywheels/Right/Velocity",
-                    "logType": "Number",
-                    "visible": true,
-                    "options": {
-                      "color": "#80588e",
+                      "color": "#2b66a2",
                       "size": "normal"
                     }
                   }
@@ -292,6 +297,72 @@
                 "rightFilter": 0
               },
               "controllerUUID": "eqxanhccarfqs7znetuke50riuyzkbms",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "Flywheels",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/Flywheels/Left/Velocity",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/Flywheels/Right/Velocity",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Flywheels/OTF/targetVelocity",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e48b32",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "discreteSources": [
+                  {
+                    "type": "stripes",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Flywheels/currentCommand",
+                    "logType": "String",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437"
+                    }
+                  }
+                ],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "autoTarget": null,
+                  "preset": null
+                },
+                "rightUnitConversion": {
+                  "autoTarget": null,
+                  "preset": null
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "tmcresahq7k8uhx3il7t1wq638xrrtju",
               "renderer": null,
               "controlsHeight": 200
             },

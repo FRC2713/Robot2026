@@ -21,7 +21,6 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.RobotTime;
 import java.util.concurrent.atomic.AtomicReference;
-import org.littletonrobotics.junction.AutoLogOutput;
 
 public class SimTalonFXIO extends TalonFXIO {
   protected DCMotorSim sim;
@@ -170,16 +169,5 @@ public class SimTalonFXIO extends TalonFXIO {
     // Preserve current velocity when setting position
     double currentVelocityRadPerSec = sim.getAngularVelocityRadPerSec();
     sim.setState(positionRad, currentVelocityRadPerSec);
-  }
-
-  @Override
-  @AutoLogOutput
-  public double getClosedLoopError() {
-    return this.lastClosedLoopError;
-  }
-
-  @Override
-  public boolean isMagicMotionAtTarget() {
-    return this.lastCheckedMMAtTarget;
   }
 }

@@ -101,9 +101,7 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
 
   public Command hubCommand(Supplier<Pose2d> robotPose) {
     return setAngle(
-        () ->
-            Util.convertRobotRelativeToFieldRelative(
-                LauncherConstants.Turret.staticHubAngle, robotPose.get()));
+        () -> Util.fieldToRobotRelative(LauncherConstants.Turret.staticHubAngle, robotPose.get()));
   }
 
   /**
@@ -150,7 +148,7 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
 
   @AutoLogOutput
   public boolean atTarget() {
-    return this.io.isMagicMotionAtTarget();
+    return this.inputs.isMotionMagicAtTarget;
   }
 
   @Override

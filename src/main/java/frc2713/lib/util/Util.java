@@ -33,7 +33,7 @@ public class Util {
     return (a.minus(epsilon).lte(b)) && (a.plus(epsilon).gte(b));
   }
 
-  public static Angle convertRobotRelativeToFieldRelative(Angle robotRelative, Pose2d robotPose) {
+  public static Angle fieldToRobotRelative(Angle robotRelative, Pose2d robotPose) {
     Rotation2d converted = new Rotation2d(robotRelative.in(Radians)).minus(robotPose.getRotation());
     return converted.getMeasure();
   }

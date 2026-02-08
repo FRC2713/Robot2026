@@ -70,7 +70,7 @@ public class VisionIOSLAMDunk implements VisionIO {
           return;
         }
         if (inputs.latency.compareTo(VisionConstants.LATENCY_THRESHOLD.get()) > 0) {
-          inputs.reasoning = "Latency > 0.2s";
+          inputs.reasoning = "Latency above threshold";
           inputs.applying = false;
           return;
         }
@@ -87,7 +87,7 @@ public class VisionIOSLAMDunk implements VisionIO {
 
         if (Math.abs(inputs.pose3d.getTranslation().getZ()) > 0.1) {
           inputs.applying = false;
-          inputs.reasoning = "Z > 0.1m";
+          inputs.reasoning = "Off ground Z > 0.1m";
           return;
         }
 

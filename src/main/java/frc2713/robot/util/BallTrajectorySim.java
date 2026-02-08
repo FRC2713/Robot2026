@@ -65,7 +65,7 @@ public class BallTrajectorySim {
               ? new Translation3d()
               : velocity.times(-0.5 * airDensity * areaM2 * dragCoeff * vMag);
 
-      // 3. Magnus Lift (CORRECTED)
+      // 3. Magnus Lift (currently commented out)
       Translation3d magnusForce = new Translation3d();
 
       // We assume "spinRateY" actually means "Backspin Rate" regardless of direction.
@@ -98,7 +98,7 @@ public class BallTrajectorySim {
       }
 
       // 4. Integration
-      Translation3d totalForce = gravityForce.plus(dragForce).plus(magnusForce);
+      Translation3d totalForce = gravityForce.plus(dragForce); // .plus(magnusForce);
       Translation3d acceleration = totalForce.div(massKg);
 
       velocity = velocity.plus(acceleration.times(dt));

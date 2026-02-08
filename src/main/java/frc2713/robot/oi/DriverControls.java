@@ -100,6 +100,7 @@ public class DriverControls {
 
     controller
         .leftBumper()
+        .or(controller.leftTrigger(0.25))
         .whileTrue(
             Commands.parallel(intakeRoller.intake(), intakeExtension.extendCommand())
                 .withName("Intaking"))

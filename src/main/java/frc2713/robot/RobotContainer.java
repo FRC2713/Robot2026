@@ -66,7 +66,10 @@ public class RobotContainer {
   public static Vision vision;
 
   // Lazy loaders
+  @SuppressWarnings("unused")
   private final KinematicsManager kinematicsManager = new KinematicsManager();
+
+  @SuppressWarnings("unused")
   private final LaunchingSolutionManager launchingSolutionManager = new LaunchingSolutionManager();
 
   // Controllers

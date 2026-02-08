@@ -22,7 +22,6 @@ import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.CTREUtil;
 import frc2713.lib.util.LoggedTunableGains;
 import frc2713.robot.Robot;
-import org.littletonrobotics.junction.AutoLogOutput;
 
 public class TalonFXIO implements MotorIO {
   // Base members
@@ -47,6 +46,8 @@ public class TalonFXIO implements MotorIO {
   private final StatusSignal<Current> currentStatorSignal;
   private final StatusSignal<Current> currentSupplySignal;
   private final StatusSignal<Angle> rawRotorPositionSignal;
+  private final StatusSignal<Double> closedLoopErrorSignal;
+  private final StatusSignal<Boolean> motionMagicAtTargetSignal;
 
   private final BaseStatusSignal[] signals;
 
@@ -75,6 +76,8 @@ public class TalonFXIO implements MotorIO {
     currentStatorSignal = talon.getStatorCurrent();
     currentSupplySignal = talon.getSupplyCurrent();
     rawRotorPositionSignal = talon.getRotorPosition();
+    closedLoopErrorSignal = talon.getClosedLoopError();
+    motionMagicAtTargetSignal = talon.getMotionMagicAtTarget();
     signals =
         new BaseStatusSignal[] {
           positionSignal,
@@ -82,7 +85,9 @@ public class TalonFXIO implements MotorIO {
           voltageSignal,
           currentStatorSignal,
           currentSupplySignal,
-          rawRotorPositionSignal
+          rawRotorPositionSignal,
+          closedLoopErrorSignal,
+          motionMagicAtTargetSignal
         };
 
     CTREUtil.tryUntilOK(
@@ -106,6 +111,8 @@ public class TalonFXIO implements MotorIO {
     inputs.currentStatorAmps = currentStatorSignal.getValue();
     inputs.currentSupplyAmps = currentSupplySignal.getValue();
     inputs.rawRotorPosition = rawRotorPositionSignal.getValue();
+    inputs.closedLoopError = closedLoopErrorSignal.getValue();
+    inputs.isMotionMagicAtTarget = motionMagicAtTargetSignal.getValue();
 
     // Update PID gains from dashboard if tunable and any value changed
     if (this.config.tunable && tunableGains != null) {
@@ -224,16 +231,5 @@ public class TalonFXIO implements MotorIO {
   @Override
   public void setVoltageConfig(VoltageConfigs config) {
     CTREUtil.applyConfigurationNonBlocking(talon, config);
-  }
-
-  @Override
-  @AutoLogOutput
-  public double getClosedLoopError() {
-    return talon.getClosedLoopError().getValue();
-  }
-
-  @Override
-  public boolean isMagicMotionAtTarget() {
-    return talon.getMotionMagicAtTarget(true).getValue();
   }
 }

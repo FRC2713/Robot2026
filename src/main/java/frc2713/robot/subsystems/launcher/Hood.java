@@ -63,7 +63,7 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
 
   @AutoLogOutput
   public boolean atTarget() {
-    return this.io.isMagicMotionAtTarget();
+    return this.inputs.isMotionMagicAtTarget;
   }
 
   @Override
