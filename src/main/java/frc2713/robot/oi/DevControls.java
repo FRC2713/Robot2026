@@ -20,7 +20,7 @@ import frc2713.robot.subsystems.serializer.Feeder;
 
 @SuppressWarnings("unused")
 public class DevControls {
-  private final CommandXboxController controller = new CommandXboxController(2);
+  private final CommandXboxController controller = new CommandXboxController(1);
 
   private final Drive drive;
   private final Flywheels flywheels;
