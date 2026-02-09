@@ -22,13 +22,17 @@ public final class SerializerConstants {
       config.name = "Dye Rotor";
       config.talonCANID = new CANDeviceId(10); // Example CAN ID, replace with actual ID
 
-      // Velocity PID gains (FOC velocity uses torque current, so kP is in amps per rot/sec error)
-      config.fxConfig.Slot0.kP = 3.0;
-      config.fxConfig.Slot0.kI = 0.0;
-      config.fxConfig.Slot0.kD = 0.0;
-      config.fxConfig.Slot0.kS = 0.1; // Static friction compensation
-      config.fxConfig.Slot0.kV = 0.12; // Velocity feedforward
+      config.useFOC = false;
 
+      // Velocity PID gains for VelocityVoltage control
+      // Units: kP/kV/kS are in volts
+      config.fxConfig.Slot0.kP = 0.08; // Volts per rps of error (lower to reduce oscillation)
+      config.fxConfig.Slot0.kI = 0.0;
+      config.fxConfig.Slot0.kD = 0.01; // Small damping to reduce oscillation
+      config.fxConfig.Slot0.kS = 0.1; // Volts to overcome static friction
+      config.fxConfig.Slot0.kV = 0.12; // Volts per rps (feedforward)
+
+      config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
       config.unitToRotorRatio = 46.0 / 14.0;
       config.momentOfInertia = 0.001; // kg*m^2 for simulation (small roller)
 
@@ -50,9 +54,17 @@ public final class SerializerConstants {
     static {
       config.name = "Feeder";
       config.talonCANID = new CANDeviceId(11); // Example CAN ID, replace with actual ID
-      config.fxConfig.Slot0.kP = 0.2;
+
+      config.useFOC = false;
+
+      // Velocity PID gains for VelocityVoltage control
+      // Units: kP/kV/kS are in volts
+      config.fxConfig.Slot0.kP = 0.11; // Volts per rps of error
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 0.0;
+      config.fxConfig.Slot0.kS = 0.1; // Volts to overcome static friction
+      config.fxConfig.Slot0.kV = 0.12; // Volts per rps (feedforward)
+
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
       config.unitToRotorRatio = 1.0;
       config.momentOfInertia = 0.001; // kg*m^2 for simulation

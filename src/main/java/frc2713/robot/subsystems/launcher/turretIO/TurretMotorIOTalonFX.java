@@ -10,6 +10,7 @@ import edu.wpi.first.units.measure.Angle;
 import frc2713.lib.io.TalonFXIO;
 import frc2713.lib.util.CTREUtil;
 import frc2713.robot.subsystems.launcher.Turret;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * TalonFX IO implementation for the turret with dual encoder support. Uses the TalonFX integrated
@@ -55,14 +56,16 @@ public class TurretMotorIOTalonFX extends TalonFXIO implements TurretMotorIO {
 
     // Read encoder 1 (TalonFX integrated encoder) - convert rotations to degrees
     double encoder1Degrees = inputs.rawRotorPosition.in(Degrees);
-    inputs.encoder1PositionDegrees = Degrees.of(encoder1Degrees);
+    inputs.encoder1Position = Degrees.of(encoder1Degrees);
 
     // Read encoder 2 (external CANCoder) - convert to degrees
     double encoder2Degrees = canCoderPositionSignal.getValue().in(Degrees);
-    inputs.encoder2PositionDegrees = Degrees.of(encoder2Degrees);
+    inputs.encoder2Position = Degrees.of(encoder2Degrees);
 
     // Compute turret position from both encoders using the Vernier algorithm
     double computedPosition = Turret.turretPositionFromEncoders(encoder1Degrees, encoder2Degrees);
-    inputs.computedTurretPositionDegrees = Degrees.of(computedPosition);
+    inputs.computedTurretPosition = Degrees.of(computedPosition);
+    Logger.recordOutput(
+        pb.makePath("ComputedTurretPositionDeg"), inputs.computedTurretPosition.in(Degrees));
   }
 }

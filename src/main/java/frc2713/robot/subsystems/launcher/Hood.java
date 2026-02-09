@@ -63,6 +63,8 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
         Logger.recordOutput(super.pb.makePath("OTF", "distanceToGoal"), toGoal);
         Logger.recordOutput(super.pb.makePath("OTF", "aimAngleDeg"), aimAngle.in(Degrees));
         Logger.recordOutput(
+            super.pb.makePath("OTF", "currentAngleDeg"), inputs.position.in(Degrees));
+        Logger.recordOutput(
             super.pb.makePath("OTF", "lookupAngle"),
             Degrees.of(LauncherConstants.Hood.angleMap.get(toGoal.in(Meters))));
         return aimAngle;

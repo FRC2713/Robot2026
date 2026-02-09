@@ -193,7 +193,7 @@ public final class LauncherConstants {
 
   public static LoggedTunableMeasure<Time> otfLinearProjectionSeconds =
       new LoggedTunableMeasure<Time>(
-          "LaunchingSolutionManager/time_to_project_lin", Seconds.of(1.0));
+          "LaunchingSolutionManager/time_to_project_lin", Seconds.of(0.5));
   public static LoggedTunableMeasure<Time> otfAngularProjectionSeconds =
       new LoggedTunableMeasure<Time>(
           "LaunchingSolutionManager/time_to_project_ang", Seconds.of(0.5));

@@ -114,7 +114,7 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
    * @return The computed turret position in degrees
    */
   public Angle getComputedTurretPosition() {
-    return inputs.computedTurretPositionDegrees;
+    return inputs.computedTurretPosition;
   }
 
   /**
@@ -123,7 +123,7 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
    * @return The current turret position as a Rotation2d
    */
   public Rotation2d getCurrentTurretRotation() {
-    return Rotation2d.fromDegrees(inputs.computedTurretPositionDegrees.in(Degrees));
+    return Rotation2d.fromDegrees(inputs.computedTurretPosition.in(Degrees));
   }
 
   /**
@@ -146,7 +146,7 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
                   LauncherConstants.Turret.staticHubAngle, RobotContainer.drive.getPose());
         } else {
           Logger.recordOutput(super.pb.makePath("OTF", "response"), "stay at measured");
-          targetAngle = inputs.computedTurretPositionDegrees;
+          targetAngle = inputs.computedTurretPosition;
         }
 
         targetAngle =
@@ -196,7 +196,7 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
   @Override
   public Transform3d getTransform3d() {
     // Use the computed turret position from the Vernier dual-encoder system (in degrees)
-    double turretAngleRadians = inputs.computedTurretPositionDegrees.in(Radian);
+    double turretAngleRadians = inputs.computedTurretPosition.in(Radian);
     return config.initialTransform.plus(
         new Transform3d(new Translation3d(), new Rotation3d(0, 0, turretAngleRadians)));
   }
