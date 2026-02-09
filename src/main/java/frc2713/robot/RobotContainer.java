@@ -20,6 +20,7 @@ import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.generated.TunerConstants;
+import frc2713.robot.oi.DevControls;
 import frc2713.robot.oi.DriverControls;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.drive.GyroIO;
@@ -69,12 +70,12 @@ public class RobotContainer {
   // Lazy loaders
   @SuppressWarnings("unused")
   private final KinematicsManager kinematicsManager = new KinematicsManager();
-
   @SuppressWarnings("unused")
   private final LaunchingSolutionManager launchingSolutionManager = new LaunchingSolutionManager();
 
   // Controllers
   public static DriverControls driverControls;
+  public static DevControls devControls;
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -256,7 +257,7 @@ public class RobotContainer {
     // Default command, normal field-relative drive
     driverControls.configureButtonBindings();
     // operatorControls.configureButtonBindings();
-    // devControls.configureButtonBindings();
+    devControls.configureButtonBindings();
 
     // Default commands
     driverControls.setToNormalDrive();

@@ -27,14 +27,13 @@ public final class LauncherConstants {
   public static final class Turret {
 
     public static TurretSubsystemConfig config = new TurretSubsystemConfig();
-
-    public static Angle acceptableError = Degrees.of(10);
+    public static Angle acceptableError = Degrees.of(3);
     public static Angle staticHubAngle = Degrees.of(0);
 
     static {
       config.name = "Turret";
-      config.talonCANID = new CANDeviceId(12); // Example CAN ID, replace with actual ID
       config.canCoderCANID = new CANDeviceId(13); // CANCoder CAN ID, replace with actual ID
+      config.tunable = true; // Enable tunable gains for Motion Magic
 
       // PID gains for Motion Magic
       config.fxConfig.Slot0.kP = 80.0;
@@ -49,7 +48,8 @@ public final class LauncherConstants {
       config.fxConfig.MotionMagic.MotionMagicAcceleration = 15.0; // rotations per second^2
       config.fxConfig.MotionMagic.MotionMagicJerk = 100; // limit jerk for smooth motion
 
-      config.unitToRotorRatio = 1.0; // 1:1 ratio
+      // Gear ratio: motor rotations per turret rotation = GEAR_1/GEAR_0 = 120/60 = 2.0
+      config.unitToRotorRatio = 120.0 / 60.0;
       config.momentOfInertia = 0.02; // kg*m^2 for simulation
 
       config.initialTransform =
@@ -72,9 +72,12 @@ public final class LauncherConstants {
         (GEAR_2_TOOTH_COUNT * GEAR_1_TOOTH_COUNT)
             / ((GEAR_1_TOOTH_COUNT - GEAR_2_TOOTH_COUNT) * GEAR_0_TOOTH_COUNT);
 
+    // How many times encoder 1 spins per 1 degree of turret rotation
+    public static final double ENCODER_1_TO_TURRET_RATIO = GEAR_1_TOOTH_COUNT / GEAR_0_TOOTH_COUNT;
+
     // Turret rotation limits
-    public static final double FORWARD_LIMIT_DEGREES = 180.0; // TODO: Replace with actual value
-    public static final double REVERSE_LIMIT_DEGREES = -180.0; // TODO: Replace with actual value
+    public static final double FORWARD_LIMIT_DEGREES = 270.0; // TODO: Replace with actual value
+    public static final double REVERSE_LIMIT_DEGREES = -270.0; // TODO: Replace with actual value
   }
 
   public final class Flywheels {

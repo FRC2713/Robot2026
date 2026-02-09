@@ -187,4 +187,4 @@ ctre_sim/
 compile_commands.json
 
 # Version file
-src/main/java/frc2713/robot/generated/BuildConstants.java
+src/main/java/**/BuildConstants.java

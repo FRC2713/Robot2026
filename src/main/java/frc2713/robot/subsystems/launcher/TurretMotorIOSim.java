@@ -1,6 +1,9 @@
 package frc2713.robot.subsystems.launcher;
 
+import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
+import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.ENCODER_1_TO_TURRET_RATIO;
+import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.SLOPE;
 
 import frc2713.lib.io.MotorInputs;
 import frc2713.lib.io.SimTalonFXIO;
@@ -11,9 +14,6 @@ import frc2713.lib.io.SimTalonFXIO;
  */
 public class TurretMotorIOSim extends SimTalonFXIO implements TurretMotorIO {
 
-  // Simulated encoder offsets to differentiate the two encoders
-  private static final double ENCODER_2_OFFSET_DEGREES = 15.0;
-
   public TurretMotorIOSim(TurretSubsystemConfig config) {
     super(config);
   }
@@ -23,20 +23,31 @@ public class TurretMotorIOSim extends SimTalonFXIO implements TurretMotorIO {
     // Call parent to read standard motor inputs
     super.readInputs(inputs);
 
-    // Simulate encoder 1 (TalonFX integrated encoder) - use raw rotor position
-    double talonEncoderDegrees = inputs.rawRotorPosition.in(Degrees);
-    inputs.encoder1PositionDegrees = Degrees.of(talonEncoderDegrees);
+    // Gear train:
+    // - Encoder 1 is on the motor shaft (GEAR_0) - directly measures motor position
+    // - GEAR_1 meshes with GEAR_0
+    // - Encoder 2 (CANCoder) is on GEAR_2
+    // - The turret position is computed from both encoders using the Vernier algorithm
 
-    // Simulate encoder 2 (external CANCoder) - slightly different gearing creates offset
-    // In reality, the CANCoder would be on a different gear with different tooth count
-    double canCoderDegrees = talonEncoderDegrees + ENCODER_2_OFFSET_DEGREES;
-    inputs.encoder2PositionDegrees = Degrees.of(canCoderDegrees);
+    // Encoder 1 = motor position (rawRotorPosition) since it's on the motor shaft
+    double encoder1Degrees = inputs.rawRotorPosition.in(Degrees);
+    inputs.encoder1PositionDegrees = Degrees.of(encoder1Degrees);
 
-    // Compute turret position from both encoders using the Vernier algorithm
-    double computedPosition =
-        Turret.turretPositionFromEncoders(
-            inputs.encoder1PositionDegrees.in(Degrees), inputs.encoder2PositionDegrees.in(Degrees));
-    inputs.computedTurretPositionDegrees = Degrees.of(computedPosition);
+    // Calculate the turret position from encoder 1
+    // Encoder 1 spins ENCODER_1_TO_TURRET_RATIO times per turret rotation
+    // turretPosition = encoder1 / ENCODER_1_TO_TURRET_RATIO
+    double turretPositionDegrees = encoder1Degrees / ENCODER_1_TO_TURRET_RATIO;
+
+    // Simulate encoder 2: The Vernier algorithm expects diff = turretPosition / SLOPE
+    // where diff = e2 - e1, so e2 = e1 + turretPosition / SLOPE
+    double encoder2Degrees = encoder1Degrees + (turretPositionDegrees / SLOPE);
+    inputs.encoder2PositionDegrees = Degrees.of(encoder2Degrees);
+
+    // Compute using Vernier algorithm (should match turretPositionDegrees)
+    double vernierComputed = Turret.turretPositionFromEncoders(encoder1Degrees, encoder2Degrees);
+
+    // Use the Vernier computed position
+    inputs.computedTurretPositionDegrees = Degrees.of(vernierComputed);
   }
 
   @Override

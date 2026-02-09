@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
+import frc2713.lib.util.CTREUtil;
 import frc2713.lib.util.RobotTime;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -80,7 +81,7 @@ public class SimTalonFXIO extends TalonFXIO {
     // For DC motor: V = I * R + ω * kE (back-EMF)
     // DCMotorSim expects voltage input and internally computes: I = (V - ω * kE) / R
     // So to command a specific current I: V = I * R + ω * kE
-    if (Math.abs(torqueCurrent) > 0.1 && Math.abs(motorVoltage) < 0.1) {
+    if (config.useFOC && Math.abs(torqueCurrent) > 0.1 && Math.abs(motorVoltage) < 0.1) {
       DCMotor motor = DCMotor.getKrakenX60Foc(1);
       double omegaRadPerSec = sim.getAngularVelocityRadPerSec();
       // V = I * R + ω * kE (kE = kV in radians, which equals 1/KvRadPerSecPerVolt)
@@ -133,6 +134,17 @@ public class SimTalonFXIO extends TalonFXIO {
     inputs.rawRotorPosition = Rotations.of(mechanismRotations * config.unitToRotorRatio);
     inputs.closedLoopError = this.lastClosedLoopError;
     inputs.isMotionMagicAtTarget = this.lastCheckedMMAtTarget;
+
+    // Check for tunable gains updates (same as TalonFXIO)
+    if (this.config.tunable && tunableGains != null) {
+      tunableGains.ifChanged(
+          this.hashCode(),
+          (gains, motionMagic) -> {
+            this.config.fxConfig.Slot0 = gains;
+            this.config.fxConfig.MotionMagic = motionMagic;
+            CTREUtil.applyConfiguration(talon, this.config.fxConfig);
+          });
+    }
   }
 
   @Override
