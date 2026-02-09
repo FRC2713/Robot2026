@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc2713.robot.RobotContainer;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
@@ -98,6 +99,7 @@ public class DriverControls {
     //     .onTrue(flywheels.velocitySetpointCommand(LauncherConstants.Flywheels.PIDTest))
     //     .onFalse(flywheels.velocitySetpointCommand(() -> RPM.of(0)));
 
+    // intake fuel
     controller
         .leftBumper()
         .or(controller.leftTrigger(0.25))
@@ -111,30 +113,14 @@ public class DriverControls {
     // shoot against the hubwhen flywheels and hub are ready
     controller
         .rightBumper()
-        .whileTrue(
-            Commands.parallel(
-                    flywheels.hubCommand(),
-                    hood.hubCommand(),
-                    turret.hubCommand(drive::getPose),
-                    flywheels.simulateLaunchedFuel(() -> flywheels.atTarget() && hood.atTarget()),
-                    feeder.feedWhenReady(() -> flywheels.atTarget() && hood.atTarget()),
-                    dyeRotor.feedWhenReady(() -> flywheels.atTarget() && hood.atTarget()))
-                .withName("Hub Shooting"))
-        .onFalse(Commands.parallel(feeder.stop(), dyeRotor.stopCommand()).withName("Stopped"));
+        .whileTrue(RobotContainer.GameCommandGroups.hubShot)
+        .onFalse(RobotContainer.GameCommandGroups.stopShooting);
 
     // shoot when flywheels are ready
     controller
         .rightTrigger(0.25)
-        .whileTrue(
-            Commands.parallel(
-                    flywheels.otfCommand(),
-                    hood.otfCommand(),
-                    turret.otfCommand(),
-                    flywheels.simulateLaunchedFuel(flywheels::atTarget),
-                    feeder.feedWhenReady(flywheels::atTarget),
-                    dyeRotor.feedWhenReady(flywheels::atTarget))
-                .withName("OTF Shooting"))
-        .onFalse(Commands.parallel(feeder.stop(), dyeRotor.stopCommand()).withName("Stopped"));
+        .whileTrue(RobotContainer.GameCommandGroups.otfShot)
+        .onFalse(RobotContainer.GameCommandGroups.stopShooting);
   }
 
   public double getLeftY() {

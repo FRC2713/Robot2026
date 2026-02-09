@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.SimTalonFXIO;
@@ -281,5 +282,34 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.get();
+  }
+
+  /**
+   * A Utility class holding common game actions in the form of command groups that can be shared
+   * between Driver, Developer, and AutoRoutines
+   */
+  public static class GameCommandGroups {
+    public static Command otfShot =
+        Commands.parallel(
+                flywheels.otfCommand(),
+                hood.otfCommand(),
+                turret.otfCommand(),
+                flywheels.simulateLaunchedFuel(flywheels::atTarget),
+                feeder.feedWhenReady(flywheels::atTarget),
+                dyeRotor.feedWhenReady(flywheels::atTarget))
+            .withName("OTF Shooting");
+
+    public static Command hubShot =
+        Commands.parallel(
+                flywheels.hubCommand(),
+                hood.hubCommand(),
+                turret.hubCommand(drive::getPose),
+                flywheels.simulateLaunchedFuel(() -> flywheels.atTarget() && hood.atTarget()),
+                feeder.feedWhenReady(() -> flywheels.atTarget() && hood.atTarget()),
+                dyeRotor.feedWhenReady(() -> flywheels.atTarget() && hood.atTarget()))
+            .withName("Hub Shooting");
+
+    public static Command stopShooting =
+        Commands.parallel(feeder.stop(), dyeRotor.stopCommand()).withName("Stopped Shooting");
   }
 }
