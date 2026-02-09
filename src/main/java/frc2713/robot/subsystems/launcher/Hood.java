@@ -73,7 +73,7 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
 
   @Override
   public Transform3d getTransform3d() {
-    Angle rotations = super.getCurrentPosition().div(config.unitToRotorRatio);
+    Angle rotations = super.getCurrentPosition();
     Transform3d localTransform =
         new Transform3d(new Translation3d(), new Rotation3d(0, rotations.in(Radians), 0));
 

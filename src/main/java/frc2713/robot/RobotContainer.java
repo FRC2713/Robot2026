@@ -8,6 +8,7 @@
 package frc2713.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -185,6 +186,9 @@ public class RobotContainer {
         vision = new Vision(new VisionIO() {});
         break;
     }
+
+    // This setting is ignored when the FMS is connected
+    DriverStation.silenceJoystickConnectionWarning(true);
 
     // Set up driver controller
     driverControls =

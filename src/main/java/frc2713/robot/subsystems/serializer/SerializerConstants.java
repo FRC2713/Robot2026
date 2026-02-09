@@ -29,7 +29,7 @@ public final class SerializerConstants {
       config.fxConfig.Slot0.kS = 0.1; // Static friction compensation
       config.fxConfig.Slot0.kV = 0.12; // Velocity feedforward
 
-      config.unitToRotorRatio = 1.0; // 1:1 ratio
+      config.unitToRotorRatio = 46.0 / 14.0;
       config.momentOfInertia = 0.001; // kg*m^2 for simulation (small roller)
 
       config.initialTransform =
@@ -54,7 +54,7 @@ public final class SerializerConstants {
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 0.0;
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-      config.unitToRotorRatio = 1.0; // 1:1 ratio
+      config.unitToRotorRatio = 1.0;
       config.momentOfInertia = 0.001; // kg*m^2 for simulation
     }
 

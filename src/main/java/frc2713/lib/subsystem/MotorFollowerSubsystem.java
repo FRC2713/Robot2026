@@ -91,25 +91,25 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
   }
 
   /**
-   * Multiply by the unit to rotor ratio to get motor rotations
+   * Convert subsystem position to the position value sent to the motor controller. Since TalonFX is
+   * configured with SensorToMechanismRatio, control requests use mechanism units directly - the
+   * controller handles the conversion internally.
    *
-   * @param subsystemPosition
-   * @return
+   * @param subsystemPosition The desired mechanism position
+   * @return The position to send to the motor controller (same as input)
    */
   protected Angle convertSubsystemPositionToMotorPosition(Angle subsystemPosition) {
-    return subsystemPosition.times(leftConfig.unitToRotorRatio);
+    return subsystemPosition;
   }
 
   /**
-   * Convert a linear distance to motor rotations
+   * Convert a linear distance to mechanism rotations for the motor controller.
    *
    * @param subsystemPosition Desired distance
-   * @return the number of rotations the motor must move to achieve that distance
+   * @return the number of mechanism rotations to achieve that distance
    */
   protected Angle convertSubsystemPositionToMotorPosition(Distance subsystemPosition) {
-    Angle rotationsPerMeter =
-        Rotations.of(subsystemPosition.in(Meters) * leftConfig.unitRotationsPerMeter);
-    return convertSubsystemPositionToMotorPosition(rotationsPerMeter);
+    return Rotations.of(subsystemPosition.in(Meters) * leftConfig.unitRotationsPerMeter);
   }
 
   // IO Implementations

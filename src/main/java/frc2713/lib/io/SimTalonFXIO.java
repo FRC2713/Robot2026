@@ -8,7 +8,6 @@ import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.sim.ChassisReference;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
@@ -27,9 +26,6 @@ public class SimTalonFXIO extends TalonFXIO {
   private Notifier simNotifier = null;
   private Time lastUpdateTimestamp = Seconds.of(0.0);
 
-  // Used to handle mechanisms that wrap.
-  private boolean invertVoltage = false;
-
   protected AtomicReference<Angle> lastPosition = new AtomicReference<>((Angle) Rotations.of(0.0));
   protected AtomicReference<AngularVelocity> lastVelocity =
       new AtomicReference<>((AngularVelocity) RadiansPerSecond.of(0.0));
@@ -43,12 +39,14 @@ public class SimTalonFXIO extends TalonFXIO {
   public SimTalonFXIO(TalonFXSubsystemConfig config) {
     // the TalonFX in the parent class will store and update the motor charecteristics in simulation
     // the DCMotorSim has the plant model that lets up update the motor state while running in
-    // simulation
+    // simulation.
+    // The gearing parameter is the gear ratio (rotor rotations per mechanism rotation).
+    // DCMotorSim outputs mechanism-side position/velocity when gearing is applied.
     this(
         config,
         new DCMotorSim(
             LinearSystemId.createDCMotorSystem(
-                DCMotor.getKrakenX60Foc(1), config.momentOfInertia, 1.0 / config.unitToRotorRatio),
+                DCMotor.getKrakenX60Foc(1), config.momentOfInertia, config.unitToRotorRatio),
             DCMotor.getKrakenX60Foc(1),
             0.001,
             0.001));
@@ -70,54 +68,43 @@ public class SimTalonFXIO extends TalonFXIO {
     simNotifier.startPeriodic(0.005);
   }
 
-  protected double getPlantModelInput(double frictionVoltage) {
-    double motorVoltage = talon.getSimState().getMotorVoltage();
-
-    // Apply static friction and brake mode
-    if (Math.abs(motorVoltage) < frictionVoltage) {
-      if (config.fxConfig.MotorOutput.NeutralMode == NeutralModeValue.Brake) {
-        double currentVelocity = sim.getAngularVelocityRadPerSec();
-        double brakeVoltage = 6.0; // Voltage to apply for braking (tune as needed)
-
-        if (Math.abs(currentVelocity) > 0.01) {
-          // Apply opposing voltage proportional to velocity to simulate braking
-          motorVoltage = -Math.signum(currentVelocity) * brakeVoltage;
-        } else {
-          motorVoltage = 0.0;
-        }
-      } else {
-        motorVoltage = 0.0;
-      }
-    } else if (motorVoltage > 0.0) {
-      motorVoltage -= frictionVoltage;
-    } else {
-      motorVoltage += frictionVoltage;
-    }
-
-    // Apply motor inversion
-    return invertVoltage ? -motorVoltage : motorVoltage;
-  }
-
-  public void setInvertVoltage(boolean invertVoltage) {
-    this.invertVoltage = invertVoltage;
-  }
-
   protected void updateSimState() {
     var motorState = talon.getSimState();
-    motorState.setSupplyVoltage((invertVoltage ? -1 : 1) * RobotController.getBatteryVoltage());
-    sim.setInputVoltage(getPlantModelInput(0.25));
+    motorState.setSupplyVoltage(RobotController.getBatteryVoltage());
+
+    // Get motor output - use voltage if available, otherwise convert torque current to voltage
+    double motorVoltage = motorState.getMotorVoltage();
+    double torqueCurrent = motorState.getTorqueCurrent();
+
+    // If torque current is being used (FOC control), convert to equivalent voltage
+    // For DC motor: V = I * R + ω * kE (back-EMF)
+    // DCMotorSim expects voltage input and internally computes: I = (V - ω * kE) / R
+    // So to command a specific current I: V = I * R + ω * kE
+    if (Math.abs(torqueCurrent) > 0.1 && Math.abs(motorVoltage) < 0.1) {
+      DCMotor motor = DCMotor.getKrakenX60Foc(1);
+      double omegaRadPerSec = sim.getAngularVelocityRadPerSec();
+      // V = I * R + ω * kE (kE = kV in radians, which equals 1/KvRadPerSecPerVolt)
+      double backEmfConstant = 1.0 / motor.KvRadPerSecPerVolt;
+      motorVoltage = torqueCurrent * motor.rOhms + omegaRadPerSec * backEmfConstant;
+    }
+
+    sim.setInputVoltage(motorVoltage);
 
     Time timestamp = RobotTime.getTimestamp();
     sim.update(timestamp.minus(lastUpdateTimestamp).in(Seconds));
     lastUpdateTimestamp = timestamp;
 
-    double simPositionRad = sim.getAngularPositionRad(); // sim in rads
-    double simVelocityRadPerSec = sim.getAngularVelocityRadPerSec();
+    // DCMotorSim with gearing outputs mechanism-side position/velocity.
+    // TalonFX sim state expects rotor (motor shaft) values.
+    // Convert: rotor = mechanism * unitToRotorRatio
+    double mechanismPositionRad = sim.getAngularPositionRad();
+    double mechanismVelocityRadPerSec = sim.getAngularVelocityRadPerSec();
 
-    double motorRotations = simPositionRad / (2.0 * Math.PI); // ctre expects rotations
-    double motorRotPerSec = simVelocityRadPerSec / (2.0 * Math.PI);
-    motorState.setRawRotorPosition(motorRotations);
-    motorState.setRotorVelocity(motorRotPerSec);
+    double rotorRotations = (mechanismPositionRad / (2.0 * Math.PI)) * config.unitToRotorRatio;
+    double rotorRotPerSec =
+        (mechanismVelocityRadPerSec / (2.0 * Math.PI)) * config.unitToRotorRatio;
+    motorState.setRawRotorPosition(rotorRotations);
+    motorState.setRotorVelocity(rotorRotPerSec);
 
     this.lastClosedLoopError = talon.getClosedLoopError().getValueAsDouble();
     this.lastCheckedMMAtTarget = talon.getMotionMagicAtTarget().getValue();
@@ -131,16 +118,19 @@ public class SimTalonFXIO extends TalonFXIO {
     double simPositionRad = sim.getAngularPositionRad();
     double simVelocityRadPerSec = sim.getAngularVelocityRadPerSec();
 
-    // Convert from radians to rotations (mechanism position, not rotor)
-    double mechanismRotations = simPositionRad / (2.0 * Math.PI) * config.unitToRotorRatio;
-    double mechanismRotPerSec = simVelocityRadPerSec / (2.0 * Math.PI) * config.unitToRotorRatio;
+    // DCMotorSim with gearing outputs mechanism-side position/velocity (not motor shaft).
+    // Just convert from radians to rotations - no gear ratio conversion needed here.
+    double mechanismRotations = simPositionRad / (2.0 * Math.PI);
+    double mechanismRotPerSec = simVelocityRadPerSec / (2.0 * Math.PI);
 
     inputs.position = Rotations.of(mechanismRotations);
     inputs.velocity = RotationsPerSecond.of(mechanismRotPerSec);
     inputs.appliedVolts = Volts.of(sim.getInputVoltage());
     inputs.currentStatorAmps = Amps.of(sim.getCurrentDrawAmps());
     inputs.currentSupplyAmps = Amps.of(sim.getCurrentDrawAmps());
-    inputs.rawRotorPosition = Rotations.of(simPositionRad / (2.0 * Math.PI));
+    inputs.currenTorqueAmps = Amps.of(sim.getCurrentDrawAmps());
+    // rawRotorPosition is motor shaft position: mechanism * unitToRotorRatio
+    inputs.rawRotorPosition = Rotations.of(mechanismRotations * config.unitToRotorRatio);
     inputs.closedLoopError = this.lastClosedLoopError;
     inputs.isMotionMagicAtTarget = this.lastCheckedMMAtTarget;
   }
@@ -161,10 +151,10 @@ public class SimTalonFXIO extends TalonFXIO {
     super.setCurrentPosition(position);
 
     // Also update the DCMotorSim state so readInputs returns the correct position
-    // Position comes in as mechanism rotations, convert to radians for the sim
+    // Position comes in as mechanism rotations, convert to mechanism radians for the sim.
+    // DCMotorSim with gearing expects mechanism-side position.
     double mechanismRotations = position.in(Rotations);
-    double motorRotations = mechanismRotations / config.unitToRotorRatio;
-    double positionRad = motorRotations * 2.0 * Math.PI;
+    double positionRad = mechanismRotations * 2.0 * Math.PI;
 
     // Preserve current velocity when setting position
     double currentVelocityRadPerSec = sim.getAngularVelocityRadPerSec();

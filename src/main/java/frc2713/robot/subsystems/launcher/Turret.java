@@ -138,7 +138,7 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
                 convertToClosestBoundedTurretAngleDegrees(
                     targetAngle.in(Degrees), getCurrentTurretRotation()));
         Logger.recordOutput(super.pb.makePath("OTF", "solutionIsValid"), solution.isValid());
-        Logger.recordOutput(pb.makePath("OTF", "targetAngle"), targetAngle);
+        Logger.recordOutput(pb.makePath("OTF", "targetAngleDegrees"), targetAngle.in(Degrees));
         return targetAngle;
       };
 
@@ -169,7 +169,7 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
 
   @Override
   public Transform3d getTransform3d() {
-    Angle rotations = super.getCurrentPosition().times(config.unitToRotorRatio);
+    Angle rotations = super.getCurrentPosition();
     return config.initialTransform.plus(
         new Transform3d(new Translation3d(), new Rotation3d(0, 0, rotations.in(Radians))));
   }

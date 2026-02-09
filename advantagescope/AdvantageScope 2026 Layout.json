@@ -31,13 +31,14 @@
             "/AdvantageKit/RealOutputs/Hood/OTF",
             "/AdvantageKit/Vision",
             "/AdvantageKit/Flywheels",
-            "/AdvantageKit/RealOutputs/Flywheels",
             "/AdvantageKit/RealOutputs/Flywheels/API/setVelocitySetpointImpl",
-            "/AdvantageKit/RealOutputs/Flywheels/OTF"
+            "/AdvantageKit/RealOutputs/Turret",
+            "/AdvantageKit/RealOutputs/Hood",
+            "/AdvantageKit/Dye Rotor"
           ]
         },
         "tabs": {
-          "selected": 2,
+          "selected": 6,
           "tabs": [
             {
               "type": 0,
@@ -130,9 +131,9 @@
                 "cameraIndex": -1,
                 "orbitFov": 50,
                 "cameraPosition": [
-                  -13.782100472527157,
-                  13.695177630445054,
-                  0.3040068758546638
+                  -10.027351456971264,
+                  3.529162718208371,
+                  -5.861471259683113
                 ],
                 "cameraTarget": [
                   -4.251612280691649,
@@ -231,6 +232,16 @@
                       "color": "#e5b31b",
                       "size": "normal"
                     }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Turret/OTF/targetAngleDegrees",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e48b32",
+                      "size": "normal"
+                    }
                   }
                 ],
                 "rightSources": [
@@ -238,9 +249,19 @@
                     "type": "stepped",
                     "logKey": "NT:/AdvantageKit/Hood/Position",
                     "logType": "Number",
-                    "visible": true,
+                    "visible": false,
                     "options": {
                       "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Hood/OTF/aimAngle",
+                    "logType": "Number",
+                    "visible": false,
+                    "options": {
+                      "color": "#3b875a",
                       "size": "normal"
                     }
                   }

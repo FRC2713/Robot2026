@@ -1,7 +1,6 @@
 package frc2713.robot.subsystems.serializer;
 
 import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -57,10 +56,7 @@ public class DyeRotor extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
 
   @Override
   public Transform3d getTransform3d() {
-
-    // inputs.position is in rotations, convert to meters
-    // distance = rotations / (rotations per meter)
-    Angle rotations = Rotations.of(inputs.position.in(Rotations) * config.unitToRotorRatio);
+    Angle rotations = super.getCurrentPosition();
     Transform3d localTransform =
         new Transform3d(new Translation3d(), new Rotation3d(0, 0, rotations.in(Radians)));
 

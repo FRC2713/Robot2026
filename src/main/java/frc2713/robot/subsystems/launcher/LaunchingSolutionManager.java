@@ -8,7 +8,6 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.subsystem.KinematicsManager;
@@ -111,7 +110,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
                     angularDisplacement.getX(),
                     angularDisplacement.getY(),
                     angularDisplacement.getZ()));
-                    
+
     Pose3d projectedPose =
         KinematicsManager.getInstance()
             .limitPoseToField(new Pose3d(projectedTranslation, projectedRotation));

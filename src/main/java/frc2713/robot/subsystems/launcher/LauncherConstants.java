@@ -95,11 +95,13 @@ public final class LauncherConstants {
       leftConfig.unitToRotorRatio = 1.0; // 1:1 ratio
       leftConfig.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
       leftConfig.fxConfig.MotorOutput.PeakReverseDutyCycle = 0;
+      leftConfig.momentOfInertia = 0.001; // Low MOI for flywheels
       leftConfig.tunable = true;
 
       rightConfig.name = "Flywheel Right";
       rightConfig.talonCANID = new CANDeviceId(1); // Example CAN ID, replace with actual ID
       rightConfig.unitToRotorRatio = 1.0; // 1:1 ratio
+      rightConfig.momentOfInertia = 0.001; // Low MOI for flywheels
     }
 
     public static int MODEL_INDEX = 5;
@@ -174,9 +176,11 @@ public final class LauncherConstants {
   }
 
   public static LoggedTunableMeasure<Time> otfLinearProjectionSeconds =
-      new LoggedTunableMeasure<Time>("LaunchingSolutionManager/time_to_project_lin", Seconds.of(1.0));
+      new LoggedTunableMeasure<Time>(
+          "LaunchingSolutionManager/time_to_project_lin", Seconds.of(1.0));
   public static LoggedTunableMeasure<Time> otfAngularProjectionSeconds =
-      new LoggedTunableMeasure<Time>("LaunchingSolutionManager/time_to_project_ang", Seconds.of(0.5));
+      new LoggedTunableMeasure<Time>(
+          "LaunchingSolutionManager/time_to_project_ang", Seconds.of(0.5));
   public static LoggedTunableBoolean otfFutureProjectionEnabled =
       new LoggedTunableBoolean("LaunchingSolutionManager/projection_enabled", true);
 }

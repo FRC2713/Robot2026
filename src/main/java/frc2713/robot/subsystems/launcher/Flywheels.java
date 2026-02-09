@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.InchesPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import edu.wpi.first.math.geometry.Pose3d;
@@ -52,7 +53,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   }
 
   public Command setVelocity(Supplier<AngularVelocity> desiredVelocity) {
-    return velocitySetpointCommand(() -> desiredVelocity.get().times(leftConfig.unitToRotorRatio));
+    return velocitySetpointCommand(desiredVelocity);
   }
 
   public Command stop() {
@@ -98,7 +99,8 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
         Logger.recordOutput(super.pb.makePath("OTF", "solutionIsValid"), solutionIsValid);
         Logger.recordOutput(super.pb.makePath("OTF", "distanceToGoal"), toGoal);
         Logger.recordOutput(super.pb.makePath("OTF", "targetSurfaceSpeed"), targetSurfaceSpeed);
-        Logger.recordOutput(super.pb.makePath("OTF", "targetVelocity"), targetVelocity);
+        Logger.recordOutput(
+            super.pb.makePath("OTF", "targetVelocity"), targetVelocity.in(RadiansPerSecond));
         return targetVelocity;
       };
 
@@ -153,7 +155,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   }
 
   public LinearVelocity getSurfaceSpeed() {
-    AngularVelocity wheelSpeed = super.getLeftCurrentVelocity().div(leftConfig.unitToRotorRatio);
+    AngularVelocity wheelSpeed = super.getLeftCurrentVelocity();
     Distance wheelDiameter = Inches.of(4);
     Distance wheelCircumference = wheelDiameter.times(Math.PI);
     return InchesPerSecond.of(wheelSpeed.in(RotationsPerSecond) * wheelCircumference.in(Inches));
