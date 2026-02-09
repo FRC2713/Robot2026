@@ -1,12 +1,12 @@
-package frc2713.robot.subsystems.launcher;
+package frc2713.robot.subsystems.launcher.turretIO;
 
-import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
 import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.ENCODER_1_TO_TURRET_RATIO;
 import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.SLOPE;
 
 import frc2713.lib.io.MotorInputs;
 import frc2713.lib.io.SimTalonFXIO;
+import frc2713.robot.subsystems.launcher.Turret;
 
 /**
  * Simulation IO implementation for the turret with dual encoder support. Simulates both the TalonFX

@@ -82,12 +82,27 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
     Time timestamp = RobotTime.getTimestamp();
     leftIO.readInputs(leftInputs);
     rightIO.readInputs(rightInputs);
-    Logger.processInputs(getName() + "/Left", leftInputs);
-    Logger.processInputs(getName() + "/Right", rightInputs);
+    Logger.processInputs(pb.makePath("LeftInputs"), leftInputs);
+    Logger.processInputs(pb.makePath("RightInputs"), rightInputs);
     Logger.recordOutput(pb.makePath("LatencyPeriodSec"), RobotTime.getTimestamp().minus(timestamp));
     Logger.recordOutput(
         pb.makePath("currentCommand"),
         (getCurrentCommand() == null) ? "Default" : getCurrentCommand().getName());
+
+    // Log setpoints for comparison with measurements (in same units as inputs)
+    Logger.recordOutput(
+        pb.makePath("Setpoints", "velocityRotPerSec"), velocitySetpoint.in(RotationsPerSecond));
+    Logger.recordOutput(pb.makePath("Setpoints", "positionRot"), positionSetpoint.in(Rotations));
+    // Also log measurements as doubles for easy comparison
+    Logger.recordOutput(
+        pb.makePath("Measurements", "leftVelocityRotPerSec"),
+        leftInputs.velocity.in(RotationsPerSecond));
+    Logger.recordOutput(
+        pb.makePath("Measurements", "rightVelocityRotPerSec"),
+        rightInputs.velocity.in(RotationsPerSecond));
+    Logger.recordOutput(
+        pb.makePath("Measurements", "leftAppliedVolts"), leftInputs.appliedVolts.in(Volts));
+    Logger.recordOutput(pb.makePath("Measurements", "closedLoopError"), leftInputs.closedLoopError);
   }
 
   /**

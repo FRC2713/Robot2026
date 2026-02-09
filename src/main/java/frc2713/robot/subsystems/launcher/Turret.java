@@ -1,13 +1,14 @@
 package frc2713.robot.subsystems.launcher;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Radian;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.ENCODER_1_TO_TURRET_RATIO;
 import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.FORWARD_LIMIT_DEGREES;
 import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.REVERSE_LIMIT_DEGREES;
 import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.SLOPE;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -15,11 +16,17 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc2713.lib.io.ArticulatedComponent;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.util.Util;
 import frc2713.robot.FieldConstants;
+import frc2713.robot.RobotContainer;
+import frc2713.robot.subsystems.launcher.turretIO.TurretInputsAutoLogged;
+import frc2713.robot.subsystems.launcher.turretIO.TurretMotorIO;
+import frc2713.robot.subsystems.launcher.turretIO.TurretSubsystemConfig;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -36,8 +43,7 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
     double diff = e2 - e1;
 
     // Normalize to [-180, 180]. This is the "Vernier Lock"
-    while (diff <= -180) diff += 360;
-    while (diff > 180) diff -= 360;
+    diff = MathUtil.inputModulus(diff, -180, 180);
 
     // 2. Coarse Estimate (The "Big Picture")
     // This uses the phase shift to guess the rough position.
@@ -63,19 +69,13 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
   public static double convertToClosestBoundedTurretAngleDegrees(
       double targetAngleDegrees, Rotation2d current) {
     // Normalize target to [-180, 180] first
-    double normalizedTarget = targetAngleDegrees;
-    while (normalizedTarget > 180) normalizedTarget -= 360;
-    while (normalizedTarget <= -180) normalizedTarget += 360;
+    double normalizedTarget = MathUtil.inputModulus(targetAngleDegrees, -180, 180);
 
     // Get current position in degrees
     double currentDegrees = current.getDegrees();
 
-    // Calculate the shortest path to the target
-    double diff = normalizedTarget - currentDegrees;
-
-    // Normalize diff to [-180, 180] to find shortest path
-    while (diff > 180) diff -= 360;
-    while (diff <= -180) diff += 360;
+    // Calculate the shortest path to the target (normalized to [-180, 180])
+    double diff = MathUtil.inputModulus(normalizedTarget - currentDegrees, -180, 180);
 
     // Calculate the final absolute position
     double finalPosition = currentDegrees + diff;
@@ -108,11 +108,6 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
         });
   }
 
-  public Command hubCommand(Supplier<Pose2d> robotPose) {
-    return setAngle(
-        () -> Util.fieldToRobotRelative(LauncherConstants.Turret.staticHubAngle, robotPose.get()));
-  }
-
   /**
    * Gets the current turret position computed from the dual encoder system.
    *
@@ -133,14 +128,26 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
 
   /**
    * Supplier that continuously calculates the on-the-fly turret angle. Uses the launch solution if
-   * valid, otherwise falls back to simple hub tracking.
+   * valid, otherwise falls back to aiming at the goal using simple geometry.
    */
   public final Supplier<Angle> otfAngleSupplier =
       () -> {
-        Angle currentAngle = Degrees.of(getCurrentTurretRotation().getDegrees());
         var solution = LaunchingSolutionManager.getInstance().getSolution();
-        Angle targetAngle =
-            solution.isValid() ? Degrees.of(solution.turretFieldYaw().getDegrees()) : currentAngle;
+        Angle targetAngle;
+
+        if (solution.isValid()) {
+          targetAngle = Degrees.of(solution.turretFieldYaw().getDegrees());
+          Logger.recordOutput(super.pb.makePath("OTF", "response"), "using solution");
+        } else if (solution.effectiveDistanceMeters() <= 0.9) {
+          // invalid bc we're too close
+          Logger.recordOutput(super.pb.makePath("OTF", "response"), "hub shot");
+          targetAngle =
+              Util.fieldToRobotRelative(
+                  LauncherConstants.Turret.staticHubAngle, RobotContainer.drive.getPose());
+        } else {
+          Logger.recordOutput(super.pb.makePath("OTF", "response"), "stay at measured");
+          targetAngle = inputs.computedTurretPositionDegrees;
+        }
 
         targetAngle =
             Degrees.of(
@@ -151,8 +158,22 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
         return targetAngle;
       };
 
+  public final Supplier<Angle> hubAngleSupplier =
+      () -> {
+        Angle val = LauncherConstants.Turret.staticHubAngle;
+        if (DriverStation.getAlliance().isPresent()
+            && DriverStation.getAlliance().get() == Alliance.Red) {
+          val = val.plus(Degrees.of(180.0));
+        }
+        return val;
+      };
+
   public Command otfCommand() {
     return setAngle(otfAngleSupplier);
+  }
+
+  public Command hubCommand(Supplier<Pose2d> robotPose) {
+    return setAngle(() -> Util.fieldToRobotRelative(hubAngleSupplier.get(), robotPose.get()));
   }
 
   @AutoLogOutput
@@ -175,7 +196,7 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
   @Override
   public Transform3d getTransform3d() {
     // Use the computed turret position from the Vernier dual-encoder system (in degrees)
-    double turretAngleRadians = Math.toRadians(inputs.computedTurretPositionDegrees);
+    double turretAngleRadians = inputs.computedTurretPositionDegrees.in(Radian);
     return config.initialTransform.plus(
         new Transform3d(new Translation3d(), new Rotation3d(0, 0, turretAngleRadians)));
   }

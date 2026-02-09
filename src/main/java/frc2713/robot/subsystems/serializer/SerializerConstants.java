@@ -22,8 +22,8 @@ public final class SerializerConstants {
       config.name = "Dye Rotor";
       config.talonCANID = new CANDeviceId(10); // Example CAN ID, replace with actual ID
 
-      // Velocity PID gains
-      config.fxConfig.Slot0.kP = 0.3;
+      // Velocity PID gains (FOC velocity uses torque current, so kP is in amps per rot/sec error)
+      config.fxConfig.Slot0.kP = 3.0;
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 0.0;
       config.fxConfig.Slot0.kS = 0.1; // Static friction compensation

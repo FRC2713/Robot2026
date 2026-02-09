@@ -1,4 +1,4 @@
-package frc2713.robot.subsystems.launcher;
+package frc2713.robot.subsystems.launcher.turretIO;
 
 import static edu.wpi.first.units.Units.Degrees;
 
@@ -7,9 +7,9 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.CANcoder;
 import edu.wpi.first.units.measure.Angle;
-import frc2713.lib.io.MotorInputs;
 import frc2713.lib.io.TalonFXIO;
 import frc2713.lib.util.CTREUtil;
+import frc2713.robot.subsystems.launcher.Turret;
 
 /**
  * TalonFX IO implementation for the turret with dual encoder support. Uses the TalonFX integrated

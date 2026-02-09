@@ -22,7 +22,6 @@ import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.CTREUtil;
 import frc2713.lib.util.LoggedTunableGains;
 import frc2713.robot.Robot;
-import org.littletonrobotics.junction.AutoLogOutput;
 
 public class TalonFXIO implements MotorIO {
   // Base members

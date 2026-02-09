@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.sim.ChassisReference;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
@@ -25,7 +26,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class SimTalonFXIO extends TalonFXIO {
   protected DCMotorSim sim;
   private Notifier simNotifier = null;
-  private Time lastUpdateTimestamp = Seconds.of(0.0);
+  private Time lastUpdateTimestamp = null; // Initialized on first update to avoid huge dt
 
   protected AtomicReference<Angle> lastPosition = new AtomicReference<>((Angle) Rotations.of(0.0));
   protected AtomicReference<AngularVelocity> lastVelocity =
@@ -89,10 +90,31 @@ public class SimTalonFXIO extends TalonFXIO {
       motorVoltage = torqueCurrent * motor.rOhms + omegaRadPerSec * backEmfConstant;
     }
 
+    // Simulate brake mode: when motor voltage is ~0 and brake mode is enabled,
+    // apply a braking voltage proportional to velocity (shorting motor terminals)
+    if (config.fxConfig.MotorOutput.NeutralMode == NeutralModeValue.Brake
+        && Math.abs(motorVoltage) < 0.1
+        && Math.abs(torqueCurrent) < 0.1) {
+      // In brake mode, back-EMF drives current through the shorted windings
+      // This creates a braking torque. Simulate by applying negative voltage proportional to
+      // velocity.
+      double omegaRadPerSec = sim.getAngularVelocityRadPerSec();
+      // Braking voltage = -kBrake * velocity (opposite to motion)
+      double kBrake = 0.9;
+      motorVoltage = -kBrake * omegaRadPerSec;
+    }
+
     sim.setInputVoltage(motorVoltage);
 
     Time timestamp = RobotTime.getTimestamp();
-    sim.update(timestamp.minus(lastUpdateTimestamp).in(Seconds));
+    // Initialize lastUpdateTimestamp on first update to avoid huge dt
+    if (lastUpdateTimestamp == null) {
+      lastUpdateTimestamp = timestamp;
+    }
+    double dt = timestamp.minus(lastUpdateTimestamp).in(Seconds);
+    // Clamp dt to reasonable values to prevent simulation instability
+    dt = Math.min(dt, 0.1);
+    sim.update(dt);
     lastUpdateTimestamp = timestamp;
 
     // DCMotorSim with gearing outputs mechanism-side position/velocity.

@@ -36,10 +36,10 @@ import frc2713.robot.subsystems.launcher.Hood;
 import frc2713.robot.subsystems.launcher.LauncherConstants;
 import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
 import frc2713.robot.subsystems.launcher.Turret;
-import frc2713.robot.subsystems.launcher.TurretMotorIO;
-import frc2713.robot.subsystems.launcher.TurretMotorIOSim;
-import frc2713.robot.subsystems.launcher.TurretMotorIOTalonFX;
-import frc2713.robot.subsystems.launcher.TurretSubsystemConfig;
+import frc2713.robot.subsystems.launcher.turretIO.TurretMotorIO;
+import frc2713.robot.subsystems.launcher.turretIO.TurretMotorIOSim;
+import frc2713.robot.subsystems.launcher.turretIO.TurretMotorIOTalonFX;
+import frc2713.robot.subsystems.launcher.turretIO.TurretSubsystemConfig;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 import frc2713.robot.subsystems.serializer.SerializerConstants;
@@ -70,6 +70,7 @@ public class RobotContainer {
   // Lazy loaders
   @SuppressWarnings("unused")
   private final KinematicsManager kinematicsManager = new KinematicsManager();
+
   @SuppressWarnings("unused")
   private final LaunchingSolutionManager launchingSolutionManager = new LaunchingSolutionManager();
 
@@ -191,9 +192,12 @@ public class RobotContainer {
     // This setting is ignored when the FMS is connected
     DriverStation.silenceJoystickConnectionWarning(true);
 
-    // Set up driver controller
+    // Set up controllers
     driverControls =
         new DriverControls(
+            drive, flywheels, turret, hood, intakeRoller, intakeExtension, dyeRotor, feeder);
+    devControls =
+        new DevControls(
             drive, flywheels, turret, hood, intakeRoller, intakeExtension, dyeRotor, feeder);
 
     // Set up auto routines

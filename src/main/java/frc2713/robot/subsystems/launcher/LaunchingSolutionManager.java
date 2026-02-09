@@ -122,17 +122,19 @@ public class LaunchingSolutionManager extends SubsystemBase {
       Pose3d robotPose, Translation3d robotVel, Translation3d targetPos) {
     // A. Relative Position
     Translation3d rangeVec = targetPos.minus(robotPose.getTranslation());
-    double dist = rangeVec.getNorm();
+    // Use 2D horizontal distance for map lookups (maps are indexed by ground distance)
+    double horizontalDist = rangeVec.toTranslation2d().getNorm();
 
     // B. Check Range
-    if (dist > 8.0 || dist < 1.0) {
-      return new LaunchSolution(new Rotation2d(), 0, new Rotation2d(), dist, false);
+    if (horizontalDist > 8.0 || horizontalDist < 0.9) {
+      return new LaunchSolution(new Rotation2d(), 0, new Rotation2d(), horizontalDist, false);
     }
 
     // C. Get Ideal Static Launch Params (Ground Relative)
     double idealSpeed =
-        FeetPerSecond.of(LauncherConstants.Flywheels.velocityMap.get(dist)).in(MetersPerSecond);
-    double idealPitchRad = Math.toRadians(LauncherConstants.Hood.angleMap.get(dist));
+        FeetPerSecond.of(LauncherConstants.Flywheels.velocityMap.get(horizontalDist))
+            .in(MetersPerSecond);
+    double idealPitchRad = Math.toRadians(LauncherConstants.Hood.angleMap.get(horizontalDist));
 
     // D. Construct Ideal Velocity Vector
     // Normalized horizontal direction to goal
@@ -163,6 +165,6 @@ public class LaunchingSolutionManager extends SubsystemBase {
         new Rotation2d(Math.atan2(neededMuzzleVelocity.getY(), neededMuzzleVelocity.getX()))
             .minus(robotPose.getRotation().toRotation2d());
 
-    return new LaunchSolution(newYaw, newSpeed, new Rotation2d(newPitch), dist, true);
+    return new LaunchSolution(newYaw, newSpeed, new Rotation2d(newPitch), horizontalDist, true);
   }
 }

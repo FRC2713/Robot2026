@@ -16,11 +16,13 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Time;
 import frc2713.lib.drivers.CANDeviceId;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.LoggedTunableBoolean;
 import frc2713.lib.util.LoggedTunableMeasure;
+import frc2713.robot.subsystems.launcher.turretIO.TurretSubsystemConfig;
 
 public final class LauncherConstants {
 
@@ -32,6 +34,7 @@ public final class LauncherConstants {
 
     static {
       config.name = "Turret";
+      config.talonCANID = new CANDeviceId(12);
       config.canCoderCANID = new CANDeviceId(13); // CANCoder CAN ID, replace with actual ID
       config.tunable = true; // Enable tunable gains for Motion Magic
 
@@ -90,27 +93,30 @@ public final class LauncherConstants {
     static {
       leftConfig.name = "Flywheel Left";
       leftConfig.talonCANID = new CANDeviceId(2); // Example CAN ID, replace with actual ID
-      leftConfig.fxConfig.Slot0.kP = 0.3;
+      leftConfig.fxConfig.Slot0.kP = 0.2;
       leftConfig.fxConfig.Slot0.kI = 0.0;
-      leftConfig.fxConfig.Slot0.kD = 0.0;
+      leftConfig.fxConfig.Slot0.kD = 0.01;
       leftConfig.fxConfig.Slot0.kS = 0.15;
-      leftConfig.fxConfig.Slot0.kV = 0.114;
+      leftConfig.fxConfig.Slot0.kV = 0.12;
       leftConfig.unitToRotorRatio = 1.0; // 1:1 ratio
       leftConfig.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
       leftConfig.fxConfig.MotorOutput.PeakReverseDutyCycle = 0;
-      leftConfig.momentOfInertia = 0.001; // Low MOI for flywheels
+      leftConfig.momentOfInertia = 0.01;
       leftConfig.tunable = true;
+      leftConfig.useFOC = false; // Use VelocityVoltage for sim compatibility
+
+      rightConfig.useFOC = false;
 
       rightConfig.name = "Flywheel Right";
       rightConfig.talonCANID = new CANDeviceId(1); // Example CAN ID, replace with actual ID
       rightConfig.unitToRotorRatio = 1.0; // 1:1 ratio
-      rightConfig.momentOfInertia = 0.001; // Low MOI for flywheels
+      rightConfig.momentOfInertia = 0.01;
     }
 
     public static int MODEL_INDEX = 5;
     public static int PARENT_INDEX = 4;
 
-    public static AngularVelocity acceptableError = RotationsPerSecond.of(12);
+    public static AngularVelocity acceptableError = RotationsPerSecond.of(10);
     public static AngularVelocity idleVelocity = RotationsPerSecond.of(20);
 
     public static Transform3d localTransform =
@@ -121,13 +127,17 @@ public final class LauncherConstants {
     public static AngularVelocity staticHubVelocity = RotationsPerSecond.of(20);
     public static InterpolatingDoubleTreeMap velocityMap = new InterpolatingDoubleTreeMap();
 
+    public static Distance WHEEL_DIAMETER = Inches.of(4);
+
     static {
       // Distance (m) -> Ball Velocity (ft/s)
       velocityMap.put(1.0, 20.0);
       velocityMap.put(1.5, 20.0);
-      velocityMap.put(3.0, 23.0);
-      velocityMap.put(4.0, 25.0);
-      velocityMap.put(5.17, 28.0);
+      velocityMap.put(2.5, 22.0);
+      velocityMap.put(3.2, 23.0);
+      velocityMap.put(4.0, 26.0);
+      velocityMap.put(5.17, 29.0);
+      velocityMap.put(5.4, 30.0);
     }
   }
 
@@ -170,11 +180,14 @@ public final class LauncherConstants {
 
     static {
       // Distance (m) -> Hood Pitch (Degrees)
-      angleMap.put(1.0, 9.0);
-      angleMap.put(1.5, 16.0);
-      angleMap.put(3.0, 24.0);
-      angleMap.put(4.0, 28.0);
+      angleMap.put(0.9, 9.0);
+      angleMap.put(1.0, 11.0);
+      angleMap.put(1.5, 18.0);
+      angleMap.put(2.0, 24.0);
+      angleMap.put(3.0, 28.0);
+      angleMap.put(4.0, 32.0);
       angleMap.put(4.5, 32.0);
+      angleMap.put(5.0, 30.0);
     }
   }
 

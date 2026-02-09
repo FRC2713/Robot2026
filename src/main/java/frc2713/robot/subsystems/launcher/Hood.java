@@ -49,15 +49,22 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
         var solution = LaunchingSolutionManager.getInstance().getSolution();
         Distance toGoal =
             this.getDistance2d(LaunchingSolutionManager.currentGoal.positionalTarget());
-        Angle aimAngle = solution.hoodPitch().getMeasure();
         boolean launchSolutionValid = solution.isValid();
-        if (!launchSolutionValid) {
+
+        Angle aimAngle;
+        if (launchSolutionValid) {
+          aimAngle = solution.hoodPitch().getMeasure();
+        } else {
           // Fallback to distance-based lookup
           aimAngle = Degrees.of(LauncherConstants.Hood.angleMap.get(toGoal.in(Meters)));
         }
+
         Logger.recordOutput(super.pb.makePath("OTF", "solutionIsValid"), launchSolutionValid);
         Logger.recordOutput(super.pb.makePath("OTF", "distanceToGoal"), toGoal);
-        Logger.recordOutput(super.pb.makePath("OTF", "aimAngle"), aimAngle);
+        Logger.recordOutput(super.pb.makePath("OTF", "aimAngleDeg"), aimAngle.in(Degrees));
+        Logger.recordOutput(
+            super.pb.makePath("OTF", "lookupAngle"),
+            Degrees.of(LauncherConstants.Hood.angleMap.get(toGoal.in(Meters))));
         return aimAngle;
       };
 

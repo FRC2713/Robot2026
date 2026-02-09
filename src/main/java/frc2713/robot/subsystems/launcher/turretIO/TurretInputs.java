@@ -1,12 +1,10 @@
-package frc2713.robot.subsystems.launcher;
-
-import frc2713.lib.io.MotorInputsAutoLogged;
+package frc2713.robot.subsystems.launcher.turretIO;
 
 import static edu.wpi.first.units.Units.Degrees;
 
-import org.littletonrobotics.junction.AutoLog;
-
 import edu.wpi.first.units.measure.Angle;
+import frc2713.lib.io.MotorInputsAutoLogged;
+import org.littletonrobotics.junction.AutoLog;
 
 @AutoLog
 public class TurretInputs extends MotorInputsAutoLogged {
