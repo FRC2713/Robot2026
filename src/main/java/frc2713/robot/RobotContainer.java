@@ -223,7 +223,15 @@ public class RobotContainer {
     autoChooser.addOption(
         "Right side trench auto",
         RightSideAutoTrench.routine(
-            autoFactory, drive, intakeExtension, intakeRoller, flywheels, dyeRotor, feeder));
+            autoFactory,
+            drive,
+            intakeExtension,
+            intakeRoller,
+            flywheels,
+            hood,
+            turret,
+            dyeRotor,
+            feeder));
 
     // Configure the button bindings
     configureButtonBindings();

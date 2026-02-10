@@ -5,13 +5,13 @@ import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc2713.robot.subsystems.drive.Drive;
-import frc2713.robot.subsystems.intake.IntakeConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.launcher.Flywheels;
+import frc2713.robot.subsystems.launcher.Hood;
+import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 
@@ -21,7 +21,9 @@ public class RightSideAutoTrench {
       Drive driveSubsystem,
       IntakeExtension intakeExtension,
       IntakeRoller intakeRoller,
-      Flywheels launcher,
+      Flywheels flywheels,
+      Hood hood,
+      Turret turret,
       DyeRotor serializer,
       //   Launcher intakeAndShooter,
       Feeder feederAndIndexer) {
@@ -29,7 +31,7 @@ public class RightSideAutoTrench {
 
     AutoTrajectory faceFuelTrench = routine.trajectory("FaceFuelTrench");
     AutoTrajectory intakeFuel = routine.trajectory("IntakeFuel");
-    AutoTrajectory moveToLaunchBump = routine.trajectory("moveToLaunchBump");
+    AutoTrajectory moveToLaunchBump = routine.trajectory("MoveToLaunchBump");
 
     routine
         .active()
@@ -44,15 +46,15 @@ public class RightSideAutoTrench {
         .onTrue(
             Commands.sequence(
                 Commands.print("Starting intake and collecting fuel"),
-                Commands.parallel(intakeExtension.extendCommand(), intakeFuel.cmd())));
+                Commands.parallel(
+                    intakeExtension.extendCommand(), intakeRoller.intake(), intakeFuel.cmd())));
 
     intakeFuel
         .done()
         .onTrue(
             Commands.sequence(
                 Commands.print("Moving to shooting position"),
-                intakeRoller.intake(),
-                new WaitCommand(1),
+                Commands.sequence(Commands.race(intakeRoller.stop(), new WaitCommand(2))),
                 moveToLaunchBump.cmd()));
     moveToLaunchBump
         .done()
@@ -60,15 +62,43 @@ public class RightSideAutoTrench {
             Commands.sequence(
                 Commands.print("Starting launch sequence"),
                 Commands.race(
-                    Commands.parallel(
-                        // Turret.voltageCmd(LauncherConstants.launchVoltage.get()),
-                        Commands.sequence(
-                            // Commands.waitSeconds(IntakeAndLauncherConstants.launchWarmUpTime.get()),
-                            Commands.sequence(
-                                new InstantCommand(() -> Commands.print("Feeding fuel to launcher"))
-                                // feederAndIndexer.voltageCmd(FeederConstants.launchVoltage.get())))),
-                                // Commands.waitSeconds(AutoConstants.launchDuration.get()))));
-                                ))))));
+                        // hub shot
+                        //     flywheels.hubCommand(),
+                        //     hood.hubCommand(),
+                        //     turret.hubCommand(),
+                        //     flywheels.simulateLaunchedFuel(
+                        //         () -> {
+                        //           return flywheels.atTarget() && hood.atTarget() &&
+                        // turret.atTarget();
+                        //         }),
+                        //     feederAndIndexer.feedWhenReady(
+                        //         () -> {
+                        //           return flywheels.atTarget() && hood.atTarget() &&
+                        // turret.atTarget();
+                        //         }),
+                        //     serializer.feedWhenReady(
+                        //         () -> {
+                        //           return flywheels.atTarget() && hood.atTarget() &&
+                        // turret.atTarget();
+                        //         }))
+                        // .withName("Hub Shot")));
+                        // otf shot
+                        flywheels.otfCommand(),
+                        hood.otfCommand(),
+                        turret.oftCommand(),
+                        flywheels.simulateLaunchedFuel(
+                            () -> {
+                              return flywheels.atTarget() && hood.atTarget() && turret.atTarget();
+                            }),
+                        feederAndIndexer.feedWhenReady(
+                            () -> {
+                              return flywheels.atTarget() && hood.atTarget() && turret.atTarget();
+                            }),
+                        serializer.feedWhenReady(
+                            () -> {
+                              return flywheels.atTarget() && hood.atTarget() && turret.atTarget();
+                            }))
+                    .withName("OTF Shooting")));
     return routine;
   }
 
@@ -77,7 +107,9 @@ public class RightSideAutoTrench {
       Drive driveSubsystem,
       IntakeExtension intakeExtension,
       IntakeRoller intakeRoller,
-      Flywheels launcher,
+      Flywheels flywheels,
+      Hood hood,
+      Turret turret,
       DyeRotor serializer,
       Feeder feederAndIndexer) {
     return RightSideAutoTrench.getRoutine(
@@ -85,7 +117,9 @@ public class RightSideAutoTrench {
             driveSubsystem,
             intakeExtension,
             intakeRoller,
-            launcher,
+            flywheels,
+            hood,
+            turret,
             serializer,
             feederAndIndexer)
         .cmd();

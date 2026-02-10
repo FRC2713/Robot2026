@@ -1,5 +1,5 @@
 {
- "name":"test",
+ "name":"AutoCommand",
  "version":2,
  "type":"Swerve",
  "variables":{
