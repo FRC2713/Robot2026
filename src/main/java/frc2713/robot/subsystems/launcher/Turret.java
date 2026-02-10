@@ -1,26 +1,34 @@
 package frc2713.robot.subsystems.launcher;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Radian;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.ENCODER_1_TO_TURRET_RATIO;
 import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.FORWARD_LIMIT_DEGREES;
 import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.REVERSE_LIMIT_DEGREES;
 import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.SLOPE;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc2713.lib.io.ArticulatedComponent;
-import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.subsystem.MotorSubsystem;
+import frc2713.lib.util.Util;
 import frc2713.robot.FieldConstants;
+import frc2713.robot.RobotContainer;
+import frc2713.robot.subsystems.launcher.turretIO.TurretInputsAutoLogged;
+import frc2713.robot.subsystems.launcher.turretIO.TurretMotorIO;
+import frc2713.robot.subsystems.launcher.turretIO.TurretSubsystemConfig;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO>
@@ -35,15 +43,14 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
     double diff = e2 - e1;
 
     // Normalize to [-180, 180]. This is the "Vernier Lock"
-    while (diff <= -180) diff += 360;
-    while (diff > 180) diff -= 360;
+    diff = MathUtil.inputModulus(diff, -180, 180);
 
     // 2. Coarse Estimate (The "Big Picture")
     // This uses the phase shift to guess the rough position.
     double coarseAngle = diff * SLOPE;
 
     // 3. The Ratio (How many times E1 spins per 1 Turret degree)
-    double encoderToTurretRatio = 8.5;
+    double encoderToTurretRatio = ENCODER_1_TO_TURRET_RATIO;
 
     // 4. Lap Calculation (The "Fine" logic)
     // We calculate how many full 360s E1 has likely traveled.
@@ -61,40 +68,104 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
 
   public static double convertToClosestBoundedTurretAngleDegrees(
       double targetAngleDegrees, Rotation2d current) {
-    double currentTotalRadians = (current.getRotations() * 2 * Math.PI);
-    double closestOffset = Units.degreesToRadians(targetAngleDegrees) - current.getRadians();
-    if (closestOffset > Math.PI) {
+    // Normalize target to [-180, 180] first
+    double normalizedTarget = MathUtil.inputModulus(targetAngleDegrees, -180, 180);
 
-      closestOffset -= 2 * Math.PI;
+    // Get current position in degrees
+    double currentDegrees = current.getDegrees();
 
-    } else if (closestOffset < -Math.PI) {
-      closestOffset += 2 * Math.PI;
+    // Calculate the shortest path to the target (normalized to [-180, 180])
+    double diff = MathUtil.inputModulus(normalizedTarget - currentDegrees, -180, 180);
+
+    // Calculate the final absolute position
+    double finalPosition = currentDegrees + diff;
+
+    // Check if final position is within limits, if not, try the other way around
+    if (finalPosition > FORWARD_LIMIT_DEGREES) {
+      finalPosition -= 360;
+    } else if (finalPosition < REVERSE_LIMIT_DEGREES) {
+      finalPosition += 360;
     }
 
-    double finalOffset = currentTotalRadians + closestOffset;
-    if ((currentTotalRadians + closestOffset) % (2 * Math.PI)
-        == (currentTotalRadians - closestOffset)
-            % (2 * Math.PI)) { // If the offset can go either way, go closer to zero
-      if (finalOffset > 0) {
-        finalOffset = currentTotalRadians - Math.abs(closestOffset);
-      } else {
-        finalOffset = currentTotalRadians + Math.abs(closestOffset);
-      }
-    }
-    if (finalOffset
-        > Units.degreesToRadians(FORWARD_LIMIT_DEGREES)) { // if past upper rotation limit
-      finalOffset -= (2 * Math.PI);
-    } else if (finalOffset
-        < Units.degreesToRadians(REVERSE_LIMIT_DEGREES)) { // if below lower rotation limit
-      finalOffset += (2 * Math.PI);
-    }
-
-    return Units.radiansToDegrees(finalOffset);
+    return finalPosition;
   }
 
+  /** Input should be robot relative (i.e. encoder-reported angle) */
   public Command setAngle(Supplier<Angle> desiredAngle) {
     return motionMagicSetpointCommand(
-        () -> convertSubsystemPositionToMotorPosition(desiredAngle.get()));
+        () -> {
+          double commandedDegrees = desiredAngle.get().in(Degrees);
+
+          // Convert the desired angle to a bounded angle that respects turret limits
+          double boundedAngleDegrees =
+              convertToClosestBoundedTurretAngleDegrees(
+                  commandedDegrees, getCurrentTurretRotation());
+
+          Logger.recordOutput(pb.makePath("setpoint", "commandedDegrees"), commandedDegrees);
+          Logger.recordOutput(pb.makePath("setpoint", "boundedDegrees"), boundedAngleDegrees);
+
+          return convertSubsystemPositionToMotorPosition(Degrees.of(boundedAngleDegrees));
+        });
+  }
+
+  /**
+   * Like {@link #setAngle}, but clamps to the turret limits instead of wrapping around. Useful for
+   * manual rotation where you want the turret to stop at the bounds.
+   */
+  public Command setAngleStopAtBounds(Supplier<Angle> desiredAngle) {
+    return motionMagicSetpointCommand(
+        () -> {
+          double commandedDegrees = desiredAngle.get().in(Degrees);
+
+          // Clamp directly to turret limits instead of wrapping
+          double clampedDegrees =
+              MathUtil.clamp(commandedDegrees, REVERSE_LIMIT_DEGREES, FORWARD_LIMIT_DEGREES);
+
+          Logger.recordOutput(pb.makePath("setpoint", "commandedDegrees"), commandedDegrees);
+          Logger.recordOutput(pb.makePath("setpoint", "clampedDegrees"), clampedDegrees);
+
+          return convertSubsystemPositionToMotorPosition(Degrees.of(clampedDegrees));
+        });
+  }
+
+  /**
+   * Like {@link #setAngleStopAtBounds}, but allows scaling the velocity and acceleration based on
+   * an input (e.g., trigger pressure).
+   *
+   * @param desiredAngle The desired angle supplier
+   * @param velocityScale Scale factor for velocity and acceleration (0.0 to 1.0)
+   */
+  public Command setAngleStopAtBounds(
+      Supplier<Angle> desiredAngle, Supplier<Double> velocityScale) {
+    return motionMagicSetpointCommand(
+        () -> {
+          double commandedDegrees = desiredAngle.get().in(Degrees);
+
+          // Clamp directly to turret limits instead of wrapping
+          double clampedDegrees =
+              MathUtil.clamp(commandedDegrees, REVERSE_LIMIT_DEGREES, FORWARD_LIMIT_DEGREES);
+
+          Logger.recordOutput(pb.makePath("setpoint", "commandedDegrees"), commandedDegrees);
+          Logger.recordOutput(pb.makePath("setpoint", "clampedDegrees"), clampedDegrees);
+
+          return convertSubsystemPositionToMotorPosition(Degrees.of(clampedDegrees));
+        },
+        () -> {
+          var mmConfig = new com.ctre.phoenix6.configs.MotionMagicConfigs();
+          double scale = MathUtil.clamp(velocityScale.get(), 0.0, 1.0);
+
+          // Scale velocity and acceleration based on input
+          mmConfig.MotionMagicCruiseVelocity =
+              config.fxConfig.MotionMagic.MotionMagicCruiseVelocity * scale;
+          mmConfig.MotionMagicAcceleration =
+              config.fxConfig.MotionMagic.MotionMagicAcceleration * scale;
+          mmConfig.MotionMagicJerk = config.fxConfig.MotionMagic.MotionMagicJerk;
+
+          Logger.recordOutput(pb.makePath("setpoint", "velocityScale"), scale);
+
+          return mmConfig;
+        },
+        0);
   }
 
   /**
@@ -103,7 +174,7 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
    * @return The computed turret position in degrees
    */
   public Angle getComputedTurretPosition() {
-    return inputs.computedTurretPositionDegrees;
+    return Degrees.of(inputs.computedTurretPositionDegrees);
   }
 
   /**
@@ -112,7 +183,62 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
    * @return The current turret position as a Rotation2d
    */
   public Rotation2d getCurrentTurretRotation() {
-    return Rotation2d.fromDegrees(inputs.computedTurretPositionDegrees.in(Degrees));
+    return Rotation2d.fromDegrees(inputs.computedTurretPositionDegrees);
+  }
+
+  /**
+   * Supplier that continuously calculates the on-the-fly turret angle. Uses the launch solution if
+   * valid, otherwise falls back to aiming at the goal using simple geometry.
+   */
+  public final Supplier<Angle> otfAngleSupplier =
+      () -> {
+        var solution = LaunchingSolutionManager.getInstance().getSolution();
+        Angle targetAngle;
+
+        if (solution.isValid()) {
+          targetAngle = Degrees.of(solution.turretFieldYaw().getDegrees());
+          Logger.recordOutput(super.pb.makePath("OTF", "response"), "using solution");
+        } else if (solution.effectiveDistanceMeters() <= 0.9) {
+          // invalid bc we're too close
+          Logger.recordOutput(super.pb.makePath("OTF", "response"), "hub shot");
+          targetAngle =
+              Util.fieldToRobotRelative(
+                  LauncherConstants.Turret.staticHubAngle, RobotContainer.drive.getPose());
+        } else {
+          Logger.recordOutput(super.pb.makePath("OTF", "response"), "stay at measured");
+          targetAngle = Degrees.of(inputs.computedTurretPositionDegrees);
+        }
+
+        targetAngle =
+            Degrees.of(
+                convertToClosestBoundedTurretAngleDegrees(
+                    targetAngle.in(Degrees), getCurrentTurretRotation()));
+        Logger.recordOutput(super.pb.makePath("OTF", "solutionIsValid"), solution.isValid());
+        Logger.recordOutput(pb.makePath("OTF", "targetAngleDegrees"), targetAngle.in(Degrees));
+        return targetAngle;
+      };
+
+  public final Supplier<Angle> hubAngleSupplier =
+      () -> {
+        Angle val = LauncherConstants.Turret.staticHubAngle;
+        if (DriverStation.getAlliance().isPresent()
+            && DriverStation.getAlliance().get() == Alliance.Red) {
+          val = val.plus(Degrees.of(180.0));
+        }
+        return val;
+      };
+
+  public Command otfCommand() {
+    return setAngle(otfAngleSupplier);
+  }
+
+  public Command hubCommand(Supplier<Pose2d> robotPose) {
+    return setAngle(() -> Util.fieldToRobotRelative(hubAngleSupplier.get(), robotPose.get()));
+  }
+
+  @AutoLogOutput
+  public boolean atTarget() {
+    return this.inputs.isMotionMagicAtTarget;
   }
 
   @Override
@@ -125,78 +251,18 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
     // Log the goal pose for visualization
     Pose3d goalPose = new Pose3d(FieldConstants.Hub.topCenterPoint, new Rotation3d());
     Logger.recordOutput(pb.makePath("goalVector"), new Pose3d[] {this.getGlobalPose(), goalPose});
-
-    // Get the target angle from launch-on-the-fly calculation
-    Angle targetAngle = getLauncOnTheFlyAngle();
-
-    // Convert to bounded angle using the computed turret position from dual encoders
-    double boundedAngleDegrees =
-        convertToClosestBoundedTurretAngleDegrees(
-            targetAngle.in(Degrees), getCurrentTurretRotation());
-
-    // Convert subsystem angle to motor position and set the setpoint
-    Angle motorPosition = convertSubsystemPositionToMotorPosition(Degrees.of(boundedAngleDegrees));
-    super.setCurrentPosition(motorPosition);
-
-    // Log encoder values for debugging
-    Logger.recordOutput(pb.makePath("encoder1Degrees"), inputs.encoder1PositionDegrees.in(Degrees));
-    Logger.recordOutput(pb.makePath("encoder2Degrees"), inputs.encoder2PositionDegrees.in(Degrees));
-    Logger.recordOutput(
-        pb.makePath("computedTurretDegrees"), inputs.computedTurretPositionDegrees.in(Degrees));
-    Logger.recordOutput(pb.makePath("targetAngleDegrees"), targetAngle.in(Degrees));
-    Logger.recordOutput(pb.makePath("boundedSetpointDegrees"), boundedAngleDegrees);
   }
 
   @Override
   public Transform3d getTransform3d() {
-    Angle rotations = super.getCurrentPosition().times(config.unitToRotorRatio);
+    // Use the computed turret position from the Vernier dual-encoder system (in degrees)
+    double turretAngleRadians = Degrees.of(inputs.computedTurretPositionDegrees).in(Radian);
     return config.initialTransform.plus(
-        new Transform3d(new Translation3d(), new Rotation3d(0, 0, rotations.in(Radians))));
+        new Transform3d(new Translation3d(), new Rotation3d(0, 0, turretAngleRadians)));
   }
 
   @Override
   public Translation3d getRelativeAngularVelocity() {
     return new Translation3d(0, 0, super.getCurrentVelocity().in(RadiansPerSecond));
-  }
-
-  public Angle getHubAngle() {
-    Translation3d diff = this.getTranslationTo(FieldConstants.Hub.topCenterPoint);
-    // 2. Calculate the Global Yaw needed to face the target
-    // Math.atan2(y, x) handles all quadrants correctly
-    double globalTargetRadians = Math.atan2(diff.getY(), diff.getX());
-
-    // 3. Get the Chassis Heading (Global)
-    // You need the Robot's orientation on the field to make this relative.
-    // Assuming ID 0 is your Drive/Chassis in KinematicsManager:
-    Rotation3d chassisRotation = KinematicsManager.getInstance().getGlobalPose(0).getRotation();
-    double chassisHeadingRadians = chassisRotation.getZ();
-
-    // 4. Calculate Relative Angle (Target - Chassis)
-    double relativeRadians = globalTargetRadians - chassisHeadingRadians;
-
-    // 5. Normalize to range (-PI to PI) so the turret takes the shortest path
-    // e.g., if result is 350 degrees, this turns it into -10 degrees
-    double normalizedRadians = MathUtil.angleModulus(relativeRadians);
-
-    return Radians.of(normalizedRadians);
-  }
-
-  public Angle getLauncOnTheFlyAngle() {
-    // 1. Get the latest solution
-    var solution = LaunchingSolutionManager.getInstance().getSolution();
-
-    if (solution.isValid()) {
-      // 2. Convert Field-Relative Goal to Robot-Relative Setpoint
-
-      // Get Chassis Heading from Kinematics
-      Rotation2d chassisHeading =
-          KinematicsManager.getInstance().getGlobalPose(0).getRotation().toRotation2d();
-
-      // TargetYaw - ChassisYaw = TurretSetpoint
-      Rotation2d localSetpoint = solution.turretFieldRelativeYaw().minus(chassisHeading);
-
-      return localSetpoint.getMeasure();
-    }
-    return Degrees.of(0);
   }
 }

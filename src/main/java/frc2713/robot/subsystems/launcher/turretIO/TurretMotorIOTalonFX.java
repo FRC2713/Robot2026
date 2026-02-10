@@ -1,4 +1,4 @@
-package frc2713.robot.subsystems.launcher;
+package frc2713.robot.subsystems.launcher.turretIO;
 
 import static edu.wpi.first.units.Units.Degrees;
 
@@ -7,9 +7,10 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.CANcoder;
 import edu.wpi.first.units.measure.Angle;
-import frc2713.lib.io.MotorInputs;
 import frc2713.lib.io.TalonFXIO;
 import frc2713.lib.util.CTREUtil;
+import frc2713.robot.subsystems.launcher.Turret;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * TalonFX IO implementation for the turret with dual encoder support. Uses the TalonFX integrated
@@ -54,23 +55,18 @@ public class TurretMotorIOTalonFX extends TalonFXIO implements TurretMotorIO {
     BaseStatusSignal.refreshAll(turretSignals);
 
     // Read encoder 1 (TalonFX integrated encoder) - convert rotations to degrees
-    double talonEncoderRotations = inputs.rawRotorPosition.in(Degrees);
-    inputs.encoder1PositionDegrees = Degrees.of(talonEncoderRotations);
+    double encoder1Degrees = inputs.rawRotorPosition.in(Degrees);
+    inputs.encoder1PositionDegrees = encoder1Degrees;
 
-    // Read encoder 2 (external CANCoder) - already in rotations, convert to degrees
-    double canCoderRotations = canCoderPositionSignal.getValue().in(Degrees);
-    inputs.encoder2PositionDegrees = Degrees.of(canCoderRotations);
+    // Read encoder 2 (external CANCoder) - convert to degrees
+    double encoder2Degrees = canCoderPositionSignal.getValue().in(Degrees);
+    inputs.encoder2PositionDegrees = encoder2Degrees;
 
     // Compute turret position from both encoders using the Vernier algorithm
-    double computedPosition =
-        Turret.turretPositionFromEncoders(
-            inputs.encoder1PositionDegrees.in(Degrees), inputs.encoder2PositionDegrees.in(Degrees));
-    inputs.computedTurretPositionDegrees = Degrees.of(computedPosition);
-  }
+    double computedPosition = Turret.turretPositionFromEncoders(encoder1Degrees, encoder2Degrees);
+    inputs.computedTurretPositionDegrees = computedPosition;
 
-  @Override
-  public void readInputs(MotorInputs inputs) {
-    // If called with base MotorInputs, just read motor inputs
-    super.readInputs(inputs);
+    Logger.recordOutput(
+        pb.makePath("ComputedTurretPositionDeg"), inputs.computedTurretPositionDegrees);
   }
 }

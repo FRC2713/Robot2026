@@ -3,7 +3,6 @@ package frc2713.robot.subsystems.intake;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.Rotations;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -60,18 +59,15 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Motor
   public void periodic() {
     super.periodic();
 
-    double currentDistanceMeters = inputs.position.in(Rotations) / config.unitRotationsPerMeter;
-    Logger.recordOutput(pb.makePath("CurrentDistanceMeters"), currentDistanceMeters);
-
-    double setpointDistanceMeters = positionSetpoint.in(Rotations) / config.unitRotationsPerMeter;
-    Logger.recordOutput(pb.makePath("SetpointDistanceMeters"), setpointDistanceMeters);
+    Logger.recordOutput(
+        pb.makePath("CurrentDistanceMeters"), getCurrentPositionAsDistance().in(Meters));
+    Logger.recordOutput(
+        pb.makePath("SetpointDistanceMeters"), getPositionSetpointAsDistance().in(Meters));
   }
 
   @Override
   public Transform3d getTransform3d() {
-    // inputs.position is in rotations, convert to meters
-    // distance = rotations / (rotations per meter)
-    Distance distance = Meters.of(inputs.position.in(Rotations) / config.unitRotationsPerMeter);
+    Distance distance = getCurrentPositionAsDistance();
     Angle sliderAngle = Degrees.of(-4.479515);
 
     Distance distanceX = distance.times(Math.cos(sliderAngle.in(Radians)));

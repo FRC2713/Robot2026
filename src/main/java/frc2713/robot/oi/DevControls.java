@@ -1,12 +1,13 @@
 package frc2713.robot.oi;
 
+import static edu.wpi.first.units.Units.Degrees;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc2713.robot.RobotContainer;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
@@ -17,8 +18,9 @@ import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 
-public class DriverControls {
-  private final CommandXboxController controller = new CommandXboxController(0);
+@SuppressWarnings("unused")
+public class DevControls {
+  private final CommandXboxController controller = new CommandXboxController(1);
 
   private final Drive drive;
   private final Flywheels flywheels;
@@ -29,7 +31,7 @@ public class DriverControls {
   private final DyeRotor dyeRotor;
   private final Feeder feeder;
 
-  public DriverControls(
+  public DevControls(
       Drive drive,
       Flywheels flywheels,
       Turret turret,
@@ -94,33 +96,38 @@ public class DriverControls {
                 "Inch Right"))
         .onFalse(this.setToNormalDriveCmd());
 
-    // controller
-    //     .rightBumper()
-    //     .onTrue(flywheels.velocitySetpointCommand(LauncherConstants.Flywheels.PIDTest))
-    //     .onFalse(flywheels.velocitySetpointCommand(() -> RPM.of(0)));
+    // Turret angle controls
+    controller.leftBumper().onTrue(turret.setAngle(() -> Degrees.of(90)));
+    controller.rightBumper().onTrue(turret.setAngle(() -> Degrees.of(-270)));
 
-    // intake fuel
+    // Manual turret rotation with triggers - continuously target far in the desired direction
+    // Velocity and acceleration scale with how hard the trigger is pressed
     controller
-        .leftBumper()
-        .or(controller.leftTrigger(0.25))
+        .leftTrigger(0.01)
         .whileTrue(
-            Commands.parallel(intakeRoller.intake(), intakeExtension.extendCommand())
-                .withName("Intaking"))
-        .onFalse(
-            Commands.parallel(intakeRoller.stop(), intakeExtension.retractCommand())
-                .withName("Intake Retracted"));
+            turret.setAngleStopAtBounds(
+                () -> Degrees.of(turret.getComputedTurretPosition().in(Degrees) + 30),
+                () -> controller.getLeftTriggerAxis() * 0.2));
 
-    // shoot against the hubwhen flywheels and hub are ready
     controller
-        .rightBumper()
-        .whileTrue(RobotContainer.GameCommandGroups.hubShot)
-        .onFalse(RobotContainer.GameCommandGroups.stopShooting);
+        .rightTrigger(0.01)
+        .whileTrue(
+            turret.setAngleStopAtBounds(
+                () -> Degrees.of(turret.getComputedTurretPosition().in(Degrees) - 30),
+                () -> controller.getRightTriggerAxis() * 0.2));
 
-    // shoot when flywheels are ready
+    // Manual hood rotation with pov up and down
+    // Velocity scaled from a double supplier
     controller
-        .rightTrigger(0.25)
-        .whileTrue(RobotContainer.GameCommandGroups.otfShot)
-        .onFalse(RobotContainer.GameCommandGroups.stopShooting);
+        .povUp()
+        .whileTrue(
+            hood.setAngleStopAtBounds(
+                () -> hood.getCurrentPosition().plus(Degrees.of(5)), () -> 0.2));
+    controller
+        .povDown()
+        .whileTrue(
+            hood.setAngleStopAtBounds(
+                () -> hood.getCurrentPosition().minus(Degrees.of(5)), () -> 0.2));
   }
 
   public double getLeftY() {

@@ -32,6 +32,7 @@ public class Vision extends SubsystemBase {
   }
 
   public Optional<Pose2d> getPose() {
+    // a hack to not get the pose at init or sim
     if (inputs.pose.getTranslation().getX() != 0) {
       return Optional.of(inputs.pose);
     } else {

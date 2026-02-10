@@ -35,15 +35,17 @@ public class VisionIOSLAMDunk implements VisionIO {
     // Reset pose to zero, leave pose3d as last state for visualization
     inputs.pose = new Pose2d();
 
-    var speed = RobotContainer.drive.getSpeed();
-    Logger.recordOutput("SLAMDunk/Speed", speed);
+    var linspeed = RobotContainer.drive.getSpeed();
+    var angspeed = RobotContainer.drive.getAngularSpeed();
+    Logger.recordOutput("SLAMDunk/SpeedLinear", linspeed);
+    Logger.recordOutput("SLAMDunk/SpeedAngular", angspeed);
     Logger.recordOutput("SLAMDunk/tFPGA", Timer.getFPGATimestamp());
 
     var poseArray = sub.get();
     if (poseArray.length > 0) {
       double t = poseArray[0];
 
-      if (lastTimestamp != t) {
+      if (lastTimestamp != t && poseArray.length > 7) {
 
         inputs.timestamp = t;
         double latency = Timer.getFPGATimestamp() - t;
@@ -67,8 +69,8 @@ public class VisionIOSLAMDunk implements VisionIO {
           inputs.applying = false;
           return;
         }
-        if (inputs.latency.compareTo(Seconds.of(0.2)) > 0) {
-          inputs.reasoning = "Latency > 0.2s";
+        if (inputs.latency.compareTo(VisionConstants.LATENCY_THRESHOLD.get()) > 0) {
+          inputs.reasoning = "Latency above threshold";
           inputs.applying = false;
           return;
         }
@@ -85,7 +87,7 @@ public class VisionIOSLAMDunk implements VisionIO {
 
         if (Math.abs(inputs.pose3d.getTranslation().getZ()) > 0.1) {
           inputs.applying = false;
-          inputs.reasoning = "Z > 0.1m";
+          inputs.reasoning = "Off ground Z > 0.1m";
           return;
         }
 
@@ -96,7 +98,7 @@ public class VisionIOSLAMDunk implements VisionIO {
       }
     }
 
-    if (poseArray.length == 0) {
+    if (poseArray.length <= 7) {
       inputs.reasoning = "No pose data available";
     } else {
       inputs.reasoning = "Stale timestamp";

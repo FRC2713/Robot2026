@@ -148,6 +148,9 @@ gradle-app.setting
 # Cache of project
 .gradletasknamecache
 
+#OS specific grade settings
+gradle.properties
+
 # # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
 # gradle/wrapper/gradle-wrapper.properties
 
@@ -184,4 +187,4 @@ ctre_sim/
 compile_commands.json
 
 # Version file
-src/main/java/frc2713/robot/generated/BuildConstants.java
+src/main/java/**/BuildConstants.java
