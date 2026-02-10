@@ -9,7 +9,6 @@ package frc2713.robot;
 
 import choreo.auto.AutoFactory;
 import com.pathplanner.lib.auto.AutoBuilder;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -244,7 +243,7 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     autoChooser.addOption(
-        "Right side trench auto",
+        "Right Side Bump Auto",
         RightSideAutoBump.routine(
             autoFactory,
             drive,
@@ -295,21 +294,17 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    // Default command, normal field-relative drive
     driverControls.configureButtonBindings();
-    // operatorControls.configureButtonBindings();
     devControls.configureButtonBindings();
 
     // Default commands
-    driverControls.setToNormalDrive();
     devControls.setToNormalDrive();
-    // turret.setDefaultCommand(turret.otfCommand().withName("OTF Tracking"));
-    hood.setDefaultCommand(hood.otfCommand().withName("OTF Tracking"));
     flywheels.setDefaultCommand(flywheels.idleSpeedCommand().withName("Idle Tracking"));
 
-    // TODO: conditional command to account for trench
-    // Trigger example = KinematicsManager.trenchTrigger();
-    // example.onTrue(hood.duck());
+    // Comment these out when using dev controller
+    driverControls.setToNormalDrive();
+    turret.setDefaultCommand(turret.otfCommand().withName("OTF Tracking"));
+    hood.setDefaultCommand(hood.otfCommand().withName("OTF Tracking"));
   }
 
   /**

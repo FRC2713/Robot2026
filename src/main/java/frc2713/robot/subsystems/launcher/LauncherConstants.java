@@ -175,6 +175,10 @@ public final class LauncherConstants {
     public static int MODEL_INDEX = 4;
     public static int PARENT_INDEX = 3; // turret
 
+    // Hood rotation limits
+    public static final double FORWARD_LIMIT_DEGREES = 60;
+    public static final double REVERSE_LIMIT_DEGREES = 0;
+
     public static Angle staticHubAngle = Degree.of(10);
     public static InterpolatingDoubleTreeMap angleMap = new InterpolatingDoubleTreeMap();
 

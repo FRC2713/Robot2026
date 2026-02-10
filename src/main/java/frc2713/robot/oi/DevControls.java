@@ -106,15 +106,28 @@ public class DevControls {
         .leftTrigger(0.01)
         .whileTrue(
             turret.setAngleStopAtBounds(
-                () -> Degrees.of(turret.getComputedTurretPosition().in(Degrees) + 180),
-                controller::getLeftTriggerAxis));
+                () -> Degrees.of(turret.getComputedTurretPosition().in(Degrees) + 30),
+                () -> controller.getLeftTriggerAxis() * 0.2));
 
     controller
         .rightTrigger(0.01)
         .whileTrue(
             turret.setAngleStopAtBounds(
-                () -> Degrees.of(turret.getComputedTurretPosition().in(Degrees) - 180),
-                controller::getRightTriggerAxis));
+                () -> Degrees.of(turret.getComputedTurretPosition().in(Degrees) - 30),
+                () -> controller.getRightTriggerAxis() * 0.2));
+
+    // Manual hood rotation with pov up and down
+    // Velocity scaled from a double supplier
+    controller
+        .povUp()
+        .whileTrue(
+            hood.setAngleStopAtBounds(
+                () -> hood.getCurrentPosition().plus(Degrees.of(5)), () -> 0.2));
+    controller
+        .povDown()
+        .whileTrue(
+            hood.setAngleStopAtBounds(
+                () -> hood.getCurrentPosition().minus(Degrees.of(5)), () -> 0.2));
   }
 
   public double getLeftY() {

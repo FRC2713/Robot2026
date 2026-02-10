@@ -65,7 +65,7 @@ public class TurretMotorIOTalonFX extends TalonFXIO implements TurretMotorIO {
     // Compute turret position from both encoders using the Vernier algorithm
     double computedPosition = Turret.turretPositionFromEncoders(encoder1Degrees, encoder2Degrees);
     inputs.computedTurretPositionDegrees = computedPosition;
-    
+
     Logger.recordOutput(
         pb.makePath("ComputedTurretPositionDeg"), inputs.computedTurretPositionDegrees);
   }

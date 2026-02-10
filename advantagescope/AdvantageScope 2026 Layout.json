@@ -4,7 +4,7 @@
       "x": 0,
       "y": 34,
       "width": 1512,
-      "height": 864,
+      "height": 856,
       "state": {
         "sidebar": {
           "width": 345,
@@ -28,26 +28,20 @@
             "/AdvantageKit/RealOutputs/Dye Rotor/API",
             "/AdvantageKit/RealOutputs/Dye Rotor/API/setVelocitySetpointImpl",
             "/AdvantageKit/Flywheels/Left",
-            "/AdvantageKit/RealOutputs",
             "/AdvantageKit/RealOutputs/Flywheels/Measurements",
-            "/AdvantageKit/Flywheels/LeftInputs",
             "/AdvantageKit/RealOutputs/Flywheels/OTF",
-            "/AdvantageKit/Hood",
             "/AdvantageKit/RealOutputs/LaunchingSolutionManager/debug",
-            "/AdvantageKit/Turret",
             "/AdvantageKit/RealOutputs/Flywheels/Setpoints",
             "/AdvantageKit/RealOutputs/Turret/API/setMotionMagicSetpointImpl",
-            "/AdvantageKit/Feeder",
-            "/AdvantageKit/Flywheels",
             "/AdvantageKit/RealOutputs/Hood",
             "/AdvantageKit/RealOutputs/Hood/OTF",
-            "/AdvantageKit/RealOutputs/Flywheels",
             "/AdvantageKit/Flywheels/RightInputs",
-            "/AdvantageKit/RealOutputs/Feeder",
             "/AdvantageKit/RealOutputs/Feeder/API",
             "/AdvantageKit/RealOutputs/Feeder/API/setOpenLoopDutyCycleImpl",
             "/AdvantageKit/RealOutputs/Feeder/API/setVelocitySetpointImpl",
-            "/AdvantageKit/Intake Extension"
+            "/AdvantageKit/RealOutputs",
+            "/AdvantageKit/RealOutputs/Hood/API",
+            "/AdvantageKit/RealOutputs/Hood/API/setMotionMagicSetpointImpDynamic"
           ]
         },
         "tabs": {
@@ -66,7 +60,7 @@
               "title": "Joysticks",
               "controller": [
                 "Xbox Controller (White)",
-                "None",
+                "Xbox Controller (Blue)",
                 "None",
                 "None",
                 "None",
@@ -144,13 +138,13 @@
                 "cameraIndex": -1,
                 "orbitFov": 50,
                 "cameraPosition": [
-                  -12.050779321656194,
-                  9.166073466799107,
-                  -5.8238293550860005
+                  10.88491636297341,
+                  7.586751596871574,
+                  0.5207111171300536
                 ],
                 "cameraTarget": [
                   1.6047678490289574,
-                  0.5675874363284407,
+                  -3.775912562717879,
                   0.37877005258791263
                 ]
               },

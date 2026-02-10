@@ -26,8 +26,7 @@ public class RightSideAutoBump {
       Hood hood,
       Turret turret,
       DyeRotor serializer,
-      //   Launcher intakeAndShooter,
-      Feeder feederAndIndexer) {
+      Feeder feeder) {
     AutoRoutine routine = factory.newRoutine("Start Collect Shoot");
 
     AutoTrajectory faceFuelTrench = routine.trajectory("FaceFuelTrench");
@@ -57,13 +56,7 @@ public class RightSideAutoBump {
                 Commands.print("Moving to shooting position over bump"),
                 Commands.sequence(Commands.race(intakeRoller.stop(), new WaitCommand(2))),
                 moveToLaunchBump.cmd()));
-    moveToLaunchBump
-        .done()
-        .onTrue(
-            Commands.sequence(
-                Commands.print("Starting launch sequence"),
-                // RobotContainer.GameCommandGroups.hubShot
-                RobotContainer.GameCommandGroups.otfShot));
+    moveToLaunchBump.done().onTrue(RobotContainer.GameCommandGroups.otfShot);
     return routine;
   }
 
