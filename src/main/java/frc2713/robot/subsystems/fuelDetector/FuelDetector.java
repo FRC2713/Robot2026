@@ -6,6 +6,8 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringSubscriber;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.littletonrobotics.junction.Logger;
 
 public class FuelDetector extends SubsystemBase {
@@ -16,6 +18,8 @@ public class FuelDetector extends SubsystemBase {
   public final int kImageWidth = 640;
   public final int kImageHeight = 480;
 
+  public boolean isLimelights;
+
   private StringSubscriber simFuelSub;
   private DoubleArraySubscriber realFuelSub;
 
@@ -24,7 +28,7 @@ public class FuelDetector extends SubsystemBase {
         NetworkTableInstance.getDefault().getStringTopic("/fuelDetector/fuelData").subscribe("");
     realFuelSub =
         NetworkTableInstance.getDefault()
-            .getDoubleArrayTopic("/limelight/tcornxy")
+            .getDoubleArrayTopic("/limelight-d/tcornxy")
             .subscribe(new double[0]);
   }
 
@@ -32,7 +36,7 @@ public class FuelDetector extends SubsystemBase {
     // get fuel information, call algorithm
     FuelCoordinates[] fuels = getDataFromNT();
     // System.out.println("fuelData: " + fuelData);
-    Logger.recordOutput("First Fuel Cluster", getRotation2D(fuels).getDegrees());
+    Logger.recordOutput("First Fuel Cluster", getRotation2D(fuels, !isLimelights).getDegrees());
     // System.out.println(
     //    findFuelClusters(fuels, kGridWidth, kGridHeight).toString() + " fuel clusters");
   }
@@ -61,7 +65,7 @@ public class FuelDetector extends SubsystemBase {
         output[w][h] = new FuelSquare(w, h);
       }
     }
-    for (int i = 0; i < fuelCoords.size(); i++) {
+    for (int i = 0; i < fuelCoords.size() - 1; i++) {
       fuelCoords
           .get(i)
           .assignSelfToFuelSquare(gridWidth, gridHeight, kImageWidth, kImageHeight, output);
@@ -96,8 +100,16 @@ public class FuelDetector extends SubsystemBase {
   }
 
   public ArrayList<FuelCluster> findFuelClusters(
-      FuelCoordinates[] inputs, int gridWidth, int gridHeight) {
-    ArrayList<FuelCoordinates> highChanceFuel = filterByHighChance(inputs);
+      FuelCoordinates[] inputs, int gridWidth, int gridHeight, boolean filter) {
+
+    ArrayList<FuelCoordinates> highChanceFuel;
+    if (filter) {
+      highChanceFuel = filterByHighChance(inputs);
+    } else {
+      highChanceFuel = new ArrayList<FuelCoordinates>(Arrays.asList(inputs));
+    }
+    highChanceFuel = filterByHighChance(inputs);
+    System.out.println(highChanceFuel.toString());
     FuelSquare[][] fuelSquares = divideIntoSquares(highChanceFuel, gridWidth, gridHeight);
     ArrayList<FuelCluster> clusters = getFuelClusters(fuelSquares);
     return clusters;
@@ -132,11 +144,13 @@ public class FuelDetector extends SubsystemBase {
   public FuelCoordinates[] getDataFromNT() {
     FuelCoordinates[] fuels;
     if (realFuelSub.exists()) {
+      isLimelights = true;
       fuels = FuelDetector.dataToFuelCoordinates(realFuelSub.get(new double[0]));
-
     } else if (simFuelSub.exists()) {
+      isLimelights = false;
       fuels = FuelDetector.dataToFuelCoordinates(simFuelSub.get(""));
     } else {
+      isLimelights = false;
       fuels = new FuelCoordinates[0];
     }
     if (fuels.length <= 0) {
@@ -145,8 +159,8 @@ public class FuelDetector extends SubsystemBase {
     return fuels;
   }
 
-  public Rotation2d getRotation2D(FuelCoordinates[] fuels) {
-    ArrayList<FuelCluster> fuelClusters = findFuelClusters(fuels, kGridWidth, kGridHeight);
+  public Rotation2d getRotation2D(FuelCoordinates[] fuels, boolean filter) {
+    ArrayList<FuelCluster> fuelClusters = findFuelClusters(fuels, kGridWidth, kGridHeight, filter);
     if (fuelClusters.size() > 0) {
       FuelCluster largestCluster =
           new FuelCluster(); // Note: this is the largest in terms of fuel count, not visiual size.
@@ -159,7 +173,8 @@ public class FuelDetector extends SubsystemBase {
         }
       }
       Rotation2d vector =
-          largestCluster.findAngleTranslation(60.0, kImageWidth, (kImageWidth / kGridWidth));
+          largestCluster.findAngleTranslation(
+              60.0, kImageWidth, (kImageWidth / kGridWidth), isLimelights);
       return vector;
     } else {
       return new Rotation2d(0); // Default value

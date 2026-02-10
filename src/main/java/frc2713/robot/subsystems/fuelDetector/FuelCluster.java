@@ -50,12 +50,16 @@ public class FuelCluster {
     return sum;
   }
 
-  public Rotation2d findAngleTranslation(double FOV, int xResolution, int pixelsPerHorizontalGrid) {
+  public Rotation2d findAngleTranslation(
+      double FOV, int xResolution, int pixelsPerHorizontalGrid, boolean isLimelightData) {
     double avgX = 0;
     for (int i = 0; i < fuelSquares.size(); i++) {
       avgX += ((fuelSquares.get(i).getGridX()) * pixelsPerHorizontalGrid);
     }
     avgX /= fuelSquares.size();
+    if (isLimelightData) {
+      System.out.print(avgX);
+    }
     avgX -= xResolution / 2;
     double degreesPerPixel = FOV / xResolution;
     return new Rotation2d(Units.degreesToRadians(-(avgX * degreesPerPixel)));

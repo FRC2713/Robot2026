@@ -20,7 +20,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.SimTalonFXIO;
-import frc2713.lib.io.TalonFXIO;
 import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.generated.TunerConstants;
@@ -91,8 +90,8 @@ public class RobotContainer {
             new Flywheels(
                 LauncherConstants.Flywheels.leftConfig,
                 LauncherConstants.Flywheels.rightConfig,
-                new TalonFXIO(LauncherConstants.Flywheels.leftConfig),
-                new TalonFXIO(LauncherConstants.Flywheels.rightConfig));
+                new MotorIO() {},
+                new MotorIO() {});
 
         hood = new Hood(LauncherConstants.Hood.config, new MotorIO() {});
 
