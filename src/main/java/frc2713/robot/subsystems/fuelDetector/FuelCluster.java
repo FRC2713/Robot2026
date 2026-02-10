@@ -57,10 +57,9 @@ public class FuelCluster {
       avgX += ((fuelSquares.get(i).getGridX()) * pixelsPerHorizontalGrid);
     }
     avgX /= fuelSquares.size();
-    if (isLimelightData) {
-      System.out.print(avgX);
-    }
+
     avgX -= xResolution / 2;
+    System.out.println(avgX);
     double degreesPerPixel = FOV / xResolution;
     return new Rotation2d(Units.degreesToRadians(-(avgX * degreesPerPixel)));
   }
