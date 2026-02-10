@@ -99,7 +99,22 @@ public class DevControls {
     // Turret angle controls
     controller.leftBumper().onTrue(turret.setAngle(() -> Degrees.of(90)));
     controller.rightBumper().onTrue(turret.setAngle(() -> Degrees.of(-270)));
-    controller.leftTrigger(0.25).whileTrue(turret.otfCommand());
+
+    // Manual turret rotation with triggers - continuously target far in the desired direction
+    // Velocity and acceleration scale with how hard the trigger is pressed
+    controller
+        .leftTrigger(0.01)
+        .whileTrue(
+            turret.setAngleStopAtBounds(
+                () -> Degrees.of(turret.getComputedTurretPosition().in(Degrees) + 180),
+                controller::getLeftTriggerAxis));
+
+    controller
+        .rightTrigger(0.01)
+        .whileTrue(
+            turret.setAngleStopAtBounds(
+                () -> Degrees.of(turret.getComputedTurretPosition().in(Degrees) - 180),
+                controller::getRightTriggerAxis));
   }
 
   public double getLeftY() {

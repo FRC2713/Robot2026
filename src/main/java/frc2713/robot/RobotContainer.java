@@ -267,7 +267,7 @@ public class RobotContainer {
     // Default commands
     driverControls.setToNormalDrive();
     devControls.setToNormalDrive();
-    turret.setDefaultCommand(turret.otfCommand().withName("OTF Tracking"));
+    // turret.setDefaultCommand(turret.otfCommand().withName("OTF Tracking"));
     hood.setDefaultCommand(hood.otfCommand().withName("OTF Tracking"));
     flywheels.setDefaultCommand(flywheels.idleSpeedCommand().withName("Idle Tracking"));
 

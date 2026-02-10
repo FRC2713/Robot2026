@@ -55,14 +55,14 @@ public class TurretMotorIOTalonFX extends TalonFXIO implements TurretMotorIO {
 
     // Read encoder 1 (TalonFX integrated encoder) - convert rotations to degrees
     double encoder1Degrees = inputs.rawRotorPosition.in(Degrees);
-    inputs.encoder1PositionDegrees = Degrees.of(encoder1Degrees);
+    inputs.encoder1PositionDegrees = encoder1Degrees;
 
     // Read encoder 2 (external CANCoder) - convert to degrees
     double encoder2Degrees = canCoderPositionSignal.getValue().in(Degrees);
-    inputs.encoder2PositionDegrees = Degrees.of(encoder2Degrees);
+    inputs.encoder2PositionDegrees = encoder2Degrees;
 
     // Compute turret position from both encoders using the Vernier algorithm
     double computedPosition = Turret.turretPositionFromEncoders(encoder1Degrees, encoder2Degrees);
-    inputs.computedTurretPositionDegrees = Degrees.of(computedPosition);
+    inputs.computedTurretPositionDegrees = computedPosition;
   }
 }

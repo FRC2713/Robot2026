@@ -31,7 +31,7 @@ public class TurretMotorIOSim extends SimTalonFXIO implements TurretMotorIO {
 
     // Encoder 1 = motor position (rawRotorPosition) since it's on the motor shaft
     double encoder1Degrees = inputs.rawRotorPosition.in(Degrees);
-    inputs.encoder1PositionDegrees = Degrees.of(encoder1Degrees);
+    inputs.encoder1PositionDegrees = encoder1Degrees;
 
     // Calculate the turret position from encoder 1
     // Encoder 1 spins ENCODER_1_TO_TURRET_RATIO times per turret rotation
@@ -41,13 +41,13 @@ public class TurretMotorIOSim extends SimTalonFXIO implements TurretMotorIO {
     // Simulate encoder 2: The Vernier algorithm expects diff = turretPosition / SLOPE
     // where diff = e2 - e1, so e2 = e1 + turretPosition / SLOPE
     double encoder2Degrees = encoder1Degrees + (turretPositionDegrees / SLOPE);
-    inputs.encoder2PositionDegrees = Degrees.of(encoder2Degrees);
+    inputs.encoder2PositionDegrees = encoder2Degrees;
 
     // Compute using Vernier algorithm (should match turretPositionDegrees)
     double vernierComputed = Turret.turretPositionFromEncoders(encoder1Degrees, encoder2Degrees);
 
     // Use the Vernier computed position
-    inputs.computedTurretPositionDegrees = Degrees.of(vernierComputed);
+    inputs.computedTurretPositionDegrees = vernierComputed;
   }
 
   @Override
