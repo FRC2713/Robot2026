@@ -7,6 +7,7 @@ import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.SLOPE;
 import frc2713.lib.io.MotorInputs;
 import frc2713.lib.io.SimTalonFXIO;
 import frc2713.robot.subsystems.launcher.Turret;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * Simulation IO implementation for the turret with dual encoder support. Simulates both the TalonFX
@@ -48,6 +49,8 @@ public class TurretMotorIOSim extends SimTalonFXIO implements TurretMotorIO {
 
     // Use the Vernier computed position
     inputs.computedTurretPositionDegrees = vernierComputed;
+    Logger.recordOutput(
+        pb.makePath("ComputedTurretPositionDeg"), inputs.computedTurretPositionDegrees);
   }
 
   @Override

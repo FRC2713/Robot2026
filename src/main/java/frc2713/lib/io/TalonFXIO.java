@@ -25,6 +25,7 @@ import frc2713.robot.Robot;
 import org.littletonrobotics.junction.AutoLogOutput;
 
 public class TalonFXIO implements MotorIO {
+
   // Base members
   protected final TalonFX talon;
   protected final TalonFXSubsystemConfig config;
@@ -52,8 +53,9 @@ public class TalonFXIO implements MotorIO {
   private final StatusSignal<Angle> rawRotorPositionSignal;
   private final StatusSignal<Double> closedLoopErrorSignal;
   private final StatusSignal<Boolean> motionMagicAtTargetSignal;
-
   private final BaseStatusSignal[] signals;
+
+  protected static final double KRAKEN_X60_KV_RPS_PER_VOLT = 5.29; // (from CTRE specs)
 
   // Tunables for Slot0 and MotionMagic (created when config.tunable == true)
   protected LoggedTunableGains tunableGains = null;
@@ -97,7 +99,7 @@ public class TalonFXIO implements MotorIO {
           currentTorqueSignal,
           rawRotorPositionSignal,
           closedLoopErrorSignal,
-          motionMagicAtTargetSignal
+          motionMagicAtTargetSignal,
         };
 
     CTREUtil.tryUntilOK(
