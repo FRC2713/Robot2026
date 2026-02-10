@@ -22,6 +22,8 @@ import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.CTREUtil;
 import frc2713.lib.util.RobotTime;
 import java.util.concurrent.atomic.AtomicReference;
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 public class SimTalonFXIO extends TalonFXIO {
   protected DCMotorSim sim;
@@ -88,20 +90,6 @@ public class SimTalonFXIO extends TalonFXIO {
       // V = I * R + ω * kE (kE = kV in radians, which equals 1/KvRadPerSecPerVolt)
       double backEmfConstant = 1.0 / motor.KvRadPerSecPerVolt;
       motorVoltage = torqueCurrent * motor.rOhms + omegaRadPerSec * backEmfConstant;
-    }
-
-    // Simulate brake mode: when motor voltage is ~0 and brake mode is enabled,
-    // apply a braking voltage proportional to velocity (shorting motor terminals)
-    if (config.fxConfig.MotorOutput.NeutralMode == NeutralModeValue.Brake
-        && Math.abs(motorVoltage) < 0.1
-        && Math.abs(torqueCurrent) < 0.1) {
-      // In brake mode, back-EMF drives current through the shorted windings
-      // This creates a braking torque. Simulate by applying negative voltage proportional to
-      // velocity.
-      double omegaRadPerSec = sim.getAngularVelocityRadPerSec();
-      // Braking voltage = -kBrake * velocity (opposite to motion)
-      double kBrake = 0.9;
-      motorVoltage = -kBrake * omegaRadPerSec;
     }
 
     sim.setInputVoltage(motorVoltage);

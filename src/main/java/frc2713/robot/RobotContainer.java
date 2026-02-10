@@ -7,7 +7,10 @@
 
 package frc2713.robot;
 
+import choreo.auto.AutoFactory;
 import com.pathplanner.lib.auto.AutoBuilder;
+
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -19,7 +22,9 @@ import frc2713.lib.io.SimTalonFXIO;
 import frc2713.lib.io.TalonFXIO;
 import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
+import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.commands.DriveCommands;
+import frc2713.robot.commands.autos.RightSideAutoBump;
 import frc2713.robot.generated.TunerConstants;
 import frc2713.robot.oi.DevControls;
 import frc2713.robot.oi.DriverControls;
@@ -47,6 +52,8 @@ import frc2713.robot.subsystems.serializer.SerializerConstants;
 import frc2713.robot.subsystems.vision.Vision;
 import frc2713.robot.subsystems.vision.VisionIO;
 import frc2713.robot.subsystems.vision.VisionIOSLAMDunk;
+import java.util.Arrays;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -80,6 +87,7 @@ public class RobotContainer {
   public static DevControls devControls;
 
   // Dashboard inputs
+  private final AutoFactory autoFactory;
   private final LoggedDashboardChooser<Command> autoChooser;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -189,6 +197,22 @@ public class RobotContainer {
         vision = new Vision(new VisionIO() {});
         break;
     }
+    //
+    autoFactory =
+        new AutoFactory(
+            drive::getPose, // Function that returns the current robot pose
+            drive::setPose, // Function that resets the current robot pose to the provided Pose2d
+            drive::followTrajectory, // The drive subsystem trajectory follower
+            true, // If alliance flipping should be enabled
+            drive,
+            (sample, isStart) -> {
+              Logger.recordOutput(
+                  "TrajectoryFollowing/ActiveTrajectory",
+                  Arrays.stream(sample.getPoses())
+                      .map(AllianceFlipUtil::apply)
+                      .toArray(Pose2d[]::new));
+            } // The drive subsystem
+            );
 
     // This setting is ignored when the FMS is connected
     DriverStation.silenceJoystickConnectionWarning(true);
@@ -219,6 +243,18 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+        "Right side trench auto",
+        RightSideAutoBump.routine(
+            autoFactory,
+            drive,
+            intakeExtension,
+            intakeRoller,
+            flywheels,
+            hood,
+            turret,
+            dyeRotor,
+            feeder));
 
     // Configure the button bindings
     configureButtonBindings();
