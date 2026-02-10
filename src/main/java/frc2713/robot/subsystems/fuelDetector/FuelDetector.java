@@ -7,7 +7,6 @@ import edu.wpi.first.networktables.StringSubscriber;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import org.littletonrobotics.junction.Logger;
 
 public class FuelDetector extends SubsystemBase {
@@ -35,6 +34,11 @@ public class FuelDetector extends SubsystemBase {
   public void periodic() {
     // get fuel information, call algorithm
     FuelCoordinates[] fuels = getDataFromNT();
+    if (fuels.length > 0) {
+      System.out.println(fuels[0].toString());
+    } else {
+      System.out.println("no fuels");
+    }
     // System.out.println("fuelData: " + fuelData);
     Logger.recordOutput("First Fuel Cluster", getRotation2D(fuels, !isLimelights).getDegrees());
     // System.out.println(
@@ -108,8 +112,7 @@ public class FuelDetector extends SubsystemBase {
     } else {
       highChanceFuel = new ArrayList<FuelCoordinates>(Arrays.asList(inputs));
     }
-    highChanceFuel = filterByHighChance(inputs);
-    System.out.println(highChanceFuel.toString());
+
     FuelSquare[][] fuelSquares = divideIntoSquares(highChanceFuel, gridWidth, gridHeight);
     ArrayList<FuelCluster> clusters = getFuelClusters(fuelSquares);
     return clusters;
@@ -134,9 +137,9 @@ public class FuelDetector extends SubsystemBase {
     // In order of properties: x, y, width, height, chance
 
     double[] fuels = data;
-    FuelCoordinates[] output = new FuelCoordinates[fuels.length];
+    FuelCoordinates[] output = new FuelCoordinates[fuels.length / 2];
     for (int i = 0; i < fuels.length; i += 2) {
-      output[i] = new FuelCoordinates(fuels[i], fuels[i + 1]);
+      output[i / 2] = new FuelCoordinates(fuels[i], fuels[i + 1]);
     }
     return output;
   }
@@ -145,22 +148,27 @@ public class FuelDetector extends SubsystemBase {
     FuelCoordinates[] fuels;
     if (realFuelSub.exists()) {
       isLimelights = true;
-      fuels = FuelDetector.dataToFuelCoordinates(realFuelSub.get(new double[0]));
+      fuels = FuelDetector.dataToFuelCoordinates(realFuelSub.get());
     } else if (simFuelSub.exists()) {
       isLimelights = false;
-      fuels = FuelDetector.dataToFuelCoordinates(simFuelSub.get(""));
+      fuels = FuelDetector.dataToFuelCoordinates(simFuelSub.get());
     } else {
       isLimelights = false;
       fuels = new FuelCoordinates[0];
     }
-    if (fuels.length <= 0) {
-      System.out.println("No fuel data");
-    }
+
+    Logger.recordOutput("FuelDetector/is_limelights", isLimelights);
+    Logger.recordOutput("FuelDetector/n_fuels", isLimelights);
+
+    // System.out.println("Fuel Length: " + fuels.length);
+
     return fuels;
   }
 
   public Rotation2d getRotation2D(FuelCoordinates[] fuels, boolean filter) {
     ArrayList<FuelCluster> fuelClusters = findFuelClusters(fuels, kGridWidth, kGridHeight, filter);
+    // System.out.println(fuelClusters.size());
+    // ArrayList<FuelCluster> fuelClusters = fuels;
     if (fuelClusters.size() > 0) {
       FuelCluster largestCluster =
           new FuelCluster(); // Note: this is the largest in terms of fuel count, not visiual size.

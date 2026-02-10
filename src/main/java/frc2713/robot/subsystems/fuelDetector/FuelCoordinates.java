@@ -51,4 +51,8 @@ public class FuelCoordinates {
   public double computeDepth(double cameraFOV) {
     return 0.0;
   }
+
+  public String toString() {
+    return "x: " + centerX + " y: " + centerY;
+  }
 }
