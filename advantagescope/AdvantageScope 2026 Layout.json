@@ -1,13 +1,13 @@
 {
   "hubs": [
     {
-      "x": -1512,
-      "y": 680,
+      "x": 0,
+      "y": 34,
       "width": 1512,
-      "height": 948,
+      "height": 856,
       "state": {
         "sidebar": {
-          "width": 453,
+          "width": 345,
           "expanded": [
             "/AdvantageKit",
             "/AdvantageKit/RealOutputs/Drive/SwerveStates",
@@ -21,24 +21,31 @@
             "/AdvantageKit/RealOutputs/Dye Rotor/TalonSimState",
             "/AdvantageKit/RealOutputs/Dye Rotor/Sim",
             "/AdvantageKit/RealOutputs/Hood/setAngleCommand",
-            "/AdvantageKit/RealOutputs/Turret/OTF",
             "/AdvantageKit/Flywheel/Left",
-            "/AdvantageKit/RealOutputs",
             "/AdvantageKit/RealOutputs/Flywheel",
-            "/AdvantageKit/Flywheels/Left",
-            "/AdvantageKit/Flywheels/Right",
             "/AdvantageKit/RealOutputs/Hood/API/setMotionMagicSetpointImpl",
-            "/AdvantageKit/RealOutputs/Hood/OTF",
-            "/AdvantageKit/Vision",
-            "/AdvantageKit/Flywheels",
             "/AdvantageKit/RealOutputs/Flywheels/API/setVelocitySetpointImpl",
-            "/AdvantageKit/RealOutputs/Turret",
+            "/AdvantageKit/RealOutputs/Dye Rotor/API",
+            "/AdvantageKit/RealOutputs/Dye Rotor/API/setVelocitySetpointImpl",
+            "/AdvantageKit/Flywheels/Left",
+            "/AdvantageKit/RealOutputs/Flywheels/Measurements",
+            "/AdvantageKit/RealOutputs/Flywheels/OTF",
+            "/AdvantageKit/RealOutputs/LaunchingSolutionManager/debug",
+            "/AdvantageKit/RealOutputs/Flywheels/Setpoints",
+            "/AdvantageKit/RealOutputs/Turret/API/setMotionMagicSetpointImpl",
             "/AdvantageKit/RealOutputs/Hood",
-            "/AdvantageKit/Dye Rotor"
+            "/AdvantageKit/RealOutputs/Hood/OTF",
+            "/AdvantageKit/Flywheels/RightInputs",
+            "/AdvantageKit/RealOutputs/Feeder/API",
+            "/AdvantageKit/RealOutputs/Feeder/API/setOpenLoopDutyCycleImpl",
+            "/AdvantageKit/RealOutputs/Feeder/API/setVelocitySetpointImpl",
+            "/AdvantageKit/RealOutputs",
+            "/AdvantageKit/RealOutputs/Hood/API",
+            "/AdvantageKit/RealOutputs/Hood/API/setMotionMagicSetpointImpDynamic"
           ]
         },
         "tabs": {
-          "selected": 6,
+          "selected": 2,
           "tabs": [
             {
               "type": 0,
@@ -53,7 +60,7 @@
               "title": "Joysticks",
               "controller": [
                 "Xbox Controller (White)",
-                "None",
+                "Xbox Controller (Blue)",
                 "None",
                 "None",
                 "None",
@@ -105,22 +112,22 @@
                   },
                   {
                     "type": "ghost",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/LaunchingSolutionManager/projected_pose",
-                    "logType": "Pose3d",
-                    "visible": true,
-                    "options": {
-                      "model": "2713 2026 Robot",
-                      "color": "#ff00ff"
-                    }
-                  },
-                  {
-                    "type": "ghost",
                     "logKey": "NT:/AdvantageKit/Vision/Pose3d",
                     "logType": "Pose3d",
                     "visible": true,
                     "options": {
                       "model": "2713 2026 Robot",
                       "color": "#00ff00"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/LaunchingSolutionManager/projected_pose",
+                    "logType": "Pose3d",
+                    "visible": false,
+                    "options": {
+                      "model": "2713 2026 Robot",
+                      "color": "#ff0000"
                     }
                   }
                 ],
@@ -131,14 +138,14 @@
                 "cameraIndex": -1,
                 "orbitFov": 50,
                 "cameraPosition": [
-                  -10.027351456971264,
-                  3.529162718208371,
-                  -5.861471259683113
+                  10.88491636297341,
+                  7.586751596871574,
+                  0.5207111171300536
                 ],
                 "cameraTarget": [
-                  -4.251612280691649,
-                  1.4122057463119604,
-                  0.2961853994555342
+                  1.6047678490289574,
+                  -3.775912562717879,
+                  0.37877005258791263
                 ]
               },
               "controlsHeight": 200
@@ -220,12 +227,12 @@
             },
             {
               "type": 1,
-              "title": "Muzzle",
+              "title": "Turret And Hood",
               "controller": {
                 "leftSources": [
                   {
                     "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/Turret/computedTurretDegrees",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Turret/setpoint/commandedDegrees",
                     "logType": "Number",
                     "visible": true,
                     "options": {
@@ -235,11 +242,11 @@
                   },
                   {
                     "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/Turret/OTF/targetAngleDegrees",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Turret/ComputedTurretPositionDeg",
                     "logType": "Number",
                     "visible": true,
                     "options": {
-                      "color": "#e48b32",
+                      "color": "#af2437",
                       "size": "normal"
                     }
                   }
@@ -247,9 +254,9 @@
                 "rightSources": [
                   {
                     "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/Hood/Position",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Hood/OTF/aimAngleDeg",
                     "logType": "Number",
-                    "visible": false,
+                    "visible": true,
                     "options": {
                       "color": "#2b66a2",
                       "size": "normal"
@@ -257,9 +264,9 @@
                   },
                   {
                     "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/Hood/OTF/aimAngle",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Hood/OTF/currentAngleDeg",
                     "logType": "Number",
-                    "visible": false,
+                    "visible": true,
                     "options": {
                       "color": "#3b875a",
                       "size": "normal"
@@ -291,15 +298,6 @@
                     "logType": "Boolean",
                     "visible": true,
                     "options": {
-                      "color": "#3b875a"
-                    }
-                  },
-                  {
-                    "type": "stripes",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/Flywheels/currentCommand",
-                    "logType": "String",
-                    "visible": true,
-                    "options": {
                       "color": "#af2437"
                     }
                   }
@@ -328,7 +326,17 @@
                 "leftSources": [
                   {
                     "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/Flywheels/Left/Velocity",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Flywheels/Measurements/leftVelocityRotPerSec",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Flywheels/Setpoints/velocityRotPerSec",
                     "logType": "Number",
                     "visible": true,
                     "options": {
@@ -338,27 +346,16 @@
                   },
                   {
                     "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/Flywheels/Right/Velocity",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Flywheels/Measurements/rightVelocityRotPerSec",
                     "logType": "Number",
                     "visible": true,
                     "options": {
-                      "color": "#e5b31b",
+                      "color": "#80588e",
                       "size": "normal"
                     }
                   }
                 ],
-                "rightSources": [
-                  {
-                    "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/Flywheels/OTF/targetVelocity",
-                    "logType": "Number",
-                    "visible": true,
-                    "options": {
-                      "color": "#e48b32",
-                      "size": "normal"
-                    }
-                  }
-                ],
+                "rightSources": [],
                 "discreteSources": [
                   {
                     "type": "stripes",
@@ -367,6 +364,15 @@
                     "visible": true,
                     "options": {
                       "color": "#af2437"
+                    }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Flywheels/AtTarget",
+                    "logType": "Boolean",
+                    "visible": true,
+                    "options": {
+                      "color": "#e48b32"
                     }
                   }
                 ],
@@ -408,7 +414,7 @@
                     "logType": "Number",
                     "visible": true,
                     "options": {
-                      "color": "#5f4528",
+                      "color": "#2b66a2",
                       "size": "normal"
                     }
                   }
@@ -430,15 +436,6 @@
                     "logType": "String",
                     "visible": true,
                     "options": {
-                      "color": "#5f4528"
-                    }
-                  },
-                  {
-                    "type": "stripes",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/Hood/AtTarget",
-                    "logType": "Boolean",
-                    "visible": true,
-                    "options": {
                       "color": "#2b66a2"
                     }
                   },
@@ -448,16 +445,7 @@
                     "logType": "Boolean",
                     "visible": true,
                     "options": {
-                      "color": "#af2437"
-                    }
-                  },
-                  {
-                    "type": "stripes",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/Turret/AtTarget",
-                    "logType": "Boolean",
-                    "visible": true,
-                    "options": {
-                      "color": "#e5b31b"
+                      "color": "#5f4528"
                     }
                   }
                 ],

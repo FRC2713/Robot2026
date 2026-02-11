@@ -103,8 +103,8 @@ public class DevControls {
         .leftTrigger(0.01)
         .whileTrue(
             turret.setAngleStopAtBounds(
-                () -> Degrees.of(turret.getComputedTurretPosition().in(Degrees) + 180),
-                controller::getLeftTriggerAxis));
+                () -> Degrees.of(turret.getComputedTurretPosition().in(Degrees) + 30),
+                () -> controller.getLeftTriggerAxis() * 0.2));
 
     controller
         .rightTrigger(0.01)

@@ -1,7 +1,7 @@
 package frc2713.lib.io;
 
 import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
@@ -21,16 +21,12 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.CTREUtil;
 import frc2713.lib.util.RobotTime;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class SimTalonFXIO extends TalonFXIO {
   protected DCMotorSim sim;
   private Notifier simNotifier = null;
   private Time lastUpdateTimestamp = null; // Initialized on first update to avoid huge dt
 
-  protected AtomicReference<Angle> lastPosition = new AtomicReference<>((Angle) Rotations.of(0.0));
-  protected AtomicReference<AngularVelocity> lastVelocity =
-      new AtomicReference<>((AngularVelocity) RadiansPerSecond.of(0.0));
   protected double lastClosedLoopError = 0.0;
   protected boolean lastCheckedMMAtTarget = false;
 
@@ -79,29 +75,11 @@ public class SimTalonFXIO extends TalonFXIO {
     double torqueCurrent = motorState.getTorqueCurrent();
 
     // If torque current is being used (FOC control), convert to equivalent voltage
-    // For DC motor: V = I * R + ω * kE (back-EMF)
-    // DCMotorSim expects voltage input and internally computes: I = (V - ω * kE) / R
     // So to command a specific current I: V = I * R + ω * kE
     if (config.useFOC && Math.abs(torqueCurrent) > 0.1 && Math.abs(motorVoltage) < 0.1) {
-      DCMotor motor = DCMotor.getKrakenX60Foc(1);
-      double omegaRadPerSec = sim.getAngularVelocityRadPerSec();
-      // V = I * R + ω * kE (kE = kV in radians, which equals 1/KvRadPerSecPerVolt)
-      double backEmfConstant = 1.0 / motor.KvRadPerSecPerVolt;
-      motorVoltage = torqueCurrent * motor.rOhms + omegaRadPerSec * backEmfConstant;
-    }
-
-    // Simulate brake mode: when motor voltage is ~0 and brake mode is enabled,
-    // apply a braking voltage proportional to velocity (shorting motor terminals)
-    if (config.fxConfig.MotorOutput.NeutralMode == NeutralModeValue.Brake
-        && Math.abs(motorVoltage) < 0.1
-        && Math.abs(torqueCurrent) < 0.1) {
-      // In brake mode, back-EMF drives current through the shorted windings
-      // This creates a braking torque. Simulate by applying negative voltage proportional to
-      // velocity.
-      double omegaRadPerSec = sim.getAngularVelocityRadPerSec();
-      // Braking voltage = -kBrake * velocity (opposite to motion)
-      double kBrake = 0.9;
-      motorVoltage = -kBrake * omegaRadPerSec;
+      double backEmfConstant = 1.0 / (KRAKEN_X60_KV_RPS_PER_VOLT * 2.0 * Math.PI); // kE
+      double rOhms = 0.025; // internal resistance from Kraken x60 specs
+      motorVoltage = torqueCurrent * rOhms + sim.getAngularVelocityRadPerSec() * backEmfConstant;
     }
 
     sim.setInputVoltage(motorVoltage);
@@ -140,6 +118,10 @@ public class SimTalonFXIO extends TalonFXIO {
 
     double simPositionRad = sim.getAngularPositionRad();
     double simVelocityRadPerSec = sim.getAngularVelocityRadPerSec();
+
+    // Guard against NaN from uninitialized sim state
+    if (Double.isNaN(simPositionRad)) simPositionRad = 0.0;
+    if (Double.isNaN(simVelocityRadPerSec)) simVelocityRadPerSec = 0.0;
 
     // DCMotorSim with gearing outputs mechanism-side position/velocity (not motor shaft).
     // Just convert from radians to rotations - no gear ratio conversion needed here.
@@ -193,5 +175,12 @@ public class SimTalonFXIO extends TalonFXIO {
     // Preserve current velocity when setting position
     double currentVelocityRadPerSec = sim.getAngularVelocityRadPerSec();
     sim.setState(positionRad, currentVelocityRadPerSec);
+  }
+
+  @Override
+  public void setVelocitySetpoint(AngularVelocity unitsPerSecond, int slot) {
+    super.setVelocitySetpoint(unitsPerSecond, slot);
+    if (Math.abs(unitsPerSecond.in(DegreesPerSecond)) < 0.1
+        && config.fxConfig.MotorOutput.NeutralMode == NeutralModeValue.Brake) {}
   }
 }

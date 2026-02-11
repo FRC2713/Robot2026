@@ -176,6 +176,10 @@ public final class LauncherConstants {
     public static int MODEL_INDEX = 4;
     public static int PARENT_INDEX = 3; // turret
 
+    // Hood rotation limits
+    public static final double FORWARD_LIMIT_DEGREES = 60;
+    public static final double REVERSE_LIMIT_DEGREES = 0;
+
     public static Angle staticHubAngle = Degree.of(10);
     public static InterpolatingDoubleTreeMap angleMap = new InterpolatingDoubleTreeMap();
 
@@ -194,7 +198,7 @@ public final class LauncherConstants {
 
   public static LoggedTunableMeasure<Time> otfLinearProjectionSeconds =
       new LoggedTunableMeasure<Time>(
-          "LaunchingSolutionManager/time_to_project_lin", Seconds.of(1.0));
+          "LaunchingSolutionManager/time_to_project_lin", Seconds.of(0.5));
   public static LoggedTunableMeasure<Time> otfAngularProjectionSeconds =
       new LoggedTunableMeasure<Time>(
           "LaunchingSolutionManager/time_to_project_ang", Seconds.of(0.5));

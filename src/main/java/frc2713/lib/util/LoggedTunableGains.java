@@ -2,6 +2,7 @@ package frc2713.lib.util;
 
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import edu.wpi.first.math.controller.PIDController;
 import frc2713.lib.io.AdvantageScopePathBuilder;
 import java.util.function.BiConsumer;
 import lombok.Getter;
@@ -100,5 +101,15 @@ public class LoggedTunableGains {
         motionMagicJerk,
         motionMagicExpo_V,
         motionMagicExpo_A);
+  }
+
+  public PIDController createPIDController() {
+    return new PIDController(this.P.getAsDouble(), this.I.getAsDouble(), this.D.getAsDouble());
+  }
+
+  public PIDController createAngularPIDController() {
+    var pid = new PIDController(this.P.getAsDouble(), this.I.getAsDouble(), this.D.getAsDouble());
+    pid.enableContinuousInput(-Math.PI, Math.PI);
+    return pid;
   }
 }
