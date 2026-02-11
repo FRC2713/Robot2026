@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -16,6 +17,7 @@ import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
+import frc2713.robot.FieldConstants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -42,6 +44,32 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
 
   public Command otfCommand() {
     return setAngleCommand(otfAngSupplier);
+  }
+
+  /**
+   * Creates a command that automatically retracts the hood when in designated field zones and
+   * raises it back up when outside those zones.
+   *
+   * @param poseSupplier Supplier for the robot's current pose
+   * @param defaultAngleSupplier Supplier for the desired hood angle when not in a retraction zone
+   * @return A command that manages hood position based on field location
+   */
+  public Command autoRetractCommand(
+      Supplier<Pose2d> poseSupplier, Supplier<Angle> defaultAngleSupplier) {
+    return setAngleCommand(
+        () -> {
+          Pose2d currentPose = poseSupplier.get();
+          boolean inRetractionZone =
+              FieldConstants.HoodRetractionZones.isInRetractionZone(currentPose);
+
+          Logger.recordOutput(pb.makePath("AutoRetract", "inRetractionZone"), inRetractionZone);
+
+          if (inRetractionZone) {
+            return LauncherConstants.Hood.retractedPosition;
+          } else {
+            return defaultAngleSupplier.get();
+          }
+        });
   }
 
   public final Supplier<Angle> otfAngSupplier =

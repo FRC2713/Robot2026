@@ -303,6 +303,110 @@ public class FieldConstants {
         new Translation2d(0, AprilTagLayoutType.OFFICIAL.getLayout().getTagPose(29).get().getY());
   }
 
+  /**
+   * Defines zones on the field where the hood must be retracted to avoid collisions with field
+   * elements like trenches or other obstacles. Each zone is defined by min/max X and Y coordinates.
+   * Origin is at the corner of the BLUE alliance near the outpost.
+   */
+  public static class HoodRetractionZones {
+
+    /** A rectangular zone on the field defined by X and Y bounds */
+    public record Zone(double minX, double maxX, double minY, double maxY) {
+      /**
+       * Check if a pose is within this zone
+       *
+       * @param pose The robot pose to check
+       * @return true if the pose is within the zone bounds
+       */
+      public boolean contains(Pose2d pose) {
+        double x = pose.getX();
+        double y = pose.getY();
+        return x >= minX && x <= maxX && y >= minY && y <= maxY;
+      }
+    }
+
+    // Robot dimensions: 33.25" + 12" extension = 45.25" maximum dimension
+    private static final double ROBOT_MAX_DIMENSION = Units.inchesToMeters(45.25);
+
+    // BLUE ALLIANCE ZONES
+
+    /**
+     * Duck zone for BLUE LEFT trench - starts one robot length away from trench opening Zone
+     * extends from one robot length before the trench opening to the hub center Does not extend
+     * into the bump area
+     */
+    public static final Zone BLUE_LEFT_DUCK_ZONE =
+        new Zone(
+            LinesVertical.hubCenter - ROBOT_MAX_DIMENSION, // minX: one robot length before opening
+            LinesVertical.hubCenter, // maxX: at the hub center (trench opening)
+            LinesHorizontal.leftBumpStart, // minY: start after bump area
+            LinesHorizontal.leftTrenchOpenStart // maxY: extend to full width
+            );
+
+    /**
+     * Duck zone for BLUE RIGHT trench - starts one robot length away from trench opening Zone
+     * extends from one robot length before the trench opening to the hub center Does not extend
+     * into the bump area
+     */
+    public static final Zone BLUE_RIGHT_DUCK_ZONE =
+        new Zone(
+            LinesVertical.hubCenter - ROBOT_MAX_DIMENSION, // minX: one robot length before opening
+            LinesVertical.hubCenter, // maxX: at the hub center (trench opening)
+            LinesHorizontal.rightTrenchOpenEnd, // minY: extend from edge
+            LinesHorizontal.rightBumpEnd // maxY: end before bump area
+            );
+
+    // RED ALLIANCE ZONES (mirrored on opposite side of field)
+
+    /**
+     * Duck zone for RED LEFT trench - starts one robot length away from trench opening Zone extends
+     * from one robot length before the trench opening to the opposing hub center Does not extend
+     * into the bump area
+     */
+    public static final Zone RED_LEFT_DUCK_ZONE =
+        new Zone(
+            LinesVertical.oppHubCenter, // minX: at the opposing hub center (trench opening)
+            LinesVertical.oppHubCenter
+                + ROBOT_MAX_DIMENSION, // maxX: one robot length after opening
+            LinesHorizontal.leftBumpStart, // minY: start after bump area
+            LinesHorizontal.leftTrenchOpenStart // maxY: extend to full width
+            );
+
+    /**
+     * Duck zone for RED RIGHT trench - starts one robot length away from trench opening Zone
+     * extends from one robot length before the trench opening to the opposing hub center Does not
+     * extend into the bump area
+     */
+    public static final Zone RED_RIGHT_DUCK_ZONE =
+        new Zone(
+            LinesVertical.oppHubCenter, // minX: at the opposing hub center (trench opening)
+            LinesVertical.oppHubCenter
+                + ROBOT_MAX_DIMENSION, // maxX: one robot length after opening
+            LinesHorizontal.rightTrenchOpenEnd, // minY: extend from edge
+            LinesHorizontal.rightBumpEnd // maxY: end before bump area
+            );
+
+    /** Array of all retraction zones for easy iteration */
+    public static final Zone[] ALL_ZONES = {
+      BLUE_LEFT_DUCK_ZONE, BLUE_RIGHT_DUCK_ZONE, RED_LEFT_DUCK_ZONE, RED_RIGHT_DUCK_ZONE
+    };
+
+    /**
+     * Check if the robot is in any retraction zone
+     *
+     * @param pose The current robot pose
+     * @return true if the robot is in any zone requiring hood retraction
+     */
+    public static boolean isInRetractionZone(Pose2d pose) {
+      for (Zone zone : ALL_ZONES) {
+        if (zone.contains(pose)) {
+          return true;
+        }
+      }
+      return false;
+    }
+  }
+
   @RequiredArgsConstructor
   public enum FieldType {
     ANDYMARK("andymark"),
