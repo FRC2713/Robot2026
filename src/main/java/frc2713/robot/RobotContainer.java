@@ -268,9 +268,9 @@ public class RobotContainer {
     driverControls.setToNormalDrive();
     devControls.setToNormalDrive();
     // turret.setDefaultCommand(turret.otfCommand().withName("OTF Tracking"));
-    hood.setDefaultCommand(
-        hood.autoRetractCommand(drive::getPose, hood.otfAngSupplier)
-            .withName("OTF Tracking with Auto-Retract"));
+    // hood.setDefaultCommand(
+    //     hood.autoRetractCommand(drive::getPose, hood.otfAngSupplier)
+    //         .withName("OTF Tracking with Auto-Retract"));
     flywheels.setDefaultCommand(flywheels.idleSpeedCommand().withName("Idle Tracking"));
 
     // TODO: conditional command to account for trench

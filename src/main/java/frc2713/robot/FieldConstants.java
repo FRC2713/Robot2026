@@ -358,8 +358,8 @@ public class FieldConstants {
 
     /**
      * Duck zone for exiting BLUE LEFT trench - extends from hub center one robot length away Zone
-     * extends from the hub center to one robot length after the trench opening Does not extend
-     * into the bump area
+     * extends from the hub center to one robot length after the trench opening Does not extend into
+     * the bump area
      */
     public static final Zone BLUE_LEFT_DUCK_EXIT_ZONE =
         new Zone(
@@ -370,9 +370,9 @@ public class FieldConstants {
             );
 
     /**
-     * Duck zone for exiting BLUE RIGHT trench - extends from hub center one robot length away
-     * Zone extends from the hub center to one robot length after the trench opening Does not
-     * extend into the bump area
+     * Duck zone for exiting BLUE RIGHT trench - extends from hub center one robot length away Zone
+     * extends from the hub center to one robot length after the trench opening Does not extend into
+     * the bump area
      */
     public static final Zone BLUE_RIGHT_DUCK_EXIT_ZONE =
         new Zone(
@@ -414,8 +414,8 @@ public class FieldConstants {
 
     /**
      * Duck zone for exiting RED LEFT trench - extends from opposing hub center one robot length
-     * away Zone extends from one robot length before the opposing hub center to the hub center
-     * Does not extend into the bump area
+     * away Zone extends from one robot length before the opposing hub center to the hub center Does
+     * not extend into the bump area
      */
     public static final Zone RED_LEFT_DUCK_EXIT_ZONE =
         new Zone(
@@ -428,8 +428,8 @@ public class FieldConstants {
 
     /**
      * Duck zone for exiting RED RIGHT trench - extends from opposing hub center one robot length
-     * away Zone extends from one robot length before the opposing hub center to the hub center
-     * Does not extend into the bump area
+     * away Zone extends from one robot length before the opposing hub center to the hub center Does
+     * not extend into the bump area
      */
     public static final Zone RED_RIGHT_DUCK_EXIT_ZONE =
         new Zone(

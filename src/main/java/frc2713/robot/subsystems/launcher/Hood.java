@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -32,6 +33,23 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   public Command setAngleCommand(Supplier<Angle> desiredAngle) {
     return motionMagicSetpointCommand(
         () -> convertSubsystemPositionToMotorPosition(desiredAngle.get()));
+  }
+
+  public Command setAngleStopAtBounds(Supplier<Angle> desiredAngle) {
+    return motionMagicSetpointCommand(
+        () -> {
+          Angle requested = desiredAngle.get();
+          Angle lowerBound = LauncherConstants.Hood.retractedPosition;
+          Angle upperBound = LauncherConstants.Hood.extendedPosition;
+
+          // Clamp the requested angle between bounds
+          Angle clamped =
+              Degrees.of(
+                  MathUtil.clamp(
+                      requested.in(Degrees), lowerBound.in(Degrees), upperBound.in(Degrees)));
+
+          return convertSubsystemPositionToMotorPosition(clamped);
+        });
   }
 
   public Command retract() {

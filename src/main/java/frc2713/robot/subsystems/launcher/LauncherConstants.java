@@ -172,6 +172,7 @@ public final class LauncherConstants {
     }
 
     public static Angle retractedPosition = Degrees.of(0);
+    public static Angle extendedPosition = Degrees.of(90);
     public static int MODEL_INDEX = 4;
     public static int PARENT_INDEX = 3; // turret
 
