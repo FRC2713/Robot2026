@@ -356,6 +356,32 @@ public class FieldConstants {
             LinesHorizontal.rightBumpEnd // maxY: end before bump area
             );
 
+    /**
+     * Duck zone for exiting BLUE LEFT trench - extends from hub center one robot length away Zone
+     * extends from the hub center to one robot length after the trench opening Does not extend
+     * into the bump area
+     */
+    public static final Zone BLUE_LEFT_DUCK_EXIT_ZONE =
+        new Zone(
+            LinesVertical.hubCenter, // minX: at the hub center (trench opening)
+            LinesVertical.hubCenter + ROBOT_MAX_DIMENSION, // maxX: one robot length after opening
+            LinesHorizontal.leftBumpStart, // minY: start after bump area
+            LinesHorizontal.leftTrenchOpenStart // maxY: extend to full width
+            );
+
+    /**
+     * Duck zone for exiting BLUE RIGHT trench - extends from hub center one robot length away
+     * Zone extends from the hub center to one robot length after the trench opening Does not
+     * extend into the bump area
+     */
+    public static final Zone BLUE_RIGHT_DUCK_EXIT_ZONE =
+        new Zone(
+            LinesVertical.hubCenter, // minX: at the hub center (trench opening)
+            LinesVertical.hubCenter + ROBOT_MAX_DIMENSION, // maxX: one robot length after opening
+            LinesHorizontal.rightTrenchOpenEnd, // minY: extend from edge
+            LinesHorizontal.rightBumpEnd // maxY: end before bump area
+            );
+
     // RED ALLIANCE ZONES (mirrored on opposite side of field)
 
     /**
@@ -386,9 +412,44 @@ public class FieldConstants {
             LinesHorizontal.rightBumpEnd // maxY: end before bump area
             );
 
+    /**
+     * Duck zone for exiting RED LEFT trench - extends from opposing hub center one robot length
+     * away Zone extends from one robot length before the opposing hub center to the hub center
+     * Does not extend into the bump area
+     */
+    public static final Zone RED_LEFT_DUCK_EXIT_ZONE =
+        new Zone(
+            LinesVertical.oppHubCenter
+                - ROBOT_MAX_DIMENSION, // minX: one robot length before opening
+            LinesVertical.oppHubCenter, // maxX: at the opposing hub center (trench opening)
+            LinesHorizontal.leftBumpStart, // minY: start after bump area
+            LinesHorizontal.leftTrenchOpenStart // maxY: extend to full width
+            );
+
+    /**
+     * Duck zone for exiting RED RIGHT trench - extends from opposing hub center one robot length
+     * away Zone extends from one robot length before the opposing hub center to the hub center
+     * Does not extend into the bump area
+     */
+    public static final Zone RED_RIGHT_DUCK_EXIT_ZONE =
+        new Zone(
+            LinesVertical.oppHubCenter
+                - ROBOT_MAX_DIMENSION, // minX: one robot length before opening
+            LinesVertical.oppHubCenter, // maxX: at the opposing hub center (trench opening)
+            LinesHorizontal.rightTrenchOpenEnd, // minY: extend from edge
+            LinesHorizontal.rightBumpEnd // maxY: end before bump area
+            );
+
     /** Array of all retraction zones for easy iteration */
     public static final Zone[] ALL_ZONES = {
-      BLUE_LEFT_DUCK_ZONE, BLUE_RIGHT_DUCK_ZONE, RED_LEFT_DUCK_ZONE, RED_RIGHT_DUCK_ZONE
+      BLUE_LEFT_DUCK_ZONE,
+      BLUE_RIGHT_DUCK_ZONE,
+      BLUE_LEFT_DUCK_EXIT_ZONE,
+      BLUE_RIGHT_DUCK_EXIT_ZONE,
+      RED_LEFT_DUCK_ZONE,
+      RED_RIGHT_DUCK_ZONE,
+      RED_LEFT_DUCK_EXIT_ZONE,
+      RED_RIGHT_DUCK_EXIT_ZONE
     };
 
     /**

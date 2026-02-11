@@ -63,6 +63,7 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
               FieldConstants.HoodRetractionZones.isInRetractionZone(currentPose);
 
           Logger.recordOutput(pb.makePath("AutoRetract", "inRetractionZone"), inRetractionZone);
+          ducking = inRetractionZone;
 
           if (inRetractionZone) {
             return LauncherConstants.Hood.retractedPosition;
@@ -71,6 +72,8 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
           }
         });
   }
+
+  @AutoLogOutput public boolean ducking = false;
 
   public final Supplier<Angle> otfAngSupplier =
       () -> {
