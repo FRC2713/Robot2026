@@ -2,10 +2,7 @@ package frc2713.robot.oi;
 
 import static edu.wpi.first.units.Units.Degrees;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc2713.robot.commands.DriveCommands;
@@ -52,33 +49,36 @@ public class DevControls {
 
   public void configureButtonBindings() {
 
+    // Messes with dualsense controls
     // Reset gyro to 0 deg when start button is pressed
-    controller
-        .start()
-        .onTrue(
-            Commands.parallel(
-                this.setToNormalDriveCmd(),
-                Commands.runOnce(
-                        () ->
-                            drive.setPose(
-                                new Pose2d(
-                                    drive.getPose().getTranslation(), Rotation2d.fromDegrees(0))),
-                        drive)
-                    .ignoringDisable(true)));
+    // controller
+    //     .start()
+    //     .onTrue(
+    //         Commands.parallel(
+    //             this.setToNormalDriveCmd(),
+    //             Commands.runOnce(
+    //                     () ->
+    //                         drive.setPose(
+    //                             new Pose2d(
+    //                                 drive.getPose().getTranslation(),
+    // Rotation2d.fromDegrees(0))),
+    //                     drive)
+    //                 .ignoringDisable(true)));
 
-    // Reset gyro to 180 deg when start button is pressed
-    controller
-        .back()
-        .onTrue(
-            Commands.parallel(
-                    this.setToNormalDriveCmd(),
-                    Commands.runOnce(
-                        () ->
-                            drive.setPose(
-                                new Pose2d(
-                                    drive.getPose().getTranslation(), Rotation2d.fromDegrees(180))),
-                        drive))
-                .ignoringDisable(true));
+    // // Reset gyro to 180 deg when start button is pressed
+    // controller
+    //     .back()
+    //     .onTrue(
+    //         Commands.parallel(
+    //                 this.setToNormalDriveCmd(),
+    //                 Commands.runOnce(
+    //                     () ->
+    //                         drive.setPose(
+    //                             new Pose2d(
+    //                                 drive.getPose().getTranslation(),
+    // Rotation2d.fromDegrees(180))),
+    //                     drive))
+    //             .ignoringDisable(true));
 
     // POV Precision Driving
     controller
@@ -97,9 +97,6 @@ public class DevControls {
         .onFalse(this.setToNormalDriveCmd());
 
     // Turret angle controls
-    controller.leftBumper().onTrue(turret.setAngle(() -> Degrees.of(90)));
-    controller.rightBumper().onTrue(turret.setAngle(() -> Degrees.of(-270)));
-
     // Manual turret rotation with triggers - continuously target far in the desired direction
     // Velocity and acceleration scale with how hard the trigger is pressed
     controller
@@ -113,21 +110,21 @@ public class DevControls {
         .rightTrigger(0.01)
         .whileTrue(
             turret.setAngleStopAtBounds(
-                () -> Degrees.of(turret.getComputedTurretPosition().in(Degrees) - 30),
-                () -> controller.getRightTriggerAxis() * 0.2));
+                () -> Degrees.of(turret.getComputedTurretPosition().in(Degrees) - 180),
+                controller::getRightTriggerAxis));
 
-    // Manual hood rotation with pov up and down
-    // Velocity scaled from a double supplier
+    // Hood manual controls - bumpers bring hood up/down continuously until bounds hit
     controller
-        .povUp()
+        .leftBumper()
         .whileTrue(
             hood.setAngleStopAtBounds(
-                () -> hood.getCurrentPosition().plus(Degrees.of(5)), () -> 0.2));
+                () -> Degrees.of(hood.getCurrentPosition().in(Degrees) - 5))); // Bring hood down
+
     controller
-        .povDown()
+        .rightBumper()
         .whileTrue(
             hood.setAngleStopAtBounds(
-                () -> hood.getCurrentPosition().minus(Degrees.of(5)), () -> 0.2));
+                () -> Degrees.of(hood.getCurrentPosition().in(Degrees) + 5))); // Bring hood up
   }
 
   public double getLeftY() {
