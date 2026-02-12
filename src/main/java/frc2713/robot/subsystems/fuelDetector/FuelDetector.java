@@ -34,6 +34,11 @@ public class FuelDetector extends SubsystemBase {
   public void periodic() {
     // get fuel information, call algorithm
     FuelCoordinates[] fuels = getDataFromNT();
+    if (fuels.length > 0) {
+      System.out.println(fuels[0].toString());
+    } else {
+      System.out.println("no fuels");
+    }
     // System.out.println("fuelData: " + fuelData);
     Logger.recordOutput("First Fuel Cluster", getRotation2D(fuels, !isLimelights).getDegrees());
     // System.out.println(
@@ -108,6 +113,7 @@ public class FuelDetector extends SubsystemBase {
       highChanceFuel = new ArrayList<FuelCoordinates>(Arrays.asList(inputs));
     }
     System.out.println(highChanceFuel);
+
     FuelSquare[][] fuelSquares = divideIntoSquares(highChanceFuel, gridWidth, gridHeight);
     // System.out.println((fuelSquares.length > 0) ? fuelSquares[0].toString() : "empty array");
     ArrayList<FuelCluster> clusters = getFuelClusters(fuelSquares);
@@ -134,9 +140,9 @@ public class FuelDetector extends SubsystemBase {
   public static FuelCoordinates[] dataToFuelCoordinates(double[] data) {
 
     double[] fuels = data;
-    FuelCoordinates[] output = new FuelCoordinates[fuels.length];
+    FuelCoordinates[] output = new FuelCoordinates[fuels.length / 2];
     for (int i = 0; i < fuels.length; i += 2) {
-      output[i] = new FuelCoordinates(fuels[i], fuels[i + 1]);
+      output[i / 2] = new FuelCoordinates(fuels[i], fuels[i + 1]);
     }
     return output;
   }
@@ -145,17 +151,20 @@ public class FuelDetector extends SubsystemBase {
     FuelCoordinates[] fuels;
     if (realFuelSub.exists()) {
       isLimelights = true;
-      fuels = FuelDetector.dataToFuelCoordinates(realFuelSub.get(new double[0]));
+      fuels = FuelDetector.dataToFuelCoordinates(realFuelSub.get());
     } else if (simFuelSub.exists()) {
       isLimelights = false;
-      fuels = FuelDetector.dataToFuelCoordinates(simFuelSub.get(""));
+      fuels = FuelDetector.dataToFuelCoordinates(simFuelSub.get());
     } else {
       isLimelights = false;
       fuels = new FuelCoordinates[0];
     }
-    if (fuels.length <= 0) {
-      System.out.println("No fuel data");
-    }
+
+    Logger.recordOutput("FuelDetector/is_limelights", isLimelights);
+    Logger.recordOutput("FuelDetector/n_fuels", isLimelights);
+
+    // System.out.println("Fuel Length: " + fuels.length);
+
     return fuels;
   }
 
@@ -163,6 +172,8 @@ public class FuelDetector extends SubsystemBase {
     ArrayList<FuelCluster> fuelClusters = findFuelClusters(fuels, kGridWidth, kGridHeight, filter);
     // System.out.println((fuelClusters.size() > 0) ? fuelClusters.get(0).toString() : "size of fuel
     // clusters is 0");
+    // System.out.println(fuelClusters.size());
+    // ArrayList<FuelCluster> fuelClusters = fuels;
     if (fuelClusters.size() > 0) {
       FuelCluster largestCluster =
           new FuelCluster(); // Note: this is the largest in terms of fuel count, not visiual size.
