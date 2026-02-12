@@ -71,6 +71,6 @@ public class FuelSquare {
   }
 
   public String toString() {
-    return "Fuel square: " + " Fuel count: " + getFuelCount();
+    return "Fuel square: (" + getGridX() + ", " + getGridY() + ") Fuel count: " + getFuelCount();
   }
 }

@@ -33,6 +33,8 @@ public class FuelCoordinates {
       width = Double.parseDouble(values[2]);
       height = Double.parseDouble(values[3]);
       chance = Double.parseDouble(values[4].substring(0, values[4].length() - 1));
+    } else {
+      System.out.println("Not enough parameters to construct fuel. See docs.");
     }
   }
 
@@ -50,5 +52,9 @@ public class FuelCoordinates {
   // TODO: implement depth function
   public double computeDepth(double cameraFOV) {
     return 0.0;
+  }
+
+  public String toString() {
+    return "x: " + centerX + " y: " + centerY;
   }
 }
