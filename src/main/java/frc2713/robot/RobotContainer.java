@@ -298,8 +298,16 @@ public class RobotContainer {
     devControls.configureButtonBindings();
 
     // Default commands
-    devControls.setToNormalDrive();
-    // turret.setDefaultCommand(turret.otfCommand().withName("OTF Tracking"));
+    // Set drive command to accept inputs from both driver and dev controllers
+    DriveCommands.setDefaultDriveCommand(
+        drive,
+        DriveCommands.joystickDrive(
+            drive,
+            () -> -driverControls.getLeftY() + -devControls.getLeftY(),
+            () -> -driverControls.getLeftX() + -devControls.getLeftX(),
+            () -> -driverControls.getRightX() + -devControls.getRightX()),
+        "Dual Controller Drive");
+    turret.setDefaultCommand(turret.otfCommand().withName("OTF Tracking"));
     hood.setDefaultCommand(
         hood.autoRetractCommand(drive::getPose, hood.otfAngSupplier)
             .withName("OTF Tracking with Auto-Retract"));
