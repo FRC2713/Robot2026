@@ -315,8 +315,6 @@ public class RobotContainer {
 
     // Comment these out when using dev controller
     driverControls.setToNormalDrive();
-    turret.setDefaultCommand(turret.otfCommand().withName("OTF Tracking"));
-    hood.setDefaultCommand(hood.otfCommand().withName("OTF Tracking"));
   }
 
   /**
