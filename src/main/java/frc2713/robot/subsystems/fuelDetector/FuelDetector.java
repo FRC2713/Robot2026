@@ -7,7 +7,6 @@ import edu.wpi.first.networktables.StringSubscriber;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import org.littletonrobotics.junction.Logger;
 
 public class FuelDetector extends SubsystemBase {
@@ -108,9 +107,9 @@ public class FuelDetector extends SubsystemBase {
     } else {
       highChanceFuel = new ArrayList<FuelCoordinates>(Arrays.asList(inputs));
     }
-    highChanceFuel = filterByHighChance(inputs);
-    System.out.println(highChanceFuel.toString());
+    System.out.println(highChanceFuel);
     FuelSquare[][] fuelSquares = divideIntoSquares(highChanceFuel, gridWidth, gridHeight);
+    // System.out.println((fuelSquares.length > 0) ? fuelSquares[0].toString() : "empty array");
     ArrayList<FuelCluster> clusters = getFuelClusters(fuelSquares);
     return clusters;
   }
@@ -119,19 +118,20 @@ public class FuelDetector extends SubsystemBase {
     // data is essentially a special type of .csv file
     // a ; seperates fuels, a , seperates fuel properties
     // In order of properties: x, y, width, height, chance
-
-    String[] fuels = data.split(";");
-    FuelCoordinates[] output = new FuelCoordinates[fuels.length];
-    for (int i = 0; i < fuels.length; i++) {
-      output[i] = new FuelCoordinates(fuels[i]);
+    if (data.length() > 0) {
+      String[] fuels = data.split(";");
+      FuelCoordinates[] output = new FuelCoordinates[fuels.length];
+      for (int i = 0; i < fuels.length; i++) {
+        output[i] = new FuelCoordinates(fuels[i]);
+      }
+      return output;
+    } else {
+      FuelCoordinates[] output = new FuelCoordinates[0];
+      return output;
     }
-    return output;
   }
 
   public static FuelCoordinates[] dataToFuelCoordinates(double[] data) {
-    // data is essentially a special type of .csv file
-    // a ; seperates fuels, a , seperates fuel properties
-    // In order of properties: x, y, width, height, chance
 
     double[] fuels = data;
     FuelCoordinates[] output = new FuelCoordinates[fuels.length];
@@ -161,6 +161,8 @@ public class FuelDetector extends SubsystemBase {
 
   public Rotation2d getRotation2D(FuelCoordinates[] fuels, boolean filter) {
     ArrayList<FuelCluster> fuelClusters = findFuelClusters(fuels, kGridWidth, kGridHeight, filter);
+    // System.out.println((fuelClusters.size() > 0) ? fuelClusters.get(0).toString() : "size of fuel
+    // clusters is 0");
     if (fuelClusters.size() > 0) {
       FuelCluster largestCluster =
           new FuelCluster(); // Note: this is the largest in terms of fuel count, not visiual size.
