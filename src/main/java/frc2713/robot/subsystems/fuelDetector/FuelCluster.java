@@ -59,7 +59,6 @@ public class FuelCluster {
     avgX /= fuelSquares.size();
 
     avgX -= xResolution / 2;
-    System.out.println(avgX);
     double degreesPerPixel = FOV / xResolution;
     return new Rotation2d(Units.degreesToRadians(-(avgX * degreesPerPixel)));
   }
