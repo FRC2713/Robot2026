@@ -25,6 +25,16 @@ public class FuelCoordinates {
     centerY = y;
   }
 
+  public FuelCoordinates(double c1x, double c1y, double c4x, double c4y, int imageWidth) {
+    boxX = (c1x > 0) ? c1x : 0;
+    boxY = (c1y > 0) ? c1y : 0;
+    boxX2 = (c4x > 0) ? c4x : 0;
+    boxY2 = (c4y > 0) ? c4y : 0;
+    computeCenterPoint(c1x, c1y, c4x, c4y);
+    width = c4x - c1x;
+    height = c4y - c1y;
+  }
+
   public FuelCoordinates(String args) {
     if (args.length() > 0) {
       String[] values = args.split(",");
@@ -47,6 +57,7 @@ public class FuelCoordinates {
       int gridWidth, int gridHeight, int imageWidth, int imageHeight, FuelSquare[][] squareArray) {
     int squareX = (int) Math.round(centerX / (imageWidth / gridWidth));
     int squareY = (int) Math.round(centerY / (imageHeight / gridHeight));
+    System.out.println(boxX);
     squareArray[squareX][squareY].addFuel(this);
   }
   // TODO: implement depth function
