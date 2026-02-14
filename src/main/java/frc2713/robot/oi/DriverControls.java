@@ -5,7 +5,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc2713.robot.RobotContainer;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
@@ -18,7 +17,7 @@ import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 
 public class DriverControls {
-  private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandVader4Controller controller = new CommandVader4Controller(0);
 
   private final Drive drive;
   private final Flywheels flywheels;
@@ -51,32 +50,32 @@ public class DriverControls {
   public void configureButtonBindings() {
 
     // Reset gyro to 0 deg when start button is pressed
-    controller
-        .start()
-        .onTrue(
-            Commands.parallel(
-                this.setToNormalDriveCmd(),
-                Commands.runOnce(
-                        () ->
-                            drive.setPose(
-                                new Pose2d(
-                                    drive.getPose().getTranslation(), Rotation2d.fromDegrees(0))),
-                        drive)
-                    .ignoringDisable(true)));
+    // controller
+    //     .start()
+    //     .onTrue(
+    //         Commands.parallel(
+    //             this.setToNormalDriveCmd(),
+    //             Commands.runOnce(
+    //                     () ->
+    //                         drive.setPose(
+    //                             new Pose2d(
+    //                                 drive.getPose().getTranslation(), Rotation2d.fromDegrees(0))),
+    //                     drive)
+    //                 .ignoringDisable(true)));
 
-    // Reset gyro to 180 deg when start button is pressed
-    controller
-        .back()
-        .onTrue(
-            Commands.parallel(
-                    this.setToNormalDriveCmd(),
-                    Commands.runOnce(
-                        () ->
-                            drive.setPose(
-                                new Pose2d(
-                                    drive.getPose().getTranslation(), Rotation2d.fromDegrees(180))),
-                        drive))
-                .ignoringDisable(true));
+    // // Reset gyro to 180 deg when start button is pressed
+    // controller
+    //     .back()
+    //     .onTrue(
+    //         Commands.parallel(
+    //                 this.setToNormalDriveCmd(),
+    //                 Commands.runOnce(
+    //                     () ->
+    //                         drive.setPose(
+    //                             new Pose2d(
+    //                                 drive.getPose().getTranslation(), Rotation2d.fromDegrees(180))),
+    //                     drive))
+    //             .ignoringDisable(true));
 
     // POV Precision Driving
     controller
@@ -118,7 +117,7 @@ public class DriverControls {
 
     // shoot when flywheels are ready
     controller
-        .rightTrigger(0.25)
+        .rightTrigger(-.98)
         .whileTrue(RobotContainer.GameCommandGroups.otfShot)
         .onFalse(RobotContainer.GameCommandGroups.stopShooting);
   }
