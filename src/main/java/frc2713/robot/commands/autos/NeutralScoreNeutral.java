@@ -86,21 +86,12 @@ public class NeutralScoreNeutral {
                     // otf shot
                     flywheels.otfCommand(),
                     hood.otfCommand(),
-                    turret.oftCommand(),
-                    flywheels.simulateLaunchedFuel(
-                        () -> {
-                          return flywheels.atTarget() && hood.atTarget() && turret.atTarget();
-                        }),
-                    feederAndIndexer.feedWhenReady(
-                        () -> {
-                          return flywheels.atTarget() && hood.atTarget() && turret.atTarget();
-                        }),
-                    serializer.feedWhenReady(
-                        () -> {
-                          return flywheels.atTarget() && hood.atTarget() && turret.atTarget();
-                        }),
-                    new WaitCommand(6)),
-                launchToFuel.cmd().withName("OTF Shooting")));
+                    turret.otfCommand(),
+                    flywheels.simulateLaunchedFuel(flywheels::atTarget),
+                    feeder.feedWhenReady(flywheels::atTarget),
+                    dyeRotor.feedWhenReady(flywheels::atTarget)),
+                new WaitCommand(6)),
+            launchToFuel.cmd().withName("OTF Shooting"));
 
     launchToFuel
         .done()

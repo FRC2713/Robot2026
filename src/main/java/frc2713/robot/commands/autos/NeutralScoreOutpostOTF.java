@@ -63,23 +63,13 @@ public class NeutralScoreOutpostOTF {
         .onTrue(
             Commands.parallel(
                     Commands.print("Moving to shooting position"),
-                    oTFToOutpost.cmd(),
-                    flywheels.otfCommand(),
-                    hood.otfCommand(),
-                    turret.oftCommand(),
-                    flywheels.simulateLaunchedFuel(
-                        () -> {
-                          return flywheels.atTarget() && hood.atTarget() && turret.atTarget();
-                        }),
-                    feederAndIndexer.feedWhenReady(
-                        () -> {
-                          return flywheels.atTarget() && hood.atTarget() && turret.atTarget();
-                        }),
-                    serializer.feedWhenReady(
-                        () -> {
-                          return flywheels.atTarget() && hood.atTarget() && turret.atTarget();
-                        }))
-                .withName("OTF Shooting"));
+               flywheels.otfCommand(),
+                hood.otfCommand(),
+                turret.otfCommand(),
+                flywheels.simulateLaunchedFuel(flywheels::atTarget),
+                feeder.feedWhenReady(flywheels::atTarget),
+                dyeRotor.feedWhenReady(flywheels::atTarget))
+            .withName("OTF Shooting"));
 
     return routine;
   }
