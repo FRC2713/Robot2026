@@ -2,8 +2,10 @@ package frc2713.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.Voltage;
 import frc2713.lib.drivers.CANDeviceId;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.LoggedTunableMeasure;
@@ -18,10 +20,11 @@ public final class IntakeConstants {
       config.name = "Intake Roller";
       config.talonCANID = new CANDeviceId(9); // Example CAN ID, replace with actual ID
       config.unitToRotorRatio = 1.0; // 1:1 ratio
+      config.momentOfInertia = 0.001; // Low MOI for fast-spinning rollers
     }
 
-    public static double intakeDutyCycle = 1.0;
-    public static double outtakeDutyCycle = -1.0;
+    public static Voltage intakeVoltageDesired = Volts.of(5.0);
+    public static Voltage outtakeVoltageDesired = Volts.of(-5.0);
   }
 
   public static final class Extension {

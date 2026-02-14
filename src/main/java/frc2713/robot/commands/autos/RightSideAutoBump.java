@@ -6,6 +6,7 @@ import choreo.auto.AutoTrajectory;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc2713.robot.RobotContainer;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
@@ -15,7 +16,7 @@ import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 
-public class RightSideAutoTrench {
+public class RightSideAutoBump {
   public static AutoRoutine getRoutine(
       AutoFactory factory,
       Drive driveSubsystem,
@@ -25,8 +26,7 @@ public class RightSideAutoTrench {
       Hood hood,
       Turret turret,
       DyeRotor serializer,
-      //   Launcher intakeAndShooter,
-      Feeder feederAndIndexer) {
+      Feeder feeder) {
     AutoRoutine routine = factory.newRoutine("Start Collect Shoot");
 
     AutoTrajectory faceFuelTrench = routine.trajectory("FaceFuelTrench");
@@ -53,52 +53,10 @@ public class RightSideAutoTrench {
         .done()
         .onTrue(
             Commands.sequence(
-                Commands.print("Moving to shooting position"),
+                Commands.print("Moving to shooting position over bump"),
                 Commands.sequence(Commands.race(intakeRoller.stop(), new WaitCommand(2))),
                 moveToLaunchBump.cmd()));
-    moveToLaunchBump
-        .done()
-        .onTrue(
-            Commands.sequence(
-                Commands.print("Starting launch sequence"),
-                Commands.race(
-                        // hub shot
-                        //     flywheels.hubCommand(),
-                        //     hood.hubCommand(),
-                        //     turret.hubCommand(),
-                        //     flywheels.simulateLaunchedFuel(
-                        //         () -> {
-                        //           return flywheels.atTarget() && hood.atTarget() &&
-                        // turret.atTarget();
-                        //         }),
-                        //     feederAndIndexer.feedWhenReady(
-                        //         () -> {
-                        //           return flywheels.atTarget() && hood.atTarget() &&
-                        // turret.atTarget();
-                        //         }),
-                        //     serializer.feedWhenReady(
-                        //         () -> {
-                        //           return flywheels.atTarget() && hood.atTarget() &&
-                        // turret.atTarget();
-                        //         }))
-                        // .withName("Hub Shot")));
-                        // otf shot
-                        flywheels.otfCommand(),
-                        hood.otfCommand(),
-                        turret.oftCommand(),
-                        flywheels.simulateLaunchedFuel(
-                            () -> {
-                              return flywheels.atTarget() && hood.atTarget() && turret.atTarget();
-                            }),
-                        feederAndIndexer.feedWhenReady(
-                            () -> {
-                              return flywheels.atTarget() && hood.atTarget() && turret.atTarget();
-                            }),
-                        serializer.feedWhenReady(
-                            () -> {
-                              return flywheels.atTarget() && hood.atTarget() && turret.atTarget();
-                            }))
-                    .withName("OTF Shooting")));
+    moveToLaunchBump.done().onTrue(RobotContainer.GameCommandGroups.otfShot);
     return routine;
   }
 
@@ -112,7 +70,7 @@ public class RightSideAutoTrench {
       Turret turret,
       DyeRotor serializer,
       Feeder feederAndIndexer) {
-    return RightSideAutoTrench.getRoutine(
+    return RightSideAutoBump.getRoutine(
             factory,
             driveSubsystem,
             intakeExtension,

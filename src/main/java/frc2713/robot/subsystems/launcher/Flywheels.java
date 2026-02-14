@@ -52,7 +52,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   }
 
   public Command setVelocity(Supplier<AngularVelocity> desiredVelocity) {
-    return velocitySetpointCommand(() -> desiredVelocity.get().times(leftConfig.unitToRotorRatio));
+    return velocitySetpointCommand(desiredVelocity);
   }
 
   public Command stop() {
@@ -61,6 +61,11 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
 
   public Command hubCommand() {
     return setVelocity(() -> LauncherConstants.Flywheels.staticHubVelocity);
+  }
+
+  /** Command to continuously track the on-the-fly flywheel velocity */
+  public Command idleSpeedCommand() {
+    return setVelocity(() -> LauncherConstants.Flywheels.idleVelocity);
   }
 
   /**
@@ -76,19 +81,23 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
         LinearVelocity targetSurfaceSpeed;
         if (solutionIsValid) {
           targetSurfaceSpeed = MetersPerSecond.of(solution.flywheelSpeedMetersPerSecond());
+          Logger.recordOutput(super.pb.makePath("OTF", "response"), "using solution");
+        } else if (solution.effectiveDistanceMeters() <= 0.9) {
+          // invalid bc we're too close
+          Logger.recordOutput(super.pb.makePath("OTF", "response"), "hub shot");
+          targetSurfaceSpeed = FeetPerSecond.of(5);
         } else {
           // Fallback to distance-based lookup
+          Logger.recordOutput(super.pb.makePath("OTF", "response"), "lookup map");
           targetSurfaceSpeed =
               FeetPerSecond.of(LauncherConstants.Flywheels.velocityMap.get(toGoal.in(Meters)));
         }
 
         // Convert surface speed to angular velocity: omega = v / r
-        Distance wheelDiameter = Inches.of(4);
-        Distance wheelRadius = wheelDiameter.div(2);
+        double wheelRadiusMeters = LauncherConstants.Flywheels.WHEEL_DIAMETER.div(2).in(Meters);
         double surfaceSpeedMps = targetSurfaceSpeed.in(MetersPerSecond);
-        double radiusMeters = wheelRadius.in(Meters);
         AngularVelocity targetVelocity =
-            RotationsPerSecond.of(surfaceSpeedMps / (radiusMeters * 2 * Math.PI));
+            RotationsPerSecond.of(surfaceSpeedMps / (wheelRadiusMeters * 2 * Math.PI));
 
         Logger.recordOutput(super.pb.makePath("OTF", "solutionIsValid"), solutionIsValid);
         Logger.recordOutput(super.pb.makePath("OTF", "distanceToGoal"), toGoal);
@@ -97,7 +106,6 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
         return targetVelocity;
       };
 
-  /** Command to continuously track the on-the-fly flywheel velocity */
   public Command otfCommand() {
     return setVelocity(otfVelocitySupplier);
   }
@@ -112,10 +120,8 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
 
   @AutoLogOutput
   public boolean atTarget() {
-    return Math.abs(this.leftIO.getClosedLoopError())
-            <= LauncherConstants.Flywheels.acceptableError.in(RotationsPerSecond)
-        && Math.abs(this.rightIO.getClosedLoopError())
-            <= LauncherConstants.Flywheels.acceptableError.in(RotationsPerSecond);
+    return Math.abs(this.leftInputs.closedLoopError)
+        <= LauncherConstants.Flywheels.acceptableError.in(RotationsPerSecond);
   }
 
   @Override
@@ -149,7 +155,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   }
 
   public LinearVelocity getSurfaceSpeed() {
-    AngularVelocity wheelSpeed = super.getLeftCurrentVelocity().div(leftConfig.unitToRotorRatio);
+    AngularVelocity wheelSpeed = super.getLeftCurrentVelocity();
     Distance wheelDiameter = Inches.of(4);
     Distance wheelCircumference = wheelDiameter.times(Math.PI);
     return InchesPerSecond.of(wheelSpeed.in(RotationsPerSecond) * wheelCircumference.in(Inches));

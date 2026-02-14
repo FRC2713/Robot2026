@@ -70,25 +70,25 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
   }
 
   /**
-   * Multiply by the unit to rotor ratio to get motor rotations
+   * Convert subsystem position to the position value sent to the motor controller. Since TalonFX is
+   * configured with SensorToMechanismRatio, control requests use mechanism units directly - the
+   * controller handles the conversion internally.
    *
-   * @param subsystemPosition
-   * @return
+   * @param subsystemPosition The desired mechanism position
+   * @return The position to send to the motor controller (same as input)
    */
   protected Angle convertSubsystemPositionToMotorPosition(Angle subsystemPosition) {
-    return subsystemPosition.times(config.unitToRotorRatio);
+    return subsystemPosition;
   }
 
   /**
-   * Convert a linear distance to motor rotations
+   * Convert a linear distance to mechanism rotations for the motor controller.
    *
    * @param subsystemPosition Desired distance
-   * @return the number of rotations the motor must move to achieve that distance
+   * @return the number of mechanism rotations to achieve that distance
    */
   protected Angle convertSubsystemPositionToMotorPosition(Distance subsystemPosition) {
-    Angle rotationsPerMeter =
-        Rotations.of(subsystemPosition.in(Meters) * config.unitRotationsPerMeter);
-    return convertSubsystemPositionToMotorPosition(rotationsPerMeter);
+    return Rotations.of(subsystemPosition.in(Meters) * config.unitRotationsPerMeter);
   }
 
   // IO Implementations
@@ -241,12 +241,22 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
 
   // Getters
   /**
-   * Gets the current position of the motor.
+   * Gets the current position of the motor in mechanism rotations.
    *
    * @return The current position of the motor.
    */
   public Angle getCurrentPosition() {
     return inputs.position;
+  }
+
+  /**
+   * Gets the current position as linear distance. For linear mechanisms (elevators, extensions),
+   * converts mechanism rotations to meters using unitRotationsPerMeter.
+   *
+   * @return The current position as a Distance
+   */
+  public Distance getCurrentPositionAsDistance() {
+    return Meters.of(inputs.position.in(Rotations) / config.unitRotationsPerMeter);
   }
 
   /**
@@ -259,12 +269,22 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
   }
 
   /**
-   * Gets the current position setpoint of the motor.
+   * Gets the current position setpoint of the motor in mechanism rotations.
    *
    * @return The current position setpoint of the motor.
    */
   public Angle getPositionSetpoint() {
     return positionSetpoint;
+  }
+
+  /**
+   * Gets the current position setpoint as linear distance. For linear mechanisms, converts
+   * mechanism rotations to meters.
+   *
+   * @return The current position setpoint as a Distance
+   */
+  public Distance getPositionSetpointAsDistance() {
+    return Meters.of(positionSetpoint.in(Rotations) / config.unitRotationsPerMeter);
   }
 
   /**

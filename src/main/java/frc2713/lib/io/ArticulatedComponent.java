@@ -34,11 +34,32 @@ public interface ArticulatedComponent {
     return new Translation3d();
   }
 
+  /**
+   * * The linear acceleration of this component relative to its parent, in this component's LOCAL
+   * frame. Example: Elevator accelerating up = VecBuilder.fill(0, 0, 1.0)
+   */
+  default Translation3d getRelativeLinearAcceleration() {
+    return new Translation3d();
+  }
+
+  /**
+   * * The angular acceleration of this component relative to its parent, in this component's LOCAL
+   * frame. Example: Turret accelerating left = VecBuilder.fill(0, 0, 0.5)
+   */
+  default Translation3d getRelativeAngularAcceleration() {
+    return new Translation3d();
+  }
+
   // --- Helpers ---
 
   default Translation3d getGlobalLinearVelocity() {
     if (KinematicsManager.getInstance() == null) return new Translation3d();
     return KinematicsManager.getInstance().getGlobalLinearVelocity(this);
+  }
+
+  default Translation3d getGlobalLinearAcceleration() {
+    if (KinematicsManager.getInstance() == null) return new Translation3d();
+    return KinematicsManager.getInstance().getGlobalLinearAcceleration(this);
   }
 
   // --- New Helper Methods ---
