@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.AngularVelocity;
 import frc2713.lib.drivers.CANDeviceId;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
+import frc2713.lib.util.LoggedTunableMeasure;
 
 public final class SerializerConstants {
 
@@ -20,7 +21,7 @@ public final class SerializerConstants {
 
     static {
       config.name = "Dye Rotor";
-      config.talonCANID = new CANDeviceId(10); // Example CAN ID, replace with actual ID
+      config.talonCANID = new CANDeviceId(43); // Example CAN ID, replace with actual ID
 
       config.useFOC = false;
 
@@ -40,7 +41,8 @@ public final class SerializerConstants {
           new Transform3d(new Translation3d(0, Inches.of(1.75).in(Meters), 0), new Rotation3d());
     }
 
-    public static AngularVelocity indexingSpeed = RotationsPerSecond.of(-3);
+    public static LoggedTunableMeasure<AngularVelocity> indexingSpeed =
+        new LoggedTunableMeasure<AngularVelocity>("DyeRotor/Speed", RotationsPerSecond.of(-3));
     public static AngularVelocity outdexingSpeed = RotationsPerSecond.of(3);
 
     public static int MODEL_INDEX = 2;
@@ -53,7 +55,7 @@ public final class SerializerConstants {
 
     static {
       config.name = "Feeder";
-      config.talonCANID = new CANDeviceId(11); // Example CAN ID, replace with actual ID
+      config.talonCANID = new CANDeviceId(44); // Example CAN ID, replace with actual ID
 
       config.useFOC = false;
 
@@ -70,6 +72,7 @@ public final class SerializerConstants {
       config.momentOfInertia = 0.001; // kg*m^2 for simulation
     }
 
-    public static AngularVelocity shootingSpeed = RotationsPerSecond.of(30);
+    public static LoggedTunableMeasure<AngularVelocity> shootingSpeed =
+        new LoggedTunableMeasure<AngularVelocity>("Feeder/Speed", RotationsPerSecond.of(30));
   }
 }
