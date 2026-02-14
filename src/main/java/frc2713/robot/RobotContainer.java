@@ -23,6 +23,7 @@ import frc2713.lib.io.TalonFXIO;
 import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.commands.DriveCommands;
+import frc2713.robot.commands.autos.NeutralScoreNeutral;
 import frc2713.robot.commands.autos.RightSideAutoTrench;
 import frc2713.robot.generated.TunerConstants;
 import frc2713.robot.subsystems.climber.Climber;
@@ -223,6 +224,18 @@ public class RobotContainer {
     autoChooser.addOption(
         "Right side trench auto",
         RightSideAutoTrench.routine(
+            autoFactory,
+            drive,
+            intakeExtension,
+            intakeRoller,
+            flywheels,
+            hood,
+            turret,
+            dyeRotor,
+            feeder));
+    autoChooser.addOption(
+        "Trench to neutral launch then refuel",
+        NeutralScoreNeutral.routine(
             autoFactory,
             drive,
             intakeExtension,
