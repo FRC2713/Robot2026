@@ -6,6 +6,7 @@ import choreo.auto.AutoTrajectory;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc2713.robot.RobotContainer;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
@@ -24,9 +25,9 @@ public class NeutralScoreNeutral {
       Flywheels flywheels,
       Hood hood,
       Turret turret,
-      DyeRotor serializer,
+      DyeRotor dyeRotor,
       //   Launcher intakeAndShooter,
-      Feeder feederAndIndexer) {
+      Feeder feeder) {
     AutoRoutine routine = factory.newRoutine("Start Collect Shoot");
 
     AutoTrajectory faceFuelTrench = routine.trajectory("FaceFuelTrench");
@@ -62,36 +63,10 @@ public class NeutralScoreNeutral {
         .onTrue(
             Commands.sequence(
                 Commands.print("Starting launch sequence"),
-                Commands.race(
-                    // hub shot
-                    //     flywheels.hubCommand(),
-                    //     hood.hubCommand(),
-                    //     turret.hubCommand(),
-                    //     flywheels.simulateLaunchedFuel(
-                    //         () -> {
-                    //           return flywheels.atTarget() && hood.atTarget() &&
-                    // turret.atTarget();
-                    //         }),
-                    //     feederAndIndexer.feedWhenReady(
-                    //         () -> {
-                    //           return flywheels.atTarget() && hood.atTarget() &&
-                    // turret.atTarget();
-                    //         }),
-                    //     serializer.feedWhenReady(
-                    //         () -> {
-                    //           return flywheels.atTarget() && hood.atTarget() &&
-                    // turret.atTarget();
-                    //         }))
-                    // .withName("Hub Shot")));
-                    // otf shot
-                    flywheels.otfCommand(),
-                    hood.otfCommand(),
-                    turret.otfCommand(),
-                    flywheels.simulateLaunchedFuel(flywheels::atTarget),
-                    feeder.feedWhenReady(flywheels::atTarget),
-                    dyeRotor.feedWhenReady(flywheels::atTarget)),
-                new WaitCommand(6)),
-            launchToFuel.cmd().withName("OTF Shooting"));
+                Commands.sequence(
+                        Commands.race(RobotContainer.GameCommandGroups.otfShot, new WaitCommand(6)),
+                        Commands.parallel(hood.retract(), launchToFuel.cmd()))
+                    .withName("OTF Shooting")));
 
     launchToFuel
         .done()
@@ -111,8 +86,8 @@ public class NeutralScoreNeutral {
       Flywheels flywheels,
       Hood hood,
       Turret turret,
-      DyeRotor serializer,
-      Feeder feederAndIndexer) {
+      DyeRotor dyeRotor,
+      Feeder feeder) {
     return NeutralScoreNeutral.getRoutine(
             factory,
             driveSubsystem,
@@ -121,8 +96,8 @@ public class NeutralScoreNeutral {
             flywheels,
             hood,
             turret,
-            serializer,
-            feederAndIndexer)
+            dyeRotor,
+            feeder)
         .cmd();
   }
 }

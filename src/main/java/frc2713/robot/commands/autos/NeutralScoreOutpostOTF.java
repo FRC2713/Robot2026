@@ -6,6 +6,7 @@ import choreo.auto.AutoTrajectory;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc2713.robot.RobotContainer;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
@@ -24,9 +25,9 @@ public class NeutralScoreOutpostOTF {
       Flywheels flywheels,
       Hood hood,
       Turret turret,
-      DyeRotor serializer,
+      DyeRotor dyeRotor,
       //   Launcher intakeAndShooter,
-      Feeder feederAndIndexer) {
+      Feeder feeder) {
     AutoRoutine routine = factory.newRoutine("Start Collect Shoot");
 
     AutoTrajectory faceFuelTrench = routine.trajectory("FaceFuelTrench");
@@ -60,16 +61,11 @@ public class NeutralScoreOutpostOTF {
 
     moveToOutpostTrench
         .done()
-        .onTrue(
-            Commands.parallel(
-                    Commands.print("Moving to shooting position"),
-               flywheels.otfCommand(),
-                hood.otfCommand(),
-                turret.otfCommand(),
-                flywheels.simulateLaunchedFuel(flywheels::atTarget),
-                feeder.feedWhenReady(flywheels::atTarget),
-                dyeRotor.feedWhenReady(flywheels::atTarget))
-            .withName("OTF Shooting"));
+        .onTrue(oTFToOutpost.cmd());
+
+    oTFToOutpost
+        .done()
+        .onTrue(RobotContainer.GameCommandGroups.otfShot);
 
     return routine;
   }
@@ -82,8 +78,8 @@ public class NeutralScoreOutpostOTF {
       Flywheels flywheels,
       Hood hood,
       Turret turret,
-      DyeRotor serializer,
-      Feeder feederAndIndexer) {
+      DyeRotor dyeRotor,
+      Feeder feeder) {
     return NeutralScoreOutpostOTF.getRoutine(
             factory,
             driveSubsystem,
@@ -92,8 +88,8 @@ public class NeutralScoreOutpostOTF {
             flywheels,
             hood,
             turret,
-            serializer,
-            feederAndIndexer)
+            dyeRotor,
+            feeder)
         .cmd();
   }
 }
