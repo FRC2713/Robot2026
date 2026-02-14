@@ -44,7 +44,7 @@ public class FuelCoordinates {
       height = Double.parseDouble(values[3]);
       chance = Double.parseDouble(values[4].substring(0, values[4].length() - 1));
     } else {
-      System.out.println("Not enough parameters to construct fuel. See docs.");
+      System.out.println("Not enough parameters to construct fuel. See docs (or Owen)");
     }
   }
 
