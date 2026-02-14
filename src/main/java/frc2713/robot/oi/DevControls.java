@@ -3,6 +3,7 @@ package frc2713.robot.oi;
 import static edu.wpi.first.units.Units.Degrees;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
@@ -124,6 +125,16 @@ public class DevControls {
         .whileTrue(
             hood.setAngleStopAtBounds(
                 () -> Degrees.of(hood.getCurrentPosition().in(Degrees) + 5))); // Bring hood up
+
+    // DyeRotor controls
+    // A button - index fuel
+    controller.a().whileTrue(dyeRotor.indexFuel()).onFalse(dyeRotor.stopCommand());
+
+    // B button - index fuel
+    controller.b().whileTrue(feeder.feedShooter()).onFalse(feeder.stop());
+
+    // Y button - index fuel in parallel (same effect since it's the same command)
+    controller.y().whileTrue(Commands.parallel(dyeRotor.indexFuel(), feeder.feedShooter())).onFalse(Commands.parallel(dyeRotor.stopCommand(), feeder.stop()));
   }
 
   public double getLeftY() {
