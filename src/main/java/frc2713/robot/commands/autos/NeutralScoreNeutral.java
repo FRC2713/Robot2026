@@ -6,7 +6,6 @@ import choreo.auto.AutoTrajectory;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import frc2713.robot.RobotContainer;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
@@ -15,6 +14,7 @@ import frc2713.robot.subsystems.launcher.Hood;
 import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
+import java.util.function.Supplier;
 
 public class NeutralScoreNeutral {
   public static AutoRoutine getRoutine(
@@ -27,7 +27,8 @@ public class NeutralScoreNeutral {
       Turret turret,
       DyeRotor dyeRotor,
       //   Launcher intakeAndShooter,
-      Feeder feeder) {
+      Feeder feeder,
+      Supplier<Command> otfShotSupplier) {
     AutoRoutine routine = factory.newRoutine("Start Collect Shoot");
 
     AutoTrajectory faceFuelTrench = routine.trajectory("FaceFuelTrench");
@@ -64,8 +65,9 @@ public class NeutralScoreNeutral {
             Commands.sequence(
                 Commands.print("Starting launch sequence"),
                 Commands.sequence(
-                        Commands.race(RobotContainer.GameCommandGroups.otfShot, new WaitCommand(6)),
-                        Commands.parallel(hood.retract(), launchToFuel.cmd()))
+                        Commands.race(otfShotSupplier.get(), new WaitCommand(6)),
+                        Commands.race(hood.retract(), new WaitCommand(1)),
+                        launchToFuel.cmd())
                     .withName("OTF Shooting")));
 
     launchToFuel
@@ -87,7 +89,8 @@ public class NeutralScoreNeutral {
       Hood hood,
       Turret turret,
       DyeRotor dyeRotor,
-      Feeder feeder) {
+      Feeder feeder,
+      Supplier<Command> otfShotSupplier) {
     return NeutralScoreNeutral.getRoutine(
             factory,
             driveSubsystem,
@@ -97,7 +100,8 @@ public class NeutralScoreNeutral {
             hood,
             turret,
             dyeRotor,
-            feeder)
+            feeder,
+            otfShotSupplier)
         .cmd();
   }
 }

@@ -267,7 +267,8 @@ public class RobotContainer {
             hood,
             turret,
             dyeRotor,
-            feeder));
+            feeder,
+            () -> GameCommandGroups.getOtfShot(flywheels, hood, turret, feeder, dyeRotor)));
     autoChooser.addOption(
         "Trench to neutral otf to outpost",
         NeutralScoreOutpostOTF.routine(
@@ -279,7 +280,8 @@ public class RobotContainer {
             hood,
             turret,
             dyeRotor,
-            feeder));
+            feeder,
+            () -> GameCommandGroups.getOtfShot(flywheels, hood, turret, feeder, dyeRotor)));
 
     // Configure the button bindings
     configureButtonBindings();
@@ -357,6 +359,18 @@ public class RobotContainer {
    * between Driver, Developer, and AutoRoutines
    */
   public static class GameCommandGroups {
+    public static Command getOtfShot(
+        Flywheels flywheels, Hood hood, Turret turret, Feeder feeder, DyeRotor dyeRotor) {
+      return Commands.parallel(
+              flywheels.otfCommand(),
+              hood.otfCommand(),
+              turret.otfCommand(),
+              flywheels.simulateLaunchedFuel(flywheels::atTarget),
+              feeder.feedWhenReady(flywheels::atTarget),
+              dyeRotor.feedWhenReady(flywheels::atTarget))
+          .withName("OTF Shooting");
+    }
+
     public static Command otfShot =
         Commands.parallel(
                 flywheels.otfCommand(),
