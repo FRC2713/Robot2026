@@ -126,6 +126,8 @@ public final class LauncherConstants {
 
     public static AngularVelocity staticHubVelocity = RotationsPerSecond.of(20);
     public static InterpolatingDoubleTreeMap velocityMap = new InterpolatingDoubleTreeMap();
+    public static InterpolatingDoubleTreeMap velocityMapAllianceFloor =
+        new InterpolatingDoubleTreeMap();
 
     public static Distance WHEEL_DIAMETER = Inches.of(4);
 
@@ -138,6 +140,17 @@ public final class LauncherConstants {
       velocityMap.put(4.0, 26.0);
       velocityMap.put(5.17, 29.0);
       velocityMap.put(5.4, 30.0);
+    }
+
+    static {
+      // Distance (m) -> Ball Velocity (ft/s)
+      velocityMapAllianceFloor.put(1.0, 20.0);
+      velocityMapAllianceFloor.put(1.5, 20.0);
+      velocityMapAllianceFloor.put(2.5, 22.0);
+      velocityMapAllianceFloor.put(3.2, 23.0);
+      velocityMapAllianceFloor.put(4.0, 26.0);
+      velocityMapAllianceFloor.put(5.17, 29.0);
+      velocityMapAllianceFloor.put(5.4, 30.0);
     }
   }
 
@@ -182,6 +195,8 @@ public final class LauncherConstants {
 
     public static Angle staticHubAngle = Degree.of(10);
     public static InterpolatingDoubleTreeMap angleMap = new InterpolatingDoubleTreeMap();
+    public static InterpolatingDoubleTreeMap angleMapAllianceFloor =
+        new InterpolatingDoubleTreeMap();
 
     static {
       // Distance (m) -> Hood Pitch (Degrees)
@@ -193,6 +208,18 @@ public final class LauncherConstants {
       angleMap.put(4.0, 32.0);
       angleMap.put(4.5, 32.0);
       angleMap.put(5.0, 30.0);
+    }
+
+    static {
+      // Distance (m) -> Hood Pitch (Degrees)
+      angleMapAllianceFloor.put(0.9, 0.0);
+      angleMapAllianceFloor.put(1.0, 0.0);
+      angleMapAllianceFloor.put(1.5, 0.0);
+      angleMapAllianceFloor.put(2.0, 0.0);
+      angleMapAllianceFloor.put(3.0, 0.0);
+      angleMapAllianceFloor.put(4.0, 0.0);
+      angleMapAllianceFloor.put(4.5, 0.0);
+      angleMapAllianceFloor.put(5.0, 0.0);
     }
   }
 

@@ -2,6 +2,7 @@ package frc2713.robot.oi;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -28,6 +29,8 @@ public class DriverControls {
   private final IntakeExtension intakeExtension;
   private final DyeRotor dyeRotor;
   private final Feeder feeder;
+
+  Translation3d target = new Translation3d(78, 79, 0);
 
   public DriverControls(
       Drive drive,
@@ -121,6 +124,13 @@ public class DriverControls {
         .rightTrigger(0.25)
         .whileTrue(RobotContainer.GameCommandGroups.otfShot)
         .onFalse(RobotContainer.GameCommandGroups.stopShooting);
+
+    //   controller
+    //       .b()
+    //       .onTrue(
+    //           LaunchingSolutionManager.setFieldGoal(target, target),
+    //           RobotContainer.GameCommandGroups.otfShot)
+    //       .onFalse(RobotContainer.GameCommandGroups.stopShooting);
   }
 
   public double getLeftY() {

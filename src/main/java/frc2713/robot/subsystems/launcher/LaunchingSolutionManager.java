@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.subsystem.KinematicsManager;
@@ -42,13 +43,35 @@ public class LaunchingSolutionManager extends SubsystemBase {
     instance = this;
   }
 
+  private static InterpolatingDoubleTreeMap velocityMap;
+  private static InterpolatingDoubleTreeMap angleMap;
+
+  private static void setMaps(FieldGoal fieldGoal) {
+    double fieldGoalX = fieldGoal.flywheelTarget.getX();
+    if (fieldGoalX == 78) {
+      velocityMap = LauncherConstants.Flywheels.velocityMapAllianceFloor;
+      angleMap = LauncherConstants.Hood.angleMapAllianceFloor;
+    } else {
+      velocityMap = LauncherConstants.Flywheels.velocityMap;
+      angleMap = LauncherConstants.Hood.angleMap;
+    }
+  }
+
   public static FieldGoal currentGoal =
       new FieldGoal(FieldConstants.Hub.innerCenterPoint, FieldConstants.Hub.topCenterPoint);
+
+  // public static void setAllianceZoneTarget() {
+  //   LaunchingSolutionManager.currentGoal =
+  //       new FieldGoal(
+  //           AllianceFlipUtil.apply(FieldConstants.Hub.floorTargetPoint),
+  // AllianceFlipUtil.apply(FieldConstants.Hub.floorTargetPoint));
+  // }
 
   public static void setFieldGoal(Translation3d flywheelTarget, Translation3d positionalTarget) {
     LaunchingSolutionManager.currentGoal =
         new FieldGoal(
             AllianceFlipUtil.apply(flywheelTarget), AllianceFlipUtil.apply(positionalTarget));
+    setMaps(currentGoal);
   }
 
   public static LaunchingSolutionManager getInstance() {
@@ -131,9 +154,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
     }
 
     // C. Get Ideal Static Launch Params (Ground Relative)
-    double idealSpeed =
-        FeetPerSecond.of(LauncherConstants.Flywheels.velocityMap.get(horizontalDist))
-            .in(MetersPerSecond);
+    double idealSpeed = FeetPerSecond.of(velocityMap.get(horizontalDist)).in(MetersPerSecond);
     double idealPitchRad = Math.toRadians(LauncherConstants.Hood.angleMap.get(horizontalDist));
 
     // D. Construct Ideal Velocity Vector
