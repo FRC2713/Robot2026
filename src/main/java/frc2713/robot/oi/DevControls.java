@@ -5,7 +5,6 @@ import static edu.wpi.first.units.Units.Degrees;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
@@ -18,7 +17,7 @@ import frc2713.robot.subsystems.serializer.Feeder;
 
 @SuppressWarnings("unused")
 public class DevControls {
-  private final CommandXboxController controller = new CommandXboxController(1);
+  private final CommandVader4Controller controller = new CommandVader4Controller(1);
 
   private final Drive drive;
   private final Flywheels flywheels;
