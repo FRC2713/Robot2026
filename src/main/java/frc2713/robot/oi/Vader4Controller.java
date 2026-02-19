@@ -33,9 +33,9 @@ public class Vader4Controller extends GenericHID implements Sendable {
     /** B button. */
     kB(2),
     /** X button. */
-    kX(4),
+    kX(3),
     /** Y button. */
-    kY(5),
+    kY(4),
     /** Left bumper button. */
     kLeftBumper(5),
     /** Right bumper button. */
@@ -49,9 +49,9 @@ public class Vader4Controller extends GenericHID implements Sendable {
     /** Right stick button. */
     kRightStick(14),
     /** C button */
-    kC(3),
+    kC(9),
     /** Z button */
-    kZ(6),
+    kZ(10),
     /** M1 Button */
     kM1(15),
     /** M2 Button */
@@ -88,15 +88,15 @@ public class Vader4Controller extends GenericHID implements Sendable {
     /** Left X axis. */
     kLeftX(0),
     /** Right X axis. */
-    kRightX(2),
+    kRightX(4),
     /** Left Y axis. */
     kLeftY(1),
     /** Right Y axis. */
-    kRightY(3),
+    kRightY(5),
     /** Left trigger. */
-    kLeftTrigger(5),
+    kLeftTrigger(2),
     /** Right trigger. */
-    kRightTrigger(4);
+    kRightTrigger(3);
 
     /** Axis value. */
     public final int value;

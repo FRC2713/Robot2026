@@ -314,7 +314,7 @@ public class RobotContainer {
     flywheels.setDefaultCommand(flywheels.idleSpeedCommand().withName("Idle Tracking"));
 
     // Comment these out when using dev controller
-    driverControls.setToNormalDrive();
+    // driverControls.setToNormalDrive();
   }
 
   /**
