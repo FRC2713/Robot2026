@@ -7,6 +7,9 @@
 
 package frc2713.robot;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc2713.robot.generated.BuildConstants;
@@ -86,7 +89,10 @@ public class Robot extends LoggedRobot {
     // This must be called from the robot's periodic block in order for anything in
     // the Command-based framework to work.
     CommandScheduler.getInstance().run();
-
+    Logger.recordOutput("matchData/timeLeftInShift", RobotContainer.getTimeLeftInShift());
+    Logger.recordOutput("matchData/ourHubActive", RobotContainer.ourHubActive());
+    Logger.recordOutput("matchData/whoWonAuto", RobotContainer.whoWonAuto());
+    Logger.recordOutput("matchData/time", DriverStation.getMatchTime());
     // Return to non-RT thread priority (do not modify the first argument)
     // Threads.setCurrentThreadPriority(false, 10);
   }
