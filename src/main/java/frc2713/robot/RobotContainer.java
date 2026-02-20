@@ -54,7 +54,6 @@ import frc2713.robot.subsystems.vision.VisionIO;
 import frc2713.robot.subsystems.vision.VisionIOSLAMDunk;
 import java.util.Arrays;
 import java.util.Optional;
-
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -404,15 +403,16 @@ public class RobotContainer {
       }
     }
   }
+
   public static boolean ourHubActive() {
     String currentHub = currentActiveHub();
     Optional<Alliance> currentAlliance = DriverStation.getAlliance();
-    if(currentAlliance.isPresent()) {
-        if(currentHub.equals("R")) {
-            return (currentAlliance.get() == DriverStation.Alliance.Red);
-        } else if(currentHub.equals("B")) {
-            return (currentAlliance.get() == DriverStation.Alliance.Blue);
-        }
+    if (currentAlliance.isPresent()) {
+      if (currentHub.equals("R")) {
+        return (currentAlliance.get() == DriverStation.Alliance.Red);
+      } else if (currentHub.equals("B")) {
+        return (currentAlliance.get() == DriverStation.Alliance.Blue);
+      }
     }
     return true;
   }
