@@ -116,7 +116,7 @@ public final class LauncherConstants {
     public static int MODEL_INDEX = 5;
     public static int PARENT_INDEX = 4;
 
-    public static AngularVelocity acceptableError = RotationsPerSecond.of(10);
+    public static AngularVelocity acceptableError = RPM.of(20);
     public static AngularVelocity idleVelocity = RotationsPerSecond.of(20);
 
     public static Transform3d localTransform =

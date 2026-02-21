@@ -1,10 +1,12 @@
 package frc2713.robot.oi;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.RPM;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
@@ -136,8 +138,12 @@ public class DevControls {
     // Y button - index fuel in parallel (same effect since it's the same command)
     controller
         .y()
-        .whileTrue(Commands.parallel(dyeRotor.indexFuel(), feeder.feedShooter()))
-        .onFalse(Commands.parallel(dyeRotor.stopCommand(), feeder.stop()));
+        .whileTrue(
+            Commands.sequence(
+                flywheels.setVelocity(() -> RPM.of(1000)), // Spin up flywheels to a moderate speed
+                // new WaitUntilCommand(flywheels::atTarget),
+                Commands.parallel(dyeRotor.indexFuel(), feeder.feedShooter())))
+        .onFalse(Commands.parallel(dyeRotor.stopCommand(), feeder.stop(), flywheels.stop()));
   }
 
   public double getLeftY() {

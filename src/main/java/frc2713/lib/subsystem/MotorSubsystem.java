@@ -397,11 +397,10 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
    * @return A command that sets the motor to the specified velocity setpoint.
    */
   public Command velocitySetpointCommand(Supplier<AngularVelocity> velocitySupplier, int slot) {
-    return runEnd(
+    return new InstantCommand(
             () -> {
               setVelocitySetpointImpl(velocitySupplier.get(), slot);
-            },
-            () -> {})
+            })
         .withName(pb.makeName("VelocityControl"));
   }
 

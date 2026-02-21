@@ -130,10 +130,10 @@ public class RobotContainer {
                 new ModuleIO() {});
         flywheels =
             new Flywheels(
-                new TalonFXSubsystemConfig(),
-                new TalonFXSubsystemConfig(),
-                new MotorIO() {},
-                new MotorIO() {});
+                LauncherConstants.Flywheels.leftConfig,
+                LauncherConstants.Flywheels.rightConfig,
+                new TalonFXIO(LauncherConstants.Flywheels.leftConfig),
+                new TalonFXIO(LauncherConstants.Flywheels.rightConfig));
         hood = new Hood(new TalonFXSubsystemConfig(), new MotorIO() {});
         turret = new Turret(new TurretSubsystemConfig(), new TurretMotorIO() {});
         intakeRoller = new IntakeRoller(new TalonFXSubsystemConfig(), new MotorIO() {});
@@ -330,7 +330,7 @@ public class RobotContainer {
     hood.setDefaultCommand(
         hood.autoRetractCommand(drive::getPose, hood.otfAngSupplier)
             .withName("OTF Tracking with Auto-Retract"));
-    flywheels.setDefaultCommand(flywheels.idleSpeedCommand().withName("Idle Tracking"));
+    // flywheels.setDefaultCommand(flywheels.idleSpeedCommand().withName("Idle Tracking"));
 
     // Comment these out when using dev controller
     // driverControls.setToNormalDrive();
