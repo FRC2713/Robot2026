@@ -89,7 +89,11 @@ public class Robot extends LoggedRobot {
     CommandScheduler.getInstance().run();
     Logger.recordOutput("matchData/timeLeftInShift", RobotContainer.getTimeLeftInShift());
     Logger.recordOutput("matchData/ourHubActive", RobotContainer.ourHubActive());
-    Logger.recordOutput("matchData/whoWonAuto", RobotContainer.whoWonAuto());
+    String autoWinner = RobotContainer.whoWonAuto();
+    Logger.recordOutput("matchData/whoWonAuto", autoWinner);
+    Logger.recordOutput(
+        "matchData/autoWinnerColor",
+        "#" + (autoWinner.equals("B") ? "0000FF" : autoWinner.equals("R") ? "FF0000" : "000000"));
     Logger.recordOutput("matchData/time", DriverStation.getMatchTime());
     // Return to non-RT thread priority (do not modify the first argument)
     // Threads.setCurrentThreadPriority(false, 10);
