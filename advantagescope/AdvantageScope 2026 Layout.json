@@ -1,0 +1,476 @@
+{
+  "hubs": [
+    {
+      "x": 0,
+      "y": 34,
+      "width": 1512,
+      "height": 856,
+      "state": {
+        "sidebar": {
+          "width": 345,
+          "expanded": [
+            "/AdvantageKit",
+            "/AdvantageKit/RealOutputs/Drive/SwerveStates",
+            "/AdvantageKit/RealOutputs/Odometry/Robot/rotation",
+            "/AdvantageKit/RealOutputs/Intake Extension/API/setMotionMagicSetpointImpl",
+            "/AdvantageKit/RealOutputs/Intake Extension/Sim",
+            "/AdvantageKit/RealOutputs/Intake Roller/Sim",
+            "/AdvantageKit/RealOutputs/Intake Extension/TalonSimState",
+            "/AdvantageKit/RealOutputs/Intake Extension/DCMotorSim",
+            "/AdvantageKit/RealOutputs/Dye Rotor/DCMotorSim",
+            "/AdvantageKit/RealOutputs/Dye Rotor/TalonSimState",
+            "/AdvantageKit/RealOutputs/Dye Rotor/Sim",
+            "/AdvantageKit/RealOutputs/Hood/setAngleCommand",
+            "/AdvantageKit/Flywheel/Left",
+            "/AdvantageKit/RealOutputs/Flywheel",
+            "/AdvantageKit/RealOutputs/Hood/API/setMotionMagicSetpointImpl",
+            "/AdvantageKit/RealOutputs/Flywheels/API/setVelocitySetpointImpl",
+            "/AdvantageKit/RealOutputs/Dye Rotor/API",
+            "/AdvantageKit/RealOutputs/Dye Rotor/API/setVelocitySetpointImpl",
+            "/AdvantageKit/Flywheels/Left",
+            "/AdvantageKit/RealOutputs/Flywheels/Measurements",
+            "/AdvantageKit/RealOutputs/Flywheels/OTF",
+            "/AdvantageKit/RealOutputs/LaunchingSolutionManager/debug",
+            "/AdvantageKit/RealOutputs/Flywheels/Setpoints",
+            "/AdvantageKit/RealOutputs/Turret/API/setMotionMagicSetpointImpl",
+            "/AdvantageKit/RealOutputs/Hood",
+            "/AdvantageKit/RealOutputs/Hood/OTF",
+            "/AdvantageKit/Flywheels/RightInputs",
+            "/AdvantageKit/RealOutputs/Feeder/API",
+            "/AdvantageKit/RealOutputs/Feeder/API/setOpenLoopDutyCycleImpl",
+            "/AdvantageKit/RealOutputs/Feeder/API/setVelocitySetpointImpl",
+            "/AdvantageKit/RealOutputs",
+            "/AdvantageKit/RealOutputs/Hood/API",
+            "/AdvantageKit/RealOutputs/Hood/API/setMotionMagicSetpointImpDynamic"
+          ]
+        },
+        "tabs": {
+          "selected": 2,
+          "tabs": [
+            {
+              "type": 0,
+              "title": "",
+              "controller": null,
+              "controllerUUID": "4axdsfu1cfkbewavnxctxpyjq2tfmy5r",
+              "renderer": "",
+              "controlsHeight": 0
+            },
+            {
+              "type": 8,
+              "title": "Joysticks",
+              "controller": [
+                "Xbox Controller (White)",
+                "Xbox Controller (Blue)",
+                "None",
+                "None",
+                "None",
+                "None"
+              ],
+              "controllerUUID": "57pbc0glsj83lsg7vsfrihsi15gm2bgu",
+              "renderer": null,
+              "controlsHeight": 85
+            },
+            {
+              "type": 3,
+              "title": "3D Field",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "robot",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Odometry/Robot",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "model": "2713 2026 Robot"
+                    }
+                  },
+                  {
+                    "type": "component",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Kinematics/mechanismPoses",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "trajectory",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Flywheels/ball_vector",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "gamePiece",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Flywheels/fuel_trajectories",
+                    "logType": "Translation3d[]",
+                    "visible": true,
+                    "options": {
+                      "variant": "Fuel"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/AdvantageKit/Vision/Pose3d",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {
+                      "model": "2713 2026 Robot",
+                      "color": "#00ff00"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/LaunchingSolutionManager/projected_pose",
+                    "logType": "Pose3d",
+                    "visible": false,
+                    "options": {
+                      "model": "2713 2026 Robot",
+                      "color": "#ff0000"
+                    }
+                  }
+                ],
+                "game": "FRC:2026 Field"
+              },
+              "controllerUUID": "jb7sulk4eummpqajh60ilj4r1e8pzqas",
+              "renderer": {
+                "cameraIndex": -1,
+                "orbitFov": 50,
+                "cameraPosition": [
+                  10.88491636297341,
+                  7.586751596871574,
+                  0.5207111171300536
+                ],
+                "cameraTarget": [
+                  1.6047678490289574,
+                  -3.775912562717879,
+                  0.37877005258791263
+                ]
+              },
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "Intake",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Intake Extension/SetpointDistanceMeters",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Intake Extension/CurrentDistanceMeters",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#3b875a",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/Intake Roller/AppliedVolts",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "discreteSources": [
+                  {
+                    "type": "stripes",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Intake Extension/currentCommand",
+                    "logType": "String",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2"
+                    }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Intake Roller/currentCommand",
+                    "logType": "String",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437"
+                    }
+                  }
+                ],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "autoTarget": null,
+                  "preset": null
+                },
+                "rightUnitConversion": {
+                  "autoTarget": null,
+                  "preset": null
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "5el776ej5v46y7po2pevw4fiy8m6egzr",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "Turret And Hood",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Turret/setpoint/commandedDegrees",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Turret/ComputedTurretPositionDeg",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Hood/OTF/aimAngleDeg",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Hood/OTF/currentAngleDeg",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#3b875a",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "discreteSources": [
+                  {
+                    "type": "stripes",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Hood/currentCommand",
+                    "logType": "String",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2"
+                    }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Turret/currentCommand",
+                    "logType": "String",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b"
+                    }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Turret/OTF/solutionIsValid",
+                    "logType": "Boolean",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437"
+                    }
+                  }
+                ],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "autoTarget": null,
+                  "preset": null
+                },
+                "rightUnitConversion": {
+                  "autoTarget": null,
+                  "preset": null
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "eqxanhccarfqs7znetuke50riuyzkbms",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "Flywheels",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Flywheels/Measurements/leftVelocityRotPerSec",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Flywheels/Setpoints/velocityRotPerSec",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Flywheels/Measurements/rightVelocityRotPerSec",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#80588e",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [],
+                "discreteSources": [
+                  {
+                    "type": "stripes",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Flywheels/currentCommand",
+                    "logType": "String",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437"
+                    }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Flywheels/AtTarget",
+                    "logType": "Boolean",
+                    "visible": true,
+                    "options": {
+                      "color": "#e48b32"
+                    }
+                  }
+                ],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "autoTarget": null,
+                  "preset": null
+                },
+                "rightUnitConversion": {
+                  "autoTarget": null,
+                  "preset": null
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "tmcresahq7k8uhx3il7t1wq638xrrtju",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "Serializer",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/Dye Rotor/Velocity",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#d993aa",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/Feeder/Velocity",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [],
+                "discreteSources": [
+                  {
+                    "type": "stripes",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Dye Rotor/currentCommand",
+                    "logType": "String",
+                    "visible": true,
+                    "options": {
+                      "color": "#d993aa"
+                    }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Feeder/currentCommand",
+                    "logType": "String",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2"
+                    }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Flywheels/AtTarget",
+                    "logType": "Boolean",
+                    "visible": true,
+                    "options": {
+                      "color": "#5f4528"
+                    }
+                  }
+                ],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "autoTarget": null,
+                  "preset": null
+                },
+                "rightUnitConversion": {
+                  "autoTarget": null,
+                  "preset": null
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "g0hxrhx3mr4fd6u7qtata5draat613yb",
+              "renderer": null,
+              "controlsHeight": 200
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "satellites": [],
+  "version": "26.0.0"
+}

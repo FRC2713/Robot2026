@@ -62,10 +62,22 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
     Logger.recordOutput(
         pb.makePath("currentCommand"),
         (getCurrentCommand() == null) ? "Default" : getCurrentCommand().getName());
-  }
 
-  // IO Implementations - These methods are now inherited from MotorSubsystem
-  // and operate on the leader motor. The follower motor follows automatically.
+    // Log setpoints for comparison with measurements (in same units as inputs)
+    Logger.recordOutput(
+        pb.makePath("Setpoints", "velocityRotPerSec"), velocitySetpoint.in(RotationsPerSecond));
+    Logger.recordOutput(pb.makePath("Setpoints", "positionRot"), positionSetpoint.in(Rotations));
+    // Also log measurements as doubles for easy comparison
+    Logger.recordOutput(
+        pb.makePath("Measurements", "leftVelocityRotPerSec"),
+        leftInputs.velocity.in(RotationsPerSecond));
+    Logger.recordOutput(
+        pb.makePath("Measurements", "rightVelocityRotPerSec"),
+        rightInputs.velocity.in(RotationsPerSecond));
+    Logger.recordOutput(
+        pb.makePath("Measurements", "leftAppliedVolts"), leftInputs.appliedVolts.in(Volts));
+    Logger.recordOutput(pb.makePath("Measurements", "closedLoopError"), leftInputs.closedLoopError);
+  }
 
   // Getters
   /**

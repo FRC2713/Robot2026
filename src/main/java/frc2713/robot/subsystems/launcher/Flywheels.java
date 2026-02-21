@@ -16,15 +16,17 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc2713.lib.io.ArticulatedComponent;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.MotorFollowerSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.RobotTime;
-import frc2713.robot.FieldConstants;
 import frc2713.robot.subsystems.launcher.LaunchingSolutionManager.LaunchSolution;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, MotorIO>
@@ -39,7 +41,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
       final MotorIO leaderLauncherMotorIO,
       final MotorIO followerLauncherMotorIO) {
     super(
-        "Flywheel",
+        "Flywheels",
         leaderConfig,
         followerConfig,
         new MotorInputsAutoLogged(),
@@ -50,28 +52,91 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   }
 
   public Command setVelocity(Supplier<AngularVelocity> desiredVelocity) {
-    return velocitySetpointCommand(() -> desiredVelocity.get().times(config.unitToRotorRatio));
+    return velocitySetpointCommand(desiredVelocity);
   }
 
   public Command stop() {
     return setVelocity(() -> RotationsPerSecond.of(0));
   }
 
+  public Command hubCommand() {
+    return setVelocity(() -> LauncherConstants.Flywheels.staticHubVelocity);
+  }
+
+  /** Command to continuously track the on-the-fly flywheel velocity */
+  public Command idleSpeedCommand() {
+    return setVelocity(() -> LauncherConstants.Flywheels.idleVelocity);
+  }
+
+  /**
+   * Supplier that continuously calculates the on-the-fly flywheel velocity. Uses the launch
+   * solution if valid, otherwise falls back to distance-based lookup.
+   */
+  public final Supplier<AngularVelocity> otfVelocitySupplier =
+      () -> {
+        var solution = LaunchingSolutionManager.getInstance().getSolution();
+        Distance toGoal = this.getDistance2d(LaunchingSolutionManager.currentGoal.flywheelTarget());
+        boolean solutionIsValid = solution.isValid();
+
+        LinearVelocity targetSurfaceSpeed;
+        if (solutionIsValid) {
+          targetSurfaceSpeed = MetersPerSecond.of(solution.flywheelSpeedMetersPerSecond());
+          Logger.recordOutput(super.pb.makePath("OTF", "response"), "using solution");
+        } else if (solution.effectiveDistanceMeters() <= 0.9) {
+          // invalid bc we're too close
+          Logger.recordOutput(super.pb.makePath("OTF", "response"), "hub shot");
+          targetSurfaceSpeed = FeetPerSecond.of(5);
+        } else {
+          // Fallback to distance-based lookup
+          Logger.recordOutput(super.pb.makePath("OTF", "response"), "lookup map");
+          targetSurfaceSpeed =
+              FeetPerSecond.of(LauncherConstants.Flywheels.velocityMap.get(toGoal.in(Meters)));
+        }
+
+        // Convert surface speed to angular velocity: omega = v / r
+        double wheelRadiusMeters = LauncherConstants.Flywheels.WHEEL_DIAMETER.div(2).in(Meters);
+        double surfaceSpeedMps = targetSurfaceSpeed.in(MetersPerSecond);
+        AngularVelocity targetVelocity =
+            RotationsPerSecond.of(surfaceSpeedMps / (wheelRadiusMeters * 2 * Math.PI));
+
+        Logger.recordOutput(super.pb.makePath("OTF", "solutionIsValid"), solutionIsValid);
+        Logger.recordOutput(super.pb.makePath("OTF", "distanceToGoal"), toGoal);
+        Logger.recordOutput(super.pb.makePath("OTF", "targetSurfaceSpeed"), targetSurfaceSpeed);
+        Logger.recordOutput(super.pb.makePath("OTF", "targetVelocity"), targetVelocity);
+        return targetVelocity;
+      };
+
+  public Command otfCommand() {
+    return setVelocity(otfVelocitySupplier);
+  }
+
+  public Command simulateLaunchedFuel(BooleanSupplier isReady) {
+    return Commands.run(
+        () -> {
+          if (isReady.getAsBoolean())
+            this.launchFuel(LaunchingSolutionManager.getInstance().getSolution());
+        });
+  }
+
+  @AutoLogOutput
+  public boolean atTarget() {
+    return Math.abs(this.leftInputs.closedLoopError)
+        <= LauncherConstants.Flywheels.acceptableError.in(RotationsPerSecond);
+  }
+
   @Override
   public void periodic() {
     super.periodic();
 
-    var solution = LaunchingSolutionManager.getInstance().getSolution();
-
-    if (solution.isValid()) {
-      launchFuel(solution);
-    }
+    // update ball_vector visualization
     Pose3d globalPose = this.getGlobalPose();
     Logger.recordOutput(
         super.pb.makePath("ball_vector"),
         new Pose3d[] {
           globalPose, globalPose.plus(new Transform3d(new Translation3d(1, 0, 0), new Rotation3d()))
         });
+
+    // update fuel trajectories physics for balls already in flight
     Time now = RobotTime.getTimestamp();
     Time dt = now.minus(lastUpdateTime);
     fuelTrajectories.update(dt);
@@ -90,14 +155,14 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   }
 
   public LinearVelocity getSurfaceSpeed() {
-    AngularVelocity wheelSpeed = super.getLeaderCurrentVelocity().div(config.unitToRotorRatio);
+    AngularVelocity wheelSpeed = super.getLeftCurrentVelocity();
     Distance wheelDiameter = Inches.of(4);
     Distance wheelCircumference = wheelDiameter.times(Math.PI);
     return InchesPerSecond.of(wheelSpeed.in(RotationsPerSecond) * wheelCircumference.in(Inches));
   }
 
   public LinearVelocity getLaunchVelocity() {
-    Distance toGoal = this.getDistance2d(FieldConstants.Hub.innerCenterPoint);
+    Distance toGoal = this.getDistance2d(LaunchingSolutionManager.currentGoal.flywheelTarget());
     LinearVelocity vel =
         FeetPerSecond.of(LauncherConstants.Flywheels.velocityMap.get(toGoal.in(Meters)));
     Logger.recordOutput(pb.makePath("launchVelocity"), vel);

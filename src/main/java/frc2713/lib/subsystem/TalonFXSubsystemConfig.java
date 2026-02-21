@@ -16,6 +16,7 @@ public class TalonFXSubsystemConfig {
   public TalonFXConfiguration fxConfig = new TalonFXConfiguration();
   // Marks Slot0 and MotionMagic as live-tunable
   public boolean tunable = false;
+  public boolean useFOC = true;
 
   // Ratio of rotor to units for this talon.  rotor * by this ratio should
   // be the units.
