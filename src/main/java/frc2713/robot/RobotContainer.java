@@ -162,10 +162,10 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.BackRight));
         flywheels =
             new Flywheels(
-                LauncherConstants.Flywheels.leftConfig,
-                LauncherConstants.Flywheels.rightConfig,
-                new SimTalonFXIO(LauncherConstants.Flywheels.leftConfig),
-                new SimTalonFXIO(LauncherConstants.Flywheels.rightConfig));
+                LauncherConstants.Flywheels.leaderConfig,
+                LauncherConstants.Flywheels.followerConfig,
+                new SimTalonFXIO(LauncherConstants.Flywheels.leaderConfig),
+                new SimTalonFXIO(LauncherConstants.Flywheels.followerConfig));
         hood =
             new Hood(
                 LauncherConstants.Hood.config, new SimTalonFXIO(LauncherConstants.Hood.config));
@@ -202,8 +202,8 @@ public class RobotContainer {
                 new ModuleIO() {});
         flywheels =
             new Flywheels(
-                new TalonFXSubsystemConfig(),
-                new TalonFXSubsystemConfig(),
+                LauncherConstants.Flywheels.leaderConfig,
+                LauncherConstants.Flywheels.followerConfig,
                 new MotorIO() {},
                 new MotorIO() {});
         hood = new Hood(new TalonFXSubsystemConfig(), new MotorIO() {});

@@ -300,6 +300,18 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
     io.setTorqueCurrentFOC(current);
   }
 
+  /**
+   * Sets the motor to the specified velocity in FOC control.
+   *
+   * @param velocity The desired velocity.
+   */
+  public void setVelocityTorqueCurrentFOCImpl(AngularVelocity velocity) {
+    Logger.recordOutput(pb.makePath("API", "setVelocityTorqueCurrentFOC", "Velocity"), velocity);
+    Logger.recordOutput(
+        pb.makePath("API", "setVelocityTorqueCurrentFOC", "Units"), velocity.unit().toString());
+    io.setVelocityTorqueCurrentFOC(velocity);
+  }
+
   /** Sets the current position of the motor as zero. */
   protected void setCurrentPositionAsZero() {
     io.setCurrentPositionAsZero();
@@ -630,6 +642,15 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
             },
             () -> {})
         .withName(pb.makeName("torqueCurrentFOCCommand"));
+  }
+
+  public Command setVelocityTorqueCurrentFOC(Supplier<AngularVelocity> velocity) {
+    return runEnd(
+            () -> {
+              setVelocityTorqueCurrentFOCImpl(velocity.get());
+            },
+            () -> {})
+        .withName(pb.makeName("velocityTorqueCurrentFOCCommand"));
   }
 
   /**

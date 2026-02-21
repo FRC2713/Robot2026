@@ -85,32 +85,31 @@ public final class LauncherConstants {
 
   public final class Flywheels {
     public static final LoggedTunableMeasure<AngularVelocity> PIDTest =
-        new LoggedTunableMeasure<>("Flywheel Left/PIDTest", RPM.of(2000));
+        new LoggedTunableMeasure<>("Flywheel/PIDTest", RPM.of(2000));
 
-    public static TalonFXSubsystemConfig leftConfig = new TalonFXSubsystemConfig();
-    public static TalonFXSubsystemConfig rightConfig = new TalonFXSubsystemConfig();
+    public static TalonFXSubsystemConfig leaderConfig = new TalonFXSubsystemConfig();
+    public static TalonFXSubsystemConfig followerConfig = new TalonFXSubsystemConfig();
 
     static {
-      leftConfig.name = "Flywheel Left";
-      leftConfig.talonCANID = new CANDeviceId(2); // Example CAN ID, replace with actual ID
-      leftConfig.fxConfig.Slot0.kP = 0.2;
-      leftConfig.fxConfig.Slot0.kI = 0.0;
-      leftConfig.fxConfig.Slot0.kD = 0.01;
-      leftConfig.fxConfig.Slot0.kS = 0.15;
-      leftConfig.fxConfig.Slot0.kV = 0.12;
-      leftConfig.unitToRotorRatio = 1.0; // 1:1 ratio
-      leftConfig.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-      leftConfig.fxConfig.MotorOutput.PeakReverseDutyCycle = 0;
-      leftConfig.momentOfInertia = 0.01;
-      leftConfig.tunable = true;
-      leftConfig.useFOC = false; // Use VelocityVoltage for sim compatibility
+      leaderConfig.name = "Flywheel Leader";
+      leaderConfig.talonCANID = new CANDeviceId(2); // Example CAN ID, replace with actual ID
+      leaderConfig.fxConfig.Slot0.kP = 0.3;
+      leaderConfig.fxConfig.Slot0.kI = 0.0;
+      leaderConfig.fxConfig.Slot0.kD = 0.0;
+      leaderConfig.fxConfig.Slot0.kS = 0.15;
+      leaderConfig.fxConfig.Slot0.kV = 0.114;
+      leaderConfig.unitToRotorRatio = 1.0; // 1:1 ratio
+      leaderConfig.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+      leaderConfig.fxConfig.MotorOutput.PeakReverseDutyCycle = 0;
+      leaderConfig.momentOfInertia = 0.01;
+      leaderConfig.useFOC = false; // Use VelocityVoltage for sim compatibility
+      leaderConfig.tunable = true;
 
-      rightConfig.useFOC = false;
-
-      rightConfig.name = "Flywheel Right";
-      rightConfig.talonCANID = new CANDeviceId(1); // Example CAN ID, replace with actual ID
-      rightConfig.unitToRotorRatio = 1.0; // 1:1 ratio
-      rightConfig.momentOfInertia = 0.01;
+      followerConfig.name = "Flywheel Follower";
+      followerConfig.talonCANID = new CANDeviceId(1); // Example CAN ID, replace with actual ID
+      followerConfig.unitToRotorRatio = 1.0; // 1:1 ratio
+      followerConfig.momentOfInertia = 0.01;
+      followerConfig.useFOC = false;
     }
 
     public static int MODEL_INDEX = 5;
