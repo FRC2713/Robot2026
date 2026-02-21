@@ -48,34 +48,32 @@ public class DriverControls {
   public void configureButtonBindings() {
 
     // Reset gyro to 0 deg when start button is pressed
-    // controller
-    //     .start()
-    //     .onTrue(
-    //         Commands.parallel(
-    //             this.setToNormalDriveCmd(),
-    //             Commands.runOnce(
-    //                     () ->
-    //                         drive.setPose(
-    //                             new Pose2d(
-    //                                 drive.getPose().getTranslation(),
-    // Rotation2d.fromDegrees(0))),
-    //                     drive)
-    //                 .ignoringDisable(true)));
+    controller
+        .start()
+        .onTrue(
+            Commands.parallel(
+                this.setToNormalDriveCmd(),
+                Commands.runOnce(
+                        () ->
+                            drive.setPose(
+                                new Pose2d(
+                                    drive.getPose().getTranslation(), Rotation2d.fromDegrees(0))),
+                        drive)
+                    .ignoringDisable(true)));
 
     // // Reset gyro to 180 deg when start button is pressed
-    // controller
-    //     .back()
-    //     .onTrue(
-    //         Commands.parallel(
-    //                 this.setToNormalDriveCmd(),
-    //                 Commands.runOnce(
-    //                     () ->
-    //                         drive.setPose(
-    //                             new Pose2d(
-    //                                 drive.getPose().getTranslation(),
-    // Rotation2d.fromDegrees(180))),
-    //                     drive))
-    //             .ignoringDisable(true));
+    controller
+        .back()
+        .onTrue(
+            Commands.parallel(
+                    this.setToNormalDriveCmd(),
+                    Commands.runOnce(
+                        () ->
+                            drive.setPose(
+                                new Pose2d(
+                                    drive.getPose().getTranslation(), Rotation2d.fromDegrees(180))),
+                        drive))
+                .ignoringDisable(true));
 
     // POV Precision Driving
     controller
