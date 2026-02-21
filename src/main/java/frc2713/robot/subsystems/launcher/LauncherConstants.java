@@ -86,6 +86,8 @@ public final class LauncherConstants {
   public final class Flywheels {
     public static final LoggedTunableMeasure<AngularVelocity> PIDTest =
         new LoggedTunableMeasure<>("Flywheel/PIDTest", RPM.of(2000));
+    public static final LoggedTunableMeasure<AngularVelocity> launchVelocity =
+        new LoggedTunableMeasure<>("Flywheels/launchVelocity", RPM.of(2500));
 
     public static TalonFXSubsystemConfig leaderConfig = new TalonFXSubsystemConfig();
     public static TalonFXSubsystemConfig followerConfig = new TalonFXSubsystemConfig();

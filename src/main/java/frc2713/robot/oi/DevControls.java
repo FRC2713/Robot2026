@@ -15,6 +15,7 @@ import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.launcher.Flywheels;
 import frc2713.robot.subsystems.launcher.Hood;
+import frc2713.robot.subsystems.launcher.LauncherConstants;
 import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
@@ -134,6 +135,9 @@ public class DevControls {
     // B button - index fuel
     controller.b().whileTrue(feeder.feedShooter()).onFalse(feeder.stop());
 
+    controller.x().whileTrue(flywheels.setVelocity(() -> LauncherConstants.Flywheels.launchVelocity.get())).onFalse(flywheels.stop());
+
+
     // Y button - index fuel in parallel (same effect since it's the same command)
     controller
         .y()
@@ -141,7 +145,7 @@ public class DevControls {
             Commands.sequence(
                 Commands.race(
                     flywheels.setVelocity(
-                        () -> RPM.of(1000)), // Spin up flywheels to a moderate speed
+                        () -> LauncherConstants.Flywheels.launchVelocity.get()), // Spin up flywheels to launch velocity
                     new WaitUntilCommand(flywheels::atTarget)),
                 Commands.parallel(dyeRotor.indexFuel(), feeder.feedShooter())))
         .onFalse(Commands.parallel(dyeRotor.stopCommand(), feeder.stop(), flywheels.stop()));
