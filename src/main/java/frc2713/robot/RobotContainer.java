@@ -130,10 +130,10 @@ public class RobotContainer {
                 new ModuleIO() {});
         flywheels =
             new Flywheels(
-                LauncherConstants.Flywheels.leftConfig,
-                LauncherConstants.Flywheels.rightConfig,
-                new TalonFXIO(LauncherConstants.Flywheels.leftConfig),
-                new TalonFXIO(LauncherConstants.Flywheels.rightConfig));
+                LauncherConstants.Flywheels.leaderConfig,
+                LauncherConstants.Flywheels.followerConfig,
+                new TalonFXIO(LauncherConstants.Flywheels.leaderConfig),
+                new TalonFXIO(LauncherConstants.Flywheels.followerConfig));
         hood = new Hood(new TalonFXSubsystemConfig(), new MotorIO() {});
         turret = new Turret(new TurretSubsystemConfig(), new TurretMotorIO() {});
         intakeRoller = new IntakeRoller(new TalonFXSubsystemConfig(), new MotorIO() {});
