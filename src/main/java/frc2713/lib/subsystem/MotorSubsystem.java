@@ -413,8 +413,7 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
             () -> {
               setVelocitySetpointImpl(velocitySupplier.get(), slot);
             },
-            () -> {
-            })
+            () -> {})
         .withName(pb.makeName("VelocityControl"));
   }
 

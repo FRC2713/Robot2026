@@ -3,6 +3,8 @@ package frc2713.robot.oi;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RPM;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -137,9 +139,10 @@ public class DevControls {
         .y()
         .whileTrue(
             Commands.sequence(
-              Commands.race(
-                flywheels.setVelocity(() -> RPM.of(1000)), // Spin up flywheels to a moderate speed
-                new WaitUntilCommand(flywheels::atTarget)),
+                Commands.race(
+                    flywheels.setVelocity(
+                        () -> RPM.of(1000)), // Spin up flywheels to a moderate speed
+                    new WaitUntilCommand(flywheels::atTarget)),
                 Commands.parallel(dyeRotor.indexFuel(), feeder.feedShooter())))
         .onFalse(Commands.parallel(dyeRotor.stopCommand(), feeder.stop(), flywheels.stop()));
   }
