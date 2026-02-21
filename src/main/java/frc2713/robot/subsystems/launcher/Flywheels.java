@@ -120,7 +120,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
 
   @AutoLogOutput
   public boolean atTarget() {
-    return Math.abs(this.leftInputs.closedLoopError)
+    return Math.abs(inputs.closedLoopError)
         <= LauncherConstants.Flywheels.acceptableError.in(RotationsPerSecond);
   }
 
@@ -155,7 +155,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   }
 
   public LinearVelocity getSurfaceSpeed() {
-    AngularVelocity wheelSpeed = super.getLeftCurrentVelocity();
+    AngularVelocity wheelSpeed = getLeaderCurrentVelocity();
     Distance wheelDiameter = Inches.of(4);
     Distance wheelCircumference = wheelDiameter.times(Math.PI);
     return InchesPerSecond.of(wheelSpeed.in(RotationsPerSecond) * wheelCircumference.in(Inches));

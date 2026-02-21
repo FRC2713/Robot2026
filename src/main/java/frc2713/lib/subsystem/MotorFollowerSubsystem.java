@@ -1,5 +1,9 @@
 package frc2713.lib.subsystem;
 
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -69,14 +73,16 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
     Logger.recordOutput(pb.makePath("Setpoints", "positionRot"), positionSetpoint.in(Rotations));
     // Also log measurements as doubles for easy comparison
     Logger.recordOutput(
-        pb.makePath("Measurements", "leftVelocityRotPerSec"),
-        leftInputs.velocity.in(RotationsPerSecond));
+        pb.makePath("Measurements", "leaderVelocityRotPerSec"),
+        inputs.velocity.in(RotationsPerSecond));
     Logger.recordOutput(
-        pb.makePath("Measurements", "rightVelocityRotPerSec"),
-        rightInputs.velocity.in(RotationsPerSecond));
+        pb.makePath("Measurements", "followerVelocityRotPerSec"),
+        followerInputs.velocity.in(RotationsPerSecond));
     Logger.recordOutput(
-        pb.makePath("Measurements", "leftAppliedVolts"), leftInputs.appliedVolts.in(Volts));
-    Logger.recordOutput(pb.makePath("Measurements", "closedLoopError"), leftInputs.closedLoopError);
+        pb.makePath("Measurements", "leaderAppliedVolts"), inputs.appliedVolts.in(Volts));
+    Logger.recordOutput(
+        pb.makePath("Measurements", "followerAppliedVolts"), followerInputs.appliedVolts.in(Volts));
+    Logger.recordOutput(pb.makePath("Measurements", "closedLoopError"), inputs.closedLoopError);
   }
 
   // Getters

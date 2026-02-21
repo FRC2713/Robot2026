@@ -110,7 +110,6 @@ public final class LauncherConstants {
       followerConfig.unitToRotorRatio = 1.0; // 1:1 ratio
       followerConfig.momentOfInertia = 0.01;
       followerConfig.useFOC = false;
-
     }
 
     public static int MODEL_INDEX = 5;

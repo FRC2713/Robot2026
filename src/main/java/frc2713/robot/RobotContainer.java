@@ -107,8 +107,8 @@ public class RobotContainer {
             new Flywheels(
                 LauncherConstants.Flywheels.leaderConfig,
                 LauncherConstants.Flywheels.followerConfig,
-                new TalonFXIO(LauncherConstants.Flywheels.leftConfig),
-                new TalonFXIO(LauncherConstants.Flywheels.rightConfig));
+                new TalonFXIO(LauncherConstants.Flywheels.leaderConfig),
+                new TalonFXIO(LauncherConstants.Flywheels.followerConfig));
         hood =
             new Hood(LauncherConstants.Hood.config, new TalonFXIO(LauncherConstants.Hood.config));
         turret =
