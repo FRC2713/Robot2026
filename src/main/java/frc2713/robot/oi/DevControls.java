@@ -124,6 +124,7 @@ public class DevControls {
         .whileTrue(
             hood.setAngleStopAtBounds(
                 () -> Degrees.of(hood.getCurrentPosition().in(Degrees) + 5))); // Bring hood up
+    controller.a().whileTrue(dyeRotor.indexFuel()); // Bring hood up
   }
 
   public double getLeftY() {
