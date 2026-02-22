@@ -5,22 +5,44 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
 /**
- * Extended Rectangle2d with rectangle-rectangle geometry support. Extends WPILib's Rectangle2d with
- * {@link #contains(Rectangle2d)} for containment checks and {@link #intersects} for overlap checks.
+ * Extended Rectangle2d with rectangle-rectangle geometry support.
+ *
+ * <p>Extends WPILib's {@link edu.wpi.first.math.geometry.Rectangle2d} with {@link
+ * #contains(edu.wpi.first.math.geometry.Rectangle2d)} for containment checks and {@link
+ * #intersects} for overlap checks. Supports both axis-aligned and rotated rectangles. All dimensions
+ * are in meters.
  */
 public class Rectangle2d extends edu.wpi.first.math.geometry.Rectangle2d {
 
+  /**
+   * Constructs an axis-aligned rectangle from two diagonally opposite corners.
+   *
+   * @param corner1 First corner of the rectangle
+   * @param corner2 Second corner (diagonal from corner1)
+   */
   public Rectangle2d(Translation2d corner1, Translation2d corner2) {
     super(corner1, corner2);
   }
 
+  /**
+   * Constructs a rectangle from its center pose and dimensions.
+   *
+   * @param center Center position and rotation of the rectangle
+   * @param xWidth Width along the local x-axis (before rotation)
+   * @param yWidth Height along the local y-axis (before rotation)
+   */
   public Rectangle2d(Pose2d center, double xWidth, double yWidth) {
     super(center, xWidth, yWidth);
   }
 
   /**
-   * Returns true if the given rectangle is entirely contained within this rectangle (all corners and
-   * edges inside or on the boundary).
+   * Returns true if the given rectangle is entirely contained within this rectangle.
+   *
+   * <p>All four corners and edges of the other rectangle must lie inside or on the boundary of this
+   * rectangle.
+   *
+   * @param rectangle The rectangle to check for containment
+   * @return true if the rectangle is fully inside this one
    */
   public boolean contains(edu.wpi.first.math.geometry.Rectangle2d rectangle) {
     // Fast path: both axis-aligned
@@ -48,7 +70,13 @@ public class Rectangle2d extends edu.wpi.first.math.geometry.Rectangle2d {
   }
 
   /**
-   * Returns true if this rectangle intersects the given rectangle (including edges and corners).
+   * Returns true if this rectangle intersects the given rectangle.
+   *
+   * <p>Intersection includes any overlap: corners touching, edges crossing (e.g. "+" shape), or one
+   * rectangle fully inside the other.
+   *
+   * @param rectangle The rectangle to check for intersection
+   * @return true if the rectangles overlap
    */
   public boolean intersects(edu.wpi.first.math.geometry.Rectangle2d rectangle) {
     // Fast path: both axis-aligned (no allocations, 4 comparisons)
@@ -111,6 +139,10 @@ public class Rectangle2d extends edu.wpi.first.math.geometry.Rectangle2d {
     return false;
   }
 
+  /**
+   * Checks if two axis-aligned rectangles overlap. Parameters are center (cx, cy) and dimensions
+   * (w, h) for each rectangle.
+   */
   private static boolean aabbOverlaps(
       double cx1, double cy1, double w1, double h1, double cx2, double cy2, double w2, double h2) {
     double halfW1 = w1 / 2.0;
@@ -123,6 +155,10 @@ public class Rectangle2d extends edu.wpi.first.math.geometry.Rectangle2d {
         && cy1 + halfH1 > cy2 - halfH2;
   }
 
+  /**
+   * Checks if the first axis-aligned rectangle fully contains the second. Parameters are center (cx,
+   * cy) and dimensions (w, h) for each rectangle.
+   */
   private static boolean aabbContains(
       double cx1, double cy1, double w1, double h1, double cx2, double cy2, double w2, double h2) {
     double halfW1 = w1 / 2.0;
@@ -135,6 +171,7 @@ public class Rectangle2d extends edu.wpi.first.math.geometry.Rectangle2d {
         && cy1 + halfH1 >= cy2 + halfH2;
   }
 
+  /** Returns the minimum X coordinate among the four corners. */
   private static double minX(Translation2d[] corners) {
     double m = corners[0].getX();
     for (int i = 1; i < 4; i++) {
@@ -143,6 +180,7 @@ public class Rectangle2d extends edu.wpi.first.math.geometry.Rectangle2d {
     return m;
   }
 
+  /** Returns the maximum X coordinate among the four corners. */
   private static double maxX(Translation2d[] corners) {
     double m = corners[0].getX();
     for (int i = 1; i < 4; i++) {
@@ -151,6 +189,7 @@ public class Rectangle2d extends edu.wpi.first.math.geometry.Rectangle2d {
     return m;
   }
 
+  /** Returns the minimum Y coordinate among the four corners. */
   private static double minY(Translation2d[] corners) {
     double m = corners[0].getY();
     for (int i = 1; i < 4; i++) {
@@ -159,6 +198,7 @@ public class Rectangle2d extends edu.wpi.first.math.geometry.Rectangle2d {
     return m;
   }
 
+  /** Returns the maximum Y coordinate among the four corners. */
   private static double maxY(Translation2d[] corners) {
     double m = corners[0].getY();
     for (int i = 1; i < 4; i++) {
@@ -167,6 +207,7 @@ public class Rectangle2d extends edu.wpi.first.math.geometry.Rectangle2d {
     return m;
   }
 
+  /** Returns the four corners of the rectangle in global coordinates (order: +x+y, -x+y, -x-y, +x-y). */
   private static Translation2d[] getCorners(edu.wpi.first.math.geometry.Rectangle2d rect) {
     double hx = rect.getXWidth() / 2.0;
     double hy = rect.getYWidth() / 2.0;
@@ -181,6 +222,10 @@ public class Rectangle2d extends edu.wpi.first.math.geometry.Rectangle2d {
     };
   }
 
+  /**
+   * Returns true if line segment (a1, a2) intersects segment (b1, b2). Uses cross-product
+   * orientation test; treats collinear overlapping segments as intersecting.
+   */
   private static boolean segmentsIntersect(
       Translation2d a1, Translation2d a2, Translation2d b1, Translation2d b2) {
     double ax = a2.getX() - a1.getX();
@@ -196,6 +241,7 @@ public class Rectangle2d extends edu.wpi.first.math.geometry.Rectangle2d {
     return d1 <= 0 && d2 <= 0;
   }
 
+  /** 2D cross product: ax*by - ay*bx. Sign indicates relative orientation. */
   private static double cross(double ax, double ay, double bx, double by) {
     return ax * by - ay * bx;
   }
