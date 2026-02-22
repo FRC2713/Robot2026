@@ -188,7 +188,7 @@ public class RobotContainer {
             new Feeder(
                 SerializerConstants.Feeder.config,
                 new SimTalonFXIO(SerializerConstants.Feeder.config));
-        vision = new Vision(new VisionIO() {});
+        vision = new Vision(new VisionIOSLAMDunk() {});
         break;
 
       default:
