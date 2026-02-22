@@ -32,6 +32,17 @@ public interface FieldRegion {
   boolean intersects(Rectangle2d rectangle);
 
   /**
+   * Returns true if the given rectangle is entirely contained within this region.
+   *
+   * <p>All four corners and edges of the other rectangle must lie inside or on the boundary of this
+   * region.
+   *
+   * @param rectangle The rectangle to check for containment, in meters
+   * @return true if the rectangle is fully inside this region
+   */
+  boolean contains (Rectangle2d rectangle);
+
+  /**
    * Creates a Trigger that activates when the supplied position is inside this region.
    *
    * @param positionSupplier Supplies the current position to check (e.g. robot pose translation)
@@ -39,6 +50,16 @@ public interface FieldRegion {
    */
   default Trigger createContainsTrigger(Supplier<Translation2d> positionSupplier) {
     return new Trigger(() -> contains(positionSupplier.get()));
+  }
+
+  /**
+   * Creates a Trigger that activates when the supplied rectangle is fully contained within this region.
+   *
+   * @param rectangleSupplier Supplies the rectangle to check (e.g. robot footprint)
+   * @return A trigger that is active when the rectangle is fully inside this region
+   */
+  default Trigger createContainsRectTrigger(Supplier<Rectangle2d> rectangleSupplier) {
+    return new Trigger(() -> contains(rectangleSupplier.get()));
   }
 
   /**
