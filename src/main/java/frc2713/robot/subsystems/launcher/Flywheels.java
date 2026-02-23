@@ -86,6 +86,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
           // invalid bc we're too close
           Logger.recordOutput(super.pb.makePath("OTF", "response"), "hub shot");
           targetSurfaceSpeed = FeetPerSecond.of(5);
+
         } else {
           // Fallback to distance-based lookup
           Logger.recordOutput(super.pb.makePath("OTF", "response"), "lookup map");

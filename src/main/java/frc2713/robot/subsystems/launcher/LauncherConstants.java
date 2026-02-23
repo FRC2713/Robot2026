@@ -86,6 +86,8 @@ public final class LauncherConstants {
   public final class Flywheels {
     public static final LoggedTunableMeasure<AngularVelocity> PIDTest =
         new LoggedTunableMeasure<>("Flywheel/PIDTest", RPM.of(2000));
+    public static final LoggedTunableMeasure<AngularVelocity> launchVelocity =
+        new LoggedTunableMeasure<>("Flywheels/launchVelocity", RPM.of(2500));
 
     public static TalonFXSubsystemConfig leaderConfig = new TalonFXSubsystemConfig();
     public static TalonFXSubsystemConfig followerConfig = new TalonFXSubsystemConfig();
@@ -115,7 +117,7 @@ public final class LauncherConstants {
     public static int MODEL_INDEX = 5;
     public static int PARENT_INDEX = 4;
 
-    public static AngularVelocity acceptableError = RotationsPerSecond.of(10);
+    public static AngularVelocity acceptableError = RPM.of(20);
     public static AngularVelocity idleVelocity = RotationsPerSecond.of(20);
 
     public static Transform3d localTransform =

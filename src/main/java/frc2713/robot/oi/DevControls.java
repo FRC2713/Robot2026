@@ -1,15 +1,21 @@
 package frc2713.robot.oi;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.RPM;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.launcher.Flywheels;
 import frc2713.robot.subsystems.launcher.Hood;
+import frc2713.robot.subsystems.launcher.LauncherConstants;
 import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
@@ -48,36 +54,33 @@ public class DevControls {
 
   public void configureButtonBindings() {
 
-    // Messes with dualsense controls
     // Reset gyro to 0 deg when start button is pressed
-    // controller
-    //     .start()
-    //     .onTrue(
-    //         Commands.parallel(
-    //             this.setToNormalDriveCmd(),
-    //             Commands.runOnce(
-    //                     () ->
-    //                         drive.setPose(
-    //                             new Pose2d(
-    //                                 drive.getPose().getTranslation(),
-    // Rotation2d.fromDegrees(0))),
-    //                     drive)
-    //                 .ignoringDisable(true)));
+    controller
+        .start()
+        .onTrue(
+            Commands.parallel(
+                this.setToNormalDriveCmd(),
+                Commands.runOnce(
+                        () ->
+                            drive.setPose(
+                                new Pose2d(
+                                    drive.getPose().getTranslation(), Rotation2d.fromDegrees(0))),
+                        drive)
+                    .ignoringDisable(true)));
 
     // // Reset gyro to 180 deg when start button is pressed
-    // controller
-    //     .back()
-    //     .onTrue(
-    //         Commands.parallel(
-    //                 this.setToNormalDriveCmd(),
-    //                 Commands.runOnce(
-    //                     () ->
-    //                         drive.setPose(
-    //                             new Pose2d(
-    //                                 drive.getPose().getTranslation(),
-    // Rotation2d.fromDegrees(180))),
-    //                     drive))
-    //             .ignoringDisable(true));
+    controller
+        .back()
+        .onTrue(
+            Commands.parallel(
+                    this.setToNormalDriveCmd(),
+                    Commands.runOnce(
+                        () ->
+                            drive.setPose(
+                                new Pose2d(
+                                    drive.getPose().getTranslation(), Rotation2d.fromDegrees(180))),
+                        drive))
+                .ignoringDisable(true));
 
     // POV Precision Driving
     controller
@@ -124,7 +127,28 @@ public class DevControls {
         .whileTrue(
             hood.setAngleStopAtBounds(
                 () -> Degrees.of(hood.getCurrentPosition().in(Degrees) + 5))); // Bring hood up
-    controller.a().whileTrue(dyeRotor.indexFuel()); // Bring hood up
+
+    // DyeRotor controls
+    // A button - index fuel
+    controller.a().whileTrue(dyeRotor.indexFuel()).onFalse(dyeRotor.stopCommand());
+
+    // B button - index fuel
+    controller.b().whileTrue(feeder.feedShooter()).onFalse(feeder.stop());
+
+    controller.x().whileTrue(flywheels.setVelocity(() -> LauncherConstants.Flywheels.launchVelocity.get())).onFalse(flywheels.stop());
+
+
+    // Y button - index fuel in parallel (same effect since it's the same command)
+    controller
+        .y()
+        .whileTrue(
+            Commands.sequence(
+                Commands.race(
+                    flywheels.setVelocity(
+                        () -> LauncherConstants.Flywheels.launchVelocity.get()), // Spin up flywheels to launch velocity
+                    new WaitUntilCommand(flywheels::atTarget)),
+                Commands.parallel(dyeRotor.indexFuel(), feeder.feedShooter())))
+        .onFalse(Commands.parallel(dyeRotor.stopCommand(), feeder.stop(), flywheels.stop()));
   }
 
   public double getLeftY() {
