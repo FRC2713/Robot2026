@@ -121,7 +121,7 @@ public class RobotContainer {
                 IntakeConstants.Roller.config, new TalonFXIO(IntakeConstants.Roller.config));
         intakeExtension =
             new IntakeExtension(
-                IntakeConstants.Extension.config,
+                IntakeConstants.Extension.simConfig,
                 new IntakeExtensionIOTalonFX(IntakeConstants.Extension.differentialConfig));
         dyeRotor =
             new DyeRotor(
@@ -161,8 +161,8 @@ public class RobotContainer {
                 IntakeConstants.Roller.config, new SimTalonFXIO(IntakeConstants.Roller.config));
         intakeExtension =
             new IntakeExtension(
-                IntakeConstants.Extension.config,
-                new SimTalonFXIO(IntakeConstants.Extension.config));
+                IntakeConstants.Extension.simConfig,
+                new SimTalonFXIO(IntakeConstants.Extension.simConfig));
         dyeRotor =
             new DyeRotor(
                 SerializerConstants.DyeRotor.config,
