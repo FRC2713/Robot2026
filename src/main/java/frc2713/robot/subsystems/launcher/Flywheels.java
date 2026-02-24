@@ -203,12 +203,16 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
 
   public void launchFuel(LaunchSolution solution) {
     Time now = RobotTime.getTimestamp();
-    // Enforce max fire rate by checking time since last launch. If we haven't waited long enough, skip this launch.
-    if (now.minus(lastLaunchTime).in(Seconds) >= (1.0 / LauncherConstants.Flywheels.LaunchRateFuelPerSecond)) {
+    // Enforce max fire rate by checking time since last launch. If we haven't waited long enough,
+    // skip this launch.
+    if (now.minus(lastLaunchTime).in(Seconds)
+        >= (1.0 / LauncherConstants.Flywheels.LaunchRateFuelPerSecond)) {
       lastLaunchTime = now;
 
-    this.fuelTrajectories.launch(
-        this.getGlobalPose().getTranslation(), getLaunchVector(solution), RotationsPerSecond.of(0));
+      this.fuelTrajectories.launch(
+          this.getGlobalPose().getTranslation(),
+          getLaunchVector(solution),
+          RotationsPerSecond.of(0));
     }
   }
 }

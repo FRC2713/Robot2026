@@ -129,8 +129,7 @@ public final class LauncherConstants {
 
     public static Distance WHEEL_DIAMETER = Inches.of(4);
     // How many fuel we can launch per second at max firing rate
-    public static double LaunchRateFuelPerSecond = 9.0; 
-    
+    public static double LaunchRateFuelPerSecond = 9.0;
 
     static {
       // Distance (m) -> Ball Velocity (ft/s)
