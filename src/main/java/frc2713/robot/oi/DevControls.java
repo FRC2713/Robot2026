@@ -1,26 +1,28 @@
 package frc2713.robot.oi;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.RPM;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.launcher.Flywheels;
 import frc2713.robot.subsystems.launcher.Hood;
+import frc2713.robot.subsystems.launcher.LauncherConstants;
 import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 
 @SuppressWarnings("unused")
 public class DevControls {
-  private final CommandXboxController controller = new CommandXboxController(1);
+  private final CommandVader4Controller controller = new CommandVader4Controller(1);
 
   private final Drive drive;
   private final Flywheels flywheels;
@@ -66,7 +68,7 @@ public class DevControls {
                         drive)
                     .ignoringDisable(true)));
 
-    // Reset gyro to 180 deg when start button is pressed
+    // // Reset gyro to 180 deg when start button is pressed
     controller
         .back()
         .onTrue(
@@ -97,9 +99,6 @@ public class DevControls {
         .onFalse(this.setToNormalDriveCmd());
 
     // Turret angle controls
-    controller.leftBumper().onTrue(turret.setAngle(() -> Degrees.of(90)));
-    controller.rightBumper().onTrue(turret.setAngle(() -> Degrees.of(-270)));
-
     // Manual turret rotation with triggers - continuously target far in the desired direction
     // Velocity and acceleration scale with how hard the trigger is pressed
     controller
@@ -113,21 +112,43 @@ public class DevControls {
         .rightTrigger(0.01)
         .whileTrue(
             turret.setAngleStopAtBounds(
-                () -> Degrees.of(turret.getComputedTurretPosition().in(Degrees) - 30),
-                () -> controller.getRightTriggerAxis() * 0.2));
+                () -> Degrees.of(turret.getComputedTurretPosition().in(Degrees) - 180),
+                controller::getRightTriggerAxis));
 
-    // Manual hood rotation with pov up and down
-    // Velocity scaled from a double supplier
+    // Hood manual controls - bumpers bring hood up/down continuously until bounds hit
     controller
-        .povUp()
+        .leftBumper()
         .whileTrue(
             hood.setAngleStopAtBounds(
-                () -> hood.getCurrentPosition().plus(Degrees.of(5)), () -> 0.2));
+                () -> Degrees.of(hood.getCurrentPosition().in(Degrees) - 5))); // Bring hood down
+
     controller
-        .povDown()
+        .rightBumper()
         .whileTrue(
             hood.setAngleStopAtBounds(
-                () -> hood.getCurrentPosition().minus(Degrees.of(5)), () -> 0.2));
+                () -> Degrees.of(hood.getCurrentPosition().in(Degrees) + 5))); // Bring hood up
+
+    // DyeRotor controls
+    // A button - index fuel
+    controller.a().whileTrue(dyeRotor.indexFuel()).onFalse(dyeRotor.stopCommand());
+
+    // B button - index fuel
+    controller.b().whileTrue(feeder.feedShooter()).onFalse(feeder.stop());
+
+    controller.x().whileTrue(flywheels.setVelocity(() -> LauncherConstants.Flywheels.launchVelocity.get())).onFalse(flywheels.stop());
+
+
+    // Y button - index fuel in parallel (same effect since it's the same command)
+    controller
+        .y()
+        .whileTrue(
+            Commands.sequence(
+                Commands.race(
+                    flywheels.setVelocity(
+                        () -> LauncherConstants.Flywheels.launchVelocity.get()), // Spin up flywheels to launch velocity
+                    new WaitUntilCommand(flywheels::atTarget)),
+                Commands.parallel(dyeRotor.indexFuel(), feeder.feedShooter())))
+        .onFalse(Commands.parallel(dyeRotor.stopCommand(), feeder.stop(), flywheels.stop()));
   }
 
   public double getLeftY() {
@@ -144,6 +165,14 @@ public class DevControls {
 
   public double getRightY() {
     return controller.getRightY();
+  }
+
+  public double getLeftTriggerAxis() {
+    return controller.getLeftTriggerAxis();
+  }
+
+  public double getRightTriggerAxis() {
+    return controller.getRightTriggerAxis();
   }
 
   public void setToNormalDrive() {

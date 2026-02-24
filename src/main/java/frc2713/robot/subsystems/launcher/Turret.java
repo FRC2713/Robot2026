@@ -156,9 +156,9 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
 
           // Scale velocity and acceleration based on input
           mmConfig.MotionMagicCruiseVelocity =
-              config.fxConfig.MotionMagic.MotionMagicCruiseVelocity * scale;
+              config.fxConfig.MotionMagic.MotionMagicCruiseVelocity * scale * .5;
           mmConfig.MotionMagicAcceleration =
-              config.fxConfig.MotionMagic.MotionMagicAcceleration * scale;
+              config.fxConfig.MotionMagic.MotionMagicAcceleration * scale * .5;
           mmConfig.MotionMagicJerk = config.fxConfig.MotionMagic.MotionMagicJerk;
 
           Logger.recordOutput(pb.makePath("setpoint", "velocityScale"), scale);

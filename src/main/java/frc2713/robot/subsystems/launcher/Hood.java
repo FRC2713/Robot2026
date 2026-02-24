@@ -8,6 +8,7 @@ import static frc2713.robot.subsystems.launcher.LauncherConstants.Hood.FORWARD_L
 import static frc2713.robot.subsystems.launcher.LauncherConstants.Hood.REVERSE_LIMIT_DEGREES;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -19,6 +20,7 @@ import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
+import frc2713.robot.FieldConstants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -35,6 +37,23 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
         () -> convertSubsystemPositionToMotorPosition(desiredAngle.get()));
   }
 
+  public Command setAngleStopAtBounds(Supplier<Angle> desiredAngle) {
+    return motionMagicSetpointCommand(
+        () -> {
+          Angle requested = desiredAngle.get();
+          Angle lowerBound = LauncherConstants.Hood.retractedPosition;
+          Angle upperBound = LauncherConstants.Hood.extendedPosition;
+
+          // Clamp the requested angle between bounds
+          Angle clamped =
+              Degrees.of(
+                  MathUtil.clamp(
+                      requested.in(Degrees), lowerBound.in(Degrees), upperBound.in(Degrees)));
+
+          return convertSubsystemPositionToMotorPosition(clamped);
+        });
+  }
+
   public Command retract() {
     return setAngleCommand(() -> LauncherConstants.Hood.retractedPosition);
   }
@@ -46,6 +65,35 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   public Command otfCommand() {
     return setAngleCommand(otfAngSupplier);
   }
+
+  /**
+   * Creates a command that automatically retracts the hood when in designated field zones and
+   * raises it back up when outside those zones.
+   *
+   * @param poseSupplier Supplier for the robot's current pose
+   * @param defaultAngleSupplier Supplier for the desired hood angle when not in a retraction zone
+   * @return A command that manages hood position based on field location
+   */
+  public Command autoRetractCommand(
+      Supplier<Pose2d> poseSupplier, Supplier<Angle> defaultAngleSupplier) {
+    return setAngleCommand(
+        () -> {
+          Pose2d currentPose = poseSupplier.get();
+          boolean inRetractionZone =
+              FieldConstants.HoodRetractionZones.isInRetractionZone(currentPose);
+
+          Logger.recordOutput(pb.makePath("AutoRetract", "inRetractionZone"), inRetractionZone);
+          ducking = inRetractionZone;
+
+          if (inRetractionZone) {
+            return LauncherConstants.Hood.retractedPosition;
+          } else {
+            return defaultAngleSupplier.get();
+          }
+        });
+  }
+
+  @AutoLogOutput public boolean ducking = false;
 
   public final Supplier<Angle> otfAngSupplier =
       () -> {
