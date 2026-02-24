@@ -196,7 +196,13 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
         Angle targetAngle;
 
         if (solution.isValid()) {
-          targetAngle = Degrees.of(solution.turretFieldYaw().getDegrees());
+          // Convert the field-relative yaw to robot-relative using the current robot heading.
+          // This must happen here (not in LaunchingSolutionManager) so we always use the
+          // robot's heading RIGHT NOW, not a projected or stale heading from a previous cycle.
+          targetAngle =
+              Util.fieldToRobotRelative(
+                  Degrees.of(solution.turretFieldYaw().getDegrees()),
+                  RobotContainer.drive.getPose());
           Logger.recordOutput(super.pb.makePath("OTF", "response"), "using solution");
         } else if (solution.effectiveDistanceMeters() <= 0.9) {
           // invalid bc we're too close
