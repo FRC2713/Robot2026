@@ -7,6 +7,11 @@
 
 package frc2713.robot;
 
+import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
+import static edu.wpi.first.units.Units.FeetPerSecond;
+import static edu.wpi.first.units.Units.FeetPerSecondPerSecond;
+
 import choreo.auto.AutoFactory;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -50,6 +55,7 @@ import frc2713.robot.subsystems.vision.Vision;
 import frc2713.robot.subsystems.vision.VisionIO;
 import frc2713.robot.subsystems.vision.VisionIOSLAMDunk;
 import java.util.Arrays;
+import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -334,6 +340,12 @@ public class RobotContainer {
   public static class GameCommandGroups {
     public static Command otfShot =
         Commands.parallel(
+                DriveCommands.setDriveLimits(
+                    drive,
+                    Optional.of(FeetPerSecond.of(4.0)),
+                    Optional.of(FeetPerSecondPerSecond.of(12.0)),
+                    Optional.of(DegreesPerSecond.of(90.0)),
+                    Optional.of(DegreesPerSecondPerSecond.of(360.0))),
                 flywheels.otfCommand(),
                 hood.otfCommand(),
                 turret.otfCommand(),
@@ -353,6 +365,8 @@ public class RobotContainer {
             .withName("Hub Shooting");
 
     public static Command stopShooting =
-        Commands.parallel(feeder.stop(), dyeRotor.stopCommand()).withName("Stopped Shooting");
+        Commands.parallel(
+                DriveCommands.clearDriveLimits(drive), feeder.stop(), dyeRotor.stopCommand())
+            .withName("Stopped Shooting");
   }
 }

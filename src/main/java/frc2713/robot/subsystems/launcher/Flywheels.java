@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.InchesPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -34,6 +35,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
 
   private FuelTrajectories fuelTrajectories = new FuelTrajectories();
   private Time lastUpdateTime = RobotTime.getTimestamp();
+  private Time lastLaunchTime = RobotTime.getTimestamp();
 
   public Flywheels(
       final TalonFXSubsystemConfig leaderConfig,
@@ -201,7 +203,17 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   }
 
   public void launchFuel(LaunchSolution solution) {
-    this.fuelTrajectories.launch(
-        this.getGlobalPose().getTranslation(), getLaunchVector(solution), RotationsPerSecond.of(0));
+    Time now = RobotTime.getTimestamp();
+    // Enforce max fire rate by checking time since last launch. If we haven't waited long enough,
+    // skip this launch.
+    if (now.minus(lastLaunchTime).in(Seconds)
+        >= (1.0 / LauncherConstants.Flywheels.LaunchRateFuelPerSecond)) {
+      lastLaunchTime = now;
+
+      this.fuelTrajectories.launch(
+          this.getGlobalPose().getTranslation(),
+          getLaunchVector(solution),
+          RotationsPerSecond.of(0));
+    }
   }
 }

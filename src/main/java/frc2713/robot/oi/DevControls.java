@@ -1,6 +1,10 @@
 package frc2713.robot.oi;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
+import static edu.wpi.first.units.Units.FeetPerSecond;
+import static edu.wpi.first.units.Units.FeetPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RPM;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -19,6 +23,7 @@ import frc2713.robot.subsystems.launcher.LauncherConstants;
 import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
+import java.util.Optional;
 
 @SuppressWarnings("unused")
 public class DevControls {
@@ -126,6 +131,19 @@ public class DevControls {
         .rightBumper()
         .whileTrue(
             hood.setAngleStopAtBounds(
+                () -> hood.getCurrentPosition().minus(Degrees.of(5)), () -> 0.2));
+
+    // Test setting drive limits
+    controller
+        .x()
+        .onTrue(
+            DriveCommands.setDriveLimits(
+                drive,
+                Optional.of(FeetPerSecond.of(2.0)),
+                Optional.of(FeetPerSecondPerSecond.of(12.0)),
+                Optional.of(DegreesPerSecond.of(90.0)),
+                Optional.of(DegreesPerSecondPerSecond.of(360.0))))
+        .onFalse(DriveCommands.clearDriveLimits(drive));
                 () -> Degrees.of(hood.getCurrentPosition().in(Degrees) + 5))); // Bring hood up
 
     // DyeRotor controls
@@ -135,7 +153,7 @@ public class DevControls {
     // B button - index fuel
     controller.b().whileTrue(feeder.feedShooter()).onFalse(feeder.stop());
 
-    controller.x().whileTrue(flywheels.setVelocity(() -> LauncherConstants.Flywheels.launchVelocity.get())).onFalse(flywheels.stop());
+    //controller.x().whileTrue(flywheels.setVelocity(() -> LauncherConstants.Flywheels.launchVelocity.get())).onFalse(flywheels.stop());
 
 
     // Y button - index fuel in parallel (same effect since it's the same command)

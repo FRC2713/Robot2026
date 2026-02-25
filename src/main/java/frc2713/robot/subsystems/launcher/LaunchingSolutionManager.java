@@ -160,10 +160,11 @@ public class LaunchingSolutionManager extends SubsystemBase {
             neededMuzzleVelocity.getZ(),
             Math.hypot(neededMuzzleVelocity.getX(), neededMuzzleVelocity.getY()));
 
-    // Horizontal Angle (Yaw)
+    // Horizontal Angle (Yaw) - this is a field-relative angle, NOT robot-relative.
+    // The conversion to robot-relative happens at the point of use (e.g. in Turret)
+    // so that it always uses the robot's current heading, not a stale or projected one.
     Rotation2d newYaw =
-        new Rotation2d(Math.atan2(neededMuzzleVelocity.getY(), neededMuzzleVelocity.getX()))
-            .minus(robotPose.getRotation().toRotation2d());
+        new Rotation2d(Math.atan2(neededMuzzleVelocity.getY(), neededMuzzleVelocity.getX()));
 
     return new LaunchSolution(newYaw, newSpeed, new Rotation2d(newPitch), horizontalDist, true);
   }
