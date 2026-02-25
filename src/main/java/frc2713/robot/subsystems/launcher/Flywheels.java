@@ -36,18 +36,18 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   private Time lastUpdateTime = RobotTime.getTimestamp();
 
   public Flywheels(
-      final TalonFXSubsystemConfig leftConfig,
-      final TalonFXSubsystemConfig rightConfig,
-      final MotorIO leftLauncherMotorIO,
-      final MotorIO rightLauncherMotorIO) {
+      final TalonFXSubsystemConfig leaderConfig,
+      final TalonFXSubsystemConfig followerConfig,
+      final MotorIO leaderLauncherMotorIO,
+      final MotorIO followerLauncherMotorIO) {
     super(
         "Flywheels",
-        leftConfig,
-        rightConfig,
+        leaderConfig,
+        followerConfig,
         new MotorInputsAutoLogged(),
         new MotorInputsAutoLogged(),
-        leftLauncherMotorIO,
-        rightLauncherMotorIO);
+        leaderLauncherMotorIO,
+        followerLauncherMotorIO);
     this.fuelTrajectories = new FuelTrajectories();
   }
 
@@ -86,6 +86,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
           // invalid bc we're too close
           Logger.recordOutput(super.pb.makePath("OTF", "response"), "hub shot");
           targetSurfaceSpeed = FeetPerSecond.of(5);
+
         } else {
           // Fallback to distance-based lookup
           Logger.recordOutput(super.pb.makePath("OTF", "response"), "lookup map");
@@ -120,7 +121,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
 
   @AutoLogOutput
   public boolean atTarget() {
-    return Math.abs(this.leftInputs.closedLoopError)
+    return Math.abs(inputs.closedLoopError)
         <= LauncherConstants.Flywheels.acceptableError.in(RotationsPerSecond);
   }
 
@@ -155,7 +156,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   }
 
   public LinearVelocity getSurfaceSpeed() {
-    AngularVelocity wheelSpeed = super.getLeftCurrentVelocity();
+    AngularVelocity wheelSpeed = getLeaderCurrentVelocity();
     Distance wheelDiameter = Inches.of(4);
     Distance wheelCircumference = wheelDiameter.times(Math.PI);
     return InchesPerSecond.of(wheelSpeed.in(RotationsPerSecond) * wheelCircumference.in(Inches));

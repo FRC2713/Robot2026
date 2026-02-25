@@ -41,6 +41,8 @@ public class TalonFXIO implements MotorIO {
   private final DynamicMotionMagicVoltage dynamicMotionMagicVoltage =
       new DynamicMotionMagicVoltage(0.0, 0.0, 0.0);
   private final TorqueCurrentFOC torqueCurrentFOC = new TorqueCurrentFOC(0.0);
+  private final VelocityTorqueCurrentFOC velocityTorqueCurrentFOC =
+      new VelocityTorqueCurrentFOC(0.0);
 
   // Status signals
   private final StatusSignal<Angle> positionSignal;
@@ -234,6 +236,11 @@ public class TalonFXIO implements MotorIO {
   @Override
   public void setTorqueCurrentFOC(Current current) {
     talon.setControl(torqueCurrentFOC.withOutput(current));
+  }
+
+  @Override
+  public void setVelocityTorqueCurrentFOC(AngularVelocity velocity) {
+    talon.setControl(velocityTorqueCurrentFOC.withVelocity(velocity));
   }
 
   @Override

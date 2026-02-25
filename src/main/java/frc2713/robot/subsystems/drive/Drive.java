@@ -23,6 +23,7 @@ import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -49,6 +50,7 @@ import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.io.ArticulatedComponent;
 import frc2713.robot.Constants;
 import frc2713.robot.Constants.Mode;
+import frc2713.robot.FieldConstants;
 import frc2713.robot.generated.TunerConstants;
 import frc2713.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
@@ -252,6 +254,9 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
 
     // Update gyro alert
     gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
+    Logger.recordOutput(
+        "Drive/isInNeutralZone",
+        FieldConstants.NeutralZone.region.contains(new Rectangle2d(getPose(), 1.0, 1.0)));
   }
 
   /**

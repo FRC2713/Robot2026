@@ -69,6 +69,8 @@ public interface MotorIO {
 
   default void setTorqueCurrentFOC(Current current) {}
 
+  default void setVelocityTorqueCurrentFOC(AngularVelocity velocity) {}
+
   default void setMotionMagicConfig(MotionMagicConfigs config) {}
 
   default void setVoltageConfig(VoltageConfigs config) {}
