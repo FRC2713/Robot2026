@@ -25,6 +25,8 @@ import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.commands.autos.NeutralScoreNeutral;
 import frc2713.robot.commands.autos.NeutralScoreOutpostOTF;
+import frc2713.robot.commands.autos.NeutralSweepLeftToRight;
+import frc2713.robot.commands.autos.NeutralSweepRightToLeft;
 import frc2713.robot.commands.autos.RightSideAutoBump;
 import frc2713.robot.generated.TunerConstants;
 import frc2713.robot.oi.DevControls;
@@ -292,6 +294,34 @@ public class RobotContainer {
     autoChooser.addOption(
         "Trench to neutral otf to outpost",
         NeutralScoreOutpostOTF.routine(
+            autoFactory,
+            drive,
+            intakeExtension,
+            intakeRoller,
+            flywheels,
+            hood,
+            turret,
+            dyeRotor,
+            feeder,
+            () -> GameCommandGroups.getOtfShot(flywheels, hood, turret, feeder, dyeRotor)));
+
+    autoChooser.addOption(
+        "Trench Sweep Right to Left",
+        NeutralSweepRightToLeft.routine(
+            autoFactory,
+            drive,
+            intakeExtension,
+            intakeRoller,
+            flywheels,
+            hood,
+            turret,
+            dyeRotor,
+            feeder,
+            () -> GameCommandGroups.getOtfShot(flywheels, hood, turret, feeder, dyeRotor)));
+
+    autoChooser.addOption(
+        "Trench Sweep Left to Right",
+        NeutralSweepLeftToRight.routine(
             autoFactory,
             drive,
             intakeExtension,
