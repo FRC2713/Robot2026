@@ -1,6 +1,3 @@
-// Copyright (c) 2025-2026 Littleton Robotics
-// http://github.com/Mechanical-Advantage
-
 package frc2713.robot;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,6 +7,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
+import frc2713.lib.field.RectangleFieldRegion;
 import java.io.IOException;
 import java.nio.file.Path;
 import lombok.Getter;
@@ -61,17 +59,45 @@ public class FieldConstants {
 
     public static final double center = fieldWidth / 2.0;
 
-    // Right of hub
+    // Right of hub (RightBump.width used inline to avoid circular init with RightBump class)
     public static final double rightBumpStart = Hub.nearRightCorner.getY();
-    public static final double rightBumpEnd = rightBumpStart - RightBump.width;
+    public static final double rightBumpEnd = rightBumpStart - Units.inchesToMeters(73.0);
     public static final double rightTrenchOpenStart = rightBumpEnd - Units.inchesToMeters(12.0);
     public static final double rightTrenchOpenEnd = 0;
 
-    // Left of hub
+    // Left of hub (LeftBump.width used inline to avoid circular init with LeftBump class)
     public static final double leftBumpEnd = Hub.nearLeftCorner.getY();
-    public static final double leftBumpStart = leftBumpEnd + LeftBump.width;
+    public static final double leftBumpStart = leftBumpEnd + Units.inchesToMeters(73.0);
     public static final double leftTrenchOpenEnd = leftBumpStart + Units.inchesToMeters(12.0);
     public static final double leftTrenchOpenStart = fieldWidth;
+  }
+
+  public static class NeutralZone {
+    public static final RectangleFieldRegion nearRegion =
+        new RectangleFieldRegion(
+            new Translation2d(LinesVertical.neutralZoneNear, fieldWidth),
+            new Translation2d(LinesVertical.center, 0));
+
+    public static final RectangleFieldRegion farRegion =
+        new RectangleFieldRegion(
+            new Translation2d(LinesVertical.center, fieldWidth),
+            new Translation2d(LinesVertical.neutralZoneFar, 0));
+
+    public static final RectangleFieldRegion region =
+        new RectangleFieldRegion(
+            new Translation2d(LinesVertical.neutralZoneNear, fieldWidth),
+            new Translation2d(LinesVertical.neutralZoneFar, 0));
+  }
+
+  public static class AllianceZone {
+
+    public static final RectangleFieldRegion region =
+        new RectangleFieldRegion(
+            new Translation2d(0, fieldWidth), new Translation2d(LinesVertical.allianceZone, 0));
+    public static final RectangleFieldRegion oppRegion =
+        new RectangleFieldRegion(
+            new Translation2d(LinesVertical.oppAllianceZone, fieldWidth),
+            new Translation2d(fieldLength, 0));
   }
 
   /** Hub related constants */
@@ -129,6 +155,9 @@ public class FieldConstants {
         AprilTagLayoutType.OFFICIAL.getLayout().getTagPose(18).get().toPose2d();
     public static final Pose2d leftFace =
         AprilTagLayoutType.OFFICIAL.getLayout().getTagPose(21).get().toPose2d();
+
+    public static final RectangleFieldRegion region =
+        new RectangleFieldRegion(nearRightCorner, farLeftCorner);
   }
 
   /** Left Bump related constants */
@@ -141,19 +170,27 @@ public class FieldConstants {
 
     // Relevant reference points on alliance side
     public static final Translation2d nearLeftCorner =
-        new Translation2d(LinesVertical.hubCenter - width / 2, Units.inchesToMeters(255));
-    public static final Translation2d nearRightCorner = Hub.nearLeftCorner;
+        new Translation2d(LinesVertical.allianceZone, LinesHorizontal.leftBumpStart);
+    public static final Translation2d nearRightCorner =
+        new Translation2d(LinesVertical.allianceZone, LinesHorizontal.leftBumpEnd);
     public static final Translation2d farLeftCorner =
-        new Translation2d(LinesVertical.hubCenter + width / 2, Units.inchesToMeters(255));
-    public static final Translation2d farRightCorner = Hub.farLeftCorner;
+        new Translation2d(LinesVertical.neutralZoneNear, LinesHorizontal.leftBumpStart);
+    public static final Translation2d farRightCorner =
+        new Translation2d(LinesVertical.neutralZoneNear, LinesHorizontal.leftBumpEnd);
+
+    public static final RectangleFieldRegion region =
+        new RectangleFieldRegion(farRightCorner, nearLeftCorner);
 
     // Relevant reference points on opposing side
     public static final Translation2d oppNearLeftCorner =
-        new Translation2d(LinesVertical.hubCenter - width / 2, Units.inchesToMeters(255));
+        new Translation2d(LinesVertical.neutralZoneFar, LinesHorizontal.leftBumpStart);
     public static final Translation2d oppNearRightCorner = Hub.oppNearLeftCorner;
     public static final Translation2d oppFarLeftCorner =
-        new Translation2d(LinesVertical.hubCenter + width / 2, Units.inchesToMeters(255));
+        new Translation2d(LinesVertical.oppAllianceZone, LinesHorizontal.leftBumpStart);
     public static final Translation2d oppFarRightCorner = Hub.oppFarLeftCorner;
+
+    public static final RectangleFieldRegion oppRegion =
+        new RectangleFieldRegion(oppFarRightCorner, oppNearLeftCorner);
   }
 
   /** Right Bump related constants */
@@ -165,19 +202,28 @@ public class FieldConstants {
 
     // Relevant reference points on alliance side
     public static final Translation2d nearLeftCorner =
-        new Translation2d(LinesVertical.hubCenter + width / 2, Units.inchesToMeters(255));
-    public static final Translation2d nearRightCorner = Hub.nearLeftCorner;
+        new Translation2d(LinesVertical.allianceZone, LinesHorizontal.rightBumpStart);
+    public static final Translation2d nearRightCorner =
+        new Translation2d(LinesVertical.allianceZone, LinesHorizontal.rightBumpEnd);
     public static final Translation2d farLeftCorner =
-        new Translation2d(LinesVertical.hubCenter - width / 2, Units.inchesToMeters(255));
-    public static final Translation2d farRightCorner = Hub.farLeftCorner;
+        new Translation2d(LinesVertical.neutralZoneNear, LinesHorizontal.rightBumpStart);
+    public static final Translation2d farRightCorner =
+        new Translation2d(LinesVertical.neutralZoneNear, LinesHorizontal.rightBumpEnd);
+
+    public static final RectangleFieldRegion region =
+        new RectangleFieldRegion(farRightCorner, nearLeftCorner);
 
     // Relevant reference points on opposing side
     public static final Translation2d oppNearLeftCorner =
-        new Translation2d(LinesVertical.hubCenter + width / 2, Units.inchesToMeters(255));
-    public static final Translation2d oppNearRightCorner = Hub.oppNearLeftCorner;
+        new Translation2d(LinesVertical.neutralZoneFar, LinesHorizontal.rightBumpStart);
+    public static final Translation2d oppNearRightCorner =
+        new Translation2d(LinesVertical.neutralZoneFar, LinesHorizontal.rightBumpEnd);
     public static final Translation2d oppFarLeftCorner =
-        new Translation2d(LinesVertical.hubCenter - width / 2, Units.inchesToMeters(255));
-    public static final Translation2d oppFarRightCorner = Hub.oppFarLeftCorner;
+        new Translation2d(LinesVertical.oppAllianceZone, LinesHorizontal.rightBumpStart);
+    public static final Translation2d oppFarRightCorner =
+        new Translation2d(LinesVertical.oppAllianceZone, LinesHorizontal.rightBumpEnd);
+    public static final RectangleFieldRegion oppRegion =
+        new RectangleFieldRegion(oppFarRightCorner, oppNearLeftCorner);
   }
 
   /** Left Trench related constants */
@@ -190,16 +236,40 @@ public class FieldConstants {
     public static final double openingHeight = Units.inchesToMeters(22.25);
 
     // Relevant reference points on alliance side
+    public static final Translation2d nearLeftCorner =
+        new Translation2d(LinesVertical.hubCenter - depth / 2, fieldWidth);
+    public static final Translation2d nearRightCorner =
+        new Translation2d(LinesVertical.hubCenter - depth / 2, fieldWidth - width);
+    public static final Translation2d farLeftCorner =
+        new Translation2d(LinesVertical.hubCenter + depth / 2, fieldWidth);
+    public static final Translation2d farRightCorner =
+        new Translation2d(LinesVertical.hubCenter + depth / 2, fieldWidth - width);
+
     public static final Translation3d openingTopLeft =
         new Translation3d(LinesVertical.hubCenter, fieldWidth, openingHeight);
     public static final Translation3d openingTopRight =
         new Translation3d(LinesVertical.hubCenter, fieldWidth - openingWidth, openingHeight);
 
+    public static final RectangleFieldRegion region =
+        new RectangleFieldRegion(farRightCorner, nearLeftCorner);
+
     // Relevant reference points on opposing side
+    public static final Translation2d oppNearLeftCorner =
+        new Translation2d(LinesVertical.oppHubCenter - depth / 2, fieldWidth);
+    public static final Translation2d oppNearRightCorner =
+        new Translation2d(LinesVertical.oppHubCenter - depth / 2, fieldWidth - width);
+    public static final Translation2d oppFarLeftCorner =
+        new Translation2d(LinesVertical.oppHubCenter + depth / 2, fieldWidth);
+    public static final Translation2d oppFarRightCorner =
+        new Translation2d(LinesVertical.oppHubCenter + depth / 2, fieldWidth - width);
+
     public static final Translation3d oppOpeningTopLeft =
         new Translation3d(LinesVertical.oppHubCenter, fieldWidth, openingHeight);
     public static final Translation3d oppOpeningTopRight =
         new Translation3d(LinesVertical.oppHubCenter, fieldWidth - openingWidth, openingHeight);
+
+    public static final RectangleFieldRegion oppRegion =
+        new RectangleFieldRegion(oppFarRightCorner, oppNearLeftCorner);
   }
 
   public static class RightTrench {
@@ -212,16 +282,40 @@ public class FieldConstants {
     public static final double openingHeight = Units.inchesToMeters(22.25);
 
     // Relevant reference points on alliance side
+    public static final Translation2d nearLeftCorner =
+        new Translation2d(LinesVertical.hubCenter - depth / 2, width);
+    public static final Translation2d nearRightCorner =
+        new Translation2d(LinesVertical.hubCenter - depth / 2, 0);
+    public static final Translation2d farLeftCorner =
+        new Translation2d(LinesVertical.hubCenter + depth / 2, width);
+    public static final Translation2d farRightCorner =
+        new Translation2d(LinesVertical.hubCenter + depth / 2, 0);
+
     public static final Translation3d openingTopLeft =
         new Translation3d(LinesVertical.hubCenter, openingWidth, openingHeight);
     public static final Translation3d openingTopRight =
         new Translation3d(LinesVertical.hubCenter, 0, openingHeight);
 
+    public static final RectangleFieldRegion region =
+        new RectangleFieldRegion(farRightCorner, nearLeftCorner);
+
     // Relevant reference points on opposing side
+    public static final Translation2d oppNearLeftCorner =
+        new Translation2d(LinesVertical.oppHubCenter - depth / 2, width);
+    public static final Translation2d oppNearRightCorner =
+        new Translation2d(LinesVertical.oppHubCenter - depth / 2, 0);
+    public static final Translation2d oppFarLeftCorner =
+        new Translation2d(LinesVertical.oppHubCenter + depth / 2, width);
+    public static final Translation2d oppFarRightCorner =
+        new Translation2d(LinesVertical.oppHubCenter + depth / 2, 0);
+
     public static final Translation3d oppOpeningTopLeft =
         new Translation3d(LinesVertical.oppHubCenter, openingWidth, openingHeight);
     public static final Translation3d oppOpeningTopRight =
         new Translation3d(LinesVertical.oppHubCenter, 0, openingHeight);
+
+    public static final RectangleFieldRegion oppRegion =
+        new RectangleFieldRegion(oppFarRightCorner, oppNearLeftCorner);
   }
 
   /** Tower related constants */
@@ -257,6 +351,11 @@ public class FieldConstants {
                 - innerOpeningWidth / 2
                 - Units.inchesToMeters(0.75));
 
+    public static final RectangleFieldRegion region =
+        new RectangleFieldRegion(
+            new Translation2d(0, centerPoint.getY() - (width / 2)),
+            new Translation2d(centerPoint.getX(), centerPoint.getY() + (width / 2)));
+
     // Relevant reference points on opposing side
     public static final Translation2d oppCenterPoint =
         new Translation2d(
@@ -274,6 +373,11 @@ public class FieldConstants {
             (AprilTagLayoutType.OFFICIAL.getLayout().getTagPose(15).get().getY())
                 - innerOpeningWidth / 2
                 - Units.inchesToMeters(0.75));
+
+    public static final RectangleFieldRegion oppRegion =
+        new RectangleFieldRegion(
+            new Translation2d(oppCenterPoint.getX(), oppCenterPoint.getY() - (width / 2)),
+            new Translation2d(fieldLength, oppCenterPoint.getY() + (width / 2)));
   }
 
   public static class Depot {
@@ -290,6 +394,17 @@ public class FieldConstants {
         new Translation3d(depth, (fieldWidth / 2) + distanceFromCenterY + (width / 2), height);
     public static final Translation3d rightCorner =
         new Translation3d(depth, (fieldWidth / 2) + distanceFromCenterY - (width / 2), height);
+
+    public static final RectangleFieldRegion region =
+        new RectangleFieldRegion(
+            new Translation2d(0, (fieldWidth / 2) + distanceFromCenterY - (width / 2)),
+            new Translation2d(depth, (fieldWidth / 2) + distanceFromCenterY + (width / 2)));
+
+    public static final RectangleFieldRegion oppRegion =
+        new RectangleFieldRegion(
+            new Translation2d(
+                fieldLength - depth, (fieldWidth / 2) - distanceFromCenterY - (width / 2)),
+            new Translation2d(fieldLength, (fieldWidth / 2) - distanceFromCenterY + (width / 2)));
   }
 
   public static class Outpost {
@@ -301,6 +416,171 @@ public class FieldConstants {
     // Relevant reference points on alliance side
     public static final Translation2d centerPoint =
         new Translation2d(0, AprilTagLayoutType.OFFICIAL.getLayout().getTagPose(29).get().getY());
+  }
+
+  /**
+   * Defines zones on the field where the hood must be retracted to avoid collisions with field
+   * elements like trenches or other obstacles. Each zone is defined by min/max X and Y coordinates.
+   * Origin is at the corner of the BLUE alliance near the outpost.
+   */
+  public static class HoodRetractionZones {
+
+    /** A rectangular zone on the field defined by X and Y bounds */
+    public record Zone(double minX, double maxX, double minY, double maxY) {
+      /**
+       * Check if a pose is within this zone
+       *
+       * @param pose The robot pose to check
+       * @return true if the pose is within the zone bounds
+       */
+      public boolean contains(Pose2d pose) {
+        double x = pose.getX();
+        double y = pose.getY();
+        return x >= minX && x <= maxX && y >= minY && y <= maxY;
+      }
+    }
+
+    // Robot dimensions: 33.25" + 12" extension = 45.25" maximum dimension
+    private static final double ROBOT_MAX_DIMENSION = Units.inchesToMeters(45.25);
+
+    // BLUE ALLIANCE ZONES
+
+    /**
+     * Duck zone for BLUE LEFT trench - starts one robot length away from trench opening Zone
+     * extends from one robot length before the trench opening to the hub center Does not extend
+     * into the bump area
+     */
+    public static final Zone BLUE_LEFT_DUCK_ZONE =
+        new Zone(
+            LinesVertical.hubCenter - ROBOT_MAX_DIMENSION, // minX: one robot length before opening
+            LinesVertical.hubCenter, // maxX: at the hub center (trench opening)
+            LinesHorizontal.leftBumpStart, // minY: start after bump area
+            LinesHorizontal.leftTrenchOpenStart // maxY: extend to full width
+            );
+
+    /**
+     * Duck zone for BLUE RIGHT trench - starts one robot length away from trench opening Zone
+     * extends from one robot length before the trench opening to the hub center Does not extend
+     * into the bump area
+     */
+    public static final Zone BLUE_RIGHT_DUCK_ZONE =
+        new Zone(
+            LinesVertical.hubCenter - ROBOT_MAX_DIMENSION, // minX: one robot length before opening
+            LinesVertical.hubCenter, // maxX: at the hub center (trench opening)
+            LinesHorizontal.rightTrenchOpenEnd, // minY: extend from edge
+            LinesHorizontal.rightBumpEnd // maxY: end before bump area
+            );
+
+    /**
+     * Duck zone for exiting BLUE LEFT trench - extends from hub center one robot length away Zone
+     * extends from the hub center to one robot length after the trench opening Does not extend into
+     * the bump area
+     */
+    public static final Zone BLUE_LEFT_DUCK_EXIT_ZONE =
+        new Zone(
+            LinesVertical.hubCenter, // minX: at the hub center (trench opening)
+            LinesVertical.hubCenter + ROBOT_MAX_DIMENSION, // maxX: one robot length after opening
+            LinesHorizontal.leftBumpStart, // minY: start after bump area
+            LinesHorizontal.leftTrenchOpenStart // maxY: extend to full width
+            );
+
+    /**
+     * Duck zone for exiting BLUE RIGHT trench - extends from hub center one robot length away Zone
+     * extends from the hub center to one robot length after the trench opening Does not extend into
+     * the bump area
+     */
+    public static final Zone BLUE_RIGHT_DUCK_EXIT_ZONE =
+        new Zone(
+            LinesVertical.hubCenter, // minX: at the hub center (trench opening)
+            LinesVertical.hubCenter + ROBOT_MAX_DIMENSION, // maxX: one robot length after opening
+            LinesHorizontal.rightTrenchOpenEnd, // minY: extend from edge
+            LinesHorizontal.rightBumpEnd // maxY: end before bump area
+            );
+
+    // RED ALLIANCE ZONES (mirrored on opposite side of field)
+
+    /**
+     * Duck zone for RED LEFT trench - starts one robot length away from trench opening Zone extends
+     * from one robot length before the trench opening to the opposing hub center Does not extend
+     * into the bump area
+     */
+    public static final Zone RED_LEFT_DUCK_ZONE =
+        new Zone(
+            LinesVertical.oppHubCenter, // minX: at the opposing hub center (trench opening)
+            LinesVertical.oppHubCenter
+                + ROBOT_MAX_DIMENSION, // maxX: one robot length after opening
+            LinesHorizontal.leftBumpStart, // minY: start after bump area
+            LinesHorizontal.leftTrenchOpenStart // maxY: extend to full width
+            );
+
+    /**
+     * Duck zone for RED RIGHT trench - starts one robot length away from trench opening Zone
+     * extends from one robot length before the trench opening to the opposing hub center Does not
+     * extend into the bump area
+     */
+    public static final Zone RED_RIGHT_DUCK_ZONE =
+        new Zone(
+            LinesVertical.oppHubCenter, // minX: at the opposing hub center (trench opening)
+            LinesVertical.oppHubCenter
+                + ROBOT_MAX_DIMENSION, // maxX: one robot length after opening
+            LinesHorizontal.rightTrenchOpenEnd, // minY: extend from edge
+            LinesHorizontal.rightBumpEnd // maxY: end before bump area
+            );
+
+    /**
+     * Duck zone for exiting RED LEFT trench - extends from opposing hub center one robot length
+     * away Zone extends from one robot length before the opposing hub center to the hub center Does
+     * not extend into the bump area
+     */
+    public static final Zone RED_LEFT_DUCK_EXIT_ZONE =
+        new Zone(
+            LinesVertical.oppHubCenter
+                - ROBOT_MAX_DIMENSION, // minX: one robot length before opening
+            LinesVertical.oppHubCenter, // maxX: at the opposing hub center (trench opening)
+            LinesHorizontal.leftBumpStart, // minY: start after bump area
+            LinesHorizontal.leftTrenchOpenStart // maxY: extend to full width
+            );
+
+    /**
+     * Duck zone for exiting RED RIGHT trench - extends from opposing hub center one robot length
+     * away Zone extends from one robot length before the opposing hub center to the hub center Does
+     * not extend into the bump area
+     */
+    public static final Zone RED_RIGHT_DUCK_EXIT_ZONE =
+        new Zone(
+            LinesVertical.oppHubCenter
+                - ROBOT_MAX_DIMENSION, // minX: one robot length before opening
+            LinesVertical.oppHubCenter, // maxX: at the opposing hub center (trench opening)
+            LinesHorizontal.rightTrenchOpenEnd, // minY: extend from edge
+            LinesHorizontal.rightBumpEnd // maxY: end before bump area
+            );
+
+    /** Array of all retraction zones for easy iteration */
+    public static final Zone[] ALL_ZONES = {
+      BLUE_LEFT_DUCK_ZONE,
+      BLUE_RIGHT_DUCK_ZONE,
+      BLUE_LEFT_DUCK_EXIT_ZONE,
+      BLUE_RIGHT_DUCK_EXIT_ZONE,
+      RED_LEFT_DUCK_ZONE,
+      RED_RIGHT_DUCK_ZONE,
+      RED_LEFT_DUCK_EXIT_ZONE,
+      RED_RIGHT_DUCK_EXIT_ZONE
+    };
+
+    /**
+     * Check if the robot is in any retraction zone
+     *
+     * @param pose The current robot pose
+     * @return true if the robot is in any zone requiring hood retraction
+     */
+    public static boolean isInRetractionZone(Pose2d pose) {
+      for (Zone zone : ALL_ZONES) {
+        if (zone.contains(pose)) {
+          return true;
+        }
+      }
+      return false;
+    }
   }
 
   @RequiredArgsConstructor
@@ -360,4 +640,5 @@ public class FieldConstants {
       return layoutString;
     }
   }
+
 }

@@ -29,14 +29,14 @@ public class DyeRotor extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   }
 
   public Command indexFuel() {
-    return setVelocity(() -> SerializerConstants.DyeRotor.indexingSpeed);
+    return setVelocity(() -> SerializerConstants.DyeRotor.indexingSpeed.get());
   }
 
   public Command feedWhenReady(BooleanSupplier isReady) {
     return setVelocity(
         () ->
             isReady.getAsBoolean()
-                ? SerializerConstants.DyeRotor.indexingSpeed
+                ? SerializerConstants.DyeRotor.indexingSpeed.get()
                 : RotationsPerSecond.of(0));
   }
 
