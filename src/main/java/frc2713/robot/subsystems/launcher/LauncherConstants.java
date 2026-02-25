@@ -57,7 +57,10 @@ public final class LauncherConstants {
 
       config.initialTransform =
           new Transform3d(
-              new Translation3d(0, Inches.of(1.75).in(Meters), Inches.of(18.484119).in(Meters)),
+              new Translation3d(
+                  Inches.of(0.5).in(Meters),
+                  Inches.of(0.5).in(Meters),
+                  Inches.of(18.484119).in(Meters)),
               new Rotation3d(0, 0, 0));
     }
 
@@ -112,6 +115,8 @@ public final class LauncherConstants {
       followerConfig.unitToRotorRatio = 1.0; // 1:1 ratio
       followerConfig.momentOfInertia = 0.01;
       followerConfig.useFOC = false;
+
+      
     }
 
     public static int MODEL_INDEX = 5;
@@ -171,7 +176,7 @@ public final class LauncherConstants {
 
       config.initialTransform =
           new Transform3d(
-              new Translation3d(Inches.of(4.086915).in(Meters), 0, 0), new Rotation3d());
+              new Translation3d(Inches.of(2.452807).in(Meters), 0, Inches.of(1.026032).in(Meters)), new Rotation3d());
     }
 
     public static Angle retractedPosition = Degrees.of(0);
@@ -193,8 +198,8 @@ public final class LauncherConstants {
       angleMap.put(1.5, 18.0);
       angleMap.put(2.0, 24.0);
       angleMap.put(3.0, 28.0);
-      angleMap.put(4.0, 32.0);
-      angleMap.put(4.5, 32.0);
+      angleMap.put(4.0, 30.0);
+      angleMap.put(4.5, 30.0);
       angleMap.put(5.0, 30.0);
     }
   }

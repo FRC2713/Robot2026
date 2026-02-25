@@ -1,8 +1,5 @@
 package frc2713.lib.subsystem;
 
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meters;
-
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -32,5 +29,5 @@ public class TalonFXSubsystemConfig {
   public double momentOfInertia = 0.5;
 
   public Transform3d initialTransform =
-      new Transform3d(new Translation3d(0, 0, Inches.of(18.484119).in(Meters)), new Rotation3d());
+      new Transform3d(new Translation3d(0, 0, 0), new Rotation3d());
 }
