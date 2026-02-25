@@ -23,6 +23,8 @@ import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.commands.DriveCommands;
+import frc2713.robot.commands.autos.NeutralScoreNeutral;
+import frc2713.robot.commands.autos.NeutralScoreOutpostOTF;
 import frc2713.robot.commands.autos.RightSideAutoBump;
 import frc2713.robot.generated.TunerConstants;
 import frc2713.robot.oi.DevControls;
@@ -274,6 +276,32 @@ public class RobotContainer {
             turret,
             dyeRotor,
             feeder));
+    autoChooser.addOption(
+        "Trench to neutral launch then refuel",
+        NeutralScoreNeutral.routine(
+            autoFactory,
+            drive,
+            intakeExtension,
+            intakeRoller,
+            flywheels,
+            hood,
+            turret,
+            dyeRotor,
+            feeder,
+            () -> GameCommandGroups.getOtfShot(flywheels, hood, turret, feeder, dyeRotor)));
+    autoChooser.addOption(
+        "Trench to neutral otf to outpost",
+        NeutralScoreOutpostOTF.routine(
+            autoFactory,
+            drive,
+            intakeExtension,
+            intakeRoller,
+            flywheels,
+            hood,
+            turret,
+            dyeRotor,
+            feeder,
+            () -> GameCommandGroups.getOtfShot(flywheels, hood, turret, feeder, dyeRotor)));
 
     // Configure the button bindings
     configureButtonBindings();
@@ -351,6 +379,18 @@ public class RobotContainer {
    * between Driver, Developer, and AutoRoutines
    */
   public static class GameCommandGroups {
+    public static Command getOtfShot(
+        Flywheels flywheels, Hood hood, Turret turret, Feeder feeder, DyeRotor dyeRotor) {
+      return Commands.parallel(
+              flywheels.otfCommand(),
+              hood.otfCommand(),
+              turret.otfCommand(),
+              flywheels.simulateLaunchedFuel(flywheels::atTarget),
+              feeder.feedWhenReady(flywheels::atTarget),
+              dyeRotor.feedWhenReady(flywheels::atTarget))
+          .withName("OTF Shooting");
+    }
+
     public static Command otfShot =
         Commands.parallel(
                 flywheels.otfCommand(),
