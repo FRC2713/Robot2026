@@ -207,7 +207,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
     // Enforce max fire rate by checking time since last launch. If we haven't waited long enough,
     // skip this launch.
     if (now.minus(lastLaunchTime).in(Seconds)
-        >= (1.0 / LauncherConstants.Flywheels.LaunchRateFuelPerSecond)) {
+        >= (1.0 / LauncherConstants.Flywheels.launchRateFuelPerSecond)) {
       lastLaunchTime = now;
 
       this.fuelTrajectories.launch(

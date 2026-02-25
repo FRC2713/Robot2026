@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.AngularVelocity;
 import frc2713.lib.drivers.CANDeviceId;
+import frc2713.lib.dynamics.MoiUnits;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.LoggedTunableMeasure;
 
@@ -34,8 +35,12 @@ public final class SerializerConstants {
       config.fxConfig.Slot0.kV = 0.12; // Volts per rps (feedforward)
 
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-      config.unitToRotorRatio = 46.0 / 14.0;
-      config.momentOfInertia = 0.001; // kg*m^2 for simulation (small roller)
+      config.unitToRotorRatio =
+          (8.0 / 44.0)
+              * (12.0
+                  / 114.0); // 8 tooth pinion to 44 tooth gear, 12 tooth gear to 114 tooth gear for
+      // total reduction of 0.0195
+      config.momentOfInertia = MoiUnits.PoundSquareInches.of(89.2780792);
 
       config.initialTransform =
           new Transform3d(new Translation3d(0, Inches.of(1.75).in(Meters), 0), new Rotation3d());
@@ -56,7 +61,6 @@ public final class SerializerConstants {
     static {
       config.name = "Feeder";
       config.talonCANID = new CANDeviceId(44); // Example CAN ID, replace with actual ID
-
       config.useFOC = false;
 
       // Velocity PID gains for VelocityVoltage control
@@ -68,8 +72,11 @@ public final class SerializerConstants {
       config.fxConfig.Slot0.kV = 0.12; // Volts per rps (feedforward)
 
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-      config.unitToRotorRatio = 1.0;
-      config.momentOfInertia = 0.001; // kg*m^2 for simulation
+      config.unitToRotorRatio =
+          14.0 / 37.0; // 14 tooth gear on motor to 37 tooth gear on feeder roller
+      // tough to estimate this, but I just determined the MOI of the wheel assembly by the hook and
+      // tripled it
+      config.momentOfInertia = MoiUnits.PoundSquareInches.of(0.075 * 3);
     }
 
     public static LoggedTunableMeasure<AngularVelocity> shootingSpeed =
