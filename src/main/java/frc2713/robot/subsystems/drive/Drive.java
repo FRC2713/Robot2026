@@ -22,6 +22,7 @@ import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rectangle2d;
@@ -111,6 +112,10 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, Pose2d.kZero);
 
+  private PIDController xController;
+  private PIDController yController;
+  private PIDController headingController;
+
   private final AdvantageScopePathBuilder odometryPb;
   private final AdvantageScopePathBuilder drivePb;
 
@@ -173,6 +178,11 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
         (targetPose) -> {
           Logger.recordOutput(odometryPb.makePath("TrajectorySetpoint"), targetPose);
         });
+
+    this.xController = DriveConstants.AutoConstants.xTrajectoryController.createPIDController();
+    this.yController = DriveConstants.AutoConstants.yTrajectoryController.createPIDController();
+    this.headingController =
+        DriveConstants.AutoConstants.headingTrajectoryController.createPIDController();
 
     // Configure SysId
     sysId =
@@ -565,20 +575,12 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
     // Generate the next speeds for the robot
     ChassisSpeeds speeds =
         new ChassisSpeeds(
-            sample.vx
-                + DriveConstants.AutoConstants.xTrajectoryController
-                    .createPIDController()
-                    .calculate(pose.getX(), sample.x),
-            sample.vy
-                + DriveConstants.AutoConstants.yTrajectoryController
-                    .createPIDController()
-                    .calculate(pose.getY(), sample.y),
+            sample.vx + xController.calculate(pose.getX(), sample.x),
+            sample.vy + yController.calculate(pose.getY(), sample.y),
             sample.omega
-                + DriveConstants.AutoConstants.headingTrajectoryController
-                    .createAngularPIDController()
-                    .calculate(
-                        pose.getRotation().getRadians(),
-                        Rotation2d.fromRadians(sample.heading).getRadians()));
+                + headingController.calculate(
+                    pose.getRotation().getRadians(),
+                    Rotation2d.fromRadians(sample.heading).getRadians()));
 
     this.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, this.getRotation()));
   }

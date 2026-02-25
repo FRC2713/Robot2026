@@ -368,6 +368,7 @@ public class RobotContainer {
    * between Driver, Developer, and AutoRoutines
    */
   public static class GameCommandGroups {
+    /** OTF shooting without drive limits. Use for auto routines. */
     public static Command getOtfShot(
         Flywheels flywheels, Hood hood, Turret turret, Feeder feeder, DyeRotor dyeRotor) {
       return Commands.parallel(
@@ -380,35 +381,53 @@ public class RobotContainer {
           .withName("OTF Shooting");
     }
 
-    public static Command otfShot =
-        Commands.parallel(
-                DriveCommands.setDriveLimits(
-                    drive,
-                    Optional.of(FeetPerSecond.of(4.0)),
-                    Optional.of(FeetPerSecondPerSecond.of(12.0)),
-                    Optional.of(DegreesPerSecond.of(90.0)),
-                    Optional.of(DegreesPerSecondPerSecond.of(360.0))),
-                flywheels.otfCommand(),
-                hood.otfCommand(),
-                turret.otfCommand(),
-                flywheels.simulateLaunchedFuel(flywheels::atTarget),
-                feeder.feedWhenReady(flywheels::atTarget),
-                dyeRotor.feedWhenReady(flywheels::atTarget))
-            .withName("OTF Shooting");
+    /** OTF shooting with drive limits. Use for driver/operator triggers. */
+    public static Command otfShot(
+        Drive drive,
+        Flywheels flywheels,
+        Hood hood,
+        Turret turret,
+        Feeder feeder,
+        DyeRotor dyeRotor) {
+      return Commands.parallel(
+              DriveCommands.setDriveLimits(
+                  drive,
+                  Optional.of(FeetPerSecond.of(4.0)),
+                  Optional.of(FeetPerSecondPerSecond.of(12.0)),
+                  Optional.of(DegreesPerSecond.of(90.0)),
+                  Optional.of(DegreesPerSecondPerSecond.of(360.0))),
+              flywheels.otfCommand(),
+              hood.otfCommand(),
+              turret.otfCommand(),
+              flywheels.simulateLaunchedFuel(flywheels::atTarget),
+              feeder.feedWhenReady(flywheels::atTarget),
+              dyeRotor.feedWhenReady(flywheels::atTarget))
+          .withName("OTF Shooting");
+    }
 
-    public static Command hubShot =
-        Commands.parallel(
-                flywheels.hubCommand(),
-                hood.hubCommand(),
-                turret.hubCommand(drive::getPose),
-                flywheels.simulateLaunchedFuel(() -> flywheels.atTarget() && hood.atTarget()),
-                feeder.feedWhenReady(() -> flywheels.atTarget() && hood.atTarget()),
-                dyeRotor.feedWhenReady(() -> flywheels.atTarget() && hood.atTarget()))
-            .withName("Hub Shooting");
+    /** Hub shooting command. */
+    public static Command hubShot(
+        Drive drive,
+        Flywheels flywheels,
+        Hood hood,
+        Turret turret,
+        Feeder feeder,
+        DyeRotor dyeRotor) {
+      return Commands.parallel(
+              flywheels.hubCommand(),
+              hood.hubCommand(),
+              turret.hubCommand(drive::getPose),
+              flywheels.simulateLaunchedFuel(() -> flywheels.atTarget() && hood.atTarget()),
+              feeder.feedWhenReady(() -> flywheels.atTarget() && hood.atTarget()),
+              dyeRotor.feedWhenReady(() -> flywheels.atTarget() && hood.atTarget()))
+          .withName("Hub Shooting");
+    }
 
-    public static Command stopShooting =
-        Commands.parallel(
-                DriveCommands.clearDriveLimits(drive), feeder.stop(), dyeRotor.stopCommand())
-            .withName("Stopped Shooting");
+    /** Stop shooting and clear drive limits. */
+    public static Command stopShooting(Drive drive, Feeder feeder, DyeRotor dyeRotor) {
+      return Commands.parallel(
+              DriveCommands.clearDriveLimits(drive), feeder.stop(), dyeRotor.stopCommand())
+          .withName("Stopped Shooting");
+    }
   }
 }

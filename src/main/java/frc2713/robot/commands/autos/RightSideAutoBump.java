@@ -56,7 +56,11 @@ public class RightSideAutoBump {
                 Commands.print("Moving to shooting position over bump"),
                 Commands.sequence(Commands.race(intakeRoller.stop(), new WaitCommand(2))),
                 moveToLaunchBump.cmd()));
-    moveToLaunchBump.done().onTrue(RobotContainer.GameCommandGroups.otfShot);
+    moveToLaunchBump
+        .done()
+        .onTrue(
+            RobotContainer.GameCommandGroups.otfShot(
+                driveSubsystem, flywheels, hood, turret, feeder, serializer));
     return routine;
   }
 
