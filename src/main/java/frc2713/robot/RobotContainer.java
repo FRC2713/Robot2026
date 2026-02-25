@@ -33,6 +33,7 @@ import frc2713.robot.subsystems.drive.ModuleIO;
 import frc2713.robot.subsystems.drive.ModuleIOSim;
 import frc2713.robot.subsystems.intake.IntakeConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
+import frc2713.robot.subsystems.intake.IntakeExtensionIOTalonFX;
 import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.launcher.Flywheels;
 import frc2713.robot.subsystems.launcher.Hood;
@@ -93,7 +94,7 @@ public class RobotContainer {
         // Real robot, instantiate hardware IO implementations
         // ModuleIOTalonFX is intended for modules with TalonFX drive, TalonFX turn, and
         // a CANcoder
-        /*
+        
         drive =
             new Drive(
                 new GyroIOPigeon2(),
@@ -120,27 +121,7 @@ public class RobotContainer {
         intakeExtension =
             new IntakeExtension(
                 IntakeConstants.Extension.config,
-                new SimTalonFXIO(IntakeConstants.Extension.config));
-                */
-        drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {});
-        flywheels =
-            new Flywheels(
-                LauncherConstants.Flywheels.leaderConfig,
-                LauncherConstants.Flywheels.followerConfig,
-                new TalonFXIO(LauncherConstants.Flywheels.leaderConfig),
-                new TalonFXIO(LauncherConstants.Flywheels.followerConfig));
-        hood = new Hood(new TalonFXSubsystemConfig(), new MotorIO() {});
-        turret = new Turret(new TurretSubsystemConfig(), new TurretMotorIO() {});
-        intakeRoller = new IntakeRoller(new TalonFXSubsystemConfig(), new MotorIO() {});
-        intakeExtension = new IntakeExtension(new TalonFXSubsystemConfig(), new MotorIO() {});
-
-        vision = new Vision(new VisionIO() {});
+                new IntakeExtensionIOTalonFX(IntakeConstants.Extension.differentialConfig));
         dyeRotor =
             new DyeRotor(
                 SerializerConstants.DyeRotor.config,
