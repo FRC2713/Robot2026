@@ -9,8 +9,8 @@ import edu.wpi.first.math.geometry.Translation2d;
  *
  * <p>Extends WPILib's {@link edu.wpi.first.math.geometry.Rectangle2d} with {@link
  * #contains(edu.wpi.first.math.geometry.Rectangle2d)} for containment checks and {@link
- * #intersects} for overlap checks. Supports both axis-aligned and rotated rectangles. All dimensions
- * are in meters.
+ * #intersects} for overlap checks. Supports both axis-aligned and rotated rectangles. All
+ * dimensions are in meters.
  */
 public class Rectangle2d extends edu.wpi.first.math.geometry.Rectangle2d {
 
@@ -156,8 +156,8 @@ public class Rectangle2d extends edu.wpi.first.math.geometry.Rectangle2d {
   }
 
   /**
-   * Checks if the first axis-aligned rectangle fully contains the second. Parameters are center (cx,
-   * cy) and dimensions (w, h) for each rectangle.
+   * Checks if the first axis-aligned rectangle fully contains the second. Parameters are center
+   * (cx, cy) and dimensions (w, h) for each rectangle.
    */
   private static boolean aabbContains(
       double cx1, double cy1, double w1, double h1, double cx2, double cy2, double w2, double h2) {
@@ -207,7 +207,10 @@ public class Rectangle2d extends edu.wpi.first.math.geometry.Rectangle2d {
     return m;
   }
 
-  /** Returns the four corners of the rectangle in global coordinates (order: +x+y, -x+y, -x-y, +x-y). */
+  /**
+   * Returns the four corners of the rectangle in global coordinates (order: +x+y, -x+y, -x-y,
+   * +x-y).
+   */
   private static Translation2d[] getCorners(edu.wpi.first.math.geometry.Rectangle2d rect) {
     double hx = rect.getXWidth() / 2.0;
     double hy = rect.getYWidth() / 2.0;

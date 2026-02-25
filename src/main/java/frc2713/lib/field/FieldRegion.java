@@ -40,7 +40,7 @@ public interface FieldRegion {
    * @param rectangle The rectangle to check for containment, in meters
    * @return true if the rectangle is fully inside this region
    */
-  boolean contains (Rectangle2d rectangle);
+  boolean contains(Rectangle2d rectangle);
 
   /**
    * Creates a Trigger that activates when the supplied position is inside this region.
@@ -53,7 +53,8 @@ public interface FieldRegion {
   }
 
   /**
-   * Creates a Trigger that activates when the supplied rectangle is fully contained within this region.
+   * Creates a Trigger that activates when the supplied rectangle is fully contained within this
+   * region.
    *
    * @param rectangleSupplier Supplies the rectangle to check (e.g. robot footprint)
    * @return A trigger that is active when the rectangle is fully inside this region

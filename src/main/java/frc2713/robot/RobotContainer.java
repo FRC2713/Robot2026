@@ -36,8 +36,10 @@ import frc2713.robot.oi.DevControls;
 import frc2713.robot.oi.DriverControls;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.drive.GyroIO;
+import frc2713.robot.subsystems.drive.GyroIOPigeon2;
 import frc2713.robot.subsystems.drive.ModuleIO;
 import frc2713.robot.subsystems.drive.ModuleIOSim;
+import frc2713.robot.subsystems.drive.ModuleIOTalonFX;
 import frc2713.robot.subsystems.intake.IntakeConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeExtensionIOTalonFX;
@@ -102,7 +104,7 @@ public class RobotContainer {
         // Real robot, instantiate hardware IO implementations
         // ModuleIOTalonFX is intended for modules with TalonFX drive, TalonFX turn, and
         // a CANcoder
-        
+
         drive =
             new Drive(
                 new GyroIOPigeon2(),
@@ -112,10 +114,10 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackRight));
         flywheels =
             new Flywheels(
-                LauncherConstants.Flywheels.leftConfig,
-                LauncherConstants.Flywheels.rightConfig,
-                new SimTalonFXIO(LauncherConstants.Flywheels.leftConfig),
-                new SimTalonFXIO(LauncherConstants.Flywheels.rightConfig));
+                LauncherConstants.Flywheels.leaderConfig,
+                LauncherConstants.Flywheels.followerConfig,
+                new SimTalonFXIO(LauncherConstants.Flywheels.leaderConfig),
+                new SimTalonFXIO(LauncherConstants.Flywheels.followerConfig));
         hood =
             new Hood(
                 LauncherConstants.Hood.config, new SimTalonFXIO(LauncherConstants.Hood.config));

@@ -640,5 +640,4 @@ public class FieldConstants {
       return layoutString;
     }
   }
-
 }
