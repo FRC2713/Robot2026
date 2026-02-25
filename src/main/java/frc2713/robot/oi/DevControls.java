@@ -165,6 +165,7 @@ public class DevControls {
                             LauncherConstants.Flywheels.launchVelocity
                                 .get()), // Spin up flywheels to launch velocity
                     new WaitUntilCommand(flywheels::atTarget)),
+                new WaitUntilCommand(flywheels::atTarget),
                 Commands.parallel(dyeRotor.indexFuel(), feeder.feedShooter())))
         .onFalse(Commands.parallel(dyeRotor.stopCommand(), feeder.stop(), flywheels.stop()));
   }

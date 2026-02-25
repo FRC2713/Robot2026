@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -94,7 +95,7 @@ public final class LauncherConstants {
 
     static {
       leaderConfig.name = "Flywheel Leader";
-      leaderConfig.talonCANID = new CANDeviceId(2); // Example CAN ID, replace with actual ID
+      leaderConfig.talonCANID = new CANDeviceId(45); // Example CAN ID, replace with actual ID
       leaderConfig.fxConfig.Slot0.kP = 0.3;
       leaderConfig.fxConfig.Slot0.kI = 0.0;
       leaderConfig.fxConfig.Slot0.kD = 0.0;
@@ -106,9 +107,10 @@ public final class LauncherConstants {
       leaderConfig.momentOfInertia = 0.01;
       leaderConfig.useFOC = false; // Use VelocityVoltage for sim compatibility
       leaderConfig.tunable = true;
+      leaderConfig.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
       followerConfig.name = "Flywheel Follower";
-      followerConfig.talonCANID = new CANDeviceId(1); // Example CAN ID, replace with actual ID
+      followerConfig.talonCANID = new CANDeviceId(46); // Example CAN ID, replace with actual ID
       followerConfig.unitToRotorRatio = 1.0; // 1:1 ratio
       followerConfig.momentOfInertia = 0.01;
       followerConfig.useFOC = false;
@@ -117,7 +119,7 @@ public final class LauncherConstants {
     public static int MODEL_INDEX = 5;
     public static int PARENT_INDEX = 4;
 
-    public static AngularVelocity acceptableError = RPM.of(20);
+    public static AngularVelocity acceptableError = RPM.of(30);
     public static AngularVelocity idleVelocity = RotationsPerSecond.of(20);
 
     public static Transform3d localTransform =

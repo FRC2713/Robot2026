@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -33,6 +34,7 @@ public final class SerializerConstants {
       config.fxConfig.Slot0.kS = 0.1; // Volts to overcome static friction
       config.fxConfig.Slot0.kV = 0.12; // Volts per rps (feedforward)
 
+      config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
       config.unitToRotorRatio = 46.0 / 14.0;
       config.momentOfInertia = 0.001; // kg*m^2 for simulation (small roller)
@@ -42,8 +44,8 @@ public final class SerializerConstants {
     }
 
     public static LoggedTunableMeasure<AngularVelocity> indexingSpeed =
-        new LoggedTunableMeasure<AngularVelocity>("DyeRotor/Speed", RotationsPerSecond.of(-3));
-    public static AngularVelocity outdexingSpeed = RotationsPerSecond.of(3);
+        new LoggedTunableMeasure<AngularVelocity>("DyeRotor/Speed", RotationsPerSecond.of(60));
+    public static AngularVelocity outdexingSpeed = RotationsPerSecond.of(-3);
 
     public static int MODEL_INDEX = 2;
     public static int PARENT_INDEX = 0; // drivetrain
@@ -67,12 +69,13 @@ public final class SerializerConstants {
       config.fxConfig.Slot0.kS = 0.1; // Volts to overcome static friction
       config.fxConfig.Slot0.kV = 0.12; // Volts per rps (feedforward)
 
+      config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
       config.unitToRotorRatio = 1.0;
       config.momentOfInertia = 0.001; // kg*m^2 for simulation
     }
 
     public static LoggedTunableMeasure<AngularVelocity> shootingSpeed =
-        new LoggedTunableMeasure<AngularVelocity>("Feeder/Speed", RotationsPerSecond.of(30));
+        new LoggedTunableMeasure<AngularVelocity>("Feeder/Speed", RotationsPerSecond.of(100));
   }
 }
