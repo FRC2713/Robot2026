@@ -112,14 +112,18 @@ public class DriverControls {
     // shoot against the hubwhen flywheels and hub are ready
     controller
         .rightBumper()
-        .whileTrue(RobotContainer.GameCommandGroups.hubShot)
-        .onFalse(RobotContainer.GameCommandGroups.stopShooting);
+        .whileTrue(
+            RobotContainer.GameCommandGroups.hubShot(
+                drive, flywheels, hood, turret, feeder, dyeRotor))
+        .onFalse(RobotContainer.GameCommandGroups.stopShooting(drive, feeder, dyeRotor));
 
     // shoot when flywheels are ready
     controller
         .rightTrigger(-.98)
-        .whileTrue(RobotContainer.GameCommandGroups.otfShot)
-        .onFalse(RobotContainer.GameCommandGroups.stopShooting);
+        .whileTrue(
+            RobotContainer.GameCommandGroups.otfShot(
+                drive, flywheels, hood, turret, feeder, dyeRotor))
+        .onFalse(RobotContainer.GameCommandGroups.stopShooting(drive, feeder, dyeRotor));
   }
 
   public double getLeftY() {
