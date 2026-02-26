@@ -164,11 +164,7 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
             new WaitUntilCommand(
                 () ->
                     Util.epsilonEquals(
-                            velocitySupplier.get(), inputs.velocity, epsilonSupplier.get())
-                        && Util.epsilonEquals(
-                            velocitySupplier.get(),
-                            followerInputs.velocity,
-                            epsilonSupplier.get())),
+                        velocitySupplier.get(), inputs.velocity, epsilonSupplier.get())),
             velocitySetpointCommand(velocitySupplier))
         .withName(pb.makeName("VelocityUntilOnTargetControl"));
   }

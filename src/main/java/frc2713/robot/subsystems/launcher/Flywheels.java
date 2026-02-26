@@ -57,6 +57,11 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
     return velocitySetpointCommand(desiredVelocity);
   }
 
+  public Command setVelocityUntilTarget(Supplier<AngularVelocity> desiredVelocity) {
+    return velocitySetpointUntilOnTargetCommand(
+        desiredVelocity, () -> LauncherConstants.Flywheels.acceptableError);
+  }
+
   public Command stop() {
     return setVelocity(() -> RotationsPerSecond.of(0));
   }

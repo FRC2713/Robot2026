@@ -86,7 +86,7 @@ public final class LauncherConstants {
 
   public final class Flywheels {
     public static final LoggedTunableMeasure<AngularVelocity> PIDTest =
-        new LoggedTunableMeasure<>("Flywheel/PIDTest", RPM.of(2000));
+        new LoggedTunableMeasure<>("Flywheels/PIDTest", RPM.of(2000));
     public static final LoggedTunableMeasure<AngularVelocity> launchVelocity =
         new LoggedTunableMeasure<>("Flywheels/launchVelocity", RPM.of(2500));
 
@@ -94,7 +94,7 @@ public final class LauncherConstants {
     public static TalonFXSubsystemConfig followerConfig = new TalonFXSubsystemConfig();
 
     static {
-      leaderConfig.name = "Flywheel Leader";
+      leaderConfig.name = "Flywheels";
       leaderConfig.talonCANID = new CANDeviceId(45); // Example CAN ID, replace with actual ID
       leaderConfig.fxConfig.Slot0.kP = 0.3;
       leaderConfig.fxConfig.Slot0.kI = 0.0;
