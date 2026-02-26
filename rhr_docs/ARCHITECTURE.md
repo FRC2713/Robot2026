@@ -2,7 +2,7 @@
 
 Subsystem folders should contain related mechanisms. For example, an `intake` subsystem folder could contain a four-bar mechanism and a roller mechanism.
 > [!NOTE]
-> Note the difference in terminology between WPILib subsystems and as they are documented here and by the CAD team. We group different WPILib "subsystems" for simplicity. All mechanisms should still at some point extend WPILib's `SubsystemBase`. 
+> Note the difference in terminology between WPILib subsystems and as they are documented here and by the CAD team. We group different WPILib "subsystems" for simplicity. All mechanisms should still at some point extend WPILib's `SubsystemBase`.
 
 ## Layout
 ```
