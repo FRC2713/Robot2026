@@ -115,8 +115,6 @@ public final class LauncherConstants {
       followerConfig.unitToRotorRatio = 1.0; // 1:1 ratio
       followerConfig.momentOfInertia = 0.01;
       followerConfig.useFOC = false;
-
-      
     }
 
     public static int MODEL_INDEX = 5;
@@ -176,7 +174,8 @@ public final class LauncherConstants {
 
       config.initialTransform =
           new Transform3d(
-              new Translation3d(Inches.of(2.452807).in(Meters), 0, Inches.of(1.026032).in(Meters)), new Rotation3d());
+              new Translation3d(Inches.of(2.452807).in(Meters), 0, Inches.of(1.026032).in(Meters)),
+              new Rotation3d());
     }
 
     public static Angle retractedPosition = Degrees.of(0);
