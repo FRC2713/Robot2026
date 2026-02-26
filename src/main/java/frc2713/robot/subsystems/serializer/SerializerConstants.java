@@ -43,7 +43,9 @@ public final class SerializerConstants {
       config.momentOfInertia = MoiUnits.PoundSquareInches.of(89.2780792);
 
       config.initialTransform =
-          new Transform3d(new Translation3d(0, Inches.of(1.75).in(Meters), 0), new Rotation3d());
+          new Transform3d(
+              new Translation3d(Inches.of(0.5).in(Meters), Inches.of(0.5).in(Meters), 0),
+              new Rotation3d());
     }
 
     public static LoggedTunableMeasure<AngularVelocity> indexingSpeed =

@@ -34,5 +34,5 @@ public class TalonFXSubsystemConfig {
   public MomentOfInertia momentOfInertia = KilogramSquareMeters.of(.5);
 
   public Transform3d initialTransform =
-      new Transform3d(new Translation3d(0, 0, Inches.of(18.484119).in(Meters)), new Rotation3d());
+      new Transform3d(new Translation3d(0, 0, 0), new Rotation3d());
 }

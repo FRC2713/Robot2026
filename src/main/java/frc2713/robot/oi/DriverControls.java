@@ -119,7 +119,7 @@ public class DriverControls {
 
     // shoot when flywheels are ready
     controller
-        .rightTrigger(-.98)
+        .rightTrigger(.98)
         .whileTrue(
             RobotContainer.GameCommandGroups.otfShot(
                 drive, flywheels, hood, turret, feeder, dyeRotor))
