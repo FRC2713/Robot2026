@@ -24,6 +24,7 @@ import frc2713.lib.dynamics.MoiUnits;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.LoggedTunableBoolean;
 import frc2713.lib.util.LoggedTunableMeasure;
+import frc2713.lib.util.Util;
 import frc2713.robot.subsystems.launcher.turretIO.TurretSubsystemConfig;
 
 public final class LauncherConstants {
@@ -115,7 +116,7 @@ public final class LauncherConstants {
     static {
       leaderConfig.name = "Flywheel Leader";
       leaderConfig.talonCANID = new CANDeviceId(2); // Example CAN ID, replace with actual ID
-      leaderConfig.fxConfig.Slot0.kP = 0.3;
+      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(0.3, 3.5);
       leaderConfig.fxConfig.Slot0.kI = 0.0;
       leaderConfig.fxConfig.Slot0.kD = 0.0;
       leaderConfig.fxConfig.Slot0.kS = 0.15;
@@ -137,7 +138,7 @@ public final class LauncherConstants {
     public static int MODEL_INDEX = 5;
     public static int PARENT_INDEX = 4;
 
-    public static AngularVelocity acceptableError = RPM.of(20);
+    public static AngularVelocity acceptableError = RPM.of(35);
     public static AngularVelocity idleVelocity = RotationsPerSecond.of(20);
 
     public static Transform3d localTransform =
