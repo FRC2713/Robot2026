@@ -2,6 +2,7 @@ package frc2713.lib.io;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
@@ -44,7 +45,9 @@ public class SimTalonFXIO extends TalonFXIO {
         config,
         new DCMotorSim(
             LinearSystemId.createDCMotorSystem(
-                DCMotor.getKrakenX60Foc(1), config.momentOfInertia, config.unitToRotorRatio),
+                DCMotor.getKrakenX60Foc(1),
+                config.momentOfInertia.in(KilogramSquareMeters),
+                config.unitToRotorRatio),
             DCMotor.getKrakenX60Foc(1),
             0.001,
             0.001));
