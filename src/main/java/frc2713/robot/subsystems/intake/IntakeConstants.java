@@ -1,6 +1,8 @@
 package frc2713.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs;
@@ -14,10 +16,11 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.mechanisms.DifferentialMotorConstants;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.Voltage;
 import frc2713.lib.drivers.CANDeviceId;
+import frc2713.lib.dynamics.MoiUnits;
 import frc2713.lib.subsystem.DifferentialSubsystemConfig;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.LoggedTunableMeasure;
@@ -31,8 +34,9 @@ public final class IntakeConstants {
     static {
       config.name = "Intake Roller";
       config.talonCANID = new CANDeviceId(9); // Example CAN ID, replace with actual ID
-      config.unitToRotorRatio = 1.0; // 1:1 ratio
-      config.momentOfInertia = 0.001; // Low MOI for fast-spinning rollers
+      config.unitToRotorRatio = 12.0 / 24.0; // 12 tooth pinion to 24 tooth gear for 0.5 reduction
+      config.momentOfInertia =
+          MoiUnits.PoundSquareInches.of(0.295439).times(2); // Low MOI for fast-spinning rollers
     }
 
     public static Voltage intakeVoltageDesired = Volts.of(5.0);
@@ -45,6 +49,11 @@ public final class IntakeConstants {
     public static DifferentialSubsystemConfig differentialConfig =
         new DifferentialSubsystemConfig();
     public static final double averageGearRatio = 60.0 / 9.0;
+    public static final Mass movingMass = Pounds.of(11.75);
+    public static final Distance sprocketPitchDiameter =
+        Inches.of(
+            1.273); // Diameter of the circle formed by the center of the sprocket teeth, used for
+    // calculating distance per rotation
 
     static {
       var avgGains =
@@ -64,11 +73,13 @@ public final class IntakeConstants {
       config.unitToRotorRatio = 1.0; // assumes 1:1 gearbox
       config.unitRotationsPerMeter =
           averageGearRatio
-              * Units.inchesToMeters(1.273)
+              * sprocketPitchDiameter.in(Meters)
               * Math.PI; // gearRatio * sprocketPitchDiameter * pi
 
-      // Moment of inertia for sim - reasonable for light linear mechanism
-      config.momentOfInertia = 0.01;
+      // MOI = m*r^2, where r is the radius to the center of mass (half the pitch diameter)
+      config.momentOfInertia =
+          MoiUnits.PoundSquareInches.of(
+              movingMass.in(Pounds) * Math.pow(sprocketPitchDiameter.in(Inches) / 2.0, 2));
       config.tunable = true;
 
       // Differential configuration

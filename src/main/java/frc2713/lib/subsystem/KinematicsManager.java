@@ -98,6 +98,9 @@ public class KinematicsManager extends SubsystemBase {
     // 1. Rebuild topology if new components were added
     if (isDirty) {
       rebuildTopology();
+      Pose3d[] zeroedComponentPoses = new Pose3d[publishableIndices.length];
+      Arrays.fill(zeroedComponentPoses, new Pose3d());
+      Logger.recordOutput(pb.makePath("zeroedComponentPoses"), zeroedComponentPoses);
     }
 
     // 2. Update Kinematics

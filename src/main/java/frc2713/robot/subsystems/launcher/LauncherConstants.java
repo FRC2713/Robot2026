@@ -18,11 +18,14 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Time;
 import frc2713.lib.drivers.CANDeviceId;
+import frc2713.lib.dynamics.MoiUnits;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.LoggedTunableBoolean;
 import frc2713.lib.util.LoggedTunableMeasure;
+import frc2713.lib.util.Util;
 import frc2713.robot.subsystems.launcher.turretIO.TurretSubsystemConfig;
 
 public final class LauncherConstants {
@@ -54,20 +57,38 @@ public final class LauncherConstants {
 
       // Gear ratio: motor rotations per turret rotation = GEAR_1/GEAR_0 = 120/60 = 2.0
       config.unitToRotorRatio = 120.0 / 60.0;
-      config.momentOfInertia = 0.02; // kg*m^2 for simulation
+      config.momentOfInertia = MoiUnits.PoundSquareInches.of(522.908341);
 
       config.initialTransform =
           new Transform3d(
-              new Translation3d(0, Inches.of(1.75).in(Meters), Inches.of(18.484119).in(Meters)),
+              new Translation3d(
+                  Inches.of(0.5).in(Meters),
+                  Inches.of(0.5).in(Meters),
+                  Inches.of(18.484119).in(Meters)),
               new Rotation3d(0, 0, 0));
     }
 
     public static int MODEL_INDEX = 3;
     public static int PARENT_INDEX = 0; // drivetrain
 
+    // Gear tooth counts for calculating overall gear ratio
+    public static final double pinionGearTeeth = 15.0;
+    public static final double spurGear1Teeth = 20.0;
+    public static final double sprocketPinionTeeth = 16.0;
+    public static final double sprocketGearTeeth = 224.0;
+
+    // Overall gear ratio from motor rotations to turret rotations
+    // motor has an absolute encoder, so this can be encoder 1
+    public static final double motorToTurretGearRatio =
+        (spurGear1Teeth / pinionGearTeeth) * (sprocketGearTeeth / sprocketPinionTeeth);
+
+    // Gear ratio from encoder rotations to turret rotations (encoder is after the first stage
+    // reduction)
+    public static final double encoderToTurretGearRatio = sprocketGearTeeth / sprocketPinionTeeth;
+
     // Gear tooth counts for turret angle calculation
     // Pinion on motor
-    public static final double GEAR_0_TOOTH_COUNT = 60.0; // TODO: Replace with actual value
+    public static final double GEAR_0_TOOTH_COUNT = 15.0; // TODO: Replace with actual value
     // attached to e1
     public static final double GEAR_1_TOOTH_COUNT = 120.0; // TODO: Replace with actual value
     // attached to e2
@@ -77,6 +98,7 @@ public final class LauncherConstants {
             / ((GEAR_1_TOOTH_COUNT - GEAR_2_TOOTH_COUNT) * GEAR_0_TOOTH_COUNT);
 
     // How many times encoder 1 spins per 1 degree of turret rotation
+    // TODO: update this with the actual ratios from above.
     public static final double ENCODER_1_TO_TURRET_RATIO = GEAR_1_TOOTH_COUNT / GEAR_0_TOOTH_COUNT;
 
     // Turret rotation limits
@@ -92,34 +114,36 @@ public final class LauncherConstants {
 
     public static TalonFXSubsystemConfig leaderConfig = new TalonFXSubsystemConfig();
     public static TalonFXSubsystemConfig followerConfig = new TalonFXSubsystemConfig();
+    public static MomentOfInertia flywhMomentOfInertia = MoiUnits.PoundSquareInches.of(10.410164);
+    public static double gearRatio = 24.0 / 18.0; // 1.33:1 reduction from motor to flywheel
 
     static {
       leaderConfig.name = "Flywheels";
-      leaderConfig.talonCANID = new CANDeviceId(45); // Example CAN ID, replace with actual ID
-      leaderConfig.fxConfig.Slot0.kP = 0.3;
+      leaderConfig.talonCANID = new CANDeviceId(45);
+      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(0.3, 3.5);
       leaderConfig.fxConfig.Slot0.kI = 0.0;
       leaderConfig.fxConfig.Slot0.kD = 0.0;
       leaderConfig.fxConfig.Slot0.kS = 0.15;
       leaderConfig.fxConfig.Slot0.kV = 0.114;
-      leaderConfig.unitToRotorRatio = 1.0; // 1:1 ratio
+      leaderConfig.unitToRotorRatio = gearRatio; // 1.33:1 reduction from motor to flywheel
       leaderConfig.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
       leaderConfig.fxConfig.MotorOutput.PeakReverseDutyCycle = 0;
-      leaderConfig.momentOfInertia = 0.01;
+      leaderConfig.momentOfInertia = flywhMomentOfInertia.times(0.5);
       leaderConfig.useFOC = false; // Use VelocityVoltage for sim compatibility
       leaderConfig.tunable = true;
       leaderConfig.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
       followerConfig.name = "Flywheel Follower";
-      followerConfig.talonCANID = new CANDeviceId(46); // Example CAN ID, replace with actual ID
-      followerConfig.unitToRotorRatio = 1.0; // 1:1 ratio
-      followerConfig.momentOfInertia = 0.01;
+      followerConfig.talonCANID = new CANDeviceId(46);
+      followerConfig.unitToRotorRatio = gearRatio; // 1.33:1 reduction from motor to flywheel
+      followerConfig.momentOfInertia = flywhMomentOfInertia.times(0.5);
       followerConfig.useFOC = false;
     }
 
     public static int MODEL_INDEX = 5;
     public static int PARENT_INDEX = 4;
 
-    public static AngularVelocity acceptableError = RPM.of(30);
+    public static AngularVelocity acceptableError = RPM.of(35);
     public static AngularVelocity idleVelocity = RotationsPerSecond.of(20);
 
     public static Transform3d localTransform =
@@ -132,7 +156,7 @@ public final class LauncherConstants {
 
     public static Distance WHEEL_DIAMETER = Inches.of(4);
     // How many fuel we can launch per second at max firing rate
-    public static double LaunchRateFuelPerSecond = 9.0;
+    public static double launchRateFuelPerSecond = 9.0;
 
     static {
       // Distance (m) -> Ball Velocity (ft/s)
@@ -151,6 +175,10 @@ public final class LauncherConstants {
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
     public static Angle acceptableError = Degrees.of(5);
 
+    // 9 tooth pinion to 20 tooth gear, 16 tooth gear to 38 tooth gear, 10 tooth gear to 124 tooth
+    // gear for total reduction of 0.0306
+    public static double gearRatio = (9.0 / 20.0) * (16.0 / 38.0) * (10.0 / 124.0);
+
     static {
       config.name = "Hood";
       config.talonCANID = new CANDeviceId(14); // Example CAN ID, replace with actual ID
@@ -168,21 +196,22 @@ public final class LauncherConstants {
       config.fxConfig.MotionMagic.MotionMagicAcceleration = 4.0; // rotations per second^2
       config.fxConfig.MotionMagic.MotionMagicJerk = 0; // no jerk limit
 
-      config.unitToRotorRatio = 1.0; // 1:1 ratio
-      config.momentOfInertia = 0.005; // kg*m^2 for simulation
+      config.unitToRotorRatio = gearRatio;
+      config.momentOfInertia = MoiUnits.PoundSquareInches.of(38.979757);
 
       config.initialTransform =
           new Transform3d(
-              new Translation3d(Inches.of(4.086915).in(Meters), 0, 0), new Rotation3d());
+              new Translation3d(Inches.of(2.452807).in(Meters), 0, Inches.of(1.026032).in(Meters)),
+              new Rotation3d());
     }
 
     public static Angle retractedPosition = Degrees.of(0);
-    public static Angle extendedPosition = Degrees.of(90);
+    public static Angle extendedPosition = Degrees.of(30);
     public static int MODEL_INDEX = 4;
     public static int PARENT_INDEX = 3; // turret
 
     // Hood rotation limits
-    public static final double FORWARD_LIMIT_DEGREES = 60;
+    public static final double FORWARD_LIMIT_DEGREES = 30;
     public static final double REVERSE_LIMIT_DEGREES = 0;
 
     public static Angle staticHubAngle = Degree.of(10);
@@ -195,8 +224,8 @@ public final class LauncherConstants {
       angleMap.put(1.5, 18.0);
       angleMap.put(2.0, 24.0);
       angleMap.put(3.0, 28.0);
-      angleMap.put(4.0, 32.0);
-      angleMap.put(4.5, 32.0);
+      angleMap.put(4.0, 30.0);
+      angleMap.put(4.5, 30.0);
       angleMap.put(5.0, 30.0);
     }
   }
