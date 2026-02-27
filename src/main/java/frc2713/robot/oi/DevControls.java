@@ -11,7 +11,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
@@ -159,12 +158,10 @@ public class DevControls {
         .y()
         .whileTrue(
             Commands.sequence(
-                Commands.race(
-                    flywheels.setVelocity(
-                        () ->
-                            LauncherConstants.Flywheels.launchVelocity
-                                .get()), // Spin up flywheels to launch velocity
-                    new WaitUntilCommand(flywheels::atTarget)),
+                flywheels.setVelocityUntilTarget(
+                    () ->
+                        LauncherConstants.Flywheels.launchVelocity
+                            .get()), // Spin up flywheels to launch velocity
                 Commands.parallel(dyeRotor.indexFuel(), feeder.feedShooter())))
         .onFalse(Commands.parallel(dyeRotor.stopCommand(), feeder.stop(), flywheels.stop()));
   }

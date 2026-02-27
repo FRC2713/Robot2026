@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -107,7 +108,7 @@ public final class LauncherConstants {
 
   public final class Flywheels {
     public static final LoggedTunableMeasure<AngularVelocity> PIDTest =
-        new LoggedTunableMeasure<>("Flywheel/PIDTest", RPM.of(2000));
+        new LoggedTunableMeasure<>("Flywheels/PIDTest", RPM.of(2000));
     public static final LoggedTunableMeasure<AngularVelocity> launchVelocity =
         new LoggedTunableMeasure<>("Flywheels/launchVelocity", RPM.of(2500));
 
@@ -117,8 +118,8 @@ public final class LauncherConstants {
     public static double gearRatio = 24.0 / 18.0; // 1.33:1 reduction from motor to flywheel
 
     static {
-      leaderConfig.name = "Flywheel Leader";
-      leaderConfig.talonCANID = new CANDeviceId(2); // Example CAN ID, replace with actual ID
+      leaderConfig.name = "Flywheels";
+      leaderConfig.talonCANID = new CANDeviceId(45);
       leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(0.3, 3.5);
       leaderConfig.fxConfig.Slot0.kI = 0.0;
       leaderConfig.fxConfig.Slot0.kD = 0.0;
@@ -130,9 +131,10 @@ public final class LauncherConstants {
       leaderConfig.momentOfInertia = flywhMomentOfInertia.times(0.5);
       leaderConfig.useFOC = false; // Use VelocityVoltage for sim compatibility
       leaderConfig.tunable = true;
+      leaderConfig.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
       followerConfig.name = "Flywheel Follower";
-      followerConfig.talonCANID = new CANDeviceId(1); // Example CAN ID, replace with actual ID
+      followerConfig.talonCANID = new CANDeviceId(46);
       followerConfig.unitToRotorRatio = gearRatio; // 1.33:1 reduction from motor to flywheel
       followerConfig.momentOfInertia = flywhMomentOfInertia.times(0.5);
       followerConfig.useFOC = false;
