@@ -88,9 +88,15 @@ public class Robot extends LoggedRobot {
     // the Command-based framework to work.
     CommandScheduler.getInstance().run();
     Logger.recordOutput("matchData/timeLeftInShift", RobotContainer.getTimeLeftInShift());
+    Logger.recordOutput("matchData/currentMatchPhase", RobotContainer.getCurrentPhase());
     Logger.recordOutput("matchData/ourHubActive", RobotContainer.ourHubActive());
     String autoWinner = RobotContainer.whoWonAuto();
     Logger.recordOutput("matchData/whoWonAuto", autoWinner);
+
+    Logger.recordOutput(
+        "matchData/FirstActive",
+        autoWinner.equals("R") ? "0000FF" : autoWinner.equals("B") ? "FF0000" : "000000");
+
     Logger.recordOutput(
         "matchData/autoWinnerColor",
         "#" + (autoWinner.equals("B") ? "0000FF" : autoWinner.equals("R") ? "FF0000" : "000000"));

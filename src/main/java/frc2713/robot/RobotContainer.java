@@ -382,6 +382,7 @@ public class RobotContainer {
   public static String currentActiveHub() {
     String firstInactive = whoWonAuto();
     double time = DriverStation.getMatchTime();
+
     int shift;
     if (time > 30 && time < 130) {
       shift = (int) (4 - Math.floor(4 * ((time - 30) / (130 - 30))));
@@ -400,6 +401,21 @@ public class RobotContainer {
       } else {
         return "";
       }
+    }
+  }
+
+  public static String getCurrentPhase() {
+    double time = DriverStation.getMatchTime();
+    if (time >= 105) {
+      return "Phase 1";
+    } else if (time >= 80) {
+      return "Phase 2";
+    } else if (time >= 55) {
+      return "Phase 3";
+    } else if (time >= 30) {
+      return "Phase 4";
+    } else {
+      return "";
     }
   }
 
