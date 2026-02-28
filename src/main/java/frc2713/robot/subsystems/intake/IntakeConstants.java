@@ -18,25 +18,41 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
+import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Voltage;
 import frc2713.lib.drivers.CANDeviceId;
 import frc2713.lib.dynamics.MoiUnits;
 import frc2713.lib.subsystem.DifferentialSubsystemConfig;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.LoggedTunableMeasure;
+import frc2713.lib.util.Util;
 
 public final class IntakeConstants {
 
   public static final class Roller {
 
-    public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
+    public static TalonFXSubsystemConfig leaderConfig = new TalonFXSubsystemConfig();
+    public static TalonFXSubsystemConfig followerConfig = new TalonFXSubsystemConfig();
+
+    public static final double gearRatio =
+        12.0 / 24.0; // 12 tooth pinion to 24 tooth gear for 0.5 reduction
+    public static final MomentOfInertia rollersMomentOfInertia =
+        MoiUnits.PoundSquareInches.of(0.295439).times(2); // Low MOI for fast-spinning rollers
 
     static {
-      config.name = "Intake Roller";
-      config.talonCANID = new CANDeviceId(9); // Example CAN ID, replace with actual ID
-      config.unitToRotorRatio = 12.0 / 24.0; // 12 tooth pinion to 24 tooth gear for 0.5 reduction
-      config.momentOfInertia =
-          MoiUnits.PoundSquareInches.of(0.295439).times(2); // Low MOI for fast-spinning rollers
+      leaderConfig.name = "Intake Rollers";
+      leaderConfig.talonCANID = new CANDeviceId(9); // Example CAN ID, replace with actual ID
+      leaderConfig.unitToRotorRatio =
+          gearRatio; // 12 tooth pinion to 24 tooth gear for 0.5 reduction
+      leaderConfig.momentOfInertia = rollersMomentOfInertia.times(0.5);
+      leaderConfig.useFOC = true;
+
+      followerConfig.name = "Intake Rollers Follower";
+      followerConfig.talonCANID = new CANDeviceId(10); // Example CAN ID, replace with actual ID
+      followerConfig.unitToRotorRatio =
+          gearRatio; // 12 tooth pinion to 24 tooth gear for 0.5 reduction
+      followerConfig.momentOfInertia = rollersMomentOfInertia.times(0.5);
+      followerConfig.useFOC = true;
     }
 
     public static Voltage intakeVoltageDesired = Volts.of(5.0);
@@ -57,7 +73,13 @@ public final class IntakeConstants {
 
     static {
       var avgGains =
-          new Slot0Configs().withKP(65).withKI(0).withKD(15).withKS(0).withKV(0).withKA(0);
+          new Slot0Configs()
+              .withKP(Util.modeDependentValue(8, 8))
+              .withKI(0)
+              .withKD(Util.modeDependentValue(0.4, 0.4))
+              .withKS(0)
+              .withKV(0)
+              .withKA(0);
 
       var motionMagicGains =
           new MotionMagicConfigs()

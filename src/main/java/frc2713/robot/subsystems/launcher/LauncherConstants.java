@@ -129,15 +129,15 @@ public final class LauncherConstants {
       leaderConfig.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
       leaderConfig.fxConfig.MotorOutput.PeakReverseDutyCycle = 0;
       leaderConfig.momentOfInertia = flywhMomentOfInertia.times(0.5);
-      leaderConfig.useFOC = false; // Use VelocityVoltage for sim compatibility
+      leaderConfig.useFOC = true;
       leaderConfig.tunable = true;
       leaderConfig.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
-      followerConfig.name = "Flywheel Follower";
+      followerConfig.name = "Flywheels Follower";
       followerConfig.talonCANID = new CANDeviceId(46);
       followerConfig.unitToRotorRatio = gearRatio; // 1.33:1 reduction from motor to flywheel
       followerConfig.momentOfInertia = flywhMomentOfInertia.times(0.5);
-      followerConfig.useFOC = false;
+      followerConfig.useFOC = true;
     }
 
     public static int MODEL_INDEX = 5;

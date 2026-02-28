@@ -125,7 +125,12 @@ public class RobotContainer {
         hood = new Hood(LauncherConstants.Hood.config, new MotorIO() {});
         turret = new Turret(LauncherConstants.Turret.config, new TurretMotorIO() {});
 
-        intakeRoller = new IntakeRoller(IntakeConstants.Roller.config, new MotorIO() {});
+        intakeRoller =
+            new IntakeRoller(
+                IntakeConstants.Roller.leaderConfig,
+                IntakeConstants.Roller.followerConfig,
+                new MotorIO() {},
+                new MotorIO() {});
 
         intakeExtension = new IntakeExtension(IntakeConstants.Extension.config, new MotorIO() {});
 
@@ -164,7 +169,10 @@ public class RobotContainer {
                 new TurretMotorIOSim(LauncherConstants.Turret.config));
         intakeRoller =
             new IntakeRoller(
-                IntakeConstants.Roller.config, new SimTalonFXIO(IntakeConstants.Roller.config));
+                IntakeConstants.Roller.leaderConfig,
+                IntakeConstants.Roller.followerConfig,
+                new SimTalonFXIO(IntakeConstants.Roller.leaderConfig),
+                new SimTalonFXIO(IntakeConstants.Roller.followerConfig));
         intakeExtension =
             new IntakeExtension(
                 IntakeConstants.Extension.config,
@@ -197,7 +205,12 @@ public class RobotContainer {
                 new MotorIO() {});
         hood = new Hood(new TalonFXSubsystemConfig(), new MotorIO() {});
         turret = new Turret(new TurretSubsystemConfig(), new TurretMotorIO() {});
-        intakeRoller = new IntakeRoller(new TalonFXSubsystemConfig(), new MotorIO() {});
+        intakeRoller =
+            new IntakeRoller(
+                new TalonFXSubsystemConfig(),
+                new TalonFXSubsystemConfig(),
+                new MotorIO() {},
+                new MotorIO() {});
         intakeExtension = new IntakeExtension(new TalonFXSubsystemConfig(), new MotorIO() {});
         dyeRotor = new DyeRotor(new TalonFXSubsystemConfig(), new MotorIO() {});
         feeder = new Feeder(new TalonFXSubsystemConfig(), new MotorIO() {});

@@ -6,13 +6,24 @@ import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
-import frc2713.lib.subsystem.MotorSubsystem;
+import frc2713.lib.subsystem.MotorFollowerSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 
-public class IntakeRoller extends MotorSubsystem<MotorInputsAutoLogged, MotorIO> {
+public class IntakeRoller extends MotorFollowerSubsystem<MotorInputsAutoLogged, MotorIO> {
 
-  public IntakeRoller(final TalonFXSubsystemConfig config, final MotorIO intakeRollersMotorIO) {
-    super(config, new MotorInputsAutoLogged(), intakeRollersMotorIO);
+  public IntakeRoller(
+      final TalonFXSubsystemConfig leaderConfig,
+      final TalonFXSubsystemConfig followerConfig,
+      final MotorIO leaderMotorIO,
+      final MotorIO followerMotorIO) {
+    super(
+        leaderConfig.name,
+        leaderConfig,
+        followerConfig,
+        new MotorInputsAutoLogged(),
+        new MotorInputsAutoLogged(),
+        leaderMotorIO,
+        followerMotorIO);
   }
 
   public Command setIntakeVoltageCommand(Voltage volts) {
