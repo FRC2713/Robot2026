@@ -177,5 +177,6 @@ public final class IntakeConstants {
 
     public static int MODEL_INDEX = 1;
     public static int PARENT_INDEX = 0; // drivetrain
+    public static Distance acceptableError = Inches.of(0.2);
   }
 }

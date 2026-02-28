@@ -128,23 +128,13 @@ public class DevControls {
         .whileTrue(
             intakeExtension.voltageCommand(() -> Volts.of(-controller.getRightTriggerAxis() * 5)));
 
-    // Hood manual controls - bumpers bring hood up/down continuously until bounds hit
-    // controller
-    //     .leftBumper()
-    //     .whileTrue(
-    //         hood.setAngleStopAtBounds(
-    //             () -> Degrees.of(hood.getCurrentPosition().in(Degrees) - 5))); // Bring hood down
     controller
         .leftBumper()
         .whileTrue(intakeExtension.extendCommand())
         .onFalse(intakeExtension.retractCommand());
     // .onFalse(intakeExtension.retractCommand()); // Bring hood down
 
-    controller
-        .rightBumper()
-        .whileTrue(
-            hood.setAngleStopAtBounds(
-                () -> hood.getCurrentPosition().minus(Degrees.of(5)), () -> 0.2));
+    controller.b().onTrue(hood.hubCommand()).onFalse(hood.setAngleCommand(() -> Degrees.of(10)));
 
     // Test setting drive limits
     controller
@@ -163,7 +153,7 @@ public class DevControls {
     controller.a().whileTrue(dyeRotor.indexFuel()).onFalse(dyeRotor.stopCommand());
 
     // B button - index fuel
-    controller.b().whileTrue(feeder.feedShooter()).onFalse(feeder.stop());
+    // controller.b().whileTrue(feeder.feedShooter()).onFalse(feeder.stop());
 
     // controller.x().whileTrue(flywheels.setVelocity(() ->
     // LauncherConstants.Flywheels.launchVelocity.get())).onFalse(flywheels.stop());

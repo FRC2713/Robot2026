@@ -36,8 +36,10 @@ import frc2713.robot.oi.DevControls;
 import frc2713.robot.oi.DriverControls;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.drive.GyroIO;
+import frc2713.robot.subsystems.drive.GyroIOPigeon2;
 import frc2713.robot.subsystems.drive.ModuleIO;
 import frc2713.robot.subsystems.drive.ModuleIOSim;
+import frc2713.robot.subsystems.drive.ModuleIOTalonFX;
 import frc2713.robot.subsystems.intake.IntakeConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeExtensionIOTalonFX;
@@ -103,27 +105,28 @@ public class RobotContainer {
         // ModuleIOTalonFX is intended for modules with TalonFX drive, TalonFX turn, and
         // a CANcoder
 
-        // drive =
-        //     new Drive(
-        //         new GyroIOPigeon2(),
-        //         new ModuleIOTalonFX(TunerConstants.FrontLeft),
-        //         new ModuleIOTalonFX(TunerConstants.FrontRight),
-        //         new ModuleIOTalonFX(TunerConstants.BackLeft),
-        //         new ModuleIOTalonFX(TunerConstants.BackRight));
         drive =
             new Drive(
-                new GyroIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {});
+                new GyroIOPigeon2(),
+                new ModuleIOTalonFX(TunerConstants.FrontLeft),
+                new ModuleIOTalonFX(TunerConstants.FrontRight),
+                new ModuleIOTalonFX(TunerConstants.BackLeft),
+                new ModuleIOTalonFX(TunerConstants.BackRight));
+        // drive =
+        //     new Drive(
+        //         new GyroIO() {},
+        //         new ModuleIO() {},
+        //         new ModuleIO() {},
+        //         new ModuleIO() {},
+        //         new ModuleIO() {});
         flywheels =
             new Flywheels(
                 LauncherConstants.Flywheels.leaderConfig,
                 LauncherConstants.Flywheels.followerConfig,
                 new TalonFXIO(LauncherConstants.Flywheels.leaderConfig),
                 new TalonFXIO(LauncherConstants.Flywheels.followerConfig));
-        hood = new Hood(LauncherConstants.Hood.config, new MotorIO() {});
+        hood =
+            new Hood(LauncherConstants.Hood.config, new TalonFXIO(LauncherConstants.Hood.config));
         turret = new Turret(LauncherConstants.Turret.config, new TurretMotorIO() {});
 
         intakeRoller =
@@ -359,9 +362,9 @@ public class RobotContainer {
             () -> -driverControls.getRightX() + -devControls.getRightX()),
         "Dual Controller Drive");
     turret.setDefaultCommand(turret.otfCommand().withName("OTF Tracking"));
-    hood.setDefaultCommand(
-        hood.autoRetractCommand(drive::getPose, hood.otfAngSupplier)
-            .withName("OTF Tracking with Auto-Retract"));
+    // hood.setDefaultCommand(
+    //     hood.autoRetractCommand(drive::getPose, hood.otfAngSupplier)
+    //         .withName("OTF Tracking with Auto-Retract"));
     // flywheels.setDefaultCommand(flywheels.idleSpeedCommand().withName("Idle Tracking"));
 
     // Comment these out when using dev controller

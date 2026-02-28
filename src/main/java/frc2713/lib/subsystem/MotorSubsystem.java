@@ -70,18 +70,6 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
   }
 
   /**
-   * Convert subsystem position to the position value sent to the motor controller. Since TalonFX is
-   * configured with SensorToMechanismRatio, control requests use mechanism units directly - the
-   * controller handles the conversion internally.
-   *
-   * @param subsystemPosition The desired mechanism position
-   * @return The position to send to the motor controller (same as input)
-   */
-  protected Angle convertSubsystemPositionToMotorPosition(Angle subsystemPosition) {
-    return subsystemPosition;
-  }
-
-  /**
    * Convert a linear distance to mechanism rotations for the motor controller.
    *
    * @param subsystemPosition Desired distance

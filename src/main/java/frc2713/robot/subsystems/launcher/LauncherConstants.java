@@ -1,6 +1,5 @@
 package frc2713.robot.subsystems.launcher;
 
-import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
@@ -15,6 +14,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
@@ -178,19 +178,33 @@ public final class LauncherConstants {
 
     // 9 tooth pinion to 20 tooth gear, 16 tooth gear to 38 tooth gear, 10 tooth gear to 124 tooth
     // gear for total reduction of 0.0306
-    public static double gearRatio = (9.0 / 20.0) * (16.0 / 38.0) * (10.0 / 124.0);
+    public static double gearRatio = 1 / ((8.0 / 52.0) * (16.0 / 38.0) * (10.0 / 124.0));
+
+    public static final Angle retractedPosition = Degrees.of(0);
 
     static {
       config.name = "Hood";
       config.talonCANID = new CANDeviceId(54, "canivore"); // Example CAN ID, replace with actual ID
 
       // PID gains for Motion Magic
-      config.fxConfig.Slot0.kP = 60.0;
+      config.fxConfig.Slot0.kP = 0.0;
       config.fxConfig.Slot0.kI = 0.0;
-      config.fxConfig.Slot0.kD = 5.0;
-      config.fxConfig.Slot0.kS = 0.1; // static friction compensation
-      config.fxConfig.Slot0.kV = 0.12; // velocity feedforward
+      config.fxConfig.Slot0.kD = 0.0;
+      config.fxConfig.Slot0.kS = 0.0; // static friction compensation
+      config.fxConfig.Slot0.kV = 0.092 * gearRatio; // velocity feedforward
       config.fxConfig.Slot0.kA = 0.0;
+
+      config.tunable = true;
+
+      config.fxConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+      config.fxConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+      config.fxConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Units.degreesToRotations(75);
+      config.fxConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = Units.degreesToRotations(0);
+
+      config.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+      config.fxConfig.CurrentLimits.StatorCurrentLimit = 10;
+      config.fxConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+      config.fxConfig.CurrentLimits.SupplyCurrentLimit = 10;
 
       // Motion Magic parameters
       config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 2.0; // rotations per second
@@ -200,22 +214,19 @@ public final class LauncherConstants {
       config.unitToRotorRatio = gearRatio;
       config.momentOfInertia = MoiUnits.PoundSquareInches.of(38.979757);
 
+      config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
       config.initialTransform =
           new Transform3d(
               new Translation3d(Inches.of(2.452807).in(Meters), 0, Inches.of(1.026032).in(Meters)),
               new Rotation3d());
     }
 
-    public static Angle retractedPosition = Degrees.of(0);
-    public static Angle extendedPosition = Degrees.of(30);
     public static int MODEL_INDEX = 4;
     public static int PARENT_INDEX = 3; // turret
 
-    // Hood rotation limits
-    public static final double FORWARD_LIMIT_DEGREES = 30;
-    public static final double REVERSE_LIMIT_DEGREES = 0;
-
-    public static Angle staticHubAngle = Degree.of(10);
+    public static LoggedTunableMeasure<Angle> staticHubAngle =
+        new LoggedTunableMeasure<Angle>("Hood/Static Hub", Degrees.of(40));
     public static InterpolatingDoubleTreeMap angleMap = new InterpolatingDoubleTreeMap();
 
     static {
