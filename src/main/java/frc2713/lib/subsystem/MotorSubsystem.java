@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.io.MotorIO;
+import frc2713.lib.io.MotorInputs;
 import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.util.RobotTime;
 import frc2713.lib.util.Util;

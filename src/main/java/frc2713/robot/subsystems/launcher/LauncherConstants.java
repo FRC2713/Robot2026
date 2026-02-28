@@ -36,6 +36,17 @@ public final class LauncherConstants {
     public static Angle acceptableError = Degrees.of(3);
     public static Angle staticHubAngle = Degrees.of(0);
 
+    // Gear tooth counts for calculating overall gear ratio
+    public static final double pinionGearTeeth = 15.0;
+    public static final double spurGear1Teeth = 20.0;
+    public static final double sprocketPinionTeeth = 16.0;
+    public static final double sprocketGearTeeth = 224.0;
+
+    // Overall gear ratio from motor rotations to turret rotations
+    // motor has an absolute encoder, so this can be encoder 1
+    public static final double motorToTurretGearRatio =
+        (spurGear1Teeth / pinionGearTeeth) * (sprocketGearTeeth / sprocketPinionTeeth);
+
     static {
       config.name = "Turret";
       config.talonCANID = new CANDeviceId(52, "canivore");
@@ -50,6 +61,8 @@ public final class LauncherConstants {
       config.fxConfig.Slot0.kS = 0.15; // static friction compensation
       config.fxConfig.Slot0.kV = 0.12; // velocity feedforward
       config.fxConfig.Slot0.kA = 0.01;
+
+      config.fxConfig.Feedback.SensorToMechanismRatio = 1 / motorToTurretGearRatio;
 
       // Motion Magic parameters
       config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 5.0; // rotations per second
@@ -71,17 +84,6 @@ public final class LauncherConstants {
 
     public static int MODEL_INDEX = 3;
     public static int PARENT_INDEX = 0; // drivetrain
-
-    // Gear tooth counts for calculating overall gear ratio
-    public static final double pinionGearTeeth = 15.0;
-    public static final double spurGear1Teeth = 20.0;
-    public static final double sprocketPinionTeeth = 16.0;
-    public static final double sprocketGearTeeth = 224.0;
-
-    // Overall gear ratio from motor rotations to turret rotations
-    // motor has an absolute encoder, so this can be encoder 1
-    public static final double motorToTurretGearRatio =
-        (spurGear1Teeth / pinionGearTeeth) * (sprocketGearTeeth / sprocketPinionTeeth);
 
     // Gear ratio from encoder rotations to turret rotations (encoder is after the first stage
     // reduction)

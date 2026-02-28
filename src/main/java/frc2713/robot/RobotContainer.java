@@ -51,6 +51,7 @@ import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
 import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.launcher.turretIO.TurretMotorIO;
 import frc2713.robot.subsystems.launcher.turretIO.TurretMotorIOSim;
+import frc2713.robot.subsystems.launcher.turretIO.TurretMotorIOTalonFX;
 import frc2713.robot.subsystems.launcher.turretIO.TurretSubsystemConfig;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
@@ -127,7 +128,10 @@ public class RobotContainer {
                 new TalonFXIO(LauncherConstants.Flywheels.followerConfig));
         hood =
             new Hood(LauncherConstants.Hood.config, new TalonFXIO(LauncherConstants.Hood.config));
-        turret = new Turret(LauncherConstants.Turret.config, new TurretMotorIO() {});
+        turret =
+            new Turret(
+                LauncherConstants.Turret.config,
+                new TurretMotorIOTalonFX(LauncherConstants.Turret.config));
 
         intakeRoller =
             new IntakeRoller(
@@ -361,7 +365,7 @@ public class RobotContainer {
             () -> -driverControls.getLeftX() + -devControls.getLeftX(),
             () -> -driverControls.getRightX() + -devControls.getRightX()),
         "Dual Controller Drive");
-    turret.setDefaultCommand(turret.otfCommand().withName("OTF Tracking"));
+    // turret.setDefaultCommand(turret.otfCommand().withName("OTF Tracking"));
     // hood.setDefaultCommand(
     //     hood.autoRetractCommand(drive::getPose, hood.otfAngSupplier)
     //         .withName("OTF Tracking with Auto-Retract"));

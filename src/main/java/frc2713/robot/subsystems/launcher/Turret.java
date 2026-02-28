@@ -250,6 +250,7 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
   @Override
   public void periodic() {
     super.periodic();
+    this.io.readInputs(inputs);
 
     // Log the goal pose for visualization
     Pose3d goalPose = new Pose3d(FieldConstants.Hub.topCenterPoint, new Rotation3d());
