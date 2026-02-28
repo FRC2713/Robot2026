@@ -40,6 +40,7 @@ import frc2713.robot.subsystems.drive.ModuleIO;
 import frc2713.robot.subsystems.drive.ModuleIOSim;
 import frc2713.robot.subsystems.intake.IntakeConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
+import frc2713.robot.subsystems.intake.IntakeExtensionIOTalonFX;
 import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.launcher.Flywheels;
 import frc2713.robot.subsystems.launcher.Hood;
@@ -74,7 +75,7 @@ public class RobotContainer {
   private static Turret turret;
   private static Hood hood;
   private static IntakeRoller intakeRoller;
-  private static IntakeExtension intakeExtension;
+  public static IntakeExtension intakeExtension;
   private static DyeRotor dyeRotor;
   private static Feeder feeder;
   public static Vision vision;
@@ -129,10 +130,13 @@ public class RobotContainer {
             new IntakeRoller(
                 IntakeConstants.Roller.leaderConfig,
                 IntakeConstants.Roller.followerConfig,
-                new MotorIO() {},
-                new MotorIO() {});
+                new TalonFXIO(IntakeConstants.Roller.leaderConfig),
+                new TalonFXIO(IntakeConstants.Roller.followerConfig));
 
-        intakeExtension = new IntakeExtension(IntakeConstants.Extension.config, new MotorIO() {});
+        intakeExtension =
+            new IntakeExtension(
+                IntakeConstants.Extension.config,
+                new IntakeExtensionIOTalonFX(IntakeConstants.Extension.differentialConfig));
 
         dyeRotor =
             new DyeRotor(

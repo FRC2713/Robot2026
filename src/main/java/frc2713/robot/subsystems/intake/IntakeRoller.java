@@ -2,7 +2,6 @@ package frc2713.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Volts;
 
-import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
@@ -26,20 +25,16 @@ public class IntakeRoller extends MotorFollowerSubsystem<MotorInputsAutoLogged, 
         followerMotorIO);
   }
 
-  public Command setIntakeVoltageCommand(Voltage volts) {
-    return voltageCommand(() -> volts);
-  }
-
   public Command intake() {
-    return setIntakeVoltageCommand(IntakeConstants.Roller.intakeVoltageDesired);
+    return voltageCommand(IntakeConstants.Roller.intakeVoltageDesired);
   }
 
   public Command stop() {
-    return setIntakeVoltageCommand(Volts.of(0.0));
+    return voltageCommand(() -> Volts.of(0.0));
   }
 
   public Command outtake() {
-    return setIntakeVoltageCommand(IntakeConstants.Roller.outtakeVoltageDesired);
+    return voltageCommand(() -> IntakeConstants.Roller.outtakeVoltageDesired);
   }
 
   @Override

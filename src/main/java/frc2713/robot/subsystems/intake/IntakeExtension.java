@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc2713.lib.io.ArticulatedComponent;
 import frc2713.lib.io.MotorIO;
@@ -49,8 +50,10 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Motor
    * @return
    */
   public Command retractCommand() {
-    return setDistanceCommand(() -> IntakeConstants.Extension.retractedPosition);
+    return setDistanceCommand(IntakeConstants.Extension.retractedPosition);
   }
+
+  // TODO: add is at target
 
   @Override
   public void periodic() {
@@ -60,6 +63,10 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Motor
         pb.makePath("CurrentDistanceMeters"), getCurrentPositionAsDistance().in(Meters));
     Logger.recordOutput(
         pb.makePath("SetpointDistanceMeters"), getPositionSetpointAsDistance().in(Meters));
+
+    if (DriverStation.isDisabled()) {
+      setPositionSetpointImpl(inputs.position);
+    }
   }
 
   @Override

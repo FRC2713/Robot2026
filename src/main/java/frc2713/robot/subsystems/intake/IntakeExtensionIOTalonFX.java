@@ -1,6 +1,9 @@
 package frc2713.robot.subsystems.intake;
 
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Revolutions;
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
@@ -20,6 +23,7 @@ import frc2713.lib.subsystem.DifferentialSubsystemConfig;
 import frc2713.lib.util.CTREUtil;
 import frc2713.lib.util.LoggedTunableGains;
 import frc2713.robot.Robot;
+import org.littletonrobotics.junction.Logger;
 
 public class IntakeExtensionIOTalonFX implements MotorIO {
 
@@ -74,6 +78,7 @@ public class IntakeExtensionIOTalonFX implements MotorIO {
 
     // Create the differential mechanism using the constants from config
     this.diffMech = new DifferentialMechanism<TalonFX>(TalonFX::new, config.differentialConstants);
+    diffMech.configNeutralMode(NeutralModeValue.Coast);
 
     // Get references to the individual motors from the differential mechanism
     this.leaderMotor = diffMech.getLeader();
@@ -133,6 +138,15 @@ public class IntakeExtensionIOTalonFX implements MotorIO {
     inputs.rawRotorPosition = rawRotorPositionSignal.getValue();
     inputs.closedLoopError = closedLoopErrorSignal.getValue();
     inputs.isMotionMagicAtTarget = motionMagicAtTargetSignal.getValue();
+
+    Logger.recordOutput("Extension/leaderPos", leaderMotor.getPosition().getValue());
+    Logger.recordOutput("Extension/followerPos", followerMotor.getPosition().getValue());
+
+    Logger.recordOutput(
+        "Extension/leaderPosin",
+        leaderMotor.getPosition().getValue().in(Rotations)
+            * IntakeConstants.Extension.sprocketPitchDiameter.in(Inches)
+            * Math.PI);
 
     // Update PID gains from dashboard if tunable and any value changed
     if (config.tunable && tunableGains != null) {
@@ -214,8 +228,7 @@ public class IntakeExtensionIOTalonFX implements MotorIO {
 
   @Override
   public void setVoltageOutput(Voltage voltage) {
-    diffMech.setControl(
-        voltageControl.withOutput(voltage), voltageControl.withOutput(voltage.times(0)));
+    diffMech.setControl(voltageControl.withOutput(voltage), voltageControl.withOutput(Volts.of(0)));
   }
 
   @Override

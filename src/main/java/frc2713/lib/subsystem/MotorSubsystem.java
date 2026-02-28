@@ -88,7 +88,7 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
    * @return the number of mechanism rotations to achieve that distance
    */
   protected Angle convertSubsystemPositionToMotorPosition(Distance subsystemPosition) {
-    return Rotations.of(subsystemPosition.in(Meters) * config.unitRotationsPerMeter);
+    return Rotations.of(subsystemPosition.in(Meters) / config.unitRotationsPerMeter);
   }
 
   // IO Implementations
@@ -256,7 +256,9 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
    * @return The current position as a Distance
    */
   public Distance getCurrentPositionAsDistance() {
-    return Meters.of(inputs.position.in(Rotations) / config.unitRotationsPerMeter);
+    Logger.recordOutput(pb.makePath("unitRotationsPerMeter"), config.unitRotationsPerMeter);
+    Logger.recordOutput(pb.makePath("inputPos"), inputs.position);
+    return Meters.of(inputs.position.in(Rotations) * config.unitRotationsPerMeter);
   }
 
   /**
@@ -284,7 +286,7 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
    * @return The current position setpoint as a Distance
    */
   public Distance getPositionSetpointAsDistance() {
-    return Meters.of(positionSetpoint.in(Rotations) / config.unitRotationsPerMeter);
+    return Meters.of(positionSetpoint.in(Rotations) * config.unitRotationsPerMeter);
   }
 
   /**

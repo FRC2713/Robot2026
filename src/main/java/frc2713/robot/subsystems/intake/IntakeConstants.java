@@ -14,6 +14,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.mechanisms.DifferentialMotorConstants;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.Distance;
@@ -55,7 +56,8 @@ public final class IntakeConstants {
       followerConfig.useFOC = true;
     }
 
-    public static Voltage intakeVoltageDesired = Volts.of(5.0);
+    public static LoggedTunableMeasure<Voltage> intakeVoltageDesired =
+        new LoggedTunableMeasure<Voltage>("Intake Rollers/Intake", Volts.of(10.0));
     public static Voltage outtakeVoltageDesired = Volts.of(-5.0);
   }
 
@@ -64,7 +66,7 @@ public final class IntakeConstants {
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
     public static DifferentialSubsystemConfig differentialConfig =
         new DifferentialSubsystemConfig();
-    public static final double averageGearRatio = 60.0 / 9.0;
+    public static final double averageGearRatio = 60.0 / 8.0;
     public static final Mass movingMass = Pounds.of(11.75);
     public static final Distance sprocketPitchDiameter =
         Inches.of(
@@ -74,17 +76,17 @@ public final class IntakeConstants {
     static {
       var avgGains =
           new Slot0Configs()
-              .withKP(Util.modeDependentValue(8, 8))
+              .withKP(Util.modeDependentValue(10, 8))
               .withKI(0)
-              .withKD(Util.modeDependentValue(0.4, 0.4))
+              .withKD(Util.modeDependentValue(0., 0.4))
               .withKS(0)
-              .withKV(0)
+              .withKV(0.092 * averageGearRatio)
               .withKA(0);
 
       var motionMagicGains =
           new MotionMagicConfigs()
-              .withMotionMagicCruiseVelocity(4.0) // target crusing vel rps
-              .withMotionMagicAcceleration(6.0)
+              .withMotionMagicCruiseVelocity(10.0) // target crusing vel rps
+              .withMotionMagicAcceleration(20.0)
               .withMotionMagicJerk(0);
 
       config.name = "Intake Extension";
@@ -94,8 +96,7 @@ public final class IntakeConstants {
 
       config.unitToRotorRatio = 1.0; // assumes 1:1 gearbox
       config.unitRotationsPerMeter =
-          averageGearRatio
-              * sprocketPitchDiameter.in(Meters)
+          IntakeConstants.Extension.sprocketPitchDiameter.in(Meters)
               * Math.PI; // gearRatio * sprocketPitchDiameter * pi
 
       // MOI = m*r^2, where r is the radius to the center of mass (half the pitch diameter)
@@ -114,11 +115,11 @@ public final class IntakeConstants {
 
       // Difference axis gains typically go in Slot 1
       differentialConfig.differenceGains =
-          new Slot1Configs().withKP(30).withKI(0).withKD(0.1).withKS(0.1).withKV(0.72);
+          new Slot1Configs().withKP(1).withKI(0).withKD(0).withKS(0.).withKV(0.);
 
       differentialConfig.averageGearRatio = averageGearRatio;
       differentialConfig.differenceGearRatio = 1.0;
-      differentialConfig.motorAlignment = MotorAlignmentValue.Aligned;
+      differentialConfig.motorAlignment = MotorAlignmentValue.Opposed;
       differentialConfig.closedLoopRate = 200.0;
       differentialConfig.followerUsesCommonLeaderConfigs = true;
       differentialConfig.tunable = true;
@@ -126,7 +127,10 @@ public final class IntakeConstants {
       // Leader initial configs
       differentialConfig.leaderConfig =
           new TalonFXConfiguration()
-              .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake))
+              .withMotorOutput(
+                  new MotorOutputConfigs()
+                      .withNeutralMode(NeutralModeValue.Coast)
+                      .withInverted(InvertedValue.Clockwise_Positive))
               .withCurrentLimits(
                   new CurrentLimitsConfigs()
                       .withStatorCurrentLimit(80.0)
@@ -136,8 +140,8 @@ public final class IntakeConstants {
                       .withSensorToMechanismRatio(differentialConfig.averageGearRatio))
               .withClosedLoopGeneral(
                   new ClosedLoopGeneralConfigs()
-                      // differential mechanism is continuous on the difference axis
-                      .withDifferentialContinuousWrap(true))
+                      // differential mechanism is not continuous on the difference axis
+                      .withDifferentialContinuousWrap(false))
               .withSlot0(differentialConfig.averageGains)
               .withSlot1(differentialConfig.differenceGains)
               .withMotionMagic(motionMagicGains);
@@ -154,6 +158,7 @@ public final class IntakeConstants {
           new DifferentialMotorConstants<TalonFXConfiguration>()
               .withLeaderId(differentialConfig.leaderCANID.getDeviceNumber())
               .withFollowerId(differentialConfig.followerCANID.getDeviceNumber())
+              .withCANBusName(differentialConfig.leaderCANID.getBus())
               .withAlignment(differentialConfig.motorAlignment)
               .withSensorToDifferentialRatio(differentialConfig.differenceGearRatio)
               .withClosedLoopRate(differentialConfig.closedLoopRate)
@@ -164,8 +169,12 @@ public final class IntakeConstants {
     }
 
     public static LoggedTunableMeasure<Distance> extendedPosition =
-        new LoggedTunableMeasure<>(config.name + "/Extended Position", Inches.of(12.0));
-    public static Distance retractedPosition = Inches.of(0);
+        new LoggedTunableMeasure<>(config.name + "/Extended Position", Inches.of(11.5));
+    public static LoggedTunableMeasure<Distance> pidTestPosition =
+        new LoggedTunableMeasure<>(config.name + "/PID Test Position", Inches.of(0));
+    public static LoggedTunableMeasure<Distance> retractedPosition =
+        new LoggedTunableMeasure<>(config.name + "/Retracted Position", Inches.of(0));
+
     public static int MODEL_INDEX = 1;
     public static int PARENT_INDEX = 0; // drivetrain
   }
