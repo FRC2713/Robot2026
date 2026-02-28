@@ -38,8 +38,9 @@ public final class LauncherConstants {
 
     static {
       config.name = "Turret";
-      config.talonCANID = new CANDeviceId(12);
-      config.canCoderCANID = new CANDeviceId(13); // CANCoder CAN ID, replace with actual ID
+      config.talonCANID = new CANDeviceId(52, "canivore");
+      config.canCoderCANID =
+          new CANDeviceId(53, "canivore"); // CANCoder CAN ID, replace with actual ID
       config.tunable = true; // Enable tunable gains for Motion Magic
 
       // PID gains for Motion Magic
@@ -119,7 +120,7 @@ public final class LauncherConstants {
 
     static {
       leaderConfig.name = "Flywheels";
-      leaderConfig.talonCANID = new CANDeviceId(45);
+      leaderConfig.talonCANID = new CANDeviceId(50, "canivore");
       leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(0.3, 3.5);
       leaderConfig.fxConfig.Slot0.kI = 0.0;
       leaderConfig.fxConfig.Slot0.kD = 0.0;
@@ -134,7 +135,7 @@ public final class LauncherConstants {
       leaderConfig.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
       followerConfig.name = "Flywheels Follower";
-      followerConfig.talonCANID = new CANDeviceId(46);
+      followerConfig.talonCANID = new CANDeviceId(51, "canivore");
       followerConfig.unitToRotorRatio = gearRatio; // 1.33:1 reduction from motor to flywheel
       followerConfig.momentOfInertia = flywhMomentOfInertia.times(0.5);
       followerConfig.useFOC = true;
@@ -181,7 +182,7 @@ public final class LauncherConstants {
 
     static {
       config.name = "Hood";
-      config.talonCANID = new CANDeviceId(14); // Example CAN ID, replace with actual ID
+      config.talonCANID = new CANDeviceId(54, "canivore"); // Example CAN ID, replace with actual ID
 
       // PID gains for Motion Magic
       config.fxConfig.Slot0.kP = 60.0;

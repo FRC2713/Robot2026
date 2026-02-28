@@ -41,14 +41,14 @@ public final class IntakeConstants {
 
     static {
       leaderConfig.name = "Intake Rollers";
-      leaderConfig.talonCANID = new CANDeviceId(9); // Example CAN ID, replace with actual ID
+      leaderConfig.talonCANID = new CANDeviceId(42); // Example CAN ID, replace with actual ID
       leaderConfig.unitToRotorRatio =
           gearRatio; // 12 tooth pinion to 24 tooth gear for 0.5 reduction
       leaderConfig.momentOfInertia = rollersMomentOfInertia.times(0.5);
       leaderConfig.useFOC = true;
 
       followerConfig.name = "Intake Rollers Follower";
-      followerConfig.talonCANID = new CANDeviceId(10); // Example CAN ID, replace with actual ID
+      followerConfig.talonCANID = new CANDeviceId(43); // Example CAN ID, replace with actual ID
       followerConfig.unitToRotorRatio =
           gearRatio; // 12 tooth pinion to 24 tooth gear for 0.5 reduction
       followerConfig.momentOfInertia = rollersMomentOfInertia.times(0.5);
@@ -88,7 +88,7 @@ public final class IntakeConstants {
               .withMotionMagicJerk(0);
 
       config.name = "Intake Extension";
-      config.talonCANID = new CANDeviceId(8); // Only used for sim, no real CAN ID
+      config.talonCANID = new CANDeviceId(40); // Only used for sim, no real CAN ID
       config.fxConfig.Slot0 = avgGains;
       config.fxConfig.MotionMagic = motionMagicGains;
 
@@ -106,8 +106,8 @@ public final class IntakeConstants {
 
       // Differential configuration
       differentialConfig.name = config.name;
-      differentialConfig.leaderCANID = new CANDeviceId(10); // Leader motor CAN ID
-      differentialConfig.followerCANID = new CANDeviceId(11); // Follower motor CAN ID
+      differentialConfig.leaderCANID = new CANDeviceId(40, "canivore"); // Leader motor CAN ID
+      differentialConfig.followerCANID = new CANDeviceId(41, "canivore"); // Follower motor CAN ID
 
       // Average axis gains typically go in Slot 0
       differentialConfig.averageGains = avgGains;
