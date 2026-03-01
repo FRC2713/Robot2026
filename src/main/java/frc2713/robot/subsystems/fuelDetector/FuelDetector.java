@@ -1,7 +1,9 @@
 package frc2713.robot.subsystems.fuelDetector;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoubleArraySubscriber;
+import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringSubscriber;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -21,20 +23,34 @@ public class FuelDetector extends SubsystemBase {
 
   private StringSubscriber simFuelSub;
   private DoubleArraySubscriber realFuelSub;
+  private DoubleSubscriber fuelHeading;
+  
+  private boolean useLegacyDetection = false; //Flag to use Java fuel cluster detection; use only if coprocessor can't be used for some reason. Will take a heavy amount of RoboRio system resources to run, with less precision
 
   public FuelDetector() {
-    simFuelSub =
-        NetworkTableInstance.getDefault().getStringTopic("/fuelDetector/fuelData").subscribe("");
-    realFuelSub =
+    if(useLegacyDetection) {
+      simFuelSub = NetworkTableInstance.getDefault().getStringTopic("/fuelDetector/fuelData").subscribe("");
+      realFuelSub = NetworkTableInstance.getDefault().getDoubleArrayTopic("/limelight-d/tcornxy").subscribe(new double[0]);
+    }
+
+    fuelHeading =
         NetworkTableInstance.getDefault()
-            .getDoubleArrayTopic("/limelight-d/tcornxy")
-            .subscribe(new double[0]);
+            .getDoubleTopic("/fuelDetector/clusterHeading")
+            .subscribe(0);
+  }
+
+  public Rotation2d getHeading() {
+    if(useLegacyDetection) {
+      return getRotation2D(getDataFromNT(), isLimelights);
+    } else {
+      return new Rotation2d(Units.degreesToRadians(fuelHeading.get()));
+    }
   }
 
   public void periodic() {
     // get fuel information, call algorithm
-    FuelCoordinates[] fuels = getDataFromNT();
-    Logger.recordOutput("First Fuel Cluster", getRotation2D(fuels, !isLimelights).getDegrees());
+    // FuelCoordinates[] fuels = getDataFromNT();
+    // Logger.recordOutput("First Fuel Cluster", getRotation2D(fuels, !isLimelights).getDegrees());
   }
 
   public ArrayList<FuelCoordinates> filterByHighChance(FuelCoordinates[] inputs) {
