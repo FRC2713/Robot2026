@@ -26,14 +26,14 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputs;
-import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.util.RobotTime;
 import frc2713.lib.util.Util;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.inputs.LoggableInputs;
 
-public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO>
+public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends MotorIO>
     extends SubsystemBase {
   protected final IO io;
   protected final MI inputs;
