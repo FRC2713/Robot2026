@@ -265,15 +265,11 @@ public class ModuleIOTalonFX implements ModuleIO {
 
   @Override
   public void setDriveGains(Slot0Configs gains) {
-    var config = new TalonFXConfiguration();
-    config.Slot0 = gains;
-    tryUntilOk(5, () -> driveTalon.getConfigurator().apply(config, 0.25));
+    tryUntilOk(5, () -> driveTalon.getConfigurator().apply(gains, 0.25));
   }
 
   @Override
   public void setTurnGains(Slot0Configs gains) {
-    var config = new TalonFXConfiguration();
-    config.Slot0 = gains;
-    tryUntilOk(5, () -> turnTalon.getConfigurator().apply(config, 0.25));
+    tryUntilOk(5, () -> turnTalon.getConfigurator().apply(gains, 0.25));
   }
 }
