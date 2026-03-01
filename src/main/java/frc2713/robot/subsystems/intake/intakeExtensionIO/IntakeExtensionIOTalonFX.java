@@ -1,4 +1,4 @@
-package frc2713.robot.subsystems.intake;
+package frc2713.robot.subsystems.intake.intakeExtensionIO;
 
 import static edu.wpi.first.units.Units.Revolutions;
 import static edu.wpi.first.units.Units.Volts;
