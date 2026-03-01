@@ -130,8 +130,8 @@ public class DevControls {
 
     controller
         .leftBumper()
-        .whileTrue(intakeExtension.extendCommand())
-        .onFalse(intakeExtension.retractCommand());
+        .whileTrue(Commands.sequence(intakeExtension.extendAndWaitCommand(), intakeRoller.intake()))
+        .onFalse(Commands.parallel(intakeRoller.stop(), intakeExtension.retractCommand()));
     // .onFalse(intakeExtension.retractCommand()); // Bring hood down
 
     controller.b().onTrue(hood.hubCommand()).onFalse(hood.setAngleCommand(() -> Degrees.of(10)));

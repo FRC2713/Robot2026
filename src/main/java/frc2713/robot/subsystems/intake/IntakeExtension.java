@@ -8,8 +8,6 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc2713.lib.io.ArticulatedComponent;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
@@ -61,7 +59,7 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Motor
    *
    * @return true if motion magic has reached the target position
    */
-  @AutoLogOutput
+  @AutoLogOutput(key = "Intake Extension/AtTarget")
   public boolean atTarget() {
     return Math.abs(
             getCurrentPositionAsDistance().in(Meters) - getPositionSetpointAsDistance().in(Meters))
@@ -69,7 +67,11 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Motor
   }
 
   public Command extendAndWaitCommand() {
-    return new ParallelDeadlineGroup(new WaitUntilCommand(this::atTarget), extendCommand());
+    return positionSetpointUntilOnTargetCommand(
+        () ->
+            convertSubsystemPositionToMotorPosition(
+                IntakeConstants.Extension.extendedPosition.get()),
+        () -> convertSubsystemPositionToMotorPosition(IntakeConstants.Extension.acceptableError));
   }
 
   @Override
