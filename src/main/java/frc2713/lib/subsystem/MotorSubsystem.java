@@ -80,6 +80,16 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
     return Rotations.of(subsystemPosition.in(Meters) / config.unitRotationsPerMeter);
   }
 
+  /**
+   * Convert mechanism rotations from the motor controller to a linear distance.
+   *
+   * @param motorPosition The current position in mechanism rotations
+   * @return the current position as a linear distance
+   */
+  protected Distance convertMotorPositionToSubsystemPosition(Angle motorPosition) {
+    return Meters.of(motorPosition.in(Rotations) * config.unitRotationsPerMeter);
+  }
+
   // IO Implementations
 
   /**
@@ -240,14 +250,12 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
 
   /**
    * Gets the current position as linear distance. For linear mechanisms (elevators, extensions),
-   * converts mechanism rotations to meters using unitRotationsPerMeter.
+   * converts mechanism rotations to meters.
    *
    * @return The current position as a Distance
    */
   public Distance getCurrentPositionAsDistance() {
-    Logger.recordOutput(pb.makePath("unitRotationsPerMeter"), config.unitRotationsPerMeter);
-    Logger.recordOutput(pb.makePath("inputPos"), inputs.position);
-    return Meters.of(inputs.position.in(Rotations) * config.unitRotationsPerMeter);
+    return convertMotorPositionToSubsystemPosition(inputs.position);
   }
 
   /**
@@ -275,7 +283,7 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
    * @return The current position setpoint as a Distance
    */
   public Distance getPositionSetpointAsDistance() {
-    return Meters.of(positionSetpoint.in(Rotations) * config.unitRotationsPerMeter);
+    return convertMotorPositionToSubsystemPosition(positionSetpoint);
   }
 
   /**
