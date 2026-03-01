@@ -48,6 +48,8 @@ public class TurretMotorIOTalonFX extends TalonFXIO implements TurretMotorIO {
 
   @Override
   public void readInputs(TurretInputs inputs) {
+    super.readInputs(inputs);
+
     // Refresh CANCoder signals
     BaseStatusSignal.refreshAll(turretSignals);
 
