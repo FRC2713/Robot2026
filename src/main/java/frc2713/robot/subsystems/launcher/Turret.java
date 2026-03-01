@@ -1,7 +1,6 @@
 package frc2713.robot.subsystems.launcher;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Radian;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.ENCODER_1_TO_TURRET_RATIO;
 import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.FORWARD_LIMIT_DEGREES;
@@ -20,22 +19,32 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc2713.lib.io.ArticulatedComponent;
+import frc2713.lib.io.CanCoderIO;
+import frc2713.lib.io.CanCoderInputsAutoLogged;
+import frc2713.lib.io.MotorIO;
+import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.MotorSubsystem;
+import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.Util;
 import frc2713.robot.FieldConstants;
 import frc2713.robot.RobotContainer;
-import frc2713.robot.subsystems.launcher.turretIO.TurretInputsAutoLogged;
-import frc2713.robot.subsystems.launcher.turretIO.TurretMotorIO;
-import frc2713.robot.subsystems.launcher.turretIO.TurretSubsystemConfig;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO>
+public class Turret extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
     implements ArticulatedComponent {
 
-  public Turret(final TurretSubsystemConfig config, final TurretMotorIO turretMotorIO) {
-    super(config, new TurretInputsAutoLogged(), turretMotorIO);
+  /**
+   * Constructor for Turret with CANcoder. Pass null for cancoderInputs and cancoderIO when using
+   * sim or replay (TurretMotorIOSim computes encoder2 from encoder1).
+   */
+  public Turret(
+      final TalonFXSubsystemConfig config,
+      final MotorIO turretMotorIO,
+      final CanCoderInputsAutoLogged cancoderInputs,
+      final CanCoderIO cancoderIO) {
+    super(config, new MotorInputsAutoLogged(), turretMotorIO, cancoderInputs, cancoderIO);
   }
 
   public static double turretPositionFromEncoders(double e1, double e2) {
@@ -174,7 +183,13 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
    * @return The computed turret position in degrees
    */
   public Angle getComputedTurretPosition() {
-    return Degrees.of(inputs.computedTurretPositionDegrees);
+    if (cancoderInputs == null) {
+      return Degrees.of(inputs.position.in(Degrees));
+    }
+    return Degrees.of(
+        Double.isNaN(cancoderInputs.absolutePositionRotations)
+            ? 0.0
+            : cancoderInputs.absolutePositionRotations * 360.0);
   }
 
   /**
@@ -183,7 +198,13 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
    * @return The current turret position as a Rotation2d
    */
   public Rotation2d getCurrentTurretRotation() {
-    return Rotation2d.fromDegrees(inputs.computedTurretPositionDegrees);
+    if (cancoderInputs == null) {
+      return Rotation2d.fromDegrees(inputs.position.in(Degrees));
+    }
+    return Rotation2d.fromDegrees(
+        Double.isNaN(cancoderInputs.absolutePositionRotations)
+            ? 0.0
+            : cancoderInputs.absolutePositionRotations * 360.0);
   }
 
   /**
@@ -212,7 +233,7 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
                   LauncherConstants.Turret.staticHubAngle, RobotContainer.drive.getPose());
         } else {
           Logger.recordOutput(super.pb.makePath("OTF", "response"), "stay at measured");
-          targetAngle = Degrees.of(inputs.computedTurretPositionDegrees);
+          targetAngle = getComputedTurretPosition();
         }
 
         targetAngle =
@@ -260,7 +281,7 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
   @Override
   public Transform3d getTransform3d() {
     // Use the computed turret position from the Vernier dual-encoder system (in degrees)
-    double turretAngleRadians = Degrees.of(inputs.computedTurretPositionDegrees).in(Radian);
+    double turretAngleRadians = getCurrentTurretRotation().getRadians();
     return config.initialTransform.plus(
         new Transform3d(new Translation3d(), new Rotation3d(0, 0, turretAngleRadians)));
   }

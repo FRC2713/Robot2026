@@ -22,17 +22,18 @@ import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Time;
 import frc2713.lib.drivers.CANDeviceId;
 import frc2713.lib.dynamics.MoiUnits;
+import frc2713.lib.io.CanCoderConfig;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.LoggedTunableBoolean;
 import frc2713.lib.util.LoggedTunableMeasure;
 import frc2713.lib.util.Util;
-import frc2713.robot.subsystems.launcher.turretIO.TurretSubsystemConfig;
 
 public final class LauncherConstants {
 
   public static final class Turret {
 
-    public static TurretSubsystemConfig config = new TurretSubsystemConfig();
+    public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
+    public static CanCoderConfig canCoderConfig = new CanCoderConfig();
     public static Angle acceptableError = Degrees.of(3);
     public static Angle staticHubAngle = Degrees.of(0);
 
@@ -50,8 +51,6 @@ public final class LauncherConstants {
     static {
       config.name = "Turret";
       config.talonCANID = new CANDeviceId(52, "canivore");
-      config.canCoderCANID =
-          new CANDeviceId(53, "canivore"); // CANCoder CAN ID, replace with actual ID
       config.tunable = true; // Enable tunable gains for Motion Magic
 
       // PID gains for Motion Magic
@@ -80,6 +79,11 @@ public final class LauncherConstants {
                   Inches.of(0.5).in(Meters),
                   Inches.of(18.484119).in(Meters)),
               new Rotation3d(0, 0, 0));
+    }
+
+    static {
+      canCoderConfig.canId =
+          new CANDeviceId(53, "canivore"); // CANCoder CAN ID, replace with actual ID
     }
 
     public static int MODEL_INDEX = 3;
