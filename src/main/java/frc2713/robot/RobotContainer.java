@@ -7,6 +7,7 @@
 
 package frc2713.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.FeetPerSecond;
@@ -424,6 +425,22 @@ public class RobotContainer {
               feeder.feedWhenReady(flywheels::atTarget),
               dyeRotor.feedWhenReady(flywheels::atTarget))
           .withName("OTF Shooting");
+    }
+
+    public static Command dumbShot(
+        Drive drive,
+        Flywheels flywheels,
+        Hood hood,
+        Turret turret,
+        Feeder feeder,
+        DyeRotor dyeRotor) {
+      return Commands.parallel(
+          flywheels.setVelocity(() -> LauncherConstants.Flywheels.staticTowerVelocity),
+          hood.setAngleCommand(() -> Degrees.of(0.0)),
+          turret.setAngle(() -> Degrees.of(0.0)),
+          feeder.feedWhenReady(null),
+          feeder.feedWhenReady(() -> flywheels.atTarget() && hood.atTarget()),
+          dyeRotor.feedWhenReady(() -> flywheels.atTarget() && hood.atTarget()));
     }
 
     /** Hub shooting command. */

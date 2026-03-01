@@ -100,14 +100,17 @@ public class DriverControls {
 
     // intake fuel
     controller
-        .leftBumper()
-        .or(controller.leftTrigger(0.25))
-        .whileTrue(
-            Commands.parallel(intakeRoller.intake(), intakeExtension.extendCommand())
+        .leftTrigger(0.25)
+        .onTrue(
+            Commands.sequence(intakeExtension.extendAndWaitCommand(), intakeRoller.intake())
                 .withName("Intaking"))
-        .onFalse(
-            Commands.parallel(intakeRoller.stop(), intakeExtension.retractCommand())
-                .withName("Intake Retracted"));
+        .onFalse(intakeRoller.stop().withName("Stop Intake"));
+
+    controller
+        .leftBumper()
+        .onTrue(
+            Commands.sequence(intakeRoller.stop(), intakeExtension.retractCommand())
+                .withName("Retract Intake"));
 
     // shoot against the hubwhen flywheels and hub are ready
     controller

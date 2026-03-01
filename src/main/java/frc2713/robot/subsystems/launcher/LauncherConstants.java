@@ -155,6 +155,7 @@ public final class LauncherConstants {
             new Rotation3d(0, Degrees.of(-90).in(Radians), 0));
 
     public static AngularVelocity staticHubVelocity = RotationsPerSecond.of(20);
+    public static AngularVelocity staticTowerVelocity = RotationsPerSecond.of(20);
     public static InterpolatingDoubleTreeMap velocityMap = new InterpolatingDoubleTreeMap();
 
     public static Distance WHEEL_DIAMETER = Inches.of(4);
@@ -228,7 +229,8 @@ public final class LauncherConstants {
     public static int PARENT_INDEX = 3; // turret
 
     public static LoggedTunableMeasure<Angle> staticHubAngle =
-        new LoggedTunableMeasure<Angle>("Hood/Static Hub", Degrees.of(40));
+        new LoggedTunableMeasure<Angle>("Hood/Static Hub", Degrees.of(30));
+
     public static InterpolatingDoubleTreeMap angleMap = new InterpolatingDoubleTreeMap();
 
     static {
