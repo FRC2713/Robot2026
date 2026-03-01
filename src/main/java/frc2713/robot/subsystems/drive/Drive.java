@@ -307,7 +307,7 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
     if (Robot.isReal()) {
       loggedTunableDriveGains.ifChanged(
           hashCode(),
-          (Slot0Configs gains, MotionMagicConfigs motionMagic) -> {
+          (Slot0Configs gains) -> {
             // Apply updated PID/FF gains
             for (int i = 0; i < 4; i++) {
               modules[i].setDriveGains(gains);
@@ -315,7 +315,7 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
           });
       loggedTunableTurnGains.ifChanged(
           hashCode(),
-          (Slot0Configs gains, MotionMagicConfigs motionMagic) -> {
+          (Slot0Configs gains) -> {
             // Apply updated PID/FF gains
             for (int i = 0; i < 4; i++) {
               modules[i].setTurnGains(gains);

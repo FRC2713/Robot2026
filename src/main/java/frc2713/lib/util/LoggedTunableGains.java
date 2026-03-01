@@ -5,6 +5,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import edu.wpi.first.math.controller.PIDController;
 import frc2713.lib.io.AdvantageScopePathBuilder;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import lombok.Getter;
 
 /**
@@ -101,6 +102,21 @@ public class LoggedTunableGains {
         motionMagicJerk,
         motionMagicExpo_V,
         motionMagicExpo_A);
+  }
+
+  /**
+   * Runs the provided action when any of the tunables have changed. The Slot0Configs and
+   * MotionMagicConfigs instance passed to the constructor will be updated before the action runs.
+   *
+   * @param id unique id for the caller (use hashCode())
+   * @param action action to run after the Slot0Configs and MotionMagicConfigs have been updated
+   */
+  public void ifChanged(int id, Consumer<Slot0Configs> action) {
+    ifChanged(
+        id,
+        (slot0, motionMagic) -> {
+          action.accept(slot0);
+        });
   }
 
   public PIDController createPIDController() {
