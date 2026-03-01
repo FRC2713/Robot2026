@@ -10,19 +10,18 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc2713.lib.io.ArticulatedComponent;
 import frc2713.lib.io.MotorIO;
-import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
+public class IntakeExtension extends MotorSubsystem<IntakeExtensionInputsAutoLogged, MotorIO>
     implements ArticulatedComponent {
 
   public IntakeExtension(
       final TalonFXSubsystemConfig config, final MotorIO intakeExtensionMotorIO) {
-    super(config, new MotorInputsAutoLogged(), intakeExtensionMotorIO);
+    super(config, new IntakeExtensionInputsAutoLogged(), intakeExtensionMotorIO);
   }
 
   /**
