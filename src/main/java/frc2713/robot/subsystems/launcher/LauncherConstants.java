@@ -25,7 +25,6 @@ import frc2713.lib.dynamics.MoiUnits;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.LoggedTunableBoolean;
 import frc2713.lib.util.LoggedTunableMeasure;
-import frc2713.lib.util.Util;
 import frc2713.robot.subsystems.launcher.turretIO.TurretSubsystemConfig;
 
 public final class LauncherConstants {
@@ -118,21 +117,26 @@ public final class LauncherConstants {
     public static TalonFXSubsystemConfig leaderConfig = new TalonFXSubsystemConfig();
     public static TalonFXSubsystemConfig followerConfig = new TalonFXSubsystemConfig();
     public static MomentOfInertia flywhMomentOfInertia = MoiUnits.PoundSquareInches.of(10.410164);
-    public static double gearRatio = 24.0 / 18.0; // 1.33:1 reduction from motor to flywheel
+    public static double gearRatio = 24.0 / 18.0; // 1.33:1 overdrive from motor to flywheel
 
     static {
       leaderConfig.name = "Flywheels";
       leaderConfig.talonCANID = new CANDeviceId(50, "canivore");
-      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(0.3, 3.5);
+      leaderConfig.fxConfig.Slot0.kP = 0.5; // Util.modeDependentValue(3.0, 3.5);
       leaderConfig.fxConfig.Slot0.kI = 0.0;
       leaderConfig.fxConfig.Slot0.kD = 0.0;
-      leaderConfig.fxConfig.Slot0.kS = 0.15;
-      leaderConfig.fxConfig.Slot0.kV = 0.114;
+      leaderConfig.fxConfig.Slot0.kS = 2.0;
+      leaderConfig.fxConfig.Slot0.kV = 0.12 * (1.0 / gearRatio);
+      leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimit = 120.0;
+      leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+      leaderConfig.fxConfig.CurrentLimits.SupplyCurrentLimit = 70.0;
+      leaderConfig.fxConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+
       leaderConfig.unitToRotorRatio = gearRatio; // 1.33:1 reduction from motor to flywheel
       leaderConfig.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
       leaderConfig.fxConfig.MotorOutput.PeakReverseDutyCycle = 0;
       leaderConfig.momentOfInertia = flywhMomentOfInertia.times(0.5);
-      leaderConfig.useFOC = true;
+      leaderConfig.useFOC = false; // FOC makes the feedfowrward term units weird
       leaderConfig.tunable = true;
       leaderConfig.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
@@ -140,7 +144,11 @@ public final class LauncherConstants {
       followerConfig.talonCANID = new CANDeviceId(51, "canivore");
       followerConfig.unitToRotorRatio = gearRatio; // 1.33:1 reduction from motor to flywheel
       followerConfig.momentOfInertia = flywhMomentOfInertia.times(0.5);
-      followerConfig.useFOC = true;
+      followerConfig.useFOC = false;
+      followerConfig.fxConfig.CurrentLimits.StatorCurrentLimit = 120.0;
+      followerConfig.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+      followerConfig.fxConfig.CurrentLimits.SupplyCurrentLimit = 70.0;
+      followerConfig.fxConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
     }
 
     public static int MODEL_INDEX = 5;
@@ -155,7 +163,7 @@ public final class LauncherConstants {
             new Rotation3d(0, Degrees.of(-90).in(Radians), 0));
 
     public static AngularVelocity staticHubVelocity = RotationsPerSecond.of(20);
-    public static AngularVelocity staticTowerVelocity = RotationsPerSecond.of(20);
+    public static AngularVelocity staticTowerVelocity = RPM.of(1500);
     public static InterpolatingDoubleTreeMap velocityMap = new InterpolatingDoubleTreeMap();
 
     public static Distance WHEEL_DIAMETER = Inches.of(4);

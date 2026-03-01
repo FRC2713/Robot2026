@@ -29,11 +29,11 @@ public final class SerializerConstants {
 
       // Velocity PID gains for VelocityVoltage control
       // Units: kP/kV/kS are in volts
-      config.fxConfig.Slot0.kP = 0.08; // Volts per rps of error (lower to reduce oscillation)
+      config.fxConfig.Slot0.kP = 0.0; // Volts per rps of error (lower to reduce oscillation)
       config.fxConfig.Slot0.kI = 0.0;
-      config.fxConfig.Slot0.kD = 0.01; // Small damping to reduce oscillation
-      config.fxConfig.Slot0.kS = 0.1; // Volts to overcome static friction
-      config.fxConfig.Slot0.kV = 0.12; // Volts per rps (feedforward)
+      config.fxConfig.Slot0.kD = 0.0; // Small damping to reduce oscillation
+      config.fxConfig.Slot0.kS = 0.0; // Volts to overcome static friction
+      config.fxConfig.Slot0.kV = 0.12 * (52.25); // Volts per rps (feedforward)
 
       config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -51,7 +51,7 @@ public final class SerializerConstants {
     }
 
     public static LoggedTunableMeasure<AngularVelocity> indexingSpeed =
-        new LoggedTunableMeasure<AngularVelocity>("DyeRotor/Speed", RotationsPerSecond.of(60));
+        new LoggedTunableMeasure<AngularVelocity>("DyeRotor/Speed", RotationsPerSecond.of(1.3));
     public static AngularVelocity outdexingSpeed = RotationsPerSecond.of(-3);
 
     public static int MODEL_INDEX = 2;

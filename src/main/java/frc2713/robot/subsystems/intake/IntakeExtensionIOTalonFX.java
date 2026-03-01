@@ -15,6 +15,7 @@ import edu.wpi.first.units.AngularAccelerationUnit;
 import edu.wpi.first.units.measure.*;
 import frc2713.lib.drivers.CANDeviceId;
 import frc2713.lib.io.AdvantageScopePathBuilder;
+import frc2713.lib.io.MotorInputs;
 import frc2713.lib.subsystem.DifferentialSubsystemConfig;
 import frc2713.lib.util.CTREUtil;
 import frc2713.lib.util.LoggedTunableGains;
@@ -122,7 +123,7 @@ public class IntakeExtensionIOTalonFX implements IntakeExtensionIO {
   }
 
   @Override
-  public void readInputs(IntakeExtensionInputs inputs) {
+  public void readInputs(MotorInputs inputs) {
     BaseStatusSignal.refreshAll(signals);
     inputs.position = positionSignal.getValue();
     inputs.velocity = velocitySignal.getValue();
@@ -134,16 +135,16 @@ public class IntakeExtensionIOTalonFX implements IntakeExtensionIO {
     inputs.closedLoopError = closedLoopErrorSignal.getValue();
     inputs.isMotionMagicAtTarget = motionMagicAtTargetSignal.getValue();
 
-    inputs.leader.position = leaderMotor.getPosition().getValue();
-    inputs.leader.velocity = leaderMotor.getVelocity().getValue();
-    inputs.leader.appliedVolts = leaderMotor.getMotorVoltage().getValue();
-    inputs.leader.currentStatorAmps = leaderMotor.getStatorCurrent().getValue();
-    inputs.leader.currentSupplyAmps = leaderMotor.getSupplyCurrent().getValue();
-    inputs.leader.currentTorqueAmps = leaderMotor.getTorqueCurrent().getValue();
-    inputs.leader.rawRotorPosition = leaderMotor.getRotorPosition().getValue();
-    inputs.leader.closedLoopError = leaderMotor.getClosedLoopError().getValue();
-    inputs.leader.isMotionMagicAtTarget = leaderMotor.getMotionMagicAtTarget().getValue();
-
+    inputs.position = leaderMotor.getPosition().getValue();
+    inputs.velocity = leaderMotor.getVelocity().getValue();
+    inputs.appliedVolts = leaderMotor.getMotorVoltage().getValue();
+    inputs.currentStatorAmps = leaderMotor.getStatorCurrent().getValue();
+    inputs.currentSupplyAmps = leaderMotor.getSupplyCurrent().getValue();
+    inputs.currentTorqueAmps = leaderMotor.getTorqueCurrent().getValue();
+    inputs.rawRotorPosition = leaderMotor.getRotorPosition().getValue();
+    inputs.closedLoopError = leaderMotor.getClosedLoopError().getValue();
+    inputs.isMotionMagicAtTarget = leaderMotor.getMotionMagicAtTarget().getValue();
+    /*
     inputs.follower.position = followerMotor.getPosition().getValue();
     inputs.follower.velocity = followerMotor.getVelocity().getValue();
     inputs.follower.appliedVolts = followerMotor.getMotorVoltage().getValue();
@@ -153,6 +154,7 @@ public class IntakeExtensionIOTalonFX implements IntakeExtensionIO {
     inputs.follower.rawRotorPosition = followerMotor.getRotorPosition().getValue();
     inputs.follower.closedLoopError = followerMotor.getClosedLoopError().getValue();
     inputs.follower.isMotionMagicAtTarget = followerMotor.getMotionMagicAtTarget().getValue();
+    */
 
     // Update PID gains from dashboard if tunable and any value changed
     if (config.tunable && tunableGains != null) {

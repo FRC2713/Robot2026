@@ -77,8 +77,6 @@ public class IntakeExtension extends MotorSubsystem<IntakeExtensionInputsAutoLog
   public void periodic() {
     super.periodic();
 
-    System.out.println(inputs.position);
-
     Logger.recordOutput(
         pb.makePath("CurrentDistanceMeters"), getCurrentPositionAsDistance().in(Meters));
     Logger.recordOutput(
