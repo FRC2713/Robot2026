@@ -42,6 +42,7 @@ import frc2713.robot.subsystems.drive.ModuleIOSim;
 import frc2713.robot.subsystems.drive.ModuleIOTalonFX;
 import frc2713.robot.subsystems.intake.IntakeConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
+import frc2713.robot.subsystems.intake.IntakeExtensionIO;
 import frc2713.robot.subsystems.intake.IntakeExtensionIOTalonFX;
 import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.launcher.Flywheels;
@@ -184,10 +185,10 @@ public class RobotContainer {
                 IntakeConstants.Roller.followerConfig,
                 new SimTalonFXIO(IntakeConstants.Roller.leaderConfig),
                 new SimTalonFXIO(IntakeConstants.Roller.followerConfig));
-        intakeExtension =
-            new IntakeExtension(
-                IntakeConstants.Extension.config,
-                new SimTalonFXIO(IntakeConstants.Extension.config));
+        // intakeExtension =
+        //     new IntakeExtension(
+        //         IntakeConstants.Extension.config,
+        //         new SimTalonFXIO(IntakeConstants.Extension.config));
         dyeRotor =
             new DyeRotor(
                 SerializerConstants.DyeRotor.config,
@@ -222,7 +223,8 @@ public class RobotContainer {
                 new TalonFXSubsystemConfig(),
                 new MotorIO() {},
                 new MotorIO() {});
-        intakeExtension = new IntakeExtension(new TalonFXSubsystemConfig(), new MotorIO() {});
+        intakeExtension =
+            new IntakeExtension(new TalonFXSubsystemConfig(), new IntakeExtensionIO() {});
         dyeRotor = new DyeRotor(new TalonFXSubsystemConfig(), new MotorIO() {});
         feeder = new Feeder(new TalonFXSubsystemConfig(), new MotorIO() {});
         vision = new Vision(new VisionIO() {});
