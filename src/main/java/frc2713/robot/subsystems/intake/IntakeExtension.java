@@ -6,21 +6,22 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc2713.lib.io.ArticulatedComponent;
-import frc2713.lib.io.MotorIO;
-import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
+public class IntakeExtension
+    extends MotorSubsystem<IntakeExtensionInputsAutoLogged, IntakeExtensionIO>
     implements ArticulatedComponent {
 
   public IntakeExtension(
-      final TalonFXSubsystemConfig config, final MotorIO intakeExtensionMotorIO) {
-    super(config, new MotorInputsAutoLogged(), intakeExtensionMotorIO);
+      final TalonFXSubsystemConfig config, final IntakeExtensionIO intakeExtensionMotorIO) {
+    super(config, new IntakeExtensionInputsAutoLogged(), intakeExtensionMotorIO);
   }
 
   /**
@@ -49,17 +50,42 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Motor
    * @return
    */
   public Command retractCommand() {
-    return setDistanceCommand(() -> IntakeConstants.Extension.retractedPosition);
+    return setDistanceCommand(IntakeConstants.Extension.retractedPosition);
+  }
+
+  /**
+   * Check if the extension mechanism is at the target position
+   *
+   * @return true if motion magic has reached the target position
+   */
+  @AutoLogOutput(key = "Intake Extension/AtTarget")
+  public boolean atTarget() {
+    return Math.abs(
+            getCurrentPositionAsDistance().in(Meters) - getPositionSetpointAsDistance().in(Meters))
+        <= IntakeConstants.Extension.acceptableError.in(Meters);
+  }
+
+  public Command extendAndWaitCommand() {
+    return positionSetpointUntilOnTargetCommand(
+        () ->
+            convertSubsystemPositionToMotorPosition(
+                IntakeConstants.Extension.extendedPosition.get()),
+        () -> convertSubsystemPositionToMotorPosition(IntakeConstants.Extension.acceptableError));
   }
 
   @Override
   public void periodic() {
+    io.readInputs(inputs);
     super.periodic();
 
     Logger.recordOutput(
         pb.makePath("CurrentDistanceMeters"), getCurrentPositionAsDistance().in(Meters));
     Logger.recordOutput(
         pb.makePath("SetpointDistanceMeters"), getPositionSetpointAsDistance().in(Meters));
+
+    if (DriverStation.isDisabled()) {
+      setPositionSetpointImpl(inputs.position);
+    }
   }
 
   @Override

@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.FeetPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -104,32 +105,36 @@ public class DevControls {
     // Turret angle controls
     // Manual turret rotation with triggers - continuously target far in the desired direction
     // Velocity and acceleration scale with how hard the trigger is pressed
+    // controller
+    //     .leftTrigger(0.01)
+    //     .whileTrue(
+    //         turret.setAngleStopAtBounds(
+    //             () -> Degrees.of(turret.getComputedTurretPosition().in(Degrees) + 30),
+    //             () -> controller.getLeftTriggerAxis() * 0.2));
+
+    // controller
+    //     .rightTrigger(0.01)
+    //     .whileTrue(
+    //         turret.setAngleStopAtBounds(
+    //             () -> Degrees.of(turret.getComputedTurretPosition().in(Degrees) - 180),
+    //             controller::getRightTriggerAxis));
+
     controller
         .leftTrigger(0.01)
         .whileTrue(
-            turret.setAngleStopAtBounds(
-                () -> Degrees.of(turret.getComputedTurretPosition().in(Degrees) + 30),
-                () -> controller.getLeftTriggerAxis() * 0.2));
-
+            intakeExtension.voltageCommand(() -> Volts.of(controller.getLeftTriggerAxis() * 5)));
     controller
         .rightTrigger(0.01)
         .whileTrue(
-            turret.setAngleStopAtBounds(
-                () -> Degrees.of(turret.getComputedTurretPosition().in(Degrees) - 180),
-                controller::getRightTriggerAxis));
+            intakeExtension.voltageCommand(() -> Volts.of(-controller.getRightTriggerAxis() * 5)));
 
-    // Hood manual controls - bumpers bring hood up/down continuously until bounds hit
     controller
         .leftBumper()
-        .whileTrue(
-            hood.setAngleStopAtBounds(
-                () -> Degrees.of(hood.getCurrentPosition().in(Degrees) - 5))); // Bring hood down
+        .whileTrue(Commands.sequence(intakeExtension.extendAndWaitCommand(), intakeRoller.intake()))
+        .onFalse(Commands.parallel(intakeRoller.stop(), intakeExtension.retractCommand()));
+    // .onFalse(intakeExtension.retractCommand()); // Bring hood down
 
-    controller
-        .rightBumper()
-        .whileTrue(
-            hood.setAngleStopAtBounds(
-                () -> hood.getCurrentPosition().minus(Degrees.of(5)), () -> 0.2));
+    controller.b().onTrue(hood.hubCommand()).onFalse(hood.setAngleCommand(() -> Degrees.of(10)));
 
     // Test setting drive limits
     controller
@@ -148,7 +153,7 @@ public class DevControls {
     controller.a().whileTrue(dyeRotor.indexFuel()).onFalse(dyeRotor.stopCommand());
 
     // B button - index fuel
-    controller.b().whileTrue(feeder.feedShooter()).onFalse(feeder.stop());
+    // controller.b().whileTrue(feeder.feedShooter()).onFalse(feeder.stop());
 
     // controller.x().whileTrue(flywheels.setVelocity(() ->
     // LauncherConstants.Flywheels.launchVelocity.get())).onFalse(flywheels.stop());

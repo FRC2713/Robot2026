@@ -1,6 +1,7 @@
 package frc2713.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Revolutions;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
@@ -14,14 +15,12 @@ import edu.wpi.first.units.AngularAccelerationUnit;
 import edu.wpi.first.units.measure.*;
 import frc2713.lib.drivers.CANDeviceId;
 import frc2713.lib.io.AdvantageScopePathBuilder;
-import frc2713.lib.io.MotorIO;
-import frc2713.lib.io.MotorInputs;
 import frc2713.lib.subsystem.DifferentialSubsystemConfig;
 import frc2713.lib.util.CTREUtil;
 import frc2713.lib.util.LoggedTunableGains;
 import frc2713.robot.Robot;
 
-public class IntakeExtensionIOTalonFX implements MotorIO {
+public class IntakeExtensionIOTalonFX implements IntakeExtensionIO {
 
   // Base members
   protected final DifferentialMechanism<TalonFX> diffMech;
@@ -74,6 +73,7 @@ public class IntakeExtensionIOTalonFX implements MotorIO {
 
     // Create the differential mechanism using the constants from config
     this.diffMech = new DifferentialMechanism<TalonFX>(TalonFX::new, config.differentialConstants);
+    diffMech.configNeutralMode(NeutralModeValue.Coast);
 
     // Get references to the individual motors from the differential mechanism
     this.leaderMotor = diffMech.getLeader();
@@ -122,17 +122,37 @@ public class IntakeExtensionIOTalonFX implements MotorIO {
   }
 
   @Override
-  public void readInputs(MotorInputs inputs) {
+  public void readInputs(IntakeExtensionInputs inputs) {
     BaseStatusSignal.refreshAll(signals);
     inputs.position = positionSignal.getValue();
     inputs.velocity = velocitySignal.getValue();
     inputs.appliedVolts = voltageSignal.getValue();
     inputs.currentStatorAmps = currentStatorSignal.getValue();
     inputs.currentSupplyAmps = currentSupplySignal.getValue();
-    inputs.currenTorqueAmps = currentTorqueSignal.getValue();
+    inputs.currentTorqueAmps = currentTorqueSignal.getValue();
     inputs.rawRotorPosition = rawRotorPositionSignal.getValue();
     inputs.closedLoopError = closedLoopErrorSignal.getValue();
     inputs.isMotionMagicAtTarget = motionMagicAtTargetSignal.getValue();
+
+    inputs.leader.position = leaderMotor.getPosition().getValue();
+    inputs.leader.velocity = leaderMotor.getVelocity().getValue();
+    inputs.leader.appliedVolts = leaderMotor.getMotorVoltage().getValue();
+    inputs.leader.currentStatorAmps = leaderMotor.getStatorCurrent().getValue();
+    inputs.leader.currentSupplyAmps = leaderMotor.getSupplyCurrent().getValue();
+    inputs.leader.currentTorqueAmps = leaderMotor.getTorqueCurrent().getValue();
+    inputs.leader.rawRotorPosition = leaderMotor.getRotorPosition().getValue();
+    inputs.leader.closedLoopError = leaderMotor.getClosedLoopError().getValue();
+    inputs.leader.isMotionMagicAtTarget = leaderMotor.getMotionMagicAtTarget().getValue();
+
+    inputs.follower.position = followerMotor.getPosition().getValue();
+    inputs.follower.velocity = followerMotor.getVelocity().getValue();
+    inputs.follower.appliedVolts = followerMotor.getMotorVoltage().getValue();
+    inputs.follower.currentStatorAmps = followerMotor.getStatorCurrent().getValue();
+    inputs.follower.currentSupplyAmps = followerMotor.getSupplyCurrent().getValue();
+    inputs.follower.currentTorqueAmps = followerMotor.getTorqueCurrent().getValue();
+    inputs.follower.rawRotorPosition = followerMotor.getRotorPosition().getValue();
+    inputs.follower.closedLoopError = followerMotor.getClosedLoopError().getValue();
+    inputs.follower.isMotionMagicAtTarget = followerMotor.getMotionMagicAtTarget().getValue();
 
     // Update PID gains from dashboard if tunable and any value changed
     if (config.tunable && tunableGains != null) {
@@ -214,8 +234,7 @@ public class IntakeExtensionIOTalonFX implements MotorIO {
 
   @Override
   public void setVoltageOutput(Voltage voltage) {
-    diffMech.setControl(
-        voltageControl.withOutput(voltage), voltageControl.withOutput(voltage.times(0)));
+    diffMech.setControl(voltageControl.withOutput(voltage), voltageControl.withOutput(Volts.of(0)));
   }
 
   @Override

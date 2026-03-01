@@ -100,14 +100,20 @@ public class DriverControls {
 
     // intake fuel
     controller
-        .leftBumper()
-        .or(controller.leftTrigger(0.25))
-        .whileTrue(
-            Commands.parallel(intakeRoller.intake(), intakeExtension.extendCommand())
+        .leftTrigger(0.25)
+        .onTrue(
+            Commands.parallel(
+                    intakeExtension.extendCommand(),
+                    Commands.sequence(Commands.waitSeconds(0.5), intakeRoller.intake()))
                 .withName("Intaking"))
-        .onFalse(
-            Commands.parallel(intakeRoller.stop(), intakeExtension.retractCommand())
-                .withName("Intake Retracted"));
+        .onFalse(intakeRoller.stop().withName("Stop Intake"));
+
+    controller
+        .leftBumper()
+        .onTrue(
+            Commands.parallel(intakeRoller.intake(), intakeExtension.retractCommand())
+                .withName("Retract Intake"))
+        .onFalse(intakeRoller.stop().withName("Stop Intake"));
 
     // shoot against the hubwhen flywheels and hub are ready
     controller
@@ -121,7 +127,7 @@ public class DriverControls {
     controller
         .rightTrigger(.98)
         .whileTrue(
-            RobotContainer.GameCommandGroups.otfShot(
+            RobotContainer.GameCommandGroups.dumbShot(
                 drive, flywheels, hood, turret, feeder, dyeRotor))
         .onFalse(RobotContainer.GameCommandGroups.stopShooting(drive, feeder, dyeRotor));
   }

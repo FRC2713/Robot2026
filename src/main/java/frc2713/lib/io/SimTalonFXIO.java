@@ -136,7 +136,7 @@ public class SimTalonFXIO extends TalonFXIO {
     inputs.appliedVolts = Volts.of(sim.getInputVoltage());
     inputs.currentStatorAmps = Amps.of(sim.getCurrentDrawAmps());
     inputs.currentSupplyAmps = Amps.of(sim.getCurrentDrawAmps());
-    inputs.currenTorqueAmps = Amps.of(sim.getCurrentDrawAmps());
+    inputs.currentTorqueAmps = Amps.of(sim.getCurrentDrawAmps());
     // rawRotorPosition is motor shaft position: mechanism * unitToRotorRatio
     inputs.rawRotorPosition = Rotations.of(mechanismRotations * config.unitToRotorRatio);
     inputs.closedLoopError = this.lastClosedLoopError;

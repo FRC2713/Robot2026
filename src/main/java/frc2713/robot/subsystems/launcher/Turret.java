@@ -104,7 +104,7 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
           Logger.recordOutput(pb.makePath("setpoint", "commandedDegrees"), commandedDegrees);
           Logger.recordOutput(pb.makePath("setpoint", "boundedDegrees"), boundedAngleDegrees);
 
-          return convertSubsystemPositionToMotorPosition(Degrees.of(boundedAngleDegrees));
+          return Degrees.of(boundedAngleDegrees);
         });
   }
 
@@ -124,7 +124,7 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
           Logger.recordOutput(pb.makePath("setpoint", "commandedDegrees"), commandedDegrees);
           Logger.recordOutput(pb.makePath("setpoint", "clampedDegrees"), clampedDegrees);
 
-          return convertSubsystemPositionToMotorPosition(Degrees.of(clampedDegrees));
+          return Degrees.of(clampedDegrees);
         });
   }
 
@@ -148,7 +148,7 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
           Logger.recordOutput(pb.makePath("setpoint", "commandedDegrees"), commandedDegrees);
           Logger.recordOutput(pb.makePath("setpoint", "clampedDegrees"), clampedDegrees);
 
-          return convertSubsystemPositionToMotorPosition(Degrees.of(clampedDegrees));
+          return Degrees.of(clampedDegrees);
         },
         () -> {
           var mmConfig = new com.ctre.phoenix6.configs.MotionMagicConfigs();

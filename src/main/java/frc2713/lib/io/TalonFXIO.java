@@ -123,7 +123,7 @@ public class TalonFXIO implements MotorIO {
     inputs.appliedVolts = voltageSignal.getValue();
     inputs.currentStatorAmps = currentStatorSignal.getValue();
     inputs.currentSupplyAmps = currentSupplySignal.getValue();
-    inputs.currenTorqueAmps = currentTorqueSignal.getValue();
+    inputs.currentTorqueAmps = currentTorqueSignal.getValue();
     inputs.rawRotorPosition = rawRotorPositionSignal.getValue();
     inputs.closedLoopError = closedLoopErrorSignal.getValue();
     inputs.isMotionMagicAtTarget = motionMagicAtTargetSignal.getValue();

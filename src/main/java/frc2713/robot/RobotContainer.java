@@ -36,10 +36,14 @@ import frc2713.robot.oi.DevControls;
 import frc2713.robot.oi.DriverControls;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.drive.GyroIO;
+import frc2713.robot.subsystems.drive.GyroIOPigeon2;
 import frc2713.robot.subsystems.drive.ModuleIO;
 import frc2713.robot.subsystems.drive.ModuleIOSim;
+import frc2713.robot.subsystems.drive.ModuleIOTalonFX;
 import frc2713.robot.subsystems.intake.IntakeConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
+import frc2713.robot.subsystems.intake.IntakeExtensionIO;
+import frc2713.robot.subsystems.intake.IntakeExtensionIOTalonFX;
 import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.launcher.Flywheels;
 import frc2713.robot.subsystems.launcher.Hood;
@@ -48,6 +52,7 @@ import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
 import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.launcher.turretIO.TurretMotorIO;
 import frc2713.robot.subsystems.launcher.turretIO.TurretMotorIOSim;
+import frc2713.robot.subsystems.launcher.turretIO.TurretMotorIOTalonFX;
 import frc2713.robot.subsystems.launcher.turretIO.TurretSubsystemConfig;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
@@ -74,7 +79,7 @@ public class RobotContainer {
   private static Turret turret;
   private static Hood hood;
   private static IntakeRoller intakeRoller;
-  private static IntakeExtension intakeExtension;
+  public static IntakeExtension intakeExtension;
   private static DyeRotor dyeRotor;
   private static Feeder feeder;
   public static Vision vision;
@@ -102,37 +107,44 @@ public class RobotContainer {
         // ModuleIOTalonFX is intended for modules with TalonFX drive, TalonFX turn, and
         // a CANcoder
 
-        // drive =
-        //     new Drive(
-        //         new GyroIOPigeon2(),
-        //         new ModuleIOTalonFX(TunerConstants.FrontLeft),
-        //         new ModuleIOTalonFX(TunerConstants.FrontRight),
-        //         new ModuleIOTalonFX(TunerConstants.BackLeft),
-        //         new ModuleIOTalonFX(TunerConstants.BackRight));
         drive =
             new Drive(
-                new GyroIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {});
+                new GyroIOPigeon2(),
+                new ModuleIOTalonFX(TunerConstants.FrontLeft),
+                new ModuleIOTalonFX(TunerConstants.FrontRight),
+                new ModuleIOTalonFX(TunerConstants.BackLeft),
+                new ModuleIOTalonFX(TunerConstants.BackRight));
+        // drive =
+        //     new Drive(
+        //         new GyroIO() {},
+        //         new ModuleIO() {},
+        //         new ModuleIO() {},
+        //         new ModuleIO() {},
+        //         new ModuleIO() {});
         flywheels =
             new Flywheels(
                 LauncherConstants.Flywheels.leaderConfig,
                 LauncherConstants.Flywheels.followerConfig,
                 new TalonFXIO(LauncherConstants.Flywheels.leaderConfig),
                 new TalonFXIO(LauncherConstants.Flywheels.followerConfig));
-        hood = new Hood(LauncherConstants.Hood.config, new MotorIO() {});
-        turret = new Turret(LauncherConstants.Turret.config, new TurretMotorIO() {});
+        hood =
+            new Hood(LauncherConstants.Hood.config, new TalonFXIO(LauncherConstants.Hood.config));
+        turret =
+            new Turret(
+                LauncherConstants.Turret.config,
+                new TurretMotorIOTalonFX(LauncherConstants.Turret.config));
 
         intakeRoller =
             new IntakeRoller(
                 IntakeConstants.Roller.leaderConfig,
                 IntakeConstants.Roller.followerConfig,
-                new MotorIO() {},
-                new MotorIO() {});
+                new TalonFXIO(IntakeConstants.Roller.leaderConfig),
+                new TalonFXIO(IntakeConstants.Roller.followerConfig));
 
-        intakeExtension = new IntakeExtension(IntakeConstants.Extension.config, new MotorIO() {});
+        intakeExtension =
+            new IntakeExtension(
+                IntakeConstants.Extension.config,
+                new IntakeExtensionIOTalonFX(IntakeConstants.Extension.differentialConfig));
 
         dyeRotor =
             new DyeRotor(
@@ -173,10 +185,10 @@ public class RobotContainer {
                 IntakeConstants.Roller.followerConfig,
                 new SimTalonFXIO(IntakeConstants.Roller.leaderConfig),
                 new SimTalonFXIO(IntakeConstants.Roller.followerConfig));
-        intakeExtension =
-            new IntakeExtension(
-                IntakeConstants.Extension.config,
-                new SimTalonFXIO(IntakeConstants.Extension.config));
+        // intakeExtension =
+        //     new IntakeExtension(
+        //         IntakeConstants.Extension.config,
+        //         new SimTalonFXIO(IntakeConstants.Extension.config));
         dyeRotor =
             new DyeRotor(
                 SerializerConstants.DyeRotor.config,
@@ -211,7 +223,8 @@ public class RobotContainer {
                 new TalonFXSubsystemConfig(),
                 new MotorIO() {},
                 new MotorIO() {});
-        intakeExtension = new IntakeExtension(new TalonFXSubsystemConfig(), new MotorIO() {});
+        intakeExtension =
+            new IntakeExtension(new TalonFXSubsystemConfig(), new IntakeExtensionIO() {});
         dyeRotor = new DyeRotor(new TalonFXSubsystemConfig(), new MotorIO() {});
         feeder = new Feeder(new TalonFXSubsystemConfig(), new MotorIO() {});
         vision = new Vision(new VisionIO() {});
@@ -354,10 +367,10 @@ public class RobotContainer {
             () -> -driverControls.getLeftX() + -devControls.getLeftX(),
             () -> -driverControls.getRightX() + -devControls.getRightX()),
         "Dual Controller Drive");
-    turret.setDefaultCommand(turret.otfCommand().withName("OTF Tracking"));
-    hood.setDefaultCommand(
-        hood.autoRetractCommand(drive::getPose, hood.otfAngSupplier)
-            .withName("OTF Tracking with Auto-Retract"));
+    // turret.setDefaultCommand(turret.otfCommand().withName("OTF Tracking"));
+    // hood.setDefaultCommand(
+    //     hood.autoRetractCommand(drive::getPose, hood.otfAngSupplier)
+    //         .withName("OTF Tracking with Auto-Retract"));
     // flywheels.setDefaultCommand(flywheels.idleSpeedCommand().withName("Idle Tracking"));
 
     // Comment these out when using dev controller
@@ -413,6 +426,21 @@ public class RobotContainer {
               feeder.feedWhenReady(flywheels::atTarget),
               dyeRotor.feedWhenReady(flywheels::atTarget))
           .withName("OTF Shooting");
+    }
+
+    public static Command dumbShot(
+        Drive drive,
+        Flywheels flywheels,
+        Hood hood,
+        Turret turret,
+        Feeder feeder,
+        DyeRotor dyeRotor) {
+      return Commands.parallel(
+          flywheels.setVelocity(() -> LauncherConstants.Flywheels.staticTowerVelocity),
+          // hood.setAngleCommand(() -> Degrees.of(0.0)),
+          // turret.setAngle(() -> Degrees.of(0.0)),
+          feeder.feedWhenReady(() -> flywheels.atTarget()),
+          dyeRotor.feedWhenReady(() -> flywheels.atTarget()));
     }
 
     /** Hub shooting command. */

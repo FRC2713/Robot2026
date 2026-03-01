@@ -25,14 +25,15 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.io.MotorIO;
-import frc2713.lib.io.MotorInputsAutoLogged;
+import frc2713.lib.io.MotorInputs;
 import frc2713.lib.util.RobotTime;
 import frc2713.lib.util.Util;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.inputs.LoggableInputs;
 
-public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO>
+public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends MotorIO>
     extends SubsystemBase {
   protected final IO io;
   protected final MI inputs;
@@ -70,25 +71,23 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
   }
 
   /**
-   * Convert subsystem position to the position value sent to the motor controller. Since TalonFX is
-   * configured with SensorToMechanismRatio, control requests use mechanism units directly - the
-   * controller handles the conversion internally.
-   *
-   * @param subsystemPosition The desired mechanism position
-   * @return The position to send to the motor controller (same as input)
-   */
-  protected Angle convertSubsystemPositionToMotorPosition(Angle subsystemPosition) {
-    return subsystemPosition;
-  }
-
-  /**
    * Convert a linear distance to mechanism rotations for the motor controller.
    *
    * @param subsystemPosition Desired distance
    * @return the number of mechanism rotations to achieve that distance
    */
   protected Angle convertSubsystemPositionToMotorPosition(Distance subsystemPosition) {
-    return Rotations.of(subsystemPosition.in(Meters) * config.unitRotationsPerMeter);
+    return Rotations.of(subsystemPosition.in(Meters) / config.unitRotationsPerMeter);
+  }
+
+  /**
+   * Convert mechanism rotations from the motor controller to a linear distance.
+   *
+   * @param motorPosition The current position in mechanism rotations
+   * @return the current position as a linear distance
+   */
+  protected Distance convertMotorPositionToSubsystemPosition(Angle motorPosition) {
+    return Meters.of(motorPosition.in(Rotations) * config.unitRotationsPerMeter);
   }
 
   // IO Implementations
@@ -251,12 +250,12 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
 
   /**
    * Gets the current position as linear distance. For linear mechanisms (elevators, extensions),
-   * converts mechanism rotations to meters using unitRotationsPerMeter.
+   * converts mechanism rotations to meters.
    *
    * @return The current position as a Distance
    */
   public Distance getCurrentPositionAsDistance() {
-    return Meters.of(inputs.position.in(Rotations) / config.unitRotationsPerMeter);
+    return convertMotorPositionToSubsystemPosition(inputs.position);
   }
 
   /**
@@ -284,7 +283,7 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
    * @return The current position setpoint as a Distance
    */
   public Distance getPositionSetpointAsDistance() {
-    return Meters.of(positionSetpoint.in(Rotations) / config.unitRotationsPerMeter);
+    return convertMotorPositionToSubsystemPosition(positionSetpoint);
   }
 
   /**
