@@ -27,6 +27,7 @@ import frc2713.lib.io.CanCoderConfig;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.LoggedTunableBoolean;
 import frc2713.lib.util.LoggedTunableMeasure;
+import frc2713.lib.util.Util;
 
 public final class LauncherConstants {
 
@@ -69,12 +70,12 @@ public final class LauncherConstants {
       config.tunable = true; // Enable tunable gains for Motion Magic
 
       // PID gains for Motion Magic
-      config.fxConfig.Slot0.kP = 80.0;
+      config.fxConfig.Slot0.kP = Util.modeDependentValue(0.0, 80.0);
       config.fxConfig.Slot0.kI = 0.0;
-      config.fxConfig.Slot0.kD = 16.0;
-      config.fxConfig.Slot0.kS = 0.15; // static friction compensation
-      config.fxConfig.Slot0.kV = 0.12; // velocity feedforward
-      config.fxConfig.Slot0.kA = 0.01;
+      config.fxConfig.Slot0.kD = Util.modeDependentValue(0.0, 16.0);
+      config.fxConfig.Slot0.kS = Util.modeDependentValue(0.0, 0.15); // static friction compensation
+      config.fxConfig.Slot0.kV = Util.modeDependentValue(0.0, 0.12); // velocity feedforward
+      config.fxConfig.Slot0.kA = Util.modeDependentValue(0.0, 0.01); // acceleration feedforward
 
       config.fxConfig.Feedback.SensorToMechanismRatio = 1 / motorToTurretGearRatio;
 
@@ -110,6 +111,11 @@ public final class LauncherConstants {
 
     public static int MODEL_INDEX = 3;
     public static int PARENT_INDEX = 0; // drivetrain
+
+    public static final LoggedTunableMeasure<Angle> PIDTestAngleOne =
+        new LoggedTunableMeasure<>("Flywheels/PIDTestAngleOne", Degrees.of(100));
+    public static final LoggedTunableMeasure<Angle> PIDTestAngleTwo =
+        new LoggedTunableMeasure<>("Flywheels/PIDTestAngleTwo", Degrees.of(-100));
   }
 
   public final class Flywheels {

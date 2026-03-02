@@ -382,11 +382,6 @@ public class RobotContainer {
             () -> -driverControls.getLeftX() + -devControls.getLeftX(),
             () -> -driverControls.getRightX() + -devControls.getRightX()),
         "Dual Controller Drive");
-    // turret.setDefaultCommand(turret.otfCommand().withName("OTF Tracking"));
-    // hood.setDefaultCommand(
-    //     hood.autoRetractCommand(drive::getPose, hood.otfAngSupplier)
-    //         .withName("OTF Tracking with Auto-Retract"));
-    // flywheels.setDefaultCommand(flywheels.idleSpeedCommand().withName("Idle Tracking"));
 
     // Comment these out when using dev controller
     // driverControls.setToNormalDrive();

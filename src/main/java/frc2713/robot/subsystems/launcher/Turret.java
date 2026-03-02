@@ -27,6 +27,7 @@ import frc2713.lib.subsystem.MotorCancoderSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.CrtSolver;
 import frc2713.lib.util.Util;
+import frc2713.robot.Constants;
 import frc2713.robot.FieldConstants;
 import frc2713.robot.RobotContainer;
 import java.util.function.Supplier;
@@ -42,7 +43,7 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
       final CanCoderInputsAutoLogged cancoderInputs,
       final CanCoderIO cancoderIO) {
     super(config, new MotorInputsAutoLogged(), turretMotorIO, cancoderInputs, cancoderIO);
-    setDefaultCommand(otfCommand());
+    if (Constants.enableOTFFeatures) setDefaultCommand(otfCommand());
   }
 
   public static Angle turretPositionFromEncoders(Angle e1, Angle e2) {
@@ -200,7 +201,7 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
       };
 
   public Command otfCommand() {
-    return setAngle(otfAngleSupplier);
+    return setAngle(otfAngleSupplier).withName("OTF Tracking");
   }
 
   public Command hubCommand(Supplier<Pose2d> robotPose) {
