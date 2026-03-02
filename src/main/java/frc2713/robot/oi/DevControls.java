@@ -1,5 +1,6 @@
 package frc2713.robot.oi;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.FeetPerSecond;
@@ -146,6 +147,9 @@ public class DevControls {
                             .get()), // Spin up flywheels to launch velocity
                 Commands.parallel(dyeRotor.indexFuel(), feeder.feedShooter())))
         .onFalse(Commands.parallel(dyeRotor.stopCommand(), feeder.stop(), flywheels.stop()));
+
+    controller.povUp().onTrue(hood.setAngleCommand(() -> Degrees.of(25)));
+    controller.povDown().onTrue(hood.setAngleCommand(() -> Degrees.of(5)));
   }
 
   public double getLeftY() {

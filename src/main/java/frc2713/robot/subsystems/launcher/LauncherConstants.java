@@ -15,7 +15,6 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
@@ -200,8 +199,10 @@ public final class LauncherConstants {
   public final class Hood {
 
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
-    public static Angle acceptableError = Degrees.of(5);
+    public static Angle acceptableError = Degrees.of(0.5);
 
+    public static final Angle minAngle = Degrees.of(5);
+    public static final Angle maxAngle = Degrees.of(25);
     // 9 tooth pinion to 20 tooth gear, 16 tooth gear to 38 tooth gear, 10 tooth gear to 124 tooth
     // gear for total reduction of 0.0306
     public static double gearRatio = 1 / ((8.0 / 52.0) * (16.0 / 38.0) * (10.0 / 124.0));
@@ -224,8 +225,8 @@ public final class LauncherConstants {
 
       config.fxConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
       config.fxConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-      config.fxConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Units.degreesToRotations(75);
-      config.fxConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = Units.degreesToRotations(0);
+      config.fxConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = maxAngle.in(Rotations);
+      config.fxConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = minAngle.in(Rotations);
 
       config.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
       config.fxConfig.CurrentLimits.StatorCurrentLimit = 10;
@@ -233,8 +234,8 @@ public final class LauncherConstants {
       config.fxConfig.CurrentLimits.SupplyCurrentLimit = 10;
 
       // Motion Magic parameters
-      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 2.0; // rotations per second
-      config.fxConfig.MotionMagic.MotionMagicAcceleration = 4.0; // rotations per second^2
+      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 0.25; // rotations per second
+      config.fxConfig.MotionMagic.MotionMagicAcceleration = 1.0; // rotations per second^2
       config.fxConfig.MotionMagic.MotionMagicJerk = 0; // no jerk limit
 
       config.unitToRotorRatio = gearRatio;

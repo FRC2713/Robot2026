@@ -11,7 +11,9 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc2713.lib.io.ArticulatedComponent;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
@@ -43,6 +45,10 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
 
   public Command otfCommand() {
     return setAngleCommand(otfAngSupplier);
+  }
+
+  public Command setTargetPositionToCurrent() {
+    return new InstantCommand(() -> setCurrentPosition(getCurrentPosition()));
   }
 
   /**
@@ -106,6 +112,9 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
 
   @Override
   public void periodic() {
+    if (DriverStation.isDisabled()) {
+      setAngleCommand(() -> getCurrentPosition());
+    }
     super.periodic();
   }
 
