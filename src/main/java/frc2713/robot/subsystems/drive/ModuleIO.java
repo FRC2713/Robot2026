@@ -7,6 +7,7 @@
 
 package frc2713.robot.subsystems.drive;
 
+import com.ctre.phoenix6.configs.Slot0Configs;
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
@@ -46,4 +47,10 @@ public interface ModuleIO {
 
   /** Run the turn motor to the specified rotation. */
   public default void setTurnPosition(Rotation2d rotation) {}
+
+  /** Set the drive motor PID gains. */
+  public default void setDriveGains(Slot0Configs gains) {}
+
+  /** Set the turn motor PID gains. */
+  public default void setTurnGains(Slot0Configs gains) {}
 }

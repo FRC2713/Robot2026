@@ -11,6 +11,7 @@ import static edu.wpi.first.units.Units.*;
 
 import choreo.trajectory.SwerveSample;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
@@ -57,6 +58,7 @@ import frc2713.lib.util.LoggedTunableGains;
 import frc2713.robot.Constants;
 import frc2713.robot.Constants.Mode;
 import frc2713.robot.FieldConstants;
+import frc2713.robot.Robot;
 import frc2713.robot.generated.TunerConstants;
 import frc2713.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
@@ -140,7 +142,7 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
   // Remembers what we actually commanded last cycle so we can calculate acceleration
   private ChassisSpeeds lastCommandedSpeeds = new ChassisSpeeds();
   private LoggedTunableGains loggedTunableDriveGains;
-  private LoggedTunableGains loggedTunableSteerGains;
+  private LoggedTunableGains loggedTunableTurnGains;
 
   public Drive(
       GyroIO gyroIO,
@@ -200,9 +202,11 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
 
     loggedTunableDriveGains =
-        new LoggedTunableGains("Drive/Drive", TunerConstants.driveGains, new MotionMagicConfigs());
-    loggedTunableSteerGains =
-        new LoggedTunableGains("Drive/Steer", TunerConstants.steerGains, new MotionMagicConfigs());
+        new LoggedTunableGains(
+            "Drive/Drive", TunerConstants.FrontLeft.DriveMotorGains, new MotionMagicConfigs());
+    loggedTunableTurnGains =
+        new LoggedTunableGains(
+            "Drive/Turn", TunerConstants.FrontLeft.SteerMotorGains, new MotionMagicConfigs());
   }
 
   @Override
@@ -299,11 +303,25 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
         "Drive/isInNeutralZone",
         FieldConstants.NeutralZone.region.contains(new Rectangle2d(getPose(), 1.0, 1.0)));
 
-    // loggedTunableDriveGains.ifChanged(hashCode(),
-    //   (Slot0Configs gains, MotionMagicConfigs motionMagic) -> {
-    //       // Apply updated PID/FF gains
-    //       modules[0].set
-    //     });
+    // Sim uses different gains
+    if (Robot.isReal()) {
+      loggedTunableDriveGains.ifChanged(
+          hashCode(),
+          (Slot0Configs gains) -> {
+            // Apply updated PID/FF gains
+            for (int i = 0; i < 4; i++) {
+              modules[i].setDriveGains(gains);
+            }
+          });
+      loggedTunableTurnGains.ifChanged(
+          hashCode(),
+          (Slot0Configs gains) -> {
+            // Apply updated PID/FF gains
+            for (int i = 0; i < 4; i++) {
+              modules[i].setTurnGains(gains);
+            }
+          });
+    }
   }
 
   /**

@@ -1,4 +1,4 @@
-package frc2713.robot.subsystems.intake;
+package frc2713.robot.subsystems.intake.intakeExtensionIO;
 
 import frc2713.lib.io.MotorInputs;
 import frc2713.lib.io.MotorInputsAutoLogged;

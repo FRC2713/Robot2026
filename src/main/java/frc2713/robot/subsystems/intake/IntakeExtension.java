@@ -11,6 +11,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc2713.lib.io.ArticulatedComponent;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
+import frc2713.robot.subsystems.intake.intakeExtensionIO.IntakeExtensionIO;
+import frc2713.robot.subsystems.intake.intakeExtensionIO.IntakeExtensionInputsAutoLogged;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
