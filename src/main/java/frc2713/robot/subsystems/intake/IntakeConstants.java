@@ -7,7 +7,6 @@ import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
-import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -149,8 +148,7 @@ public final class IntakeConstants {
               .withMotionMagic(motionMagicGains);
 
       // Follower initial configs
-      differentialConfig.followerConfig =
-          new TalonFXConfiguration();
+      differentialConfig.followerConfig = new TalonFXConfiguration();
 
       // Differential mechanism constants
       differentialConfig.differentialConstants =

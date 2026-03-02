@@ -1,6 +1,5 @@
 package frc2713.robot.subsystems.intake.intakeExtensionIO;
 
-import static edu.wpi.first.units.Units.InchesPerSecond;
 import static edu.wpi.first.units.Units.Revolutions;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -154,8 +153,6 @@ public class IntakeExtensionIOTalonFX implements IntakeExtensionIO {
     inputs.follower.rawRotorPosition = followerMotor.getRotorPosition().getValue();
     inputs.follower.closedLoopError = followerMotor.getClosedLoopError().getValue();
     inputs.follower.isMotionMagicAtTarget = followerMotor.getMotionMagicAtTarget().getValue();
-
-
 
     // Update PID gains from dashboard if tunable and any value changed
     if (config.tunable && tunableGains != null) {

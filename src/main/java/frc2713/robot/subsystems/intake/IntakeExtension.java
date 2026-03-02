@@ -3,7 +3,6 @@ package frc2713.robot.subsystems.intake;
 import static edu.wpi.first.units.Units.InchesPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 
-import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -44,8 +43,8 @@ public class IntakeExtension
               convertSubsystemVelocityToMotorVelocity(cruiseVelocity.get());
           Logger.recordOutput(pb.makePath("cruiseLinearVelocity"), cruiseVelocity.get());
           Logger.recordOutput(pb.makePath("cruiseAnguularVelocity"), cruiseAngularVelocity);
-          return IntakeConstants.Extension.config.fxConfig.MotionMagic.withMotionMagicCruiseVelocity(
-                  cruiseAngularVelocity);
+          return IntakeConstants.Extension.config.fxConfig.MotionMagic
+              .withMotionMagicCruiseVelocity(cruiseAngularVelocity);
         });
   }
 
