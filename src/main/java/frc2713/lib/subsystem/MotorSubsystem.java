@@ -78,7 +78,7 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
    * @return the number of mechanism rotations to achieve that distance
    */
   protected Angle convertSubsystemPositionToMotorPosition(Distance subsystemPosition) {
-    return Rotations.of(subsystemPosition.in(Meters) / config.unitRotationsPerMeter);
+    return Rotations.of(subsystemPosition.in(Meters) / config.metersPerRotation);
   }
 
   /**
@@ -88,7 +88,7 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
    * @return the current position as a linear distance
    */
   protected Distance convertMotorPositionToSubsystemPosition(Angle motorPosition) {
-    return Meters.of(motorPosition.in(Rotations) * config.unitRotationsPerMeter);
+    return Meters.of(motorPosition.in(Rotations) * config.metersPerRotation);
   }
 
   /**
@@ -100,7 +100,7 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
   protected AngularVelocity convertSubsystemVelocityToMotorVelocity(
       LinearVelocity subsystemVelocity) {
     return RotationsPerSecond.of(
-        subsystemVelocity.in(MetersPerSecond) * config.unitRotationsPerMeter);
+        subsystemVelocity.in(MetersPerSecond) / config.metersPerRotation);
   }
 
   /**
@@ -110,7 +110,7 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
    * @return The current velocity as a linear velocity
    */
   protected LinearVelocity convertMotorVelocityToSubsystemVelocity(AngularVelocity motorVelocity) {
-    return MetersPerSecond.of(motorVelocity.in(RotationsPerSecond) / config.unitRotationsPerMeter);
+    return MetersPerSecond.of(motorVelocity.in(RotationsPerSecond) * config.metersPerRotation);
   }
 
   // IO Implementations
