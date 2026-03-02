@@ -1,8 +1,5 @@
 package frc2713.lib.io;
 
-import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
@@ -36,7 +33,7 @@ public class CanCoderIOHardware implements CanCoderIO {
   @Override
   public void readInputs(CanCoderInputs inputs) {
     BaseStatusSignal.refreshAll(signals);
-    inputs.absolutePositionRotations = positionSignal.getValue().in(Rotations);
-    inputs.velocityRotationsPerSecond = velocitySignal.getValue().in(RotationsPerSecond);
+    inputs.absolutePosition = positionSignal.getValue();
+    inputs.velocity = velocitySignal.getValue();
   }
 }
