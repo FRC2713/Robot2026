@@ -25,6 +25,7 @@ import frc2713.lib.dynamics.MoiUnits;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.LoggedTunableBoolean;
 import frc2713.lib.util.LoggedTunableMeasure;
+import frc2713.lib.util.Util;
 import frc2713.robot.subsystems.launcher.turretIO.TurretSubsystemConfig;
 
 public final class LauncherConstants {
@@ -122,7 +123,7 @@ public final class LauncherConstants {
     static {
       leaderConfig.name = "Flywheels";
       leaderConfig.talonCANID = new CANDeviceId(50, "canivore");
-      leaderConfig.fxConfig.Slot0.kP = 0.5; // Util.modeDependentValue(3.0, 3.5);
+      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(0.5, 3.5);
       leaderConfig.fxConfig.Slot0.kI = 0.0;
       leaderConfig.fxConfig.Slot0.kD = 0.0;
       leaderConfig.fxConfig.Slot0.kS = 2.0;
