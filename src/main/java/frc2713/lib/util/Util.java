@@ -46,4 +46,14 @@ public class Util {
   public static <T> T modeDependentValue(T real) {
     return modeDependentValue(real, real);
   }
+
+  public static Angle clamp(Angle value, Angle min, Angle max) {
+    if (value.lt(min)) {
+      return min;
+    } else if (value.gt(max)) {
+      return max;
+    } else {
+      return value;
+    }
+  }
 }

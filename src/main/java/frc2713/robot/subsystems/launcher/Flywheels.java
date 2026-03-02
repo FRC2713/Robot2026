@@ -82,7 +82,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   public final Supplier<AngularVelocity> otfVelocitySupplier =
       () -> {
         var solution = LaunchingSolutionManager.getInstance().getSolution();
-        Distance toGoal = this.getDistance2d(LaunchingSolutionManager.currentGoal.flywheelTarget());
+        Distance toGoal = this.getDistance2d(LaunchingSolutionManager.currentGoal);
         boolean solutionIsValid = solution.isValid();
 
         LinearVelocity targetSurfaceSpeed;
@@ -170,7 +170,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   }
 
   public LinearVelocity getLaunchVelocity() {
-    Distance toGoal = this.getDistance2d(LaunchingSolutionManager.currentGoal.flywheelTarget());
+    Distance toGoal = this.getDistance2d(LaunchingSolutionManager.currentGoal);
     LinearVelocity vel =
         FeetPerSecond.of(LauncherConstants.Flywheels.velocityMap.get(toGoal.in(Meters)));
     Logger.recordOutput(pb.makePath("launchVelocity"), vel);

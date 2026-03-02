@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
@@ -22,35 +23,49 @@ import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Time;
 import frc2713.lib.drivers.CANDeviceId;
 import frc2713.lib.dynamics.MoiUnits;
+import frc2713.lib.io.CanCoderConfig;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.LoggedTunableBoolean;
 import frc2713.lib.util.LoggedTunableMeasure;
-import frc2713.robot.subsystems.launcher.turretIO.TurretSubsystemConfig;
 
 public final class LauncherConstants {
 
   public static final class Turret {
 
-    public static TurretSubsystemConfig config = new TurretSubsystemConfig();
+    public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
+    public static CanCoderConfig canCoderConfig = new CanCoderConfig();
     public static Angle acceptableError = Degrees.of(3);
     public static Angle staticHubAngle = Degrees.of(0);
 
+    // Turret rotation limits
+    public static final double FORWARD_LIMIT_DEGREES = 210.0;
+    public static final double REVERSE_LIMIT_DEGREES = -210.0;
+
+    public static final Angle forwardSoftLimit = Degrees.of(FORWARD_LIMIT_DEGREES);
+    public static final Angle reverseSoftLimit = Degrees.of(REVERSE_LIMIT_DEGREES);
+
     // Gear tooth counts for calculating overall gear ratio
-    public static final double pinionGearTeeth = 15.0;
-    public static final double spurGear1Teeth = 20.0;
-    public static final double sprocketPinionTeeth = 16.0;
-    public static final double sprocketGearTeeth = 224.0;
+    public static final int pinionGearTeeth = 15;
+    public static final int spurGear1Teeth = 26;
+    public static final int sprocketPinionTeeth = 16;
+    public static final int sprocketGearTeeth = 224;
 
     // Overall gear ratio from motor rotations to turret rotations
     // motor has an absolute encoder, so this can be encoder 1
     public static final double motorToTurretGearRatio =
         (spurGear1Teeth / pinionGearTeeth) * (sprocketGearTeeth / sprocketPinionTeeth);
 
+    // Gear ratio from motor rotations to encoder rotations (encoder is after the first stage
+    // reduction)
+    public static final double motorToEncoderGearRatio = spurGear1Teeth / pinionGearTeeth;
+
+    // Gear ratio from encoder rotations to turret rotations (encoder is after the first stage
+    // reduction)
+    public static final double encoderToTurretGearRatio = sprocketGearTeeth / sprocketPinionTeeth;
+
     static {
       config.name = "Turret";
       config.talonCANID = new CANDeviceId(52, "canivore");
-      config.canCoderCANID =
-          new CANDeviceId(53, "canivore"); // CANCoder CAN ID, replace with actual ID
       config.tunable = true; // Enable tunable gains for Motion Magic
 
       // PID gains for Motion Magic
@@ -69,8 +84,15 @@ public final class LauncherConstants {
       config.fxConfig.MotionMagic.MotionMagicJerk = 100; // limit jerk for smooth motion
 
       // Gear ratio: motor rotations per turret rotation = GEAR_1/GEAR_0 = 120/60 = 2.0
-      config.unitToRotorRatio = 120.0 / 60.0;
+      config.unitToRotorRatio = motorToTurretGearRatio;
       config.momentOfInertia = MoiUnits.PoundSquareInches.of(522.908341);
+
+      config.fxConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+      config.fxConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+      config.fxConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
+          forwardSoftLimit.in(Rotations);
+      config.fxConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold =
+          reverseSoftLimit.in(Rotations);
 
       config.initialTransform =
           new Transform3d(
@@ -81,31 +103,13 @@ public final class LauncherConstants {
               new Rotation3d(0, 0, 0));
     }
 
+    static {
+      canCoderConfig.canId =
+          new CANDeviceId(53, "canivore"); // CANCoder CAN ID, replace with actual ID
+    }
+
     public static int MODEL_INDEX = 3;
     public static int PARENT_INDEX = 0; // drivetrain
-
-    // Gear ratio from encoder rotations to turret rotations (encoder is after the first stage
-    // reduction)
-    public static final double encoderToTurretGearRatio = sprocketGearTeeth / sprocketPinionTeeth;
-
-    // Gear tooth counts for turret angle calculation
-    // Pinion on motor
-    public static final double GEAR_0_TOOTH_COUNT = 15.0; // TODO: Replace with actual value
-    // attached to e1
-    public static final double GEAR_1_TOOTH_COUNT = 120.0; // TODO: Replace with actual value
-    // attached to e2
-    public static final double GEAR_2_TOOTH_COUNT = 80.0; // TODO: Replace with actual value
-    public static final double SLOPE =
-        (GEAR_2_TOOTH_COUNT * GEAR_1_TOOTH_COUNT)
-            / ((GEAR_1_TOOTH_COUNT - GEAR_2_TOOTH_COUNT) * GEAR_0_TOOTH_COUNT);
-
-    // How many times encoder 1 spins per 1 degree of turret rotation
-    // TODO: update this with the actual ratios from above.
-    public static final double ENCODER_1_TO_TURRET_RATIO = GEAR_1_TOOTH_COUNT / GEAR_0_TOOTH_COUNT;
-
-    // Turret rotation limits
-    public static final double FORWARD_LIMIT_DEGREES = 270.0; // TODO: Replace with actual value
-    public static final double REVERSE_LIMIT_DEGREES = -270.0; // TODO: Replace with actual value
   }
 
   public final class Flywheels {
