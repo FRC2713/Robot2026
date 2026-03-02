@@ -35,6 +35,20 @@ public class SimTalonFXIO extends TalonFXIO {
     return config.unitToRotorRatio;
   }
 
+  /** Mechanism position in rotations (for driving SimCanCoderIO from motor sim). */
+  public double getSimMechanismPositionRotations() {
+    if (sim == null) return 0.0;
+    double rad = sim.getAngularPositionRad();
+    return Double.isNaN(rad) ? 0.0 : rad / (2.0 * Math.PI);
+  }
+
+  /** Mechanism velocity in rotations per second. */
+  public double getSimMechanismVelocityRps() {
+    if (sim == null) return 0.0;
+    double radPerSec = sim.getAngularVelocityRadPerSec();
+    return Double.isNaN(radPerSec) ? 0.0 : radPerSec / (2.0 * Math.PI);
+  }
+
   public SimTalonFXIO(TalonFXSubsystemConfig config) {
     // the TalonFX in the parent class will store and update the motor charecteristics in simulation
     // the DCMotorSim has the plant model that lets up update the motor state while running in

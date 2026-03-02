@@ -44,7 +44,6 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
   protected AngularVelocity velocitySetpoint = RotationsPerSecond.of(0.0);
 
   public MotorSubsystem(TalonFXSubsystemConfig config, MI inputs, IO io) {
-    // Set the subsystem name
     super(config.name);
     this.config = config;
     this.inputs = inputs;
@@ -52,7 +51,6 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
 
     this.pb = new AdvantageScopePathBuilder(this.getName());
 
-    // Set the default command to stop the motor
     setDefaultCommand(
         this.dutyCycleCommand(() -> 0.0)
             .withName(pb.makeName("DefaultCommand"))
@@ -64,6 +62,7 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
     Time timestamp = RobotTime.getTimestamp();
     io.readInputs(inputs);
     Logger.processInputs(getName(), inputs);
+
     Logger.recordOutput(pb.makePath("LatencyPeriodSec"), RobotTime.getTimestamp().minus(timestamp));
     Logger.recordOutput(
         pb.makePath("currentCommand"),
