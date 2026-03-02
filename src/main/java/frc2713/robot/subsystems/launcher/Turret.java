@@ -46,6 +46,7 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
       final CanCoderInputsAutoLogged cancoderInputs,
       final CanCoderIO cancoderIO) {
     super(config, new MotorInputsAutoLogged(), turretMotorIO, cancoderInputs, cancoderIO);
+    setDefaultCommand(otfCommand());
   }
 
   public static Angle turretPositionFromEncoders(Angle e1, Angle e2) {
