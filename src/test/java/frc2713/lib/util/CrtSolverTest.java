@@ -149,11 +149,7 @@ class CrtSolverTest {
         Angle enc1 = Rotations.of(enc1Frac);
         Angle enc2 = Rotations.of(enc2Frac);
         double result = CrtSolver.calculateAbsoluteMotorTurns(enc1, enc2, teeth1, teeth2);
-        assertEquals(
-            totalMotorTurns,
-            result,
-            TOLERANCE,
-            "Failed for km=" + km);
+        assertEquals(totalMotorTurns, result, TOLERANCE, "Failed for km=" + km);
       }
     }
 

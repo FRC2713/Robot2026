@@ -2,15 +2,11 @@ package frc2713.robot.subsystems.launcher;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.ENCODER_1_TO_TURRET_RATIO;
-import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.FORWARD_LIMIT_DEGREES;
-import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.REVERSE_LIMIT_DEGREES;
-import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.SLOPE;
+import static edu.wpi.first.units.Units.Rotations;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -18,6 +14,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc2713.lib.geometry.GeometryUtil;
 import frc2713.lib.io.ArticulatedComponent;
 import frc2713.lib.io.CanCoderIO;
 import frc2713.lib.io.CanCoderInputsAutoLogged;
@@ -25,6 +22,7 @@ import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
+import frc2713.lib.util.CrtSolver;
 import frc2713.lib.util.Util;
 import frc2713.robot.FieldConstants;
 import frc2713.robot.RobotContainer;
@@ -47,53 +45,35 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
     super(config, new MotorInputsAutoLogged(), turretMotorIO, cancoderInputs, cancoderIO);
   }
 
-  public static double turretPositionFromEncoders(double e1, double e2) {
-    // 1. Calculate the 'Difference' (The Phase)
-    double diff = e2 - e1;
-
-    // Normalize to [-180, 180]. This is the "Vernier Lock"
-    diff = MathUtil.inputModulus(diff, -180, 180);
-
-    // 2. Coarse Estimate (The "Big Picture")
-    // This uses the phase shift to guess the rough position.
-    double coarseAngle = diff * SLOPE;
-
-    // 3. The Ratio (How many times E1 spins per 1 Turret degree)
-    double encoderToTurretRatio = ENCODER_1_TO_TURRET_RATIO;
-
-    // 4. Lap Calculation (The "Fine" logic)
-    // We calculate how many full 360s E1 has likely traveled.
-    // 'expectedE1' is where the encoder SHOULD be if coarseAngle was perfect.
-    double expectedE1 = coarseAngle * encoderToTurretRatio;
-
-    // Determine the 'Lap' by finding how many 360s are between
-    // the expected position and the actual sensor reading (e1).
-    double lap = Math.round((expectedE1 - e1) / 360.0);
-
-    // 5. High-Resolution Output
-    // Combine the Lap (coarse) with the Sensor Reading (fine)
-    return (lap * 360.0 + e1) / encoderToTurretRatio;
+  public static Angle turretPositionFromEncoders(Angle e1, Angle e2) {
+    Angle encoder1Rotations =
+        CrtSolver.calculateAbsoluteMotorTurns(
+            e1,
+            e2,
+            LauncherConstants.Turret.pinionGearTeeth,
+            LauncherConstants.Turret.spurGear1Teeth);
+    return encoder1Rotations.div(LauncherConstants.Turret.motorToTurretGearRatio);
   }
 
-  public static double convertToClosestBoundedTurretAngleDegrees(
-      double targetAngleDegrees, Rotation2d current) {
+  public static Angle convertToClosestBoundedTurretAngleDegrees(Angle desiredAngle, Angle current) {
     // Normalize target to [-180, 180] first
-    double normalizedTarget = MathUtil.inputModulus(targetAngleDegrees, -180, 180);
-
-    // Get current position in degrees
-    double currentDegrees = current.getDegrees();
+    Angle normalizedTarget =
+        GeometryUtil.angleModulus(desiredAngle, Degrees.of(-180), Degrees.of(180));
 
     // Calculate the shortest path to the target (normalized to [-180, 180])
-    double diff = MathUtil.inputModulus(normalizedTarget - currentDegrees, -180, 180);
+
+    Angle diff =
+        GeometryUtil.angleModulus(
+            normalizedTarget.minus(current), Degrees.of(-180), Degrees.of(180));
 
     // Calculate the final absolute position
-    double finalPosition = currentDegrees + diff;
+    Angle finalPosition = current.plus(diff);
 
     // Check if final position is within limits, if not, try the other way around
-    if (finalPosition > FORWARD_LIMIT_DEGREES) {
-      finalPosition -= 360;
-    } else if (finalPosition < REVERSE_LIMIT_DEGREES) {
-      finalPosition += 360;
+    if (finalPosition.gt(LauncherConstants.Turret.forwardSoftLimit)) {
+      finalPosition = finalPosition.minus(Rotations.of(1));
+    } else if (finalPosition.lt(LauncherConstants.Turret.reverseSoftLimit)) {
+      finalPosition = finalPosition.plus(Rotations.of(1));
     }
 
     return finalPosition;
@@ -103,15 +83,15 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   public Command setAngle(Supplier<Angle> desiredAngle) {
     return motionMagicSetpointCommand(
         () -> {
-          double commandedDegrees = desiredAngle.get().in(Degrees);
 
           // Convert the desired angle to a bounded angle that respects turret limits
-          double boundedAngleDegrees =
+          Angle boundedAngleDegrees =
               convertToClosestBoundedTurretAngleDegrees(
-                  commandedDegrees, getCurrentTurretRotation());
+                  desiredAngle.get(), getCurrentTurretRotation());
 
-          Logger.recordOutput(pb.makePath("setpoint", "commandedDegrees"), commandedDegrees);
-          Logger.recordOutput(pb.makePath("setpoint", "boundedDegrees"), boundedAngleDegrees);
+          Logger.recordOutput(
+              pb.makePath("setpoint", "commandedAngle"), desiredAngle.get().in(Degrees));
+          Logger.recordOutput(pb.makePath("setpoint", "boundedAngle"), boundedAngleDegrees);
 
           return Degrees.of(boundedAngleDegrees);
         });
@@ -197,14 +177,14 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
    *
    * @return The current turret position as a Rotation2d
    */
-  public Rotation2d getCurrentTurretRotation() {
+  public Angle getCurrentTurretRotation() {
     if (cancoderInputs == null) {
-      return Rotation2d.fromDegrees(inputs.position.in(Degrees));
+      return Degrees.of(inputs.position.in(Degrees));
     }
-    return Rotation2d.fromDegrees(
+    return Degrees.of(
         Double.isNaN(cancoderInputs.absolutePositionRotations)
             ? 0.0
-            : cancoderInputs.absolutePositionRotations * 360.0);
+            : cancoderInputs.absolutePositionRotations);
   }
 
   /**
