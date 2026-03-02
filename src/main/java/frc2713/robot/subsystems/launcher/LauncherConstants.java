@@ -27,8 +27,6 @@ import frc2713.lib.io.CanCoderConfig;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.LoggedTunableBoolean;
 import frc2713.lib.util.LoggedTunableMeasure;
-import frc2713.robot.subsystems.launcher.turretIO.TurretSubsystemConfig;
-import frc2713.lib.util.Util;
 
 public final class LauncherConstants {
 

@@ -62,8 +62,8 @@ class CrtSolverTest {
     void zeroTurns_bothEncodersAtZero() {
       Angle enc1 = Rotations.of(0.0);
       Angle enc2 = Rotations.of(0.0);
-      double result = CrtSolver.calculateAbsoluteMotorTurns(enc1, enc2, GEAR_15, GEAR_26);
-      assertEquals(0.0, result, TOLERANCE);
+      Angle result = CrtSolver.calculateAbsoluteMotorTurns(enc1, enc2, GEAR_15, GEAR_26);
+      assertEquals(0.0, result.in(Rotations), TOLERANCE);
     }
 
     @Test
@@ -73,8 +73,8 @@ class CrtSolverTest {
       double enc2Frac = (motorTurns * GEAR_15) / (double) GEAR_26;
       Angle enc1 = Rotations.of(motorTurns);
       Angle enc2 = Rotations.of(enc2Frac);
-      double result = CrtSolver.calculateAbsoluteMotorTurns(enc1, enc2, GEAR_15, GEAR_26);
-      assertEquals(motorTurns, result, TOLERANCE);
+      Angle result = CrtSolver.calculateAbsoluteMotorTurns(enc1, enc2, GEAR_15, GEAR_26);
+      assertEquals(motorTurns, result.in(Rotations), TOLERANCE);
     }
 
     @Test
@@ -85,8 +85,8 @@ class CrtSolverTest {
       double enc2Frac = ((motorTurns * GEAR_15) / (double) GEAR_26) % 1.0;
       Angle enc1 = Rotations.of(enc1Frac);
       Angle enc2 = Rotations.of(enc2Frac);
-      double result = CrtSolver.calculateAbsoluteMotorTurns(enc1, enc2, GEAR_15, GEAR_26);
-      assertEquals(motorTurns, result, TOLERANCE);
+      Angle result = CrtSolver.calculateAbsoluteMotorTurns(enc1, enc2, GEAR_15, GEAR_26);
+      assertEquals(motorTurns, result.in(Rotations), TOLERANCE);
     }
 
     @Test
@@ -98,10 +98,10 @@ class CrtSolverTest {
         double enc2Frac = ((totalMotorTurns * GEAR_15) / (double) GEAR_26) % 1.0;
         Angle enc1 = Rotations.of(enc1Frac);
         Angle enc2 = Rotations.of(enc2Frac);
-        double result = CrtSolver.calculateAbsoluteMotorTurns(enc1, enc2, GEAR_15, GEAR_26);
+        Angle result = CrtSolver.calculateAbsoluteMotorTurns(enc1, enc2, GEAR_15, GEAR_26);
         assertEquals(
             totalMotorTurns,
-            result,
+            result.in(Rotations),
             TOLERANCE,
             "Failed for km=" + km + " (totalMotorTurns=" + totalMotorTurns + ")");
       }
@@ -114,8 +114,8 @@ class CrtSolverTest {
         double enc2Frac = ((km * (double) GEAR_15) / GEAR_26) % 1.0;
         Angle enc1 = Rotations.of(enc1Frac);
         Angle enc2 = Rotations.of(enc2Frac);
-        double result = CrtSolver.calculateAbsoluteMotorTurns(enc1, enc2, GEAR_15, GEAR_26);
-        assertEquals(km, result, TOLERANCE, "Failed for km=" + km);
+        Angle result = CrtSolver.calculateAbsoluteMotorTurns(enc1, enc2, GEAR_15, GEAR_26);
+        assertEquals(km, result.in(Rotations), TOLERANCE, "Failed for km=" + km);
       }
     }
 
@@ -128,10 +128,10 @@ class CrtSolverTest {
         double enc2Frac = ((totalMotorTurns * GEAR_15) / (double) GEAR_26) % 1.0;
         Angle enc1 = Rotations.of(enc1Frac);
         Angle enc2 = Rotations.of(enc2Frac);
-        double result = CrtSolver.calculateAbsoluteMotorTurns(enc1, enc2, GEAR_15, GEAR_26);
+        Angle result = CrtSolver.calculateAbsoluteMotorTurns(enc1, enc2, GEAR_15, GEAR_26);
         assertEquals(
             totalMotorTurns,
-            result,
+            result.in(Rotations),
             TOLERANCE,
             "Failed for km=" + km + " (totalMotorTurns=" + totalMotorTurns + ")");
       }
@@ -148,8 +148,8 @@ class CrtSolverTest {
         double enc2Frac = ((totalMotorTurns * teeth1) / (double) teeth2) % 1.0;
         Angle enc1 = Rotations.of(enc1Frac);
         Angle enc2 = Rotations.of(enc2Frac);
-        double result = CrtSolver.calculateAbsoluteMotorTurns(enc1, enc2, teeth1, teeth2);
-        assertEquals(totalMotorTurns, result, TOLERANCE, "Failed for km=" + km);
+        Angle result = CrtSolver.calculateAbsoluteMotorTurns(enc1, enc2, teeth1, teeth2);
+        assertEquals(totalMotorTurns, result.in(Rotations), TOLERANCE, "Failed for km=" + km);
       }
     }
 
@@ -163,8 +163,8 @@ class CrtSolverTest {
 
       Angle enc1 = Rotations.of(motorPhase + 2.0);
       Angle enc2 = Rotations.of(enc2Frac + 3.0);
-      double result = CrtSolver.calculateAbsoluteMotorTurns(enc1, enc2, GEAR_15, GEAR_26);
-      assertEquals(totalMotorTurns, result, TOLERANCE);
+      Angle result = CrtSolver.calculateAbsoluteMotorTurns(enc1, enc2, GEAR_15, GEAR_26);
+      assertEquals(totalMotorTurns, result.in(Rotations), TOLERANCE);
     }
 
     @Test
@@ -177,8 +177,8 @@ class CrtSolverTest {
       double enc2Frac = ((totalMotorTurns * GEAR_15) / (double) GEAR_26) % 1.0;
       Angle enc1 = Rotations.of(enc1Frac);
       Angle enc2 = Rotations.of(enc2Frac);
-      double result = CrtSolver.calculateAbsoluteMotorTurns(enc1, enc2, GEAR_15, GEAR_26);
-      assertEquals(totalMotorTurns, result, TOLERANCE);
+      Angle result = CrtSolver.calculateAbsoluteMotorTurns(enc1, enc2, GEAR_15, GEAR_26);
+      assertEquals(totalMotorTurns, result.in(Rotations), TOLERANCE);
     }
   }
 }

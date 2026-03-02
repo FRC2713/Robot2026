@@ -313,10 +313,9 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
     if (cancoderInputs == null) {
       return Rotations.of(0.0);
     }
-    return Rotations.of(
-        Double.isNaN(cancoderInputs.absolutePositionRotations)
-            ? 0.0
-            : cancoderInputs.absolutePositionRotations);
+    return cancoderInputs.absolutePosition == null
+        ? Rotations.of(0.0)
+        : cancoderInputs.absolutePosition;
   }
 
   /**
@@ -329,7 +328,7 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
     if (cancoderInputs == null) {
       return RotationsPerSecond.of(0.0);
     }
-    return RotationsPerSecond.of(cancoderInputs.velocityRotationsPerSecond);
+    return cancoderInputs.velocity;
   }
 
   /**

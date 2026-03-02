@@ -1,8 +1,11 @@
 package frc2713.robot.subsystems.launcher;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
+import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.forwardSoftLimit;
+import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.reverseSoftLimit;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -86,14 +89,13 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
 
           // Convert the desired angle to a bounded angle that respects turret limits
           Angle boundedAngleDegrees =
-              convertToClosestBoundedTurretAngleDegrees(
-                  desiredAngle.get(), getCurrentTurretRotation());
+              convertToClosestBoundedTurretAngleDegrees(desiredAngle.get(), inputs.position);
 
           Logger.recordOutput(
               pb.makePath("setpoint", "commandedAngle"), desiredAngle.get().in(Degrees));
           Logger.recordOutput(pb.makePath("setpoint", "boundedAngle"), boundedAngleDegrees);
 
-          return Degrees.of(boundedAngleDegrees);
+          return boundedAngleDegrees;
         });
   }
 
@@ -104,16 +106,15 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   public Command setAngleStopAtBounds(Supplier<Angle> desiredAngle) {
     return motionMagicSetpointCommand(
         () -> {
-          double commandedDegrees = desiredAngle.get().in(Degrees);
+          Angle commandedDegrees = desiredAngle.get();
 
           // Clamp directly to turret limits instead of wrapping
-          double clampedDegrees =
-              MathUtil.clamp(commandedDegrees, REVERSE_LIMIT_DEGREES, FORWARD_LIMIT_DEGREES);
+          Angle clampedDegrees = Util.clamp(commandedDegrees, reverseSoftLimit, forwardSoftLimit);
 
           Logger.recordOutput(pb.makePath("setpoint", "commandedDegrees"), commandedDegrees);
           Logger.recordOutput(pb.makePath("setpoint", "clampedDegrees"), clampedDegrees);
 
-          return Degrees.of(clampedDegrees);
+          return clampedDegrees;
         });
   }
 
@@ -128,16 +129,15 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
       Supplier<Angle> desiredAngle, Supplier<Double> velocityScale) {
     return motionMagicSetpointCommand(
         () -> {
-          double commandedDegrees = desiredAngle.get().in(Degrees);
+          Angle commandedDegrees = desiredAngle.get();
 
           // Clamp directly to turret limits instead of wrapping
-          double clampedDegrees =
-              MathUtil.clamp(commandedDegrees, REVERSE_LIMIT_DEGREES, FORWARD_LIMIT_DEGREES);
+          Angle clampedDegrees = Util.clamp(desiredAngle.get(), reverseSoftLimit, forwardSoftLimit);
 
           Logger.recordOutput(pb.makePath("setpoint", "commandedDegrees"), commandedDegrees);
           Logger.recordOutput(pb.makePath("setpoint", "clampedDegrees"), clampedDegrees);
 
-          return Degrees.of(clampedDegrees);
+          return clampedDegrees;
         },
         () -> {
           var mmConfig = new com.ctre.phoenix6.configs.MotionMagicConfigs();
@@ -155,36 +155,6 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
           return mmConfig;
         },
         0);
-  }
-
-  /**
-   * Gets the current turret position computed from the dual encoder system.
-   *
-   * @return The computed turret position in degrees
-   */
-  public Angle getComputedTurretPosition() {
-    if (cancoderInputs == null) {
-      return Degrees.of(inputs.position.in(Degrees));
-    }
-    return Degrees.of(
-        Double.isNaN(cancoderInputs.absolutePositionRotations)
-            ? 0.0
-            : cancoderInputs.absolutePositionRotations * 360.0);
-  }
-
-  /**
-   * Gets the current turret position as a Rotation2d for use with bounded angle calculations.
-   *
-   * @return The current turret position as a Rotation2d
-   */
-  public Angle getCurrentTurretRotation() {
-    if (cancoderInputs == null) {
-      return Degrees.of(inputs.position.in(Degrees));
-    }
-    return Degrees.of(
-        Double.isNaN(cancoderInputs.absolutePositionRotations)
-            ? 0.0
-            : cancoderInputs.absolutePositionRotations);
   }
 
   /**
@@ -213,13 +183,10 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
                   LauncherConstants.Turret.staticHubAngle, RobotContainer.drive.getPose());
         } else {
           Logger.recordOutput(super.pb.makePath("OTF", "response"), "stay at measured");
-          targetAngle = getComputedTurretPosition();
+          targetAngle = inputs.position;
         }
 
-        targetAngle =
-            Degrees.of(
-                convertToClosestBoundedTurretAngleDegrees(
-                    targetAngle.in(Degrees), getCurrentTurretRotation()));
+        targetAngle = convertToClosestBoundedTurretAngleDegrees(targetAngle, inputs.position);
         Logger.recordOutput(super.pb.makePath("OTF", "solutionIsValid"), solution.isValid());
         Logger.recordOutput(pb.makePath("OTF", "targetAngleDegrees"), targetAngle.in(Degrees));
         return targetAngle;
@@ -260,9 +227,8 @@ public class Turret extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   @Override
   public Transform3d getTransform3d() {
     // Use the computed turret position from the Vernier dual-encoder system (in degrees)
-    double turretAngleRadians = getCurrentTurretRotation().getRadians();
     return config.initialTransform.plus(
-        new Transform3d(new Translation3d(), new Rotation3d(0, 0, turretAngleRadians)));
+        new Transform3d(new Translation3d(), new Rotation3d(0, 0, inputs.position.in(Radians))));
   }
 
   @Override
