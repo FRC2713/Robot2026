@@ -133,7 +133,7 @@ public final class LauncherConstants {
     static {
       leaderConfig.name = "Flywheels";
       leaderConfig.talonCANID = new CANDeviceId(50, "canivore");
-      leaderConfig.fxConfig.Slot0.kP = 0.5; // Util.modeDependentValue(3.0, 3.5);
+      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(0.5, 3.5);
       leaderConfig.fxConfig.Slot0.kI = 0.0;
       leaderConfig.fxConfig.Slot0.kD = 0.0;
       leaderConfig.fxConfig.Slot0.kS = 2.0;
