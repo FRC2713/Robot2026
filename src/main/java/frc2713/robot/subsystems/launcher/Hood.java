@@ -77,8 +77,7 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   public final Supplier<Angle> otfAngSupplier =
       () -> {
         var solution = LaunchingSolutionManager.getInstance().getSolution();
-        Distance toGoal =
-            this.getDistance2d(LaunchingSolutionManager.currentGoal.positionalTarget());
+        Distance toGoal = this.getDistance2d(LaunchingSolutionManager.currentGoal);
         boolean launchSolutionValid = solution.isValid();
 
         Angle aimAngle;
