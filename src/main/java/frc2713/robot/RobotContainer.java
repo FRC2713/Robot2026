@@ -21,12 +21,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc2713.lib.io.CanCoderIO;
-import frc2713.lib.io.CanCoderIOHardware;
-import frc2713.lib.io.CanCoderInputs;
-import frc2713.lib.io.CanCoderInputsAutoLogged;
 import frc2713.lib.io.MotorIO;
-import frc2713.lib.io.SimCanCoderIO;
 import frc2713.lib.io.SimTalonFXIO;
 import frc2713.lib.io.TalonFXIO;
 import frc2713.lib.subsystem.KinematicsManager;
@@ -56,6 +51,10 @@ import frc2713.robot.subsystems.launcher.Hood;
 import frc2713.robot.subsystems.launcher.LauncherConstants;
 import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
 import frc2713.robot.subsystems.launcher.Turret;
+import frc2713.robot.subsystems.launcher.turretIO.TurretMotorIO;
+import frc2713.robot.subsystems.launcher.turretIO.TurretMotorIOSim;
+import frc2713.robot.subsystems.launcher.turretIO.TurretMotorIOTalonFX;
+import frc2713.robot.subsystems.launcher.turretIO.TurretSubsystemConfig;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 import frc2713.robot.subsystems.serializer.SerializerConstants;
@@ -116,6 +115,13 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
+        // drive =
+        //     new Drive(
+        //         new GyroIO() {},
+        //         new ModuleIO() {},
+        //         new ModuleIO() {},
+        //         new ModuleIO() {},
+        //         new ModuleIO() {});
         flywheels =
             new Flywheels(
                 LauncherConstants.Flywheels.leaderConfig,
@@ -124,13 +130,10 @@ public class RobotContainer {
                 new TalonFXIO(LauncherConstants.Flywheels.followerConfig));
         hood =
             new Hood(LauncherConstants.Hood.config, new TalonFXIO(LauncherConstants.Hood.config));
-
         turret =
             new Turret(
                 LauncherConstants.Turret.config,
-                new TalonFXIO(LauncherConstants.Turret.config),
-                new CanCoderInputsAutoLogged(),
-                new CanCoderIOHardware(LauncherConstants.Turret.canCoderConfig));
+                new TurretMotorIOTalonFX(LauncherConstants.Turret.config));
 
         intakeRoller =
             new IntakeRoller(
@@ -173,19 +176,10 @@ public class RobotContainer {
         hood =
             new Hood(
                 LauncherConstants.Hood.config, new SimTalonFXIO(LauncherConstants.Hood.config));
-
         turret =
             new Turret(
                 LauncherConstants.Turret.config,
-                new SimTalonFXIO(LauncherConstants.Turret.config),
-                new CanCoderInputsAutoLogged(),
-                new SimCanCoderIO(
-                    LauncherConstants.Turret.canCoderConfig,
-                    () -> {
-                      var state = new SimCanCoderIO.SimCanCoderState();
-                      return state;
-                    }));
-
+                new TurretMotorIOSim(LauncherConstants.Turret.config));
         intakeRoller =
             new IntakeRoller(
                 IntakeConstants.Roller.leaderConfig,
@@ -223,15 +217,7 @@ public class RobotContainer {
                 new MotorIO() {},
                 new MotorIO() {});
         hood = new Hood(new TalonFXSubsystemConfig(), new MotorIO() {});
-        turret =
-            new Turret(
-                LauncherConstants.Turret.config,
-                new MotorIO() {},
-                new CanCoderInputsAutoLogged(),
-                new CanCoderIO() {
-                  @Override
-                  public void readInputs(CanCoderInputs inputs) {}
-                });
+        turret = new Turret(new TurretSubsystemConfig(), new TurretMotorIO() {});
         intakeRoller =
             new IntakeRoller(
                 new TalonFXSubsystemConfig(),
@@ -382,6 +368,11 @@ public class RobotContainer {
             () -> -driverControls.getLeftX() + -devControls.getLeftX(),
             () -> -driverControls.getRightX() + -devControls.getRightX()),
         "Dual Controller Drive");
+    // turret.setDefaultCommand(turret.otfCommand().withName("OTF Tracking"));
+    // hood.setDefaultCommand(
+    //     hood.autoRetractCommand(drive::getPose, hood.otfAngSupplier)
+    //         .withName("OTF Tracking with Auto-Retract"));
+    // flywheels.setDefaultCommand(flywheels.idleSpeedCommand().withName("Idle Tracking"));
 
     // Comment these out when using dev controller
     // driverControls.setToNormalDrive();
