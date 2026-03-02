@@ -21,7 +21,9 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc2713.lib.io.CanCoderIO;
 import frc2713.lib.io.CanCoderIOHardware;
+import frc2713.lib.io.CanCoderInputs;
 import frc2713.lib.io.CanCoderInputsAutoLogged;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.SimCanCoderIO;
@@ -221,7 +223,15 @@ public class RobotContainer {
                 new MotorIO() {},
                 new MotorIO() {});
         hood = new Hood(new TalonFXSubsystemConfig(), new MotorIO() {});
-        turret = new Turret(LauncherConstants.Turret.config, new MotorIO() {}, null, null);
+        turret =
+            new Turret(
+                LauncherConstants.Turret.config,
+                new MotorIO() {},
+                new CanCoderInputsAutoLogged(),
+                new CanCoderIO() {
+                  @Override
+                  public void readInputs(CanCoderInputs inputs) {}
+                });
         intakeRoller =
             new IntakeRoller(
                 new TalonFXSubsystemConfig(),

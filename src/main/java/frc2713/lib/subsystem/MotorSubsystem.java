@@ -24,8 +24,6 @@ import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc2713.lib.io.AdvantageScopePathBuilder;
-import frc2713.lib.io.CanCoderIO;
-import frc2713.lib.io.CanCoderInputsAutoLogged;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputs;
 import frc2713.lib.util.RobotTime;
@@ -42,35 +40,14 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
   protected final TalonFXSubsystemConfig config;
   protected final AdvantageScopePathBuilder pb;
 
-  /** Optional CANcoder inputs; null when subsystem has no CANcoder. */
-  protected final CanCoderInputsAutoLogged cancoderInputs;
-
-  /** Optional CANcoder IO; null when subsystem has no CANcoder. */
-  protected final CanCoderIO cancoderIO;
-
   protected Angle positionSetpoint = Radians.of(0.0);
   protected AngularVelocity velocitySetpoint = RotationsPerSecond.of(0.0);
 
   public MotorSubsystem(TalonFXSubsystemConfig config, MI inputs, IO io) {
-    this(config, inputs, io, null, null);
-  }
-
-  /**
-   * Constructor with optional CANcoder support. Pass non-null cancoderInputs and cancoderIO for
-   * subsystems that have a CANcoder (e.g. Turret).
-   */
-  public MotorSubsystem(
-      TalonFXSubsystemConfig config,
-      MI inputs,
-      IO io,
-      CanCoderInputsAutoLogged cancoderInputs,
-      CanCoderIO cancoderIO) {
     super(config.name);
     this.config = config;
     this.inputs = inputs;
     this.io = io;
-    this.cancoderInputs = cancoderInputs;
-    this.cancoderIO = cancoderIO;
 
     this.pb = new AdvantageScopePathBuilder(this.getName());
 
@@ -85,11 +62,6 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
     Time timestamp = RobotTime.getTimestamp();
     io.readInputs(inputs);
     Logger.processInputs(getName(), inputs);
-
-    if (cancoderIO != null && cancoderInputs != null) {
-      cancoderIO.readInputs(cancoderInputs);
-      Logger.processInputs(getName() + "/cancoder", cancoderInputs);
-    }
 
     Logger.recordOutput(pb.makePath("LatencyPeriodSec"), RobotTime.getTimestamp().minus(timestamp));
     Logger.recordOutput(
@@ -292,43 +264,6 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
    */
   public AngularVelocity getCurrentVelocity() {
     return inputs.velocity;
-  }
-
-  /**
-   * Returns whether this subsystem has a CANcoder.
-   *
-   * @return true if CANcoder inputs and IO were provided to the constructor
-   */
-  public boolean hasCanCoder() {
-    return cancoderIO != null && cancoderInputs != null;
-  }
-
-  /**
-   * Gets the CANcoder absolute position in rotations. Only valid when {@link #hasCanCoder()} is
-   * true.
-   *
-   * @return CANcoder position in rotations, or 0 if no CANcoder
-   */
-  public Angle getCanCoderPosition() {
-    if (cancoderInputs == null) {
-      return Rotations.of(0.0);
-    }
-    return cancoderInputs.absolutePosition == null
-        ? Rotations.of(0.0)
-        : cancoderInputs.absolutePosition;
-  }
-
-  /**
-   * Gets the CANcoder velocity in rotations per second. Only valid when {@link #hasCanCoder()} is
-   * true.
-   *
-   * @return CANcoder velocity in rotations per second, or 0 if no CANcoder
-   */
-  public AngularVelocity getCanCoderVelocity() {
-    if (cancoderInputs == null) {
-      return RotationsPerSecond.of(0.0);
-    }
-    return cancoderInputs.velocity;
   }
 
   /**

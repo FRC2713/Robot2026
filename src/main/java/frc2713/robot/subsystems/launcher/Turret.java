@@ -23,7 +23,7 @@ import frc2713.lib.io.CanCoderIO;
 import frc2713.lib.io.CanCoderInputsAutoLogged;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
-import frc2713.lib.subsystem.MotorSubsystem;
+import frc2713.lib.subsystem.MotorCancoderSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.CrtSolver;
 import frc2713.lib.util.Util;
@@ -33,13 +33,9 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class Turret extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
+public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorIO>
     implements ArticulatedComponent {
 
-  /**
-   * Constructor for Turret with CANcoder. Pass null for cancoderInputs and cancoderIO when using
-   * sim or replay (TurretMotorIOSim computes encoder2 from encoder1).
-   */
   public Turret(
       final TalonFXSubsystemConfig config,
       final MotorIO turretMotorIO,
