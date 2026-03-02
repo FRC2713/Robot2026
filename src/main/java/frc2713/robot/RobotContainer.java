@@ -7,11 +7,6 @@
 
 package frc2713.robot;
 
-import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
-import static edu.wpi.first.units.Units.FeetPerSecond;
-import static edu.wpi.first.units.Units.FeetPerSecondPerSecond;
-
 import choreo.auto.AutoFactory;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -19,7 +14,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc2713.lib.io.CanCoderIO;
 import frc2713.lib.io.CanCoderIOHardware;
@@ -63,7 +57,6 @@ import frc2713.robot.subsystems.vision.Vision;
 import frc2713.robot.subsystems.vision.VisionIO;
 import frc2713.robot.subsystems.vision.VisionIOSLAMDunk;
 import java.util.Arrays;
-import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -315,7 +308,8 @@ public class RobotContainer {
             turret,
             dyeRotor,
             feeder,
-            () -> GameCommandGroups.getOtfShot(flywheels, hood, turret, feeder, dyeRotor)));
+            () ->
+                GameCommandGroups.Launching.getOtfShot(flywheels, hood, turret, feeder, dyeRotor)));
     autoChooser.addOption(
         "Trench to neutral otf to outpost",
         NeutralScoreOutpostOTF.routine(
@@ -328,7 +322,8 @@ public class RobotContainer {
             turret,
             dyeRotor,
             feeder,
-            () -> GameCommandGroups.getOtfShot(flywheels, hood, turret, feeder, dyeRotor)));
+            () ->
+                GameCommandGroups.Launching.getOtfShot(flywheels, hood, turret, feeder, dyeRotor)));
 
     // Configure the button bindings
     configureButtonBindings();
@@ -394,88 +389,5 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.get();
-  }
-
-  /**
-   * A Utility class holding common game actions in the form of command groups that can be shared
-   * between Driver, Developer, and AutoRoutines
-   */
-  public static class GameCommandGroups {
-    /** OTF shooting without drive limits. Use for auto routines. */
-    public static Command getOtfShot(
-        Flywheels flywheels, Hood hood, Turret turret, Feeder feeder, DyeRotor dyeRotor) {
-      return Commands.parallel(
-              flywheels.otfCommand(),
-              hood.otfCommand(),
-              turret.otfCommand(),
-              flywheels.simulateLaunchedFuel(flywheels::atTarget),
-              feeder.feedWhenReady(flywheels::atTarget),
-              dyeRotor.feedWhenReady(flywheels::atTarget))
-          .withName("OTF Shooting");
-    }
-
-    /** OTF shooting with drive limits. Use for driver/operator triggers. */
-    public static Command otfShot(
-        Drive drive,
-        Flywheels flywheels,
-        Hood hood,
-        Turret turret,
-        Feeder feeder,
-        DyeRotor dyeRotor) {
-      return Commands.parallel(
-              DriveCommands.setDriveLimits(
-                  drive,
-                  Optional.of(FeetPerSecond.of(4.0)),
-                  Optional.of(FeetPerSecondPerSecond.of(12.0)),
-                  Optional.of(DegreesPerSecond.of(90.0)),
-                  Optional.of(DegreesPerSecondPerSecond.of(360.0))),
-              flywheels.otfCommand(),
-              hood.otfCommand(),
-              turret.otfCommand(),
-              flywheels.simulateLaunchedFuel(flywheels::atTarget),
-              feeder.feedWhenReady(flywheels::atTarget),
-              dyeRotor.feedWhenReady(flywheels::atTarget))
-          .withName("OTF Shooting");
-    }
-
-    public static Command dumbShot(
-        Drive drive,
-        Flywheels flywheels,
-        Hood hood,
-        Turret turret,
-        Feeder feeder,
-        DyeRotor dyeRotor) {
-      return Commands.parallel(
-          flywheels.setVelocity(() -> LauncherConstants.Flywheels.staticTowerVelocity),
-          // hood.setAngleCommand(() -> Degrees.of(0.0)),
-          // turret.setAngle(() -> Degrees.of(0.0)),
-          feeder.feedWhenReady(() -> flywheels.atTarget()),
-          dyeRotor.feedWhenReady(() -> flywheels.atTarget()));
-    }
-
-    /** Hub shooting command. */
-    public static Command hubShot(
-        Drive drive,
-        Flywheels flywheels,
-        Hood hood,
-        Turret turret,
-        Feeder feeder,
-        DyeRotor dyeRotor) {
-      return Commands.parallel(
-              flywheels.hubCommand(),
-              hood.hubCommand(),
-              turret.hubCommand(drive::getPose),
-              flywheels.simulateLaunchedFuel(() -> flywheels.atTarget() && hood.atTarget()),
-              feeder.feedWhenReady(() -> flywheels.atTarget() && hood.atTarget()),
-              dyeRotor.feedWhenReady(() -> flywheels.atTarget() && hood.atTarget()))
-          .withName("Hub Shooting");
-    }
-
-    /** Stop shooting and clear drive limits. */
-    public static Command stopShooting(Drive drive, Feeder feeder, DyeRotor dyeRotor) {
-      return Commands.parallel(
-              DriveCommands.clearDriveLimits(drive), feeder.stop(), dyeRotor.stopCommand())
-          .withName("Stopped Shooting");
-    }
   }
 }

@@ -73,6 +73,11 @@ public final class IntakeConstants {
             1.273); // Diameter of the circle formed by the center of the sprocket teeth, used for
     // calculating distance per rotation
 
+    // Dimensions
+    public static final Distance height = Inches.of(15.5);
+    public static final Distance width = Inches.of(30.0);
+    public static final double volumePerInch = height.in(Inches) * width.in(Inches);
+
     static {
       var avgGains =
           new Slot0Configs()
@@ -94,7 +99,7 @@ public final class IntakeConstants {
       config.fxConfig.Slot0 = avgGains;
       config.fxConfig.MotionMagic = motionMagicGains;
 
-      config.unitToRotorRatio = 1.0; // assumes 1:1 gearbox
+      config.unitToRotorRatio = averageGearRatio;
       config.unitRotationsPerMeter =
           IntakeConstants.Extension.sprocketPitchDiameter.in(Meters)
               * Math.PI; // gearRatio * sprocketPitchDiameter * pi
@@ -135,9 +140,6 @@ public final class IntakeConstants {
                   new CurrentLimitsConfigs()
                       .withStatorCurrentLimit(80.0)
                       .withStatorCurrentLimitEnable(true))
-              .withFeedback(
-                  new FeedbackConfigs()
-                      .withSensorToMechanismRatio(differentialConfig.averageGearRatio))
               .withClosedLoopGeneral(
                   new ClosedLoopGeneralConfigs()
                       // differential mechanism is not continuous on the difference axis
@@ -148,10 +150,7 @@ public final class IntakeConstants {
 
       // Follower initial configs
       differentialConfig.followerConfig =
-          new TalonFXConfiguration()
-              .withFeedback(
-                  new FeedbackConfigs()
-                      .withSensorToMechanismRatio(differentialConfig.averageGearRatio));
+          new TalonFXConfiguration();
 
       // Differential mechanism constants
       differentialConfig.differentialConstants =

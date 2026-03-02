@@ -1,6 +1,7 @@
 package frc2713.lib.subsystem;
 
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
@@ -14,6 +15,7 @@ import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
@@ -87,6 +89,28 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
    */
   protected Distance convertMotorPositionToSubsystemPosition(Angle motorPosition) {
     return Meters.of(motorPosition.in(Rotations) * config.unitRotationsPerMeter);
+  }
+
+  /**
+   * Convert a linear velocity to mechanism rotations per second for the motor controller.
+   *
+   * @param subsystemVelocity The desired linear velocity
+   * @return The equivalent angular velocity in mechanism rotations per second
+   */
+  protected AngularVelocity convertSubsystemVelocityToMotorVelocity(
+      LinearVelocity subsystemVelocity) {
+    return RotationsPerSecond.of(
+        subsystemVelocity.in(MetersPerSecond) * config.unitRotationsPerMeter);
+  }
+
+  /**
+   * Convert mechanism rotations per second from the motor controller to a linear velocity.
+   *
+   * @param motorVelocity The current velocity in mechanism rotations per second
+   * @return The current velocity as a linear velocity
+   */
+  protected LinearVelocity convertMotorVelocityToSubsystemVelocity(AngularVelocity motorVelocity) {
+    return MetersPerSecond.of(motorVelocity.in(RotationsPerSecond) / config.unitRotationsPerMeter);
   }
 
   // IO Implementations

@@ -28,6 +28,7 @@ import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.LoggedTunableBoolean;
 import frc2713.lib.util.LoggedTunableMeasure;
 import frc2713.lib.util.Util;
+import frc2713.robot.GamePieceConstants;
 
 public final class LauncherConstants {
 
@@ -179,6 +180,10 @@ public final class LauncherConstants {
     public static Distance WHEEL_DIAMETER = Inches.of(4);
     // How many fuel we can launch per second at max firing rate
     public static double launchRateFuelPerSecond = 9.0;
+
+    // the volume of fuel we're launching per second at max firing rate
+    public static double launchRateVolumeInchesCubedPerSecond =
+        launchRateFuelPerSecond * GamePieceConstants.Fuel.volumeInchesCubed;
 
     static {
       // Distance (m) -> Ball Velocity (ft/s)
