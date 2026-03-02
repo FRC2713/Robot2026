@@ -64,12 +64,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
       Translation3d robotAngAccel = KinematicsManager.getInstance().getGlobalAngularAcceleration(0);
       currentSolution =
           calculateWithProjection(
-              robotPose,
-              robotLinVel,
-              robotAngVel,
-              robotLinAccel,
-              robotAngAccel,
-              currentGoal);
+              robotPose, robotLinVel, robotAngVel, robotLinAccel, robotAngAccel, currentGoal);
     } else {
       currentSolution = calculate(robotPose, robotLinVel, currentGoal);
     }
