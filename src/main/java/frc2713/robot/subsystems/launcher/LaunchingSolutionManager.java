@@ -29,8 +29,6 @@ public class LaunchingSolutionManager extends SubsystemBase {
       boolean isValid // False if target is out of range or blocked
       ) {}
 
-  public static record FieldGoal(Translation3d flywheelTarget, Translation3d positionalTarget) {}
-
   // Default to an empty/invalid solution
   private LaunchSolution currentSolution =
       new LaunchSolution(new Rotation2d(), 0, new Rotation2d(), 0, false);
@@ -42,13 +40,10 @@ public class LaunchingSolutionManager extends SubsystemBase {
     instance = this;
   }
 
-  public static FieldGoal currentGoal =
-      new FieldGoal(FieldConstants.Hub.innerCenterPoint, FieldConstants.Hub.topCenterPoint);
+  public static Translation3d currentGoal = FieldConstants.Hub.topCenterPoint;
 
-  public static void setFieldGoal(Translation3d flywheelTarget, Translation3d positionalTarget) {
-    LaunchingSolutionManager.currentGoal =
-        new FieldGoal(
-            AllianceFlipUtil.apply(flywheelTarget), AllianceFlipUtil.apply(positionalTarget));
+  public static void setGoal(Translation3d goal) {
+    LaunchingSolutionManager.currentGoal = AllianceFlipUtil.apply(goal);
   }
 
   public static LaunchingSolutionManager getInstance() {
@@ -74,10 +69,9 @@ public class LaunchingSolutionManager extends SubsystemBase {
               robotAngVel,
               robotLinAccel,
               robotAngAccel,
-              LaunchingSolutionManager.currentGoal.positionalTarget);
+              currentGoal);
     } else {
-      currentSolution =
-          calculate(robotPose, robotLinVel, LaunchingSolutionManager.currentGoal.positionalTarget);
+      currentSolution = calculate(robotPose, robotLinVel, currentGoal);
     }
   }
 

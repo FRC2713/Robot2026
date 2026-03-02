@@ -217,7 +217,7 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
     super.periodic();
 
     // Log the goal pose for visualization
-    Pose3d goalPose = new Pose3d(FieldConstants.Hub.topCenterPoint, new Rotation3d());
+    Pose3d goalPose = new Pose3d(LaunchingSolutionManager.currentGoal, new Rotation3d());
     Logger.recordOutput(pb.makePath("goalVector"), new Pose3d[] {this.getGlobalPose(), goalPose});
   }
 
