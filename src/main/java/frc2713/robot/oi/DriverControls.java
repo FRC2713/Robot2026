@@ -127,7 +127,7 @@ public class DriverControls {
     controller
         .rightTrigger(.98)
         .whileTrue(
-            RobotContainer.GameCommandGroups.dumbShot(
+            RobotContainer.GameCommandGroups.otfShot(
                 drive, flywheels, hood, turret, feeder, dyeRotor))
         .onFalse(RobotContainer.GameCommandGroups.stopShooting(drive, feeder, dyeRotor));
   }
