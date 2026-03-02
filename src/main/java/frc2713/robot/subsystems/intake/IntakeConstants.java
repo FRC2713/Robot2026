@@ -11,7 +11,6 @@ import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
-import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -72,11 +71,10 @@ public final class IntakeConstants {
     public static DifferentialSubsystemConfig differentialConfig =
         new DifferentialSubsystemConfig();
 
-    // Ratios    
+    // Ratios
     public static final double averageGearRatio = 60.0 / 8.0;
     public static final Distance sprocketPitchDiameter =
-        Inches.of(
-            1.273); // Diameter of the circle formed by the center of the sprocket teeth
+        Inches.of(1.273); // Diameter of the circle formed by the center of the sprocket teeth
 
     // Dynamics
     public static final Mass movingMass = Pounds.of(11.75);
@@ -88,7 +86,7 @@ public final class IntakeConstants {
     public static final double volumePerInch = height.in(Inches) * width.in(Inches);
 
     static {
-        config.unitToRotorRatio = averageGearRatio;
+      config.unitToRotorRatio = averageGearRatio;
       config.metersPerRotation = sprocketPitchDiameter.in(Meters) * Math.PI;
       var avgGains =
           new Slot0Configs()
@@ -101,16 +99,17 @@ public final class IntakeConstants {
 
       var motionMagicGains =
           new MotionMagicConfigs()
-              .withMotionMagicCruiseVelocity(RotationsPerSecond.of(cruiseVelocity.in(MetersPerSecond) / config.metersPerRotation)) // target crusing vel rps
-              .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(40.0 ))
+              .withMotionMagicCruiseVelocity(
+                  RotationsPerSecond.of(
+                      cruiseVelocity.in(MetersPerSecond)
+                          / config.metersPerRotation)) // target crusing vel rps
+              .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(40.0))
               .withMotionMagicJerk(0);
 
       config.name = "Intake Extension";
       config.talonCANID = new CANDeviceId(40); // Only used for sim, no real CAN ID
       config.fxConfig.Slot0 = avgGains;
       config.fxConfig.MotionMagic = motionMagicGains;
-
-      
 
       // MOI = m*r^2, where r is the radius to the center of mass (half the pitch diameter)
       config.momentOfInertia =
@@ -157,8 +156,7 @@ public final class IntakeConstants {
               .withMotionMagic(motionMagicGains);
 
       // Follower initial configs
-      differentialConfig.followerConfig =
-          new TalonFXConfiguration();
+      differentialConfig.followerConfig = new TalonFXConfiguration();
 
       // Differential mechanism constants
       differentialConfig.differentialConstants =

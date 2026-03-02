@@ -99,8 +99,7 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
    */
   protected AngularVelocity convertSubsystemVelocityToMotorVelocity(
       LinearVelocity subsystemVelocity) {
-    return RotationsPerSecond.of(
-        subsystemVelocity.in(MetersPerSecond) / config.metersPerRotation);
+    return RotationsPerSecond.of(subsystemVelocity.in(MetersPerSecond) / config.metersPerRotation);
   }
 
   /**
