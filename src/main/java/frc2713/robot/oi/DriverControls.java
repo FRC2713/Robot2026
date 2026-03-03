@@ -5,7 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc2713.robot.RobotContainer;
+import frc2713.robot.GameCommandGroups;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
@@ -119,17 +119,17 @@ public class DriverControls {
     controller
         .rightBumper()
         .whileTrue(
-            RobotContainer.GameCommandGroups.hubShot(
-                drive, flywheels, hood, turret, feeder, dyeRotor))
-        .onFalse(RobotContainer.GameCommandGroups.stopShooting(drive, feeder, dyeRotor));
+            GameCommandGroups.Launching.hubShot(drive, flywheels, hood, turret, feeder, dyeRotor))
+        .onFalse(
+            Commands.parallel(GameCommandGroups.Launching.stopShooting(drive, feeder, dyeRotor)));
 
     // shoot when flywheels are ready
     controller
         .rightTrigger(.98)
         .whileTrue(
-            RobotContainer.GameCommandGroups.otfShot(
-                drive, flywheels, hood, turret, feeder, dyeRotor))
-        .onFalse(RobotContainer.GameCommandGroups.stopShooting(drive, feeder, dyeRotor));
+            GameCommandGroups.Launching.dumbShot(
+                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
+        .onFalse(GameCommandGroups.Launching.stopShootingAndRetract(drive, feeder, dyeRotor, hood));
   }
 
   public double getLeftY() {

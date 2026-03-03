@@ -36,7 +36,7 @@ public class DifferentialSubsystemConfig {
   // Ratio of difference rotor to units for this differential mechanism
   public double differenceGearRatio = 1.0;
   // The number of times the mechanism has to rotate to achieve 1m of travel
-  public double unitRotationsPerMeter = 1.0;
+  public double metersPerRotation = 0.0;
   public double kMinPositionUnits = Double.NEGATIVE_INFINITY;
   public double kMaxPositionUnits = Double.POSITIVE_INFINITY;
 

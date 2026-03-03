@@ -1,8 +1,11 @@
 package frc2713.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.InchesPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Pounds;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs;
@@ -18,6 +21,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Voltage;
@@ -36,7 +40,7 @@ public final class IntakeConstants {
     public static TalonFXSubsystemConfig followerConfig = new TalonFXSubsystemConfig();
 
     public static final double gearRatio =
-        12.0 / 24.0; // 12 tooth pinion to 24 tooth gear for 0.5 reduction
+        24.0 / 12.0; // 12 tooth pinion to 24 tooth gear for 0.5 reduction
     public static final MomentOfInertia rollersMomentOfInertia =
         MoiUnits.PoundSquareInches.of(0.295439).times(2); // Low MOI for fast-spinning rollers
 
@@ -58,6 +62,8 @@ public final class IntakeConstants {
 
     public static LoggedTunableMeasure<Voltage> intakeVoltageDesired =
         new LoggedTunableMeasure<Voltage>("Intake Rollers/Intake", Volts.of(10.0));
+    public static LoggedTunableMeasure<Voltage> fuelPressureVoltageDesired =
+        new LoggedTunableMeasure<Voltage>("Intake Rollers/Fuel Pressure", Volts.of(10.0));
     public static Voltage outtakeVoltageDesired = Volts.of(-5.0);
   }
 
@@ -66,14 +72,24 @@ public final class IntakeConstants {
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
     public static DifferentialSubsystemConfig differentialConfig =
         new DifferentialSubsystemConfig();
+
+    // Ratios
     public static final double averageGearRatio = 60.0 / 8.0;
-    public static final Mass movingMass = Pounds.of(11.75);
     public static final Distance sprocketPitchDiameter =
-        Inches.of(
-            1.273); // Diameter of the circle formed by the center of the sprocket teeth, used for
-    // calculating distance per rotation
+        Inches.of(1.273); // Diameter of the circle formed by the center of the sprocket teeth
+
+    // Dynamics
+    public static final Mass movingMass = Pounds.of(11.75);
+    public static final LinearVelocity cruiseVelocity = InchesPerSecond.of(24);
+
+    // Dimensions
+    public static final Distance height = Inches.of(15.5);
+    public static final Distance width = Inches.of(30.0);
+    public static final double volumePerInch = height.in(Inches) * width.in(Inches);
 
     static {
+      config.unitToRotorRatio = 1.0;
+      config.metersPerRotation = sprocketPitchDiameter.in(Meters) * Math.PI;
       var avgGains =
           new Slot0Configs()
               .withKP(Util.modeDependentValue(10, 8))
@@ -85,19 +101,14 @@ public final class IntakeConstants {
 
       var motionMagicGains =
           new MotionMagicConfigs()
-              .withMotionMagicCruiseVelocity(10.0) // target crusing vel rps
-              .withMotionMagicAcceleration(20.0)
+              .withMotionMagicCruiseVelocity(RotationsPerSecond.of(2)) // target crusing vel rps
+              .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(20.0))
               .withMotionMagicJerk(0);
 
       config.name = "Intake Extension";
       config.talonCANID = new CANDeviceId(40); // Only used for sim, no real CAN ID
       config.fxConfig.Slot0 = avgGains;
       config.fxConfig.MotionMagic = motionMagicGains;
-
-      config.unitToRotorRatio = 1.0; // assumes 1:1 gearbox
-      config.unitRotationsPerMeter =
-          IntakeConstants.Extension.sprocketPitchDiameter.in(Meters)
-              * Math.PI; // gearRatio * sprocketPitchDiameter * pi
 
       // MOI = m*r^2, where r is the radius to the center of mass (half the pitch diameter)
       config.momentOfInertia =
@@ -135,9 +146,7 @@ public final class IntakeConstants {
                   new CurrentLimitsConfigs()
                       .withStatorCurrentLimit(80.0)
                       .withStatorCurrentLimitEnable(true))
-              .withFeedback(
-                  new FeedbackConfigs()
-                      .withSensorToMechanismRatio(differentialConfig.averageGearRatio))
+              .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(averageGearRatio))
               .withClosedLoopGeneral(
                   new ClosedLoopGeneralConfigs()
                       // differential mechanism is not continuous on the difference axis
@@ -149,9 +158,7 @@ public final class IntakeConstants {
       // Follower initial configs
       differentialConfig.followerConfig =
           new TalonFXConfiguration()
-              .withFeedback(
-                  new FeedbackConfigs()
-                      .withSensorToMechanismRatio(differentialConfig.averageGearRatio));
+              .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(averageGearRatio));
 
       // Differential mechanism constants
       differentialConfig.differentialConstants =

@@ -76,7 +76,7 @@ public class TalonFXIO implements MotorIO {
     }
 
     // Configure the gear ratio so getPosition/getVelocity return mechanism units.
-    // Note: unitRotationsPerMeter is handled at subsystem-level for linear mechanisms
+    // Note: metersPerRotation is handled at subsystem-level for linear mechanisms
     this.config.fxConfig.Feedback.SensorToMechanismRatio = config.unitToRotorRatio;
 
     CTREUtil.applyConfiguration(this.talon, this.config.fxConfig);

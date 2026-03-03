@@ -22,9 +22,8 @@ public class TalonFXSubsystemConfig {
   // be the units.
   // <1 is reduction
   public double unitToRotorRatio = 1.0;
-  // The number of times the pulley, drum, etc has to rotate to achieve
-  // 1m of travel
-  public double unitRotationsPerMeter = 1.0;
+  // How far the subsystem travels linearly for one rotation
+  public double metersPerRotation = 1.0;
   public double kMinPositionUnits = Double.NEGATIVE_INFINITY;
   public double kMaxPositionUnits = Double.POSITIVE_INFINITY;
 

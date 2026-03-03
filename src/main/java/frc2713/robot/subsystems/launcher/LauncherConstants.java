@@ -15,7 +15,6 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
@@ -28,6 +27,7 @@ import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.LoggedTunableBoolean;
 import frc2713.lib.util.LoggedTunableMeasure;
 import frc2713.lib.util.Util;
+import frc2713.robot.GamePieceConstants;
 
 public final class LauncherConstants {
 
@@ -180,6 +180,10 @@ public final class LauncherConstants {
     // How many fuel we can launch per second at max firing rate
     public static double launchRateFuelPerSecond = 9.0;
 
+    // the volume of fuel we're launching per second at max firing rate
+    public static double launchRateVolumeInchesCubedPerSecond =
+        launchRateFuelPerSecond * GamePieceConstants.Fuel.volumeInchesCubed;
+
     static {
       // Distance (m) -> Ball Velocity (ft/s)
       velocityMap.put(1.0, 20.0);
@@ -195,11 +199,13 @@ public final class LauncherConstants {
   public final class Hood {
 
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
-    public static Angle acceptableError = Degrees.of(5);
+    public static Angle acceptableError = Degrees.of(0.5);
 
+    public static final Angle minAngle = Degrees.of(0);
+    public static final Angle maxAngle = Degrees.of(30);
     // 9 tooth pinion to 20 tooth gear, 16 tooth gear to 38 tooth gear, 10 tooth gear to 124 tooth
     // gear for total reduction of 0.0306
-    public static double gearRatio = 1 / ((8.0 / 52.0) * (16.0 / 38.0) * (10.0 / 124.0));
+    public static double gearRatio = ((52 / 8.0) * (38 / 16.0) * (124 / 10.0));
 
     public static final Angle retractedPosition = Degrees.of(0);
 
@@ -208,7 +214,7 @@ public final class LauncherConstants {
       config.talonCANID = new CANDeviceId(54, "canivore"); // Example CAN ID, replace with actual ID
 
       // PID gains for Motion Magic
-      config.fxConfig.Slot0.kP = 0.0;
+      config.fxConfig.Slot0.kP = 60.0;
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 0.0;
       config.fxConfig.Slot0.kS = 0.0; // static friction compensation
@@ -219,17 +225,17 @@ public final class LauncherConstants {
 
       config.fxConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
       config.fxConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-      config.fxConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Units.degreesToRotations(75);
-      config.fxConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = Units.degreesToRotations(0);
+      config.fxConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = maxAngle.in(Rotations);
+      config.fxConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = minAngle.in(Rotations);
 
       config.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-      config.fxConfig.CurrentLimits.StatorCurrentLimit = 10;
+      config.fxConfig.CurrentLimits.StatorCurrentLimit = 20;
       config.fxConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-      config.fxConfig.CurrentLimits.SupplyCurrentLimit = 10;
+      config.fxConfig.CurrentLimits.SupplyCurrentLimit = 20;
 
       // Motion Magic parameters
-      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 2.0; // rotations per second
-      config.fxConfig.MotionMagic.MotionMagicAcceleration = 4.0; // rotations per second^2
+      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 0.5; // rotations per second
+      config.fxConfig.MotionMagic.MotionMagicAcceleration = 5.0; // rotations per second^2
       config.fxConfig.MotionMagic.MotionMagicJerk = 0; // no jerk limit
 
       config.unitToRotorRatio = gearRatio;
@@ -246,8 +252,10 @@ public final class LauncherConstants {
     public static int MODEL_INDEX = 4;
     public static int PARENT_INDEX = 3; // turret
 
+    public static LoggedTunableMeasure<Angle> staticTowerAngle =
+        new LoggedTunableMeasure<Angle>("Hood/Static Tower", Degrees.of(25));
     public static LoggedTunableMeasure<Angle> staticHubAngle =
-        new LoggedTunableMeasure<Angle>("Hood/Static Hub", Degrees.of(30));
+        new LoggedTunableMeasure<Angle>("Hood/Static Hub", Degrees.of(25));
 
     public static InterpolatingDoubleTreeMap angleMap = new InterpolatingDoubleTreeMap();
 
