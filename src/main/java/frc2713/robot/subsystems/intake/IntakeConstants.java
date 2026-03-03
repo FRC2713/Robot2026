@@ -62,6 +62,8 @@ public final class IntakeConstants {
 
     public static LoggedTunableMeasure<Voltage> intakeVoltageDesired =
         new LoggedTunableMeasure<Voltage>("Intake Rollers/Intake", Volts.of(10.0));
+    public static LoggedTunableMeasure<Voltage> fuelPressureVoltageDesired =
+        new LoggedTunableMeasure<Voltage>("Intake Rollers/Fuel Pressure", Volts.of(10.0));
     public static Voltage outtakeVoltageDesired = Volts.of(-5.0);
   }
 
@@ -99,7 +101,7 @@ public final class IntakeConstants {
 
       var motionMagicGains =
           new MotionMagicConfigs()
-              .withMotionMagicCruiseVelocity(RotationsPerSecond.of(10)) // target crusing vel rps
+              .withMotionMagicCruiseVelocity(RotationsPerSecond.of(2)) // target crusing vel rps
               .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(20.0))
               .withMotionMagicJerk(0);
 

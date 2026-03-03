@@ -1,6 +1,5 @@
 package frc2713.robot;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.FeetPerSecond;
@@ -10,7 +9,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
+import frc2713.robot.subsystems.intake.IntakeConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
+import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.launcher.Flywheels;
 import frc2713.robot.subsystems.launcher.Hood;
 import frc2713.robot.subsystems.launcher.LauncherConstants;
@@ -72,14 +73,16 @@ public final class GameCommandGroups {
         Turret turret,
         Feeder feeder,
         DyeRotor dyeRotor,
-        IntakeExtension extension) {
+        IntakeExtension extension, 
+        IntakeRoller rollers) {
       return Commands.parallel(
           flywheels.setVelocity(() -> LauncherConstants.Flywheels.staticTowerVelocity),
-          hood.setAngleCommand(() -> Degrees.of(0.0)),
+          hood.dumbCommand(),
           // turret.setAngle(() -> Degrees.of(0.0)),
           feeder.feedWhenReady(() -> flywheels.atTarget()),
           dyeRotor.feedWhenReady(() -> flywheels.atTarget()),
-          extension.maintainFuelPressureCommand());
+          extension.maintainFuelPressureCommand(),
+          rollers.voltageCommand(IntakeConstants.Roller.fuelPressureVoltageDesired));
     }
 
     /** Hub shooting command. */
