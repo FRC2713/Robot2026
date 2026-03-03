@@ -82,7 +82,7 @@ public final class GameCommandGroups {
           feeder.feedWhenReady(() -> flywheels.atTarget()),
           dyeRotor.feedWhenReady(() -> flywheels.atTarget()),
           extension.maintainFuelPressureCommand(),
-          rollers.voltageCommand(IntakeConstants.Roller.fuelPressureVoltageDesired));
+          rollers.voltageCommand(IntakeConstants.Roller.intakeVoltageDesired));
     }
 
     /** Hub shooting command. */
