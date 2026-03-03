@@ -128,7 +128,7 @@ public class DriverControls {
         .rightTrigger(.98)
         .whileTrue(
             GameCommandGroups.Launching.dumbShot(
-                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension))
+                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
         .onFalse(GameCommandGroups.Launching.stopShootingAndRetract(drive, feeder, dyeRotor, hood));
   }
 

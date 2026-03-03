@@ -73,7 +73,7 @@ public final class GameCommandGroups {
         Turret turret,
         Feeder feeder,
         DyeRotor dyeRotor,
-        IntakeExtension extension, 
+        IntakeExtension extension,
         IntakeRoller rollers) {
       return Commands.parallel(
           flywheels.setVelocity(() -> LauncherConstants.Flywheels.staticTowerVelocity),
