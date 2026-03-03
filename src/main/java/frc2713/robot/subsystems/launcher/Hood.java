@@ -39,6 +39,10 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
     return setAngleCommand(() -> LauncherConstants.Hood.retractedPosition);
   }
 
+  public Command dumbCommand() {
+    return setAngleCommand(LauncherConstants.Hood.staticTowerAngle);
+  }
+
   public Command hubCommand() {
     return setAngleCommand(LauncherConstants.Hood.staticHubAngle);
   }

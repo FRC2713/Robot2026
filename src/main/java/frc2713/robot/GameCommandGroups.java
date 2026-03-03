@@ -1,5 +1,6 @@
 package frc2713.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.FeetPerSecond;
@@ -74,7 +75,7 @@ public final class GameCommandGroups {
         IntakeExtension extension) {
       return Commands.parallel(
           flywheels.setVelocity(() -> LauncherConstants.Flywheels.staticTowerVelocity),
-          // hood.setAngleCommand(() -> Degrees.of(0.0)),
+          hood.setAngleCommand(() -> Degrees.of(0.0)),
           // turret.setAngle(() -> Degrees.of(0.0)),
           feeder.feedWhenReady(() -> flywheels.atTarget()),
           dyeRotor.feedWhenReady(() -> flywheels.atTarget()),
@@ -104,6 +105,11 @@ public final class GameCommandGroups {
       return Commands.parallel(
               DriveCommands.clearDriveLimits(drive), feeder.stop(), dyeRotor.stopCommand())
           .withName("Stopped Shooting");
+    }
+
+    public static Command stopShootingAndRetract(
+        Drive drive, Feeder feeder, DyeRotor dyeRotor, Hood hood) {
+      return Commands.parallel(stopShooting(drive, feeder, dyeRotor), hood.retract());
     }
   }
 }

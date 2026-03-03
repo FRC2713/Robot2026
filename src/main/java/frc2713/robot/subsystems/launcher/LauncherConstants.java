@@ -201,11 +201,11 @@ public final class LauncherConstants {
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
     public static Angle acceptableError = Degrees.of(0.5);
 
-    public static final Angle minAngle = Degrees.of(5);
-    public static final Angle maxAngle = Degrees.of(25);
+    public static final Angle minAngle = Degrees.of(0);
+    public static final Angle maxAngle = Degrees.of(30);
     // 9 tooth pinion to 20 tooth gear, 16 tooth gear to 38 tooth gear, 10 tooth gear to 124 tooth
     // gear for total reduction of 0.0306
-    public static double gearRatio = 1 / ((8.0 / 52.0) * (16.0 / 38.0) * (10.0 / 124.0));
+    public static double gearRatio = ((52 / 8.0) * (38 / 16.0) * (124 / 10.0));
 
     public static final Angle retractedPosition = Degrees.of(0);
 
@@ -214,7 +214,7 @@ public final class LauncherConstants {
       config.talonCANID = new CANDeviceId(54, "canivore"); // Example CAN ID, replace with actual ID
 
       // PID gains for Motion Magic
-      config.fxConfig.Slot0.kP = 0.0;
+      config.fxConfig.Slot0.kP = 60.0;
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 0.0;
       config.fxConfig.Slot0.kS = 0.0; // static friction compensation
@@ -229,13 +229,13 @@ public final class LauncherConstants {
       config.fxConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = minAngle.in(Rotations);
 
       config.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-      config.fxConfig.CurrentLimits.StatorCurrentLimit = 10;
+      config.fxConfig.CurrentLimits.StatorCurrentLimit = 20;
       config.fxConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-      config.fxConfig.CurrentLimits.SupplyCurrentLimit = 10;
+      config.fxConfig.CurrentLimits.SupplyCurrentLimit = 20;
 
       // Motion Magic parameters
-      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 0.25; // rotations per second
-      config.fxConfig.MotionMagic.MotionMagicAcceleration = 1.0; // rotations per second^2
+      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 0.5; // rotations per second
+      config.fxConfig.MotionMagic.MotionMagicAcceleration = 5.0; // rotations per second^2
       config.fxConfig.MotionMagic.MotionMagicJerk = 0; // no jerk limit
 
       config.unitToRotorRatio = gearRatio;
@@ -252,8 +252,10 @@ public final class LauncherConstants {
     public static int MODEL_INDEX = 4;
     public static int PARENT_INDEX = 3; // turret
 
+    public static LoggedTunableMeasure<Angle> staticTowerAngle =
+        new LoggedTunableMeasure<Angle>("Hood/Static Tower", Degrees.of(25));
     public static LoggedTunableMeasure<Angle> staticHubAngle =
-        new LoggedTunableMeasure<Angle>("Hood/Static Hub", Degrees.of(30));
+        new LoggedTunableMeasure<Angle>("Hood/Static Hub", Degrees.of(25));
 
     public static InterpolatingDoubleTreeMap angleMap = new InterpolatingDoubleTreeMap();
 
