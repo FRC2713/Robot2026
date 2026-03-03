@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
+import frc2713.lib.field.FieldRegion;
 import frc2713.lib.field.RectangleFieldRegion;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -420,25 +421,11 @@ public class FieldConstants {
 
   /**
    * Defines zones on the field where the hood must be retracted to avoid collisions with field
-   * elements like trenches or other obstacles. Each zone is defined by min/max X and Y coordinates.
-   * Origin is at the corner of the BLUE alliance near the outpost.
+   * elements like trenches or other obstacles. Each zone is defined as a RectangleFieldRegion for
+   * easy visualization in AdvantageScope. Origin is at the corner of the BLUE alliance near the
+   * outpost.
    */
   public static class HoodRetractionZones {
-
-    /** A rectangular zone on the field defined by X and Y bounds */
-    public record Zone(double minX, double maxX, double minY, double maxY) {
-      /**
-       * Check if a pose is within this zone
-       *
-       * @param pose The robot pose to check
-       * @return true if the pose is within the zone bounds
-       */
-      public boolean contains(Pose2d pose) {
-        double x = pose.getX();
-        double y = pose.getY();
-        return x >= minX && x <= maxX && y >= minY && y <= maxY;
-      }
-    }
 
     // Robot dimensions: 33.25" + 12" extension = 45.25" maximum dimension
     private static final double ROBOT_MAX_DIMENSION = Units.inchesToMeters(45.25);
@@ -450,8 +437,8 @@ public class FieldConstants {
      * extends from one robot length before the trench opening to the hub center Does not extend
      * into the bump area
      */
-    public static final Zone BLUE_LEFT_DUCK_ZONE =
-        new Zone(
+    public static final RectangleFieldRegion BLUE_LEFT_DUCK_ZONE =
+        new RectangleFieldRegion(
             LinesVertical.hubCenter - ROBOT_MAX_DIMENSION, // minX: one robot length before opening
             LinesVertical.hubCenter, // maxX: at the hub center (trench opening)
             LinesHorizontal.leftBumpStart, // minY: start after bump area
@@ -463,8 +450,8 @@ public class FieldConstants {
      * extends from one robot length before the trench opening to the hub center Does not extend
      * into the bump area
      */
-    public static final Zone BLUE_RIGHT_DUCK_ZONE =
-        new Zone(
+    public static final RectangleFieldRegion BLUE_RIGHT_DUCK_ZONE =
+        new RectangleFieldRegion(
             LinesVertical.hubCenter - ROBOT_MAX_DIMENSION, // minX: one robot length before opening
             LinesVertical.hubCenter, // maxX: at the hub center (trench opening)
             LinesHorizontal.rightTrenchOpenEnd, // minY: extend from edge
@@ -476,8 +463,8 @@ public class FieldConstants {
      * extends from the hub center to one robot length after the trench opening Does not extend into
      * the bump area
      */
-    public static final Zone BLUE_LEFT_DUCK_EXIT_ZONE =
-        new Zone(
+    public static final RectangleFieldRegion BLUE_LEFT_DUCK_EXIT_ZONE =
+        new RectangleFieldRegion(
             LinesVertical.hubCenter, // minX: at the hub center (trench opening)
             LinesVertical.hubCenter + ROBOT_MAX_DIMENSION, // maxX: one robot length after opening
             LinesHorizontal.leftBumpStart, // minY: start after bump area
@@ -489,8 +476,8 @@ public class FieldConstants {
      * extends from the hub center to one robot length after the trench opening Does not extend into
      * the bump area
      */
-    public static final Zone BLUE_RIGHT_DUCK_EXIT_ZONE =
-        new Zone(
+    public static final RectangleFieldRegion BLUE_RIGHT_DUCK_EXIT_ZONE =
+        new RectangleFieldRegion(
             LinesVertical.hubCenter, // minX: at the hub center (trench opening)
             LinesVertical.hubCenter + ROBOT_MAX_DIMENSION, // maxX: one robot length after opening
             LinesHorizontal.rightTrenchOpenEnd, // minY: extend from edge
@@ -504,8 +491,8 @@ public class FieldConstants {
      * from one robot length before the trench opening to the opposing hub center Does not extend
      * into the bump area
      */
-    public static final Zone RED_LEFT_DUCK_ZONE =
-        new Zone(
+    public static final RectangleFieldRegion RED_LEFT_DUCK_ZONE =
+        new RectangleFieldRegion(
             LinesVertical.oppHubCenter, // minX: at the opposing hub center (trench opening)
             LinesVertical.oppHubCenter
                 + ROBOT_MAX_DIMENSION, // maxX: one robot length after opening
@@ -518,8 +505,8 @@ public class FieldConstants {
      * extends from one robot length before the trench opening to the opposing hub center Does not
      * extend into the bump area
      */
-    public static final Zone RED_RIGHT_DUCK_ZONE =
-        new Zone(
+    public static final RectangleFieldRegion RED_RIGHT_DUCK_ZONE =
+        new RectangleFieldRegion(
             LinesVertical.oppHubCenter, // minX: at the opposing hub center (trench opening)
             LinesVertical.oppHubCenter
                 + ROBOT_MAX_DIMENSION, // maxX: one robot length after opening
@@ -532,8 +519,8 @@ public class FieldConstants {
      * away Zone extends from one robot length before the opposing hub center to the hub center Does
      * not extend into the bump area
      */
-    public static final Zone RED_LEFT_DUCK_EXIT_ZONE =
-        new Zone(
+    public static final RectangleFieldRegion RED_LEFT_DUCK_EXIT_ZONE =
+        new RectangleFieldRegion(
             LinesVertical.oppHubCenter
                 - ROBOT_MAX_DIMENSION, // minX: one robot length before opening
             LinesVertical.oppHubCenter, // maxX: at the opposing hub center (trench opening)
@@ -546,8 +533,8 @@ public class FieldConstants {
      * away Zone extends from one robot length before the opposing hub center to the hub center Does
      * not extend into the bump area
      */
-    public static final Zone RED_RIGHT_DUCK_EXIT_ZONE =
-        new Zone(
+    public static final RectangleFieldRegion RED_RIGHT_DUCK_EXIT_ZONE =
+        new RectangleFieldRegion(
             LinesVertical.oppHubCenter
                 - ROBOT_MAX_DIMENSION, // minX: one robot length before opening
             LinesVertical.oppHubCenter, // maxX: at the opposing hub center (trench opening)
@@ -556,7 +543,7 @@ public class FieldConstants {
             );
 
     /** Array of all retraction zones for easy iteration */
-    public static final Zone[] ALL_ZONES = {
+    public static final RectangleFieldRegion[] ALL_ZONES = {
       BLUE_LEFT_DUCK_ZONE,
       BLUE_RIGHT_DUCK_ZONE,
       BLUE_LEFT_DUCK_EXIT_ZONE,
@@ -574,12 +561,32 @@ public class FieldConstants {
      * @return true if the robot is in any zone requiring hood retraction
      */
     public static boolean isInRetractionZone(Pose2d pose) {
-      for (Zone zone : ALL_ZONES) {
-        if (zone.contains(pose)) {
+      for (RectangleFieldRegion zone : ALL_ZONES) {
+        if (zone.contains(pose.getTranslation())) {
           return true;
         }
       }
       return false;
+    }
+
+    /**
+     * Logs all hood retraction zones to AdvantageScope for visualization. Call this periodically or
+     * once at robot init to see the zones on the field view.
+     */
+    public static void logZones() {
+      FieldRegion.logAll("Field/HoodRetractionZones", ALL_ZONES);
+    }
+
+    /** Logs all hood retraction zones individually with descriptive names. */
+    public static void logZonesIndividually() {
+      BLUE_LEFT_DUCK_ZONE.log("Field/HoodRetractionZones/BlueLeftDuck");
+      BLUE_RIGHT_DUCK_ZONE.log("Field/HoodRetractionZones/BlueRightDuck");
+      BLUE_LEFT_DUCK_EXIT_ZONE.log("Field/HoodRetractionZones/BlueLeftDuckExit");
+      BLUE_RIGHT_DUCK_EXIT_ZONE.log("Field/HoodRetractionZones/BlueRightDuckExit");
+      RED_LEFT_DUCK_ZONE.log("Field/HoodRetractionZones/RedLeftDuck");
+      RED_RIGHT_DUCK_ZONE.log("Field/HoodRetractionZones/RedRightDuck");
+      RED_LEFT_DUCK_EXIT_ZONE.log("Field/HoodRetractionZones/RedLeftDuckExit");
+      RED_RIGHT_DUCK_EXIT_ZONE.log("Field/HoodRetractionZones/RedRightDuckExit");
     }
   }
 
