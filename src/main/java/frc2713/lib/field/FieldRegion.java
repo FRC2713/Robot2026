@@ -1,9 +1,11 @@
 package frc2713.lib.field;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * A field region for containment and intersection checks.
@@ -71,5 +73,66 @@ public interface FieldRegion {
    */
   default Trigger createIntersectsTrigger(Supplier<Rectangle2d> rectangleSupplier) {
     return new Trigger(() -> intersects(rectangleSupplier.get()));
+  }
+
+  // ========== VISUALIZATION METHODS ==========
+
+  /**
+   * Returns an array of Pose2d representing the boundary of this region for visualization in
+   * AdvantageScope. For rectangular regions, returns the four corners plus a closing point. The
+   * poses form a closed polygon when connected in order.
+   *
+   * @return Array of poses representing the region boundary (closed polygon)
+   */
+  default Pose2d[] getBoundaryPoses() {
+    return new Pose2d[0]; // Override in implementations
+  }
+
+  /**
+   * Returns a double array [x1, y1, x2, y2, ...] representing the region boundary for
+   * visualization. This is a more efficient format for logging multiple regions.
+   *
+   * @return Array of x,y coordinate pairs forming a closed polygon
+   */
+  default double[] getBoundaryPoints() {
+    Pose2d[] poses = getBoundaryPoses();
+    double[] points = new double[poses.length * 2];
+    for (int i = 0; i < poses.length; i++) {
+      points[i * 2] = poses[i].getX();
+      points[i * 2 + 1] = poses[i].getY();
+    }
+    return points;
+  }
+
+  /**
+   * Logs this region to AdvantageScope for visualization on the field view.
+   *
+   * @param path The log path (e.g. "FieldRegions/MyZone")
+   */
+  default void log(String path) {
+    Logger.recordOutput(path, getBoundaryPoses());
+  }
+
+  /**
+   * Logs multiple regions to AdvantageScope as a combined array for visualization.
+   *
+   * @param path The log path (e.g. "FieldRegions/AllZones")
+   * @param regions The regions to log
+   */
+  static void logAll(String path, FieldRegion... regions) {
+    int totalPoses = 0;
+    for (FieldRegion region : regions) {
+      totalPoses += region.getBoundaryPoses().length;
+    }
+
+    Pose2d[] allPoses = new Pose2d[totalPoses];
+    int index = 0;
+    for (FieldRegion region : regions) {
+      Pose2d[] poses = region.getBoundaryPoses();
+      System.arraycopy(poses, 0, allPoses, index, poses.length);
+      index += poses.length;
+    }
+
+    Logger.recordOutput(path, allPoses);
   }
 }
