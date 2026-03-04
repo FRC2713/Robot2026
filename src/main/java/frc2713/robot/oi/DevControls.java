@@ -103,9 +103,6 @@ public class DevControls {
                 "Inch Right"))
         .onFalse(this.setToNormalDriveCmd());
 
-    controller.povUp().onTrue(hood.setAngleCommand(() -> Degrees.of(25)));
-    controller.povDown().onTrue(hood.setAngleCommand(() -> Degrees.of(0)));
-
     // Turret angle controls
     // controller.a().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleOne));
 
@@ -163,7 +160,7 @@ public class DevControls {
         .onFalse(Commands.parallel(dyeRotor.stopCommand(), feeder.stop(), flywheels.stop()));
 
     controller.povUp().onTrue(hood.setAngleCommand(() -> Degrees.of(25)));
-    controller.povDown().onTrue(hood.setAngleCommand(() -> Degrees.of(5)));
+    controller.povDown().onTrue(hood.setAngleCommand(() -> Degrees.of(0)));
   }
 
   public double getLeftY() {
