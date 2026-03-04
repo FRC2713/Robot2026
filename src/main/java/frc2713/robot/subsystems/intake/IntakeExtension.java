@@ -3,8 +3,8 @@ package frc2713.robot.subsystems.intake;
 import static edu.wpi.first.units.Units.InchesPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Second;
 
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -45,8 +45,14 @@ public class IntakeExtension
               convertSubsystemVelocityToMotorVelocity(cruiseVelocity.get());
           Logger.recordOutput(pb.makePath("cruiseLinearVelocity"), cruiseVelocity.get());
           Logger.recordOutput(pb.makePath("cruiseAnguularVelocity"), cruiseAngularVelocity);
-          return IntakeConstants.Extension.config.fxConfig.MotionMagic
-              .withMotionMagicCruiseVelocity(cruiseAngularVelocity);
+
+          var motionMagicGains =
+              new MotionMagicConfigs()
+                  .withMotionMagicCruiseVelocity(cruiseAngularVelocity) // target crusing vel rps
+                  .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(20.0))
+                  .withMotionMagicJerk(0);
+
+          return motionMagicGains;
         });
   }
 
@@ -67,7 +73,8 @@ public class IntakeExtension
    * @return
    */
   public Command extendCommand() {
-    return setDistanceCommand(IntakeConstants.Extension.extendedPosition);
+    return setDistanceCommand(
+        IntakeConstants.Extension.extendedPosition, () -> InchesPerSecond.of(24));
   }
 
   /**
@@ -76,7 +83,8 @@ public class IntakeExtension
    * @return
    */
   public Command retractCommand() {
-    return setDistanceCommand(IntakeConstants.Extension.retractedPosition);
+    return setDistanceCommand(
+        IntakeConstants.Extension.retractedPosition, () -> InchesPerSecond.of(2.0));
   }
 
   /**
@@ -96,24 +104,6 @@ public class IntakeExtension
         InchesPerSecond.of(volumeLostPerSecond / IntakeConstants.Extension.volumePerInch / 2.0);
     return setDistanceCommand(IntakeConstants.Extension.retractedPosition, () -> velocityToMaintain)
         .withName("Maintain Fuel Pressure");
-  }
-
-  /**
-   * Set the extension distance using a specified velocity parameter. Uses the provided velocity for
-   * motion magic control.
-   */
-  public Command setDistanceWithVelocityCommand(Distance distance, LinearVelocity velocity) {
-    System.out.println("Setting distance with velocity: " + velocity);
-    return run(
-        () ->
-            io.setMotionMagicSetpoint(
-                convertSubsystemPositionToMotorPosition(distance),
-                convertSubsystemVelocityToMotorVelocity(velocity),
-                RotationsPerSecondPerSecond.of(
-                    20),
-                RotationsPerSecondPerSecond.of(
-                        0)
-                    .per(Second)));
   }
 
   /**

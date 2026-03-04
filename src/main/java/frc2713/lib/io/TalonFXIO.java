@@ -1,6 +1,9 @@
 package frc2713.lib.io;
 
 import static edu.wpi.first.units.Units.Revolutions;
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
@@ -164,13 +167,12 @@ public class TalonFXIO implements MotorIO {
       Velocity<AngularAccelerationUnit> jerk,
       int slot,
       double feedforward) {
-    talon.setControl(
-        dynamicMotionMagicVoltage
-            .withPosition(setpoint)
-            .withVelocity(velocity)
-            .withAcceleration(acceleration)
-            .withJerk(jerk)
-            .withFeedForward(feedforward));
+    DynamicMotionMagicVoltage m_request =
+        new DynamicMotionMagicVoltage(
+            setpoint.in(Rotations),
+            velocity.in(RotationsPerSecond),
+            acceleration.in(RotationsPerSecondPerSecond));
+    talon.setControl(m_request);
   }
 
   @Override

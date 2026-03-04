@@ -98,10 +98,10 @@ public final class IntakeConstants {
               .withKA(0);
 
       var motionMagicGains =
-          new MotionMagicConfigs();
-            //   .withMotionMagicCruiseVelocity(RotationsPerSecond.of(10)) // target crusing vel rps
-            //   .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(20.0))
-            //   .withMotionMagicJerk(0);
+          new MotionMagicConfigs()
+              .withMotionMagicCruiseVelocity(RotationsPerSecond.of(10)) // target crusing vel rps
+              .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(20.0))
+              .withMotionMagicJerk(0);
 
       config.name = "Intake Extension";
       config.talonCANID = new CANDeviceId(40); // Only used for sim, no real CAN ID
@@ -179,16 +179,6 @@ public final class IntakeConstants {
         new LoggedTunableMeasure<>(config.name + "/PID Test Position", Inches.of(0));
     public static LoggedTunableMeasure<Distance> retractedPosition =
         new LoggedTunableMeasure<>(config.name + "/Retracted Position", Inches.of(0));
-
-    // Tunable velocity for Motion Magic
-    public static LoggedTunableMeasure<LinearVelocity> tunableCruiseVelocity =
-        new LoggedTunableMeasure<>(config.name + "/Cruise Velocity", InchesPerSecond.of(24.0));
-
-    // Tunable velocities for dev controls
-    public static LoggedTunableMeasure<LinearVelocity> extensionVelocity =
-        new LoggedTunableMeasure<>(config.name + "/Extension Velocity", InchesPerSecond.of(20.0));
-    public static LoggedTunableMeasure<LinearVelocity> retractVelocity =
-        new LoggedTunableMeasure<>(config.name + "/Retract Velocity", InchesPerSecond.of(30.0));
 
     public static int MODEL_INDEX = 1;
     public static int PARENT_INDEX = 0; // drivetrain

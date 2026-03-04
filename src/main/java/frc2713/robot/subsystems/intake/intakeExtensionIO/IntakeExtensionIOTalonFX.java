@@ -43,27 +43,13 @@ public class IntakeExtensionIOTalonFX implements IntakeExtensionIO {
   // Status signals from average axis (differential mechanism provides these)
   private final StatusSignal<Angle> positionSignal;
   private final StatusSignal<AngularVelocity> velocitySignal;
-  private final StatusSignal<Voltage> leaderVoltageSignal;
-  private final StatusSignal<Current> leaderCurrentStatorSignal;
-  private final StatusSignal<Current> leaderCurrentSupplySignal;
-  private final StatusSignal<Current> leaderCurrentTorqueSignal;
-  private final StatusSignal<Angle> leaderRawRotorPositionSignal;
-  private final StatusSignal<Double> leaderClosedLoopErrorSignal;
-  private final StatusSignal<Boolean> leaderMotionMagicAtTargetSignal;
-
-  // Per-motor status signals (cached to avoid per-cycle CAN round-trips)
-  private final StatusSignal<Angle> leaderPositionSignal;
-  private final StatusSignal<AngularVelocity> leaderVelocitySignal;
-  private final StatusSignal<Angle> followerPositionSignal;
-  private final StatusSignal<AngularVelocity> followerVelocitySignal;
-  private final StatusSignal<Voltage> followerVoltageSignal;
-  private final StatusSignal<Current> followerStatorCurrentSignal;
-  private final StatusSignal<Current> followerSupplyCurrentSignal;
-  private final StatusSignal<Current> followerTorqueCurrentSignal;
-  private final StatusSignal<Angle> followerRawRotorPositionSignal;
-  private final StatusSignal<Double> followerClosedLoopErrorSignal;
-  private final StatusSignal<Boolean> followerMotionMagicAtTargetSignal;
-
+  private final StatusSignal<Voltage> voltageSignal;
+  private final StatusSignal<Current> currentStatorSignal;
+  private final StatusSignal<Current> currentSupplySignal;
+  private final StatusSignal<Current> currentTorqueSignal;
+  private final StatusSignal<Angle> rawRotorPositionSignal;
+  private final StatusSignal<Double> closedLoopErrorSignal;
+  private final StatusSignal<Boolean> motionMagicAtTargetSignal;
   private final BaseStatusSignal[] signals;
 
   // Tunables for differential gains (created when config.tunable == true)
@@ -96,54 +82,28 @@ public class IntakeExtensionIOTalonFX implements IntakeExtensionIO {
     // Set up status signals from the differential mechanism's average axis
     positionSignal = diffMech.getAveragePosition();
     velocitySignal = diffMech.getAverageVelocity();
-
-    // Cache per-motor signals so readInputs() never creates transient StatusSignal objects.
-    // Leader position/velocity are distinct from the differential average signals above.
-    leaderPositionSignal = leaderMotor.getPosition();
-    leaderVelocitySignal = leaderMotor.getVelocity();
-    leaderVoltageSignal = leaderMotor.getMotorVoltage();
-    leaderCurrentStatorSignal = leaderMotor.getStatorCurrent();
-    leaderCurrentSupplySignal = leaderMotor.getSupplyCurrent();
-    leaderCurrentTorqueSignal = leaderMotor.getTorqueCurrent();
-    leaderRawRotorPositionSignal = leaderMotor.getRotorPosition();
-    leaderClosedLoopErrorSignal = leaderMotor.getClosedLoopError();
-    leaderMotionMagicAtTargetSignal = leaderMotor.getMotionMagicAtTarget();
-
-    followerPositionSignal = followerMotor.getPosition();
-    followerVelocitySignal = followerMotor.getVelocity();
-    followerVoltageSignal = followerMotor.getMotorVoltage();
-    followerStatorCurrentSignal = followerMotor.getStatorCurrent();
-    followerSupplyCurrentSignal = followerMotor.getSupplyCurrent();
-    followerTorqueCurrentSignal = followerMotor.getTorqueCurrent();
-    followerRawRotorPositionSignal = followerMotor.getRotorPosition();
-    followerClosedLoopErrorSignal = followerMotor.getClosedLoopError();
-    followerMotionMagicAtTargetSignal = followerMotor.getMotionMagicAtTarget();
+    // For voltage and current, we'll average the leader and follower manually since no direct
+    // method exists
+    voltageSignal = leaderMotor.getMotorVoltage();
+    currentStatorSignal = leaderMotor.getStatorCurrent();
+    currentSupplySignal = leaderMotor.getSupplyCurrent();
+    currentTorqueSignal = leaderMotor.getTorqueCurrent();
+    // Use leader motor for individual signals
+    rawRotorPositionSignal = leaderMotor.getRotorPosition();
+    closedLoopErrorSignal = leaderMotor.getClosedLoopError();
+    motionMagicAtTargetSignal = leaderMotor.getMotionMagicAtTarget();
 
     signals =
         new BaseStatusSignal[] {
-          // Differential average signals
           positionSignal,
           velocitySignal,
-          // Leader individual signals
-          leaderVoltageSignal,
-          leaderCurrentStatorSignal,
-          leaderCurrentSupplySignal,
-          leaderCurrentTorqueSignal,
-          leaderRawRotorPositionSignal,
-          leaderClosedLoopErrorSignal,
-          leaderMotionMagicAtTargetSignal,
-          leaderPositionSignal,
-          leaderVelocitySignal,
-          // Follower individual signals
-          followerPositionSignal,
-          followerVelocitySignal,
-          followerVoltageSignal,
-          followerStatorCurrentSignal,
-          followerSupplyCurrentSignal,
-          followerTorqueCurrentSignal,
-          followerRawRotorPositionSignal,
-          followerClosedLoopErrorSignal,
-          followerMotionMagicAtTargetSignal,
+          voltageSignal,
+          currentStatorSignal,
+          currentSupplySignal,
+          currentTorqueSignal,
+          rawRotorPositionSignal,
+          closedLoopErrorSignal,
+          motionMagicAtTargetSignal,
         };
 
     CTREUtil.tryUntilOK(
@@ -166,33 +126,33 @@ public class IntakeExtensionIOTalonFX implements IntakeExtensionIO {
     BaseStatusSignal.refreshAll(signals);
     inputs.position = positionSignal.getValue();
     inputs.velocity = velocitySignal.getValue();
-    inputs.appliedVolts = leaderVoltageSignal.getValue();
-    inputs.currentStatorAmps = leaderCurrentStatorSignal.getValue();
-    inputs.currentSupplyAmps = leaderCurrentSupplySignal.getValue();
-    inputs.currentTorqueAmps = leaderCurrentTorqueSignal.getValue();
-    inputs.rawRotorPosition = leaderRawRotorPositionSignal.getValue();
-    inputs.closedLoopError = leaderClosedLoopErrorSignal.getValue();
-    inputs.isMotionMagicAtTarget = leaderMotionMagicAtTargetSignal.getValue();
+    inputs.appliedVolts = voltageSignal.getValue();
+    inputs.currentStatorAmps = currentStatorSignal.getValue();
+    inputs.currentSupplyAmps = currentSupplySignal.getValue();
+    inputs.currentTorqueAmps = currentTorqueSignal.getValue();
+    inputs.rawRotorPosition = rawRotorPositionSignal.getValue();
+    inputs.closedLoopError = closedLoopErrorSignal.getValue();
+    inputs.isMotionMagicAtTarget = motionMagicAtTargetSignal.getValue();
 
-    inputs.leader.position = leaderPositionSignal.getValue();
-    inputs.leader.velocity = leaderVelocitySignal.getValue();
-    inputs.leader.appliedVolts = leaderVoltageSignal.getValue();
-    inputs.leader.currentStatorAmps = leaderCurrentStatorSignal.getValue();
-    inputs.leader.currentSupplyAmps = leaderCurrentSupplySignal.getValue();
-    inputs.leader.currentTorqueAmps = leaderCurrentTorqueSignal.getValue();
-    inputs.leader.rawRotorPosition = leaderRawRotorPositionSignal.getValue();
-    inputs.leader.closedLoopError = leaderClosedLoopErrorSignal.getValue();
-    inputs.leader.isMotionMagicAtTarget = leaderMotionMagicAtTargetSignal.getValue();
+    inputs.leader.position = leaderMotor.getPosition().getValue();
+    inputs.leader.velocity = leaderMotor.getVelocity().getValue();
+    inputs.leader.appliedVolts = leaderMotor.getMotorVoltage().getValue();
+    inputs.leader.currentStatorAmps = leaderMotor.getStatorCurrent().getValue();
+    inputs.leader.currentSupplyAmps = leaderMotor.getSupplyCurrent().getValue();
+    inputs.leader.currentTorqueAmps = leaderMotor.getTorqueCurrent().getValue();
+    inputs.leader.rawRotorPosition = leaderMotor.getRotorPosition().getValue();
+    inputs.leader.closedLoopError = leaderMotor.getClosedLoopError().getValue();
+    inputs.leader.isMotionMagicAtTarget = leaderMotor.getMotionMagicAtTarget().getValue();
 
-    inputs.follower.position = followerPositionSignal.getValue();
-    inputs.follower.velocity = followerVelocitySignal.getValue();
-    inputs.follower.appliedVolts = followerVoltageSignal.getValue();
-    inputs.follower.currentStatorAmps = followerStatorCurrentSignal.getValue();
-    inputs.follower.currentSupplyAmps = followerSupplyCurrentSignal.getValue();
-    inputs.follower.currentTorqueAmps = followerTorqueCurrentSignal.getValue();
-    inputs.follower.rawRotorPosition = followerRawRotorPositionSignal.getValue();
-    inputs.follower.closedLoopError = followerClosedLoopErrorSignal.getValue();
-    inputs.follower.isMotionMagicAtTarget = followerMotionMagicAtTargetSignal.getValue();
+    inputs.follower.position = followerMotor.getPosition().getValue();
+    inputs.follower.velocity = followerMotor.getVelocity().getValue();
+    inputs.follower.appliedVolts = followerMotor.getMotorVoltage().getValue();
+    inputs.follower.currentStatorAmps = followerMotor.getStatorCurrent().getValue();
+    inputs.follower.currentSupplyAmps = followerMotor.getSupplyCurrent().getValue();
+    inputs.follower.currentTorqueAmps = followerMotor.getTorqueCurrent().getValue();
+    inputs.follower.rawRotorPosition = followerMotor.getRotorPosition().getValue();
+    inputs.follower.closedLoopError = followerMotor.getClosedLoopError().getValue();
+    inputs.follower.isMotionMagicAtTarget = followerMotor.getMotionMagicAtTarget().getValue();
 
     // Update PID gains from dashboard if tunable and any value changed
     if (config.tunable && tunableGains != null) {
