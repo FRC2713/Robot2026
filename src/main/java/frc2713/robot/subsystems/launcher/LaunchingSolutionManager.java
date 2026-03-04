@@ -29,8 +29,6 @@ public class LaunchingSolutionManager extends SubsystemBase {
       boolean isValid // False if target is out of range or blocked
       ) {}
 
-  public static record FieldGoal(Translation3d flywheelTarget, Translation3d positionalTarget) {}
-
   // Default to an empty/invalid solution
   private LaunchSolution currentSolution =
       new LaunchSolution(new Rotation2d(), 0, new Rotation2d(), 0, false);
@@ -42,13 +40,10 @@ public class LaunchingSolutionManager extends SubsystemBase {
     instance = this;
   }
 
-  public static FieldGoal currentGoal =
-      new FieldGoal(FieldConstants.Hub.innerCenterPoint, FieldConstants.Hub.topCenterPoint);
+  public static Translation3d currentGoal = FieldConstants.Hub.topCenterPoint;
 
-  public static void setFieldGoal(Translation3d flywheelTarget, Translation3d positionalTarget) {
-    LaunchingSolutionManager.currentGoal =
-        new FieldGoal(
-            AllianceFlipUtil.apply(flywheelTarget), AllianceFlipUtil.apply(positionalTarget));
+  public static void setGoal(Translation3d goal) {
+    LaunchingSolutionManager.currentGoal = AllianceFlipUtil.apply(goal);
   }
 
   public static LaunchingSolutionManager getInstance() {
@@ -69,15 +64,9 @@ public class LaunchingSolutionManager extends SubsystemBase {
       Translation3d robotAngAccel = KinematicsManager.getInstance().getGlobalAngularAcceleration(0);
       currentSolution =
           calculateWithProjection(
-              robotPose,
-              robotLinVel,
-              robotAngVel,
-              robotLinAccel,
-              robotAngAccel,
-              LaunchingSolutionManager.currentGoal.positionalTarget);
+              robotPose, robotLinVel, robotAngVel, robotLinAccel, robotAngAccel, currentGoal);
     } else {
-      currentSolution =
-          calculate(robotPose, robotLinVel, LaunchingSolutionManager.currentGoal.positionalTarget);
+      currentSolution = calculate(robotPose, robotLinVel, currentGoal);
     }
   }
 
@@ -160,10 +149,11 @@ public class LaunchingSolutionManager extends SubsystemBase {
             neededMuzzleVelocity.getZ(),
             Math.hypot(neededMuzzleVelocity.getX(), neededMuzzleVelocity.getY()));
 
-    // Horizontal Angle (Yaw)
+    // Horizontal Angle (Yaw) - this is a field-relative angle, NOT robot-relative.
+    // The conversion to robot-relative happens at the point of use (e.g. in Turret)
+    // so that it always uses the robot's current heading, not a stale or projected one.
     Rotation2d newYaw =
-        new Rotation2d(Math.atan2(neededMuzzleVelocity.getY(), neededMuzzleVelocity.getX()))
-            .minus(robotPose.getRotation().toRotation2d());
+        new Rotation2d(Math.atan2(neededMuzzleVelocity.getY(), neededMuzzleVelocity.getX()));
 
     return new LaunchSolution(newYaw, newSpeed, new Rotation2d(newPitch), horizontalDist, true);
   }

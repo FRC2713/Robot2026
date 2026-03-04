@@ -8,6 +8,7 @@
 package frc2713.robot.subsystems.drive;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -137,5 +138,13 @@ public class Module {
   /** Returns the module velocity in rotations/sec (Phoenix native units). */
   public double getFFCharacterizationVelocity() {
     return Units.radiansToRotations(inputs.driveVelocityRadPerSec);
+  }
+
+  public void setDriveGains(Slot0Configs gains) {
+    io.setDriveGains(gains);
+  }
+
+  public void setTurnGains(Slot0Configs gains) {
+    io.setTurnGains(gains);
   }
 }

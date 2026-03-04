@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.InchesPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -34,6 +35,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
 
   private FuelTrajectories fuelTrajectories = new FuelTrajectories();
   private Time lastUpdateTime = RobotTime.getTimestamp();
+  private Time lastLaunchTime = RobotTime.getTimestamp();
 
   public Flywheels(
       final TalonFXSubsystemConfig leaderConfig,
@@ -53,6 +55,11 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
 
   public Command setVelocity(Supplier<AngularVelocity> desiredVelocity) {
     return velocitySetpointCommand(desiredVelocity);
+  }
+
+  public Command setVelocityUntilTarget(Supplier<AngularVelocity> desiredVelocity) {
+    return velocitySetpointUntilOnTargetCommand(
+        desiredVelocity, () -> LauncherConstants.Flywheels.acceptableError);
   }
 
   public Command stop() {
@@ -75,7 +82,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   public final Supplier<AngularVelocity> otfVelocitySupplier =
       () -> {
         var solution = LaunchingSolutionManager.getInstance().getSolution();
-        Distance toGoal = this.getDistance2d(LaunchingSolutionManager.currentGoal.flywheelTarget());
+        Distance toGoal = this.getDistance2d(LaunchingSolutionManager.currentGoal);
         boolean solutionIsValid = solution.isValid();
 
         LinearVelocity targetSurfaceSpeed;
@@ -163,7 +170,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   }
 
   public LinearVelocity getLaunchVelocity() {
-    Distance toGoal = this.getDistance2d(LaunchingSolutionManager.currentGoal.flywheelTarget());
+    Distance toGoal = this.getDistance2d(LaunchingSolutionManager.currentGoal);
     LinearVelocity vel =
         FeetPerSecond.of(LauncherConstants.Flywheels.velocityMap.get(toGoal.in(Meters)));
     Logger.recordOutput(pb.makePath("launchVelocity"), vel);
@@ -201,7 +208,17 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   }
 
   public void launchFuel(LaunchSolution solution) {
-    this.fuelTrajectories.launch(
-        this.getGlobalPose().getTranslation(), getLaunchVector(solution), RotationsPerSecond.of(0));
+    Time now = RobotTime.getTimestamp();
+    // Enforce max fire rate by checking time since last launch. If we haven't waited long enough,
+    // skip this launch.
+    if (now.minus(lastLaunchTime).in(Seconds)
+        >= (1.0 / LauncherConstants.Flywheels.launchRateFuelPerSecond)) {
+      lastLaunchTime = now;
+
+      this.fuelTrajectories.launch(
+          this.getGlobalPose().getTranslation(),
+          getLaunchVector(solution),
+          RotationsPerSecond.of(0));
+    }
   }
 }

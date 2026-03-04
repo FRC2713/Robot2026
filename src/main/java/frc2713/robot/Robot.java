@@ -86,6 +86,7 @@ public class Robot extends LoggedRobot {
     // This must be called from the robot's periodic block in order for anything in
     // the Command-based framework to work.
     CommandScheduler.getInstance().run();
+    FieldConstants.HoodRetractionZones.logZonesIndividually();
 
     // Return to non-RT thread priority (do not modify the first argument)
     // Threads.setCurrentThreadPriority(false, 10);
@@ -93,10 +94,7 @@ public class Robot extends LoggedRobot {
 
   /** This function is called once when the robot is disabled. */
   @Override
-  public void disabledInit() {
-    LaunchingSolutionManager.setFieldGoal(
-        FieldConstants.Hub.innerCenterPoint, FieldConstants.Hub.topCenterPoint);
-  }
+  public void disabledInit() {}
 
   /** This function is called periodically when disabled. */
   @Override
@@ -106,6 +104,8 @@ public class Robot extends LoggedRobot {
     if (visionPose.isPresent()) {
       RobotContainer.drive.setPose(visionPose.get());
     }
+
+    LaunchingSolutionManager.setGoal(FieldConstants.Hub.topCenterPoint);
   }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */

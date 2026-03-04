@@ -1,6 +1,7 @@
 package frc2713.lib.subsystem;
 
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
@@ -14,6 +15,7 @@ import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
@@ -25,14 +27,15 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.io.MotorIO;
-import frc2713.lib.io.MotorInputsAutoLogged;
+import frc2713.lib.io.MotorInputs;
 import frc2713.lib.util.RobotTime;
 import frc2713.lib.util.Util;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.inputs.LoggableInputs;
 
-public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO>
+public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends MotorIO>
     extends SubsystemBase {
   protected final IO io;
   protected final MI inputs;
@@ -43,7 +46,6 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
   protected AngularVelocity velocitySetpoint = RotationsPerSecond.of(0.0);
 
   public MotorSubsystem(TalonFXSubsystemConfig config, MI inputs, IO io) {
-    // Set the subsystem name
     super(config.name);
     this.config = config;
     this.inputs = inputs;
@@ -51,7 +53,6 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
 
     this.pb = new AdvantageScopePathBuilder(this.getName());
 
-    // Set the default command to stop the motor
     setDefaultCommand(
         this.dutyCycleCommand(() -> 0.0)
             .withName(pb.makeName("DefaultCommand"))
@@ -63,22 +64,11 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
     Time timestamp = RobotTime.getTimestamp();
     io.readInputs(inputs);
     Logger.processInputs(getName(), inputs);
+
     Logger.recordOutput(pb.makePath("LatencyPeriodSec"), RobotTime.getTimestamp().minus(timestamp));
     Logger.recordOutput(
         pb.makePath("currentCommand"),
         (getCurrentCommand() == null) ? "Default" : getCurrentCommand().getName());
-  }
-
-  /**
-   * Convert subsystem position to the position value sent to the motor controller. Since TalonFX is
-   * configured with SensorToMechanismRatio, control requests use mechanism units directly - the
-   * controller handles the conversion internally.
-   *
-   * @param subsystemPosition The desired mechanism position
-   * @return The position to send to the motor controller (same as input)
-   */
-  protected Angle convertSubsystemPositionToMotorPosition(Angle subsystemPosition) {
-    return subsystemPosition;
   }
 
   /**
@@ -88,7 +78,38 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
    * @return the number of mechanism rotations to achieve that distance
    */
   protected Angle convertSubsystemPositionToMotorPosition(Distance subsystemPosition) {
-    return Rotations.of(subsystemPosition.in(Meters) * config.unitRotationsPerMeter);
+    return Rotations.of(subsystemPosition.in(Meters) / config.metersPerRotation);
+  }
+
+  /**
+   * Convert mechanism rotations from the motor controller to a linear distance.
+   *
+   * @param motorPosition The current position in mechanism rotations
+   * @return the current position as a linear distance
+   */
+  protected Distance convertMotorPositionToSubsystemPosition(Angle motorPosition) {
+    return Meters.of(motorPosition.in(Rotations) * config.metersPerRotation);
+  }
+
+  /**
+   * Convert a linear velocity to mechanism rotations per second for the motor controller.
+   *
+   * @param subsystemVelocity The desired linear velocity
+   * @return The equivalent angular velocity in mechanism rotations per second
+   */
+  protected AngularVelocity convertSubsystemVelocityToMotorVelocity(
+      LinearVelocity subsystemVelocity) {
+    return RotationsPerSecond.of(subsystemVelocity.in(MetersPerSecond) / config.metersPerRotation);
+  }
+
+  /**
+   * Convert mechanism rotations per second from the motor controller to a linear velocity.
+   *
+   * @param motorVelocity The current velocity in mechanism rotations per second
+   * @return The current velocity as a linear velocity
+   */
+  protected LinearVelocity convertMotorVelocityToSubsystemVelocity(AngularVelocity motorVelocity) {
+    return MetersPerSecond.of(motorVelocity.in(RotationsPerSecond) * config.metersPerRotation);
   }
 
   // IO Implementations
@@ -251,12 +272,12 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
 
   /**
    * Gets the current position as linear distance. For linear mechanisms (elevators, extensions),
-   * converts mechanism rotations to meters using unitRotationsPerMeter.
+   * converts mechanism rotations to meters.
    *
    * @return The current position as a Distance
    */
   public Distance getCurrentPositionAsDistance() {
-    return Meters.of(inputs.position.in(Rotations) / config.unitRotationsPerMeter);
+    return convertMotorPositionToSubsystemPosition(inputs.position);
   }
 
   /**
@@ -284,7 +305,7 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
    * @return The current position setpoint as a Distance
    */
   public Distance getPositionSetpointAsDistance() {
-    return Meters.of(positionSetpoint.in(Rotations) / config.unitRotationsPerMeter);
+    return convertMotorPositionToSubsystemPosition(positionSetpoint);
   }
 
   /**

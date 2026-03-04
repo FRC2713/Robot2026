@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.MotorSubsystem;
@@ -26,11 +27,13 @@ public class Feeder extends MotorSubsystem<MotorInputsAutoLogged, MotorIO> {
   }
 
   public Command feedWhenReady(BooleanSupplier isReady) {
-    return setVelocity(
-        () ->
-            isReady.getAsBoolean()
-                ? SerializerConstants.Feeder.shootingSpeed.get()
-                : RotationsPerSecond.of(0));
+    return Commands.sequence(
+        Commands.waitUntil(isReady), setVelocity(SerializerConstants.Feeder.shootingSpeed));
+    // return setVelocity(
+    //     () ->
+    //         isReady.getAsBoolean()
+    //             ? SerializerConstants.Feeder.shootingSpeed.get()
+    //             : RotationsPerSecond.of(0));
   }
 
   public Command stop() {

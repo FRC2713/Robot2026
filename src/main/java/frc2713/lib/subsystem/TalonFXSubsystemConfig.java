@@ -1,12 +1,12 @@
 package frc2713.lib.subsystem;
 
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.units.measure.MomentOfInertia;
 import frc2713.lib.drivers.CANDeviceId;
 
 public class TalonFXSubsystemConfig {
@@ -22,15 +22,14 @@ public class TalonFXSubsystemConfig {
   // be the units.
   // <1 is reduction
   public double unitToRotorRatio = 1.0;
-  // The number of times the pulley, drum, etc has to rotate to achieve
-  // 1m of travel
-  public double unitRotationsPerMeter = 1.0;
+  // How far the subsystem travels linearly for one rotation
+  public double metersPerRotation = 1.0;
   public double kMinPositionUnits = Double.NEGATIVE_INFINITY;
   public double kMaxPositionUnits = Double.POSITIVE_INFINITY;
 
   // Moment of Inertia (KgMetersSquared) for sim
-  public double momentOfInertia = 0.5;
+  public MomentOfInertia momentOfInertia = KilogramSquareMeters.of(.5);
 
   public Transform3d initialTransform =
-      new Transform3d(new Translation3d(0, 0, Inches.of(18.484119).in(Meters)), new Rotation3d());
+      new Transform3d(new Translation3d(0, 0, 0), new Rotation3d());
 }

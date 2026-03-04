@@ -5,7 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc2713.robot.RobotContainer;
+import frc2713.robot.GameCommandGroups;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
@@ -100,26 +100,36 @@ public class DriverControls {
 
     // intake fuel
     controller
-        .leftBumper()
-        .or(controller.leftTrigger(0.25))
-        .whileTrue(
-            Commands.parallel(intakeRoller.intake(), intakeExtension.extendCommand())
+        .leftTrigger(0.25)
+        .onTrue(
+            Commands.parallel(
+                    intakeExtension.extendCommand(),
+                    Commands.sequence(Commands.waitSeconds(0.5), intakeRoller.intake()))
                 .withName("Intaking"))
-        .onFalse(
-            Commands.parallel(intakeRoller.stop(), intakeExtension.retractCommand())
-                .withName("Intake Retracted"));
+        .onFalse(intakeRoller.stop().withName("Stop Intake"));
+
+    controller
+        .leftBumper()
+        .onTrue(
+            Commands.parallel(intakeRoller.intake(), intakeExtension.retractCommand())
+                .withName("Retract Intake"))
+        .onFalse(intakeRoller.stop().withName("Stop Intake"));
 
     // shoot against the hubwhen flywheels and hub are ready
     controller
         .rightBumper()
-        .whileTrue(RobotContainer.GameCommandGroups.hubShot)
-        .onFalse(RobotContainer.GameCommandGroups.stopShooting);
+        .whileTrue(
+            GameCommandGroups.Launching.hubShot(drive, flywheels, hood, turret, feeder, dyeRotor))
+        .onFalse(
+            Commands.parallel(GameCommandGroups.Launching.stopShooting(drive, feeder, dyeRotor)));
 
     // shoot when flywheels are ready
     controller
-        .rightTrigger(-.98)
-        .whileTrue(RobotContainer.GameCommandGroups.otfShot)
-        .onFalse(RobotContainer.GameCommandGroups.stopShooting);
+        .rightTrigger(.98)
+        .whileTrue(
+            GameCommandGroups.Launching.dumbShot(
+                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
+        .onFalse(GameCommandGroups.Launching.stopShootingAndRetract(drive, feeder, dyeRotor, hood));
   }
 
   public double getLeftY() {
