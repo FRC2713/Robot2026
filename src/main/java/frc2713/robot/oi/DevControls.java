@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
+import frc2713.robot.subsystems.intake.IntakeConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.launcher.Flywheels;
@@ -147,6 +148,23 @@ public class DevControls {
                             .get()), // Spin up flywheels to launch velocity
                 Commands.parallel(dyeRotor.indexFuel(), feeder.feedShooter())))
         .onFalse(Commands.parallel(dyeRotor.stopCommand(), feeder.stop(), flywheels.stop()));
+
+    // Intake extension dev controls with tunable velocities
+    // Right bumper - extend to extended position with tunable extension velocity
+    controller
+        .rightBumper()
+        .onTrue(
+            intakeExtension.setDistanceWithVelocityCommand(
+                IntakeConstants.Extension.extendedPosition.get(),
+                IntakeConstants.Extension.extensionVelocity.get()));
+
+    // Right trigger - retract to retracted position with tunable retract velocity
+    controller
+        .rightTrigger()
+        .onTrue(
+            intakeExtension.setDistanceWithVelocityCommand(
+                IntakeConstants.Extension.retractedPosition.get(),
+                IntakeConstants.Extension.retractVelocity.get()));
 
     controller.povUp().onTrue(hood.setAngleCommand(() -> Degrees.of(25)));
     controller.povDown().onTrue(hood.setAngleCommand(() -> Degrees.of(5)));
