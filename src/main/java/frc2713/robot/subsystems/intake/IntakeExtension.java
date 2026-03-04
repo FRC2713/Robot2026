@@ -11,6 +11,8 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc2713.lib.io.ArticulatedComponent;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
@@ -35,17 +37,20 @@ public class IntakeExtension
    */
   public Command setDistanceCommand(
       Supplier<Distance> desiredDistance, Supplier<LinearVelocity> cruiseVelocity) {
-
-    return motionMagicSetpointCommand(
-        () -> convertSubsystemPositionToMotorPosition(desiredDistance.get()),
-        () -> {
-          AngularVelocity cruiseAngularVelocity =
-              convertSubsystemVelocityToMotorVelocity(cruiseVelocity.get());
-          Logger.recordOutput(pb.makePath("cruiseLinearVelocity"), cruiseVelocity.get());
-          Logger.recordOutput(pb.makePath("cruiseAnguularVelocity"), cruiseAngularVelocity);
-          return IntakeConstants.Extension.config.fxConfig.MotionMagic
-              .withMotionMagicCruiseVelocity(cruiseAngularVelocity);
-        });
+    return Commands.sequence(
+        new InstantCommand(
+            () -> {
+              AngularVelocity cruiseAngularVelocity =
+                  convertSubsystemVelocityToMotorVelocity(cruiseVelocity.get());
+              Logger.recordOutput(pb.makePath("cruiseLinearVelocity"), cruiseVelocity.get());
+              Logger.recordOutput(pb.makePath("cruiseAnguularVelocity"), cruiseAngularVelocity);
+              setMotionMagicConfigImpl(
+                  IntakeConstants.Extension.motionMagicGains
+                      .get()
+                      .withMotionMagicCruiseVelocity(cruiseAngularVelocity));
+            }),
+        motionMagicSetpointCommand(
+            () -> convertSubsystemPositionToMotorPosition(desiredDistance.get())));
   }
 
   /**
@@ -55,8 +60,13 @@ public class IntakeExtension
    * @return
    */
   public Command setDistanceCommand(Supplier<Distance> desiredDistance) {
-    return motionMagicSetpointCommand(
-        () -> convertSubsystemPositionToMotorPosition(desiredDistance.get()));
+    return setDistanceCommand(
+        desiredDistance,
+        () ->
+            convertMotorVelocityToSubsystemVelocity(
+                IntakeConstants.Extension.motionMagicGains
+                    .get()
+                    .getMotionMagicCruiseVelocityMeasure()));
   }
 
   /**
