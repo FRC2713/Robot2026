@@ -1,11 +1,18 @@
 package frc2713.lib.subsystem;
 
+import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Rotations;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import frc2713.lib.drivers.CANDeviceId;
 
@@ -32,4 +39,19 @@ public class TalonFXSubsystemConfig {
 
   public Transform3d initialTransform =
       new Transform3d(new Translation3d(0, 0, 0), new Rotation3d());
+
+  public GeneralControlMode generalControlMode = GeneralControlMode.POSITION;
+
+  public Angle acceptablePositionError = Degree.of(0.5);
+  public AngularVelocity acceptableVelocityError = RPM.of(200);
+
+  public static void setLinearAcceptableError(
+      TalonFXSubsystemConfig config, double metersPerRotation, Distance acceptableError) {
+    config.acceptablePositionError = Rotations.of(acceptableError.in(Meters) / metersPerRotation);
+  }
+
+  public enum GeneralControlMode {
+    POSITION,
+    VELOCITY
+  }
 }
