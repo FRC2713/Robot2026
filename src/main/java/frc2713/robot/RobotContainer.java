@@ -240,7 +240,6 @@ public class RobotContainer {
         vision = new Vision(new VisionIO() {});
         break;
     }
-    //
     autoFactory =
         new AutoFactory(
             drive::getPose, // Function that returns the current robot pose
@@ -339,7 +338,8 @@ public class RobotContainer {
             turret,
             dyeRotor,
             feeder,
-            () -> GameCommandGroups.getOtfShot(flywheels, hood, turret, feeder, dyeRotor)));
+            () ->
+                GameCommandGroups.Launching.getOtfShot(flywheels, hood, turret, feeder, dyeRotor)));
 
     autoChooser.addOption(
         "Trench Sweep Left to Right",
@@ -353,7 +353,8 @@ public class RobotContainer {
             turret,
             dyeRotor,
             feeder,
-            () -> GameCommandGroups.getOtfShot(flywheels, hood, turret, feeder, dyeRotor)));
+            () ->
+                GameCommandGroups.Launching.getOtfShot(flywheels, hood, turret, feeder, dyeRotor)));
 
     // Configure the button bindings
     configureButtonBindings();
