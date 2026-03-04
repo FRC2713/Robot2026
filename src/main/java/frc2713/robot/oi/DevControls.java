@@ -103,6 +103,9 @@ public class DevControls {
                 "Inch Right"))
         .onFalse(this.setToNormalDriveCmd());
 
+    controller.povUp().onTrue(hood.setAngleCommand(() -> Degrees.of(25)));
+    controller.povDown().onTrue(hood.setAngleCommand(() -> Degrees.of(0)));
+
     // Turret angle controls
     // controller.a().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleOne));
 
