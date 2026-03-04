@@ -31,6 +31,7 @@ import frc2713.lib.subsystem.DifferentialSubsystemConfig;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.LoggedTunableMeasure;
 import frc2713.lib.util.Util;
+import java.util.function.Supplier;
 
 public final class IntakeConstants {
 
@@ -84,6 +85,13 @@ public final class IntakeConstants {
     public static final Distance height = Inches.of(15.5);
     public static final Distance width = Inches.of(30.0);
     public static final double volumePerInch = height.in(Inches) * width.in(Inches);
+    // A supplier to prevent changes by subsystem from propagating
+    public static final Supplier<MotionMagicConfigs> motionMagicGains =
+        () ->
+            new MotionMagicConfigs()
+                .withMotionMagicCruiseVelocity(RotationsPerSecond.of(10)) // target crusing vel rps
+                .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(20.0))
+                .withMotionMagicJerk(0);
 
     static {
       config.unitToRotorRatio = 1.0;
@@ -97,16 +105,10 @@ public final class IntakeConstants {
               .withKV(0.092 * averageGearRatio)
               .withKA(0);
 
-      var motionMagicGains =
-          new MotionMagicConfigs()
-              .withMotionMagicCruiseVelocity(RotationsPerSecond.of(10)) // target crusing vel rps
-              .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(20.0))
-              .withMotionMagicJerk(0);
-
       config.name = "Intake Extension";
       config.talonCANID = new CANDeviceId(40); // Only used for sim, no real CAN ID
       config.fxConfig.Slot0 = avgGains;
-      config.fxConfig.MotionMagic = motionMagicGains;
+      config.fxConfig.MotionMagic = motionMagicGains.get();
 
       // MOI = m*r^2, where r is the radius to the center of mass (half the pitch diameter)
       config.momentOfInertia =
@@ -151,7 +153,7 @@ public final class IntakeConstants {
                       .withDifferentialContinuousWrap(false))
               .withSlot0(differentialConfig.averageGains)
               .withSlot1(differentialConfig.differenceGains)
-              .withMotionMagic(motionMagicGains);
+              .withMotionMagic(config.fxConfig.MotionMagic);
 
       // Follower initial configs
       differentialConfig.followerConfig =

@@ -110,9 +110,7 @@ public class DevControls {
 
     controller
         .a()
-        .onTrue(
-            intakeExtension.setDistanceCommand(
-                IntakeConstants.Extension.extendedPosition, () -> InchesPerSecond.of(10.0)));
+        .onTrue(intakeExtension.setDistanceCommand(IntakeConstants.Extension.extendedPosition));
     controller
         .b()
         .onTrue(

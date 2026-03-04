@@ -45,7 +45,8 @@ public class IntakeExtension
               Logger.recordOutput(pb.makePath("cruiseLinearVelocity"), cruiseVelocity.get());
               Logger.recordOutput(pb.makePath("cruiseAnguularVelocity"), cruiseAngularVelocity);
               setMotionMagicConfigImpl(
-                  IntakeConstants.Extension.config.fxConfig.MotionMagic
+                  IntakeConstants.Extension.motionMagicGains
+                      .get()
                       .withMotionMagicCruiseVelocity(cruiseAngularVelocity));
             }),
         motionMagicSetpointCommand(
@@ -63,7 +64,8 @@ public class IntakeExtension
         desiredDistance,
         () ->
             convertMotorVelocityToSubsystemVelocity(
-                IntakeConstants.Extension.config.fxConfig.MotionMagic
+                IntakeConstants.Extension.motionMagicGains
+                    .get()
                     .getMotionMagicCruiseVelocityMeasure()));
   }
 
