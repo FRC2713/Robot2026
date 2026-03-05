@@ -82,34 +82,49 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
     Time timestamp = RobotTime.getTimestamp();
     leftIO.readInputs(leftInputs);
     rightIO.readInputs(rightInputs);
-    Logger.processInputs(getName() + "/Left", leftInputs);
-    Logger.processInputs(getName() + "/Right", rightInputs);
+    Logger.processInputs(pb.makePath("LeftInputs"), leftInputs);
+    Logger.processInputs(pb.makePath("RightInputs"), rightInputs);
     Logger.recordOutput(pb.makePath("LatencyPeriodSec"), RobotTime.getTimestamp().minus(timestamp));
     Logger.recordOutput(
         pb.makePath("currentCommand"),
         (getCurrentCommand() == null) ? "Default" : getCurrentCommand().getName());
+
+    // Log setpoints for comparison with measurements (in same units as inputs)
+    Logger.recordOutput(
+        pb.makePath("Setpoints", "velocityRotPerSec"), velocitySetpoint.in(RotationsPerSecond));
+    Logger.recordOutput(pb.makePath("Setpoints", "positionRot"), positionSetpoint.in(Rotations));
+    // Also log measurements as doubles for easy comparison
+    Logger.recordOutput(
+        pb.makePath("Measurements", "leftVelocityRotPerSec"),
+        leftInputs.velocity.in(RotationsPerSecond));
+    Logger.recordOutput(
+        pb.makePath("Measurements", "rightVelocityRotPerSec"),
+        rightInputs.velocity.in(RotationsPerSecond));
+    Logger.recordOutput(
+        pb.makePath("Measurements", "leftAppliedVolts"), leftInputs.appliedVolts.in(Volts));
+    Logger.recordOutput(pb.makePath("Measurements", "closedLoopError"), leftInputs.closedLoopError);
   }
 
   /**
-   * Multiply by the unit to rotor ratio to get motor rotations
+   * Convert subsystem position to the position value sent to the motor controller. Since TalonFX is
+   * configured with SensorToMechanismRatio, control requests use mechanism units directly - the
+   * controller handles the conversion internally.
    *
-   * @param subsystemPosition
-   * @return
+   * @param subsystemPosition The desired mechanism position
+   * @return The position to send to the motor controller (same as input)
    */
   protected Angle convertSubsystemPositionToMotorPosition(Angle subsystemPosition) {
-    return subsystemPosition.times(leftConfig.unitToRotorRatio);
+    return subsystemPosition;
   }
 
   /**
-   * Convert a linear distance to motor rotations
+   * Convert a linear distance to mechanism rotations for the motor controller.
    *
    * @param subsystemPosition Desired distance
-   * @return the number of rotations the motor must move to achieve that distance
+   * @return the number of mechanism rotations to achieve that distance
    */
   protected Angle convertSubsystemPositionToMotorPosition(Distance subsystemPosition) {
-    Angle rotationsPerMeter =
-        Rotations.of(subsystemPosition.in(Meters) * leftConfig.unitRotationsPerMeter);
-    return convertSubsystemPositionToMotorPosition(rotationsPerMeter);
+    return Rotations.of(subsystemPosition.in(Meters) * leftConfig.unitRotationsPerMeter);
   }
 
   // IO Implementations

@@ -18,5 +18,8 @@ public class MotorInputs {
   public Voltage appliedVolts = Volts.of(0.0);
   public Current currentStatorAmps = Amps.of(0.0);
   public Current currentSupplyAmps = Amps.of(0.0);
+  public Current currenTorqueAmps = Amps.of(0.0);
   public Angle rawRotorPosition = Rotations.of(0.0);
+  public double closedLoopError = 0.0;
+  public boolean isMotionMagicAtTarget = true;
 }

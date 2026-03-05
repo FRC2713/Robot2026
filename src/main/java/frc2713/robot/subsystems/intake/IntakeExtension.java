@@ -1,7 +1,6 @@
 package frc2713.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 
@@ -10,7 +9,6 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc2713.lib.io.ArticulatedComponent;
 import frc2713.lib.io.MotorIO;
@@ -18,6 +16,7 @@ import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
     implements ArticulatedComponent {
@@ -59,13 +58,16 @@ public class IntakeExtension extends MotorSubsystem<MotorInputsAutoLogged, Motor
   @Override
   public void periodic() {
     super.periodic();
-    // Additional periodic code for intake can be added here
+
+    Logger.recordOutput(
+        pb.makePath("CurrentDistanceMeters"), getCurrentPositionAsDistance().in(Meters));
+    Logger.recordOutput(
+        pb.makePath("SetpointDistanceMeters"), getPositionSetpointAsDistance().in(Meters));
   }
 
   @Override
   public Transform3d getTransform3d() {
-    // TODO: Get this from sensors
-    Distance distance = Inches.of(Math.sin(Timer.getFPGATimestamp()) + 1).times(6);
+    Distance distance = getCurrentPositionAsDistance();
     Angle sliderAngle = Degrees.of(-4.479515);
 
     Distance distanceX = distance.times(Math.cos(sliderAngle.in(Radians)));

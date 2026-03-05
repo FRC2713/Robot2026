@@ -24,6 +24,7 @@ import frc2713.lib.util.LoggedTunableGains;
 import frc2713.robot.Robot;
 
 public class TalonFXIO implements MotorIO {
+
   // Base members
   protected final TalonFX talon;
   protected final TalonFXSubsystemConfig config;
@@ -32,6 +33,8 @@ public class TalonFXIO implements MotorIO {
   // Control signals
   DutyCycleOut dutyCycleControl = new DutyCycleOut(0.0);
   private final VelocityVoltage velocityVoltageControl = new VelocityVoltage(0.0);
+  private final VelocityTorqueCurrentFOC velocityTorqueFOCControl =
+      new VelocityTorqueCurrentFOC(0.0);
   private final VoltageOut voltageControl = new VoltageOut(0.0);
   private final PositionVoltage positionVoltageControl = new PositionVoltage(0.0);
   private final MotionMagicVoltage motionMagicPositionControl = new MotionMagicVoltage(0.0);
@@ -45,12 +48,16 @@ public class TalonFXIO implements MotorIO {
   private final StatusSignal<Voltage> voltageSignal;
   private final StatusSignal<Current> currentStatorSignal;
   private final StatusSignal<Current> currentSupplySignal;
+  private final StatusSignal<Current> currentTorqueSignal;
   private final StatusSignal<Angle> rawRotorPositionSignal;
-
+  private final StatusSignal<Double> closedLoopErrorSignal;
+  private final StatusSignal<Boolean> motionMagicAtTargetSignal;
   private final BaseStatusSignal[] signals;
 
+  protected static final double KRAKEN_X60_KV_RPS_PER_VOLT = 5.29; // (from CTRE specs)
+
   // Tunables for Slot0 and MotionMagic (created when config.tunable == true)
-  private LoggedTunableGains tunableGains = null;
+  protected LoggedTunableGains tunableGains = null;
 
   public TalonFXIO(TalonFXSubsystemConfig config) {
     this.talon =
@@ -66,6 +73,10 @@ public class TalonFXIO implements MotorIO {
       this.config.fxConfig.OpenLoopRamps = new OpenLoopRampsConfigs();
     }
 
+    // Configure the gear ratio so getPosition/getVelocity return mechanism units.
+    // Note: unitRotationsPerMeter is handled at subsystem-level for linear mechanisms
+    this.config.fxConfig.Feedback.SensorToMechanismRatio = config.unitToRotorRatio;
+
     CTREUtil.applyConfiguration(this.talon, this.config.fxConfig);
 
     positionSignal = talon.getPosition();
@@ -73,7 +84,10 @@ public class TalonFXIO implements MotorIO {
     voltageSignal = talon.getMotorVoltage();
     currentStatorSignal = talon.getStatorCurrent();
     currentSupplySignal = talon.getSupplyCurrent();
+    currentTorqueSignal = talon.getTorqueCurrent();
     rawRotorPositionSignal = talon.getRotorPosition();
+    closedLoopErrorSignal = talon.getClosedLoopError();
+    motionMagicAtTargetSignal = talon.getMotionMagicAtTarget();
     signals =
         new BaseStatusSignal[] {
           positionSignal,
@@ -81,7 +95,10 @@ public class TalonFXIO implements MotorIO {
           voltageSignal,
           currentStatorSignal,
           currentSupplySignal,
-          rawRotorPositionSignal
+          currentTorqueSignal,
+          rawRotorPositionSignal,
+          closedLoopErrorSignal,
+          motionMagicAtTargetSignal,
         };
 
     CTREUtil.tryUntilOK(
@@ -104,7 +121,10 @@ public class TalonFXIO implements MotorIO {
     inputs.appliedVolts = voltageSignal.getValue();
     inputs.currentStatorAmps = currentStatorSignal.getValue();
     inputs.currentSupplyAmps = currentSupplySignal.getValue();
+    inputs.currenTorqueAmps = currentTorqueSignal.getValue();
     inputs.rawRotorPosition = rawRotorPositionSignal.getValue();
+    inputs.closedLoopError = closedLoopErrorSignal.getValue();
+    inputs.isMotionMagicAtTarget = motionMagicAtTargetSignal.getValue();
 
     // Update PID gains from dashboard if tunable and any value changed
     if (this.config.tunable && tunableGains != null) {
@@ -159,7 +179,9 @@ public class TalonFXIO implements MotorIO {
 
   @Override
   public void setVelocitySetpoint(AngularVelocity setpoint, int slot) {
-    talon.setControl(velocityVoltageControl.withVelocity(setpoint));
+    if (this.config.useFOC)
+      talon.setControl(velocityTorqueFOCControl.withVelocity(setpoint).withSlot(slot));
+    else talon.setControl(velocityVoltageControl.withVelocity(setpoint).withSlot(slot));
   }
 
   @Override

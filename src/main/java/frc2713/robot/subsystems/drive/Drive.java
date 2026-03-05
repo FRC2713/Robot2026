@@ -9,6 +9,7 @@ package frc2713.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.*;
 
+import choreo.trajectory.SwerveSample;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
@@ -35,6 +36,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -176,6 +179,18 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
   public Translation3d getRelativeAngularVelocity() {
     ChassisSpeeds speeds = getChassisSpeeds();
     return new Translation3d(0, 0, speeds.omegaRadiansPerSecond);
+  }
+
+  @Override
+  public Translation3d getRelativeLinearAcceleration() {
+    // TODO: Implement acceleration tracking from gyro or differentiated velocity
+    return new Translation3d();
+  }
+
+  @Override
+  public Translation3d getRelativeAngularAcceleration() {
+    // TODO: Implement angular acceleration tracking from gyro or differentiated velocity
+    return new Translation3d();
   }
 
   @Override
@@ -325,6 +340,20 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
     return kinematics.toChassisSpeeds(getModuleStates());
   }
 
+  /** Returns the linear speed of the robot */
+  @AutoLogOutput(key = "Drive/MeasuredLinearSpeed")
+  public LinearVelocity getSpeed() {
+    ChassisSpeeds speeds = getChassisSpeeds();
+    double linearSpeed = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
+    return MetersPerSecond.of(linearSpeed);
+  }
+
+  @AutoLogOutput(key = "Drive/MeasuredAngularSpeed")
+  public AngularVelocity getAngularSpeed() {
+    ChassisSpeeds speeds = getChassisSpeeds();
+    return RadiansPerSecond.of(speeds.omegaRadiansPerSecond);
+  }
+
   /** Returns the position of each module in radians. */
   public double[] getWheelRadiusCharacterizationPositions() {
     double[] values = new double[4];
@@ -378,6 +407,44 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
     return getMaxLinearSpeedMetersPerSec() / DRIVE_BASE_RADIUS;
   }
 
+  // Trajectory Following
+  public void followTrajectory(SwerveSample sample) {
+    // Get the current pose of the robot
+    Pose2d pose = getPose();
+    Pose2d samplePose2d =
+        new Pose2d(
+            new Translation2d(sample.x, sample.y), new Rotation2d(Radians.of(sample.heading)));
+    Logger.recordOutput("TrajectoryFollowing/pose2d", samplePose2d);
+    Logger.recordOutput("TrajectoryFollowing/posex", pose.getX());
+    Logger.recordOutput("TrajectoryFollowing/samplex", sample.x);
+
+    Logger.recordOutput("TrajectoryFollowing/posey", pose.getY());
+    Logger.recordOutput("TrajectoryFollowing/sampley", sample.y);
+
+    Logger.recordOutput(
+        "TrajectoryFollowing/heading", pose.getRotation().getRadians() + Math.PI * 2);
+    Logger.recordOutput(
+        "TrajectoryFollowing/sampleheading", Rotation2d.fromRadians(sample.heading).getRadians());
+    // Generate the next speeds for the robot
+    ChassisSpeeds speeds =
+        new ChassisSpeeds(
+            sample.vx
+                + DriveConstants.AutoConstants.xTrajectoryController
+                    .createPIDController()
+                    .calculate(pose.getX(), sample.x),
+            sample.vy
+                + DriveConstants.AutoConstants.yTrajectoryController
+                    .createPIDController()
+                    .calculate(pose.getY(), sample.y),
+            sample.omega
+                + DriveConstants.AutoConstants.headingTrajectoryController
+                    .createAngularPIDController()
+                    .calculate(
+                        pose.getRotation().getRadians(),
+                        Rotation2d.fromRadians(sample.heading).getRadians()));
+
+    this.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, this.getRotation()));
+  }
   /** Returns an array of module translations. */
   public static Translation2d[] getModuleTranslations() {
     return new Translation2d[] {

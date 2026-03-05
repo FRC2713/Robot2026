@@ -29,6 +29,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class DriveCommands {
   private static final double DEADBAND = 0.1;
@@ -40,8 +41,31 @@ public class DriveCommands {
   private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
   private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
   private static final double WHEEL_RADIUS_RAMP_RATE = 0.05; // Rad/Sec^2
+  public static final DoubleSupplier INCH_SPEED = () -> 0.1;
 
   private DriveCommands() {}
+
+  public static void setDefaultDriveCommand(Drive drive, Command cmd, String name) {
+    Logger.recordOutput("CurrentDriveCommand", name);
+    var currentCmd = drive.getCurrentCommand();
+    if (currentCmd != null) {
+      drive.getCurrentCommand().cancel();
+      drive.removeDefaultCommand();
+    }
+    drive.setDefaultCommand(cmd);
+  }
+
+  public static Command changeDefaultDriveCommand(Drive drive, Command cmd, String name) {
+    return Commands.runOnce(() -> setDefaultDriveCommand(drive, cmd, name));
+  }
+
+  public static Command inch(Drive drive, DoubleSupplier xSupplier) {
+    return Commands.run(
+        () -> {
+          drive.runVelocity(new ChassisSpeeds(0, xSupplier.getAsDouble(), 0));
+        },
+        drive);
+  }
 
   private static Translation2d getLinearVelocityFromJoysticks(double x, double y) {
     // Apply deadband
