@@ -159,6 +159,30 @@ public class FieldConstants {
 
     public static final RectangleFieldRegion region =
         new RectangleFieldRegion(nearRightCorner, farLeftCorner);
+
+    /**
+     * Hub exit positions for fuel returning to the field. Four exits on the back face (facing field
+     * center), 35" off the floor, spaced 10.5" apart in Y. Use {@link
+     * frc2713.lib.util.AllianceFlipUtil#apply} for alliance-aware positioning.
+     */
+    public static final Translation3d[] returnFuelExitPositions = {
+      new Translation3d(
+          topCenterPoint.getX() + width / 2.0,
+          fieldWidth / 2.0 - Units.inchesToMeters(15.75),
+          Units.inchesToMeters(35)),
+      new Translation3d(
+          topCenterPoint.getX() + width / 2.0,
+          fieldWidth / 2.0 - Units.inchesToMeters(5.25),
+          Units.inchesToMeters(35)),
+      new Translation3d(
+          topCenterPoint.getX() + width / 2.0,
+          fieldWidth / 2.0 + Units.inchesToMeters(5.25),
+          Units.inchesToMeters(35)),
+      new Translation3d(
+          topCenterPoint.getX() + width / 2.0,
+          fieldWidth / 2.0 + Units.inchesToMeters(15.75),
+          Units.inchesToMeters(35))
+    };
   }
 
   /** Left Bump related constants */

@@ -17,6 +17,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -35,9 +36,12 @@ import frc2713.robot.FieldConstants;
 import frc2713.robot.RobotContainer;
 import frc2713.robot.subsystems.intake.IntakeSimulationBridge;
 import frc2713.robot.subsystems.launcher.LaunchingSolutionManager.LaunchSolution;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.gamepieces.GamePieceProjectile;
+import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnField;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -271,6 +275,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
         fuelOnFly
             .withTargetPosition(() -> AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint))
             .withTargetTolerance(new Translation3d(0.5, 1.2, 0.3))
+            .withHitTargetCallBack(this::spawnReturnFuelFromHub)
             .withProjectileTrajectoryDisplayCallBack(
                 (hit) ->
                     Logger.recordOutput(
@@ -282,5 +287,50 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
         SimulatedArena.getInstance().addGamePieceProjectile(fuelOnFly);
       }
     }
+  }
+
+  /**
+   * Spawns a fuel projectile from a random hub exit, simulating fuel returning to the field center
+   * after a score. Called when a launched fuel hits the hub target.
+   */
+  private void spawnReturnFuelFromHub() {
+    // Pick a random hub exit (4 exits, 35" off floor, 10.5" apart)
+    Translation3d exitPosition =
+        AllianceFlipUtil.apply(
+            FieldConstants.Hub.returnFuelExitPositions[
+                ThreadLocalRandom.current()
+                    .nextInt(FieldConstants.Hub.returnFuelExitPositions.length)]);
+
+    // Direction toward field center from exit
+    Translation2d fieldCenter =
+        new Translation2d(FieldConstants.fieldLength / 2.0, FieldConstants.fieldWidth / 2.0);
+    Translation2d exit2d = exitPosition.toTranslation2d();
+    Translation2d directionToCenter = fieldCenter.minus(exit2d);
+    double horizontalDist = directionToCenter.getNorm();
+    if (horizontalDist < 1e-6) {
+      return; // Exit at center, skip
+    }
+    Translation2d horizontalDir = directionToCenter.div(horizontalDist);
+
+    // 30° down from horizontal: horizontal component = speed*cos(30°), vertical = -speed*sin(30°)
+    double speedMps = 4.0; // Initial velocity magnitude
+    double angleDownRad = Math.toRadians(30);
+    Translation2d horizontalVel = horizontalDir.times(speedMps * Math.cos(angleDownRad));
+    double verticalVelMps = -speedMps * Math.sin(angleDownRad);
+
+    GamePieceProjectile returnFuel =
+        new GamePieceProjectile(
+            RebuiltFuelOnField.REBUILT_FUEL_INFO,
+            exit2d,
+            horizontalVel,
+            exitPosition.getZ(),
+            verticalVelMps,
+            new Rotation3d(0, -angleDownRad, horizontalDir.getAngle().getRadians()));
+
+    returnFuel
+        .enableBecomesGamePieceOnFieldAfterTouchGround()
+        .withTouchGroundHeight(Units.inchesToMeters(3));
+
+    SimulatedArena.getInstance().addGamePieceProjectile(returnFuel);
   }
 }
