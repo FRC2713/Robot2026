@@ -145,7 +145,7 @@ public class RobotContainer {
             new Feeder(
                 SerializerConstants.Feeder.config,
                 new TalonFXIO(SerializerConstants.Feeder.config));
-        vision = new Vision(new VisionIO() {});
+        vision = new Vision(new VisionIOSLAMDunk());
         break;
 
       case SIM:
@@ -197,7 +197,7 @@ public class RobotContainer {
             new Feeder(
                 SerializerConstants.Feeder.config,
                 new SimTalonFXIO(SerializerConstants.Feeder.config));
-        vision = new Vision(new VisionIOSLAMDunk() {});
+        vision = new Vision(new VisionIOSLAMDunk());
         break;
 
       default:
@@ -373,8 +373,8 @@ public class RobotContainer {
         drive,
         DriveCommands.joystickDrive(
             drive,
-            () -> -driverControls.getLeftY() + -devControls.getLeftY(),
-            () -> -driverControls.getLeftX() + -devControls.getLeftX(),
+            () -> driverControls.getLeftY() + devControls.getLeftY(),
+            () -> driverControls.getLeftX() + devControls.getLeftX(),
             () -> -driverControls.getRightX() + -devControls.getRightX()),
         "Dual Controller Drive");
 

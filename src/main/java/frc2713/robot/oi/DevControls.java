@@ -115,7 +115,7 @@ public class DevControls {
         .b()
         .onTrue(
             intakeExtension.setDistanceCommand(
-                IntakeConstants.Extension.retractedPosition, () -> InchesPerSecond.of(1.0)));
+                IntakeConstants.Extension.retractedPosition, () -> InchesPerSecond.of(5.0)));
 
     controller
         .leftBumper()
@@ -160,7 +160,7 @@ public class DevControls {
         .onFalse(Commands.parallel(dyeRotor.stopCommand(), feeder.stop(), flywheels.stop()));
 
     controller.povUp().onTrue(hood.setAngleCommand(() -> Degrees.of(25)));
-    controller.povDown().onTrue(hood.setAngleCommand(() -> Degrees.of(5)));
+    controller.povDown().onTrue(hood.setAngleCommand(() -> Degrees.of(0)));
   }
 
   public double getLeftY() {

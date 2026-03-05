@@ -104,9 +104,12 @@ public class DriverControls {
         .onTrue(
             Commands.parallel(
                     intakeExtension.extendCommand(),
-                    Commands.sequence(Commands.waitSeconds(0.5), intakeRoller.intake()))
+                    Commands.sequence(
+                        Commands.waitSeconds(0.5),
+                        Commands.parallel(intakeRoller.intake(), dyeRotor.stirFuel())))
                 .withName("Intaking"))
-        .onFalse(intakeRoller.stop().withName("Stop Intake"));
+        .onFalse(
+            Commands.parallel(intakeRoller.stop().withName("Stop Intake"), dyeRotor.stopCommand()));
 
     controller
         .leftBumper()

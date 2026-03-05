@@ -5,7 +5,6 @@ import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.Logger;
 
 /**
  * A field region for containment and intersection checks.
@@ -84,9 +83,7 @@ public interface FieldRegion {
    *
    * @return Array of poses representing the region boundary (closed polygon)
    */
-  default Pose2d[] getBoundaryPoses() {
-    return new Pose2d[0]; // Override in implementations
-  }
+  Pose2d[] getBoundaryPoses();
 
   /**
    * Returns a double array [x1, y1, x2, y2, ...] representing the region boundary for
@@ -102,37 +99,5 @@ public interface FieldRegion {
       points[i * 2 + 1] = poses[i].getY();
     }
     return points;
-  }
-
-  /**
-   * Logs this region to AdvantageScope for visualization on the field view.
-   *
-   * @param path The log path (e.g. "FieldRegions/MyZone")
-   */
-  default void log(String path) {
-    Logger.recordOutput(path, getBoundaryPoses());
-  }
-
-  /**
-   * Logs multiple regions to AdvantageScope as a combined array for visualization.
-   *
-   * @param path The log path (e.g. "FieldRegions/AllZones")
-   * @param regions The regions to log
-   */
-  static void logAll(String path, FieldRegion... regions) {
-    int totalPoses = 0;
-    for (FieldRegion region : regions) {
-      totalPoses += region.getBoundaryPoses().length;
-    }
-
-    Pose2d[] allPoses = new Pose2d[totalPoses];
-    int index = 0;
-    for (FieldRegion region : regions) {
-      Pose2d[] poses = region.getBoundaryPoses();
-      System.arraycopy(poses, 0, allPoses, index, poses.length);
-      index += poses.length;
-    }
-
-    Logger.recordOutput(path, allPoses);
   }
 }
