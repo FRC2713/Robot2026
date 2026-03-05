@@ -2,6 +2,7 @@ package frc2713.robot.subsystems.fuelDetector;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -41,6 +42,8 @@ public class FuelDetector extends SubsystemBase {
               .getDoubleArrayTopic("/limelight-d/tcornxy")
               .subscribe(new double[0]);
     }
+    BooleanPublisher pythonBeacon = NetworkTableInstance.getDefault().getBooleanTopic("/fuelDetector/robotConnected").publish(); //Tells the Python code running on a coproccessor what server is bbeing used for NT
+    pythonBeacon.set(true);
 
     fuelHeading =
         NetworkTableInstance.getDefault()

@@ -76,7 +76,7 @@ public class RobotContainer {
   private static DyeRotor dyeRotor;
   private static Feeder feeder;
   public static Vision vision;
-  private final FuelDetector fuels;
+  private static FuelDetector fuels;
 
   // Lazy loaders
   @SuppressWarnings("unused")
@@ -435,5 +435,9 @@ public class RobotContainer {
       }
     }
     return true;
+  }
+
+  public static void getAndPublishFuelHeading() {
+    Logger.recordOutput("fuelDetector/fuelHeading", RobotContainer.fuels.getHeading());
   }
 }
