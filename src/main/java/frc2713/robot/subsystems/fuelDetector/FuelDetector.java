@@ -19,18 +19,27 @@ public class FuelDetector extends SubsystemBase {
   public static final int kImageWidth = 640;
   public static final int kImageHeight = 480;
 
-  public boolean isLimelights; //Does nothing unless legacy detection is activated. If legacy detecttion is activates, sets the expected source of the fuel data
+  public boolean
+      isLimelights; // Does nothing unless legacy detection is activated. If legacy detecttion is
+  // activates, sets the expected source of the fuel data
 
   private StringSubscriber simFuelSub;
   private DoubleArraySubscriber realFuelSub;
   private DoubleSubscriber fuelHeading;
-  
-  private boolean useLegacyDetection = false; //Flag to use Java fuel cluster detection; use only if coprocessor can't be used for some reason. Will take a heavy amount of RoboRio system resources to run, with less precision
+
+  private boolean useLegacyDetection =
+      false; // Flag to use Java fuel cluster detection; use only if coprocessor can't be used for
+  // some reason. Will take a heavy amount of RoboRio system resources to run, with less
+  // precision
 
   public FuelDetector() {
-    if(useLegacyDetection) {
-      simFuelSub = NetworkTableInstance.getDefault().getStringTopic("/fuelDetector/fuelData").subscribe("");
-      realFuelSub = NetworkTableInstance.getDefault().getDoubleArrayTopic("/limelight-d/tcornxy").subscribe(new double[0]);
+    if (useLegacyDetection) {
+      simFuelSub =
+          NetworkTableInstance.getDefault().getStringTopic("/fuelDetector/fuelData").subscribe("");
+      realFuelSub =
+          NetworkTableInstance.getDefault()
+              .getDoubleArrayTopic("/limelight-d/tcornxy")
+              .subscribe(new double[0]);
     }
 
     fuelHeading =
@@ -40,7 +49,7 @@ public class FuelDetector extends SubsystemBase {
   }
 
   public Rotation2d getHeading() {
-    if(useLegacyDetection) {
+    if (useLegacyDetection) {
       return getRotation2D(getDataFromNT(), isLimelights);
     } else {
       return new Rotation2d(Units.degreesToRadians(fuelHeading.get()));
