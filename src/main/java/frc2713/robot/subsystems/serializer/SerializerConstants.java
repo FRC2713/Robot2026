@@ -1,9 +1,11 @@
 package frc2713.robot.subsystems.serializer;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -35,6 +37,11 @@ public final class SerializerConstants {
       config.fxConfig.Slot0.kS = 0.0; // Volts to overcome static friction
       config.fxConfig.Slot0.kV = 0.12 * (52.25); // Volts per rps (feedforward)
 
+      config.fxConfig.CurrentLimits =
+          new CurrentLimitsConfigs()
+              .withStatorCurrentLimit(Amps.of(80))
+              .withStatorCurrentLimitEnable(true);
+
       config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
       config.unitToRotorRatio =
@@ -51,7 +58,11 @@ public final class SerializerConstants {
     }
 
     public static LoggedTunableMeasure<AngularVelocity> indexingSpeed =
-        new LoggedTunableMeasure<AngularVelocity>("DyeRotor/Speed", RotationsPerSecond.of(1.3));
+        new LoggedTunableMeasure<AngularVelocity>(
+            "DyeRotor/Index Speed", RotationsPerSecond.of(1.3));
+    public static LoggedTunableMeasure<AngularVelocity> stirSpeed =
+        new LoggedTunableMeasure<AngularVelocity>(
+            "DyeRotor/Stir Speed", RotationsPerSecond.of(0.5));
     public static AngularVelocity outdexingSpeed = RotationsPerSecond.of(-3);
 
     public static int MODEL_INDEX = 2;
@@ -74,6 +85,11 @@ public final class SerializerConstants {
       config.fxConfig.Slot0.kD = 0.0;
       config.fxConfig.Slot0.kS = 0.1; // Volts to overcome static friction
       config.fxConfig.Slot0.kV = 0.12; // Volts per rps (feedforward)
+
+      config.fxConfig.CurrentLimits =
+          new CurrentLimitsConfigs()
+              .withStatorCurrentLimit(Amps.of(80))
+              .withStatorCurrentLimitEnable(true);
 
       config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;

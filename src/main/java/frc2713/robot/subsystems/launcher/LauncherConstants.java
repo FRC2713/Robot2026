@@ -54,7 +54,8 @@ public final class LauncherConstants {
     // Overall gear ratio from motor rotations to turret rotations
     // motor has an absolute encoder, so this can be encoder 1
     public static final double motorToTurretGearRatio =
-        (spurGear1Teeth / pinionGearTeeth) * (sprocketGearTeeth / sprocketPinionTeeth);
+        ((double) spurGear1Teeth / (double) pinionGearTeeth)
+            * ((double) sprocketGearTeeth / (double) sprocketPinionTeeth);
 
     // Gear ratio from motor rotations to encoder rotations (encoder is after the first stage
     // reduction)
@@ -68,6 +69,8 @@ public final class LauncherConstants {
       config.name = "Turret";
       config.talonCANID = new CANDeviceId(52, "canivore");
       config.tunable = true; // Enable tunable gains for Motion Magic
+
+      config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
       // PID gains for Motion Magic
       config.fxConfig.Slot0.kP = Util.modeDependentValue(0.0, 80.0);

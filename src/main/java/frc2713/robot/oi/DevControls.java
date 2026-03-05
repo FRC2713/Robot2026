@@ -115,7 +115,7 @@ public class DevControls {
         .b()
         .onTrue(
             intakeExtension.setDistanceCommand(
-                IntakeConstants.Extension.retractedPosition, () -> InchesPerSecond.of(1.0)));
+                IntakeConstants.Extension.retractedPosition, () -> InchesPerSecond.of(5.0)));
 
     controller
         .leftBumper()
