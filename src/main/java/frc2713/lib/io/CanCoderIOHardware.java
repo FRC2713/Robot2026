@@ -13,6 +13,7 @@ public class CanCoderIOHardware implements CanCoderIO {
   protected final CanCoderConfig config;
 
   private final StatusSignal<Angle> positionSignal;
+  private final StatusSignal<Angle> absolutePositionSignal;
   private final StatusSignal<AngularVelocity> velocitySignal;
   private final BaseStatusSignal[] signals;
 
@@ -22,9 +23,10 @@ public class CanCoderIOHardware implements CanCoderIO {
 
     CTREUtil.applyConfiguration(canCoder, config.config);
 
-    positionSignal = canCoder.getAbsolutePosition();
+    positionSignal = canCoder.getPosition();
+    absolutePositionSignal = canCoder.getAbsolutePosition();
     velocitySignal = canCoder.getVelocity();
-    signals = new BaseStatusSignal[] {positionSignal, velocitySignal};
+    signals = new BaseStatusSignal[] {positionSignal, absolutePositionSignal, velocitySignal};
 
     BaseStatusSignal.setUpdateFrequencyForAll(50.0, signals);
     CTREUtil.tryUntilOK(() -> canCoder.optimizeBusUtilization(), canCoder.getDeviceID());
@@ -33,7 +35,8 @@ public class CanCoderIOHardware implements CanCoderIO {
   @Override
   public void readInputs(CanCoderInputs inputs) {
     BaseStatusSignal.refreshAll(signals);
-    inputs.absolutePosition = positionSignal.getValue();
+    inputs.position = positionSignal.getValue();
+    inputs.absolutePosition = absolutePositionSignal.getValue();
     inputs.velocity = velocitySignal.getValue();
   }
 }

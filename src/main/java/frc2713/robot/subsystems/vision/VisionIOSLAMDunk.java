@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Quaternion;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.NetworkTable;
@@ -52,17 +53,18 @@ public class VisionIOSLAMDunk implements VisionIO {
         inputs.latency = Seconds.of(latency);
 
         lastTimestamp = t;
-        inputs.pose3d =
+        var pose2 =
             new Pose3d(
                 new Translation3d(poseArray[1], poseArray[2], poseArray[3]),
                 new Rotation3d(
                     new Quaternion(poseArray[4], poseArray[5], poseArray[6], poseArray[7])));
 
-        inputs.pose = inputs.pose3d.toPose2d();
+        pose2 =
+            pose2.transformBy(
+                new Transform3d(new Translation3d(), new Rotation3d(0, 0, Math.PI / 2)));
+        inputs.pose3d = pose2;
 
-        // pose =
-        //     pose.transformBy(
-        //         new Transform3d(new Translation3d(), new Rotation3d(0, 0, Math.PI / 2)));
+        inputs.pose = inputs.pose3d.toPose2d();
 
         if (latency < 0) {
           inputs.reasoning = "Pose from the future!";

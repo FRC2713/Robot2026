@@ -54,7 +54,8 @@ public final class LauncherConstants {
     // Overall gear ratio from motor rotations to turret rotations
     // motor has an absolute encoder, so this can be encoder 1
     public static final double motorToTurretGearRatio =
-        (spurGear1Teeth / pinionGearTeeth) * (sprocketGearTeeth / sprocketPinionTeeth);
+        ((double) spurGear1Teeth / (double) pinionGearTeeth)
+            * ((double) sprocketGearTeeth / (double) sprocketPinionTeeth);
 
     // Gear ratio from motor rotations to encoder rotations (encoder is after the first stage
     // reduction)
@@ -71,6 +72,8 @@ public final class LauncherConstants {
       config.generalControlMode = GeneralControlMode.POSITION;
       config.acceptablePositionError = Degrees.of(3);
 
+      config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
       // PID gains for Motion Magic
       config.fxConfig.Slot0.kP = Util.modeDependentValue(0.0, 80.0);
       config.fxConfig.Slot0.kI = 0.0;
@@ -78,8 +81,6 @@ public final class LauncherConstants {
       config.fxConfig.Slot0.kS = Util.modeDependentValue(0.0, 0.15); // static friction compensation
       config.fxConfig.Slot0.kV = Util.modeDependentValue(0.0, 0.12); // velocity feedforward
       config.fxConfig.Slot0.kA = Util.modeDependentValue(0.0, 0.01); // acceleration feedforward
-
-      config.fxConfig.Feedback.SensorToMechanismRatio = 1 / motorToTurretGearRatio;
 
       // Motion Magic parameters
       config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 5.0; // rotations per second
@@ -216,10 +217,10 @@ public final class LauncherConstants {
       config.talonCANID = new CANDeviceId(54, "canivore"); // Example CAN ID, replace with actual ID
 
       // PID gains for Motion Magic
-      config.fxConfig.Slot0.kP = 60.0;
-      config.fxConfig.Slot0.kI = 0.0;
-      config.fxConfig.Slot0.kD = 0.0;
-      config.fxConfig.Slot0.kS = 0.0; // static friction compensation
+      config.fxConfig.Slot0.kP = 600.0;
+      config.fxConfig.Slot0.kI = 254.0;
+      config.fxConfig.Slot0.kD = 30.0;
+      config.fxConfig.Slot0.kS = 5.0; // static friction compensation
       config.fxConfig.Slot0.kV = 0.092 * gearRatio; // velocity feedforward
       config.fxConfig.Slot0.kA = 0.0;
 
@@ -233,13 +234,13 @@ public final class LauncherConstants {
       config.fxConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = minAngle.in(Rotations);
 
       config.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-      config.fxConfig.CurrentLimits.StatorCurrentLimit = 20;
+      config.fxConfig.CurrentLimits.StatorCurrentLimit = 30;
       config.fxConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
       config.fxConfig.CurrentLimits.SupplyCurrentLimit = 20;
 
       // Motion Magic parameters
-      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 0.5; // rotations per second
-      config.fxConfig.MotionMagic.MotionMagicAcceleration = 5.0; // rotations per second^2
+      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 5; // rotations per second
+      config.fxConfig.MotionMagic.MotionMagicAcceleration = 500.0; // rotations per second^2
       config.fxConfig.MotionMagic.MotionMagicJerk = 0; // no jerk limit
 
       config.unitToRotorRatio = gearRatio;

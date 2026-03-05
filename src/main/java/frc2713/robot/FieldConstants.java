@@ -7,12 +7,12 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
-import frc2713.lib.field.FieldRegion;
 import frc2713.lib.field.RectangleFieldRegion;
 import java.io.IOException;
 import java.nio.file.Path;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * Contains information for location of field element and other useful reference points.
@@ -574,19 +574,25 @@ public class FieldConstants {
      * once at robot init to see the zones on the field view.
      */
     public static void logZones() {
-      FieldRegion.logAll("Field/HoodRetractionZones", ALL_ZONES);
-    }
-
-    /** Logs all hood retraction zones individually with descriptive names. */
-    public static void logZonesIndividually() {
-      BLUE_LEFT_DUCK_ZONE.log("Field/HoodRetractionZones/BlueLeftDuck");
-      BLUE_RIGHT_DUCK_ZONE.log("Field/HoodRetractionZones/BlueRightDuck");
-      BLUE_LEFT_DUCK_EXIT_ZONE.log("Field/HoodRetractionZones/BlueLeftDuckExit");
-      BLUE_RIGHT_DUCK_EXIT_ZONE.log("Field/HoodRetractionZones/BlueRightDuckExit");
-      RED_LEFT_DUCK_ZONE.log("Field/HoodRetractionZones/RedLeftDuck");
-      RED_RIGHT_DUCK_ZONE.log("Field/HoodRetractionZones/RedRightDuck");
-      RED_LEFT_DUCK_EXIT_ZONE.log("Field/HoodRetractionZones/RedLeftDuckExit");
-      RED_RIGHT_DUCK_EXIT_ZONE.log("Field/HoodRetractionZones/RedRightDuckExit");
+      Logger.recordOutput(
+          "Field/HoodRetractionZones/BlueLeftDuck", BLUE_LEFT_DUCK_ZONE.getBoundaryPoses());
+      Logger.recordOutput(
+          "Field/HoodRetractionZones/BlueRightDuck", BLUE_RIGHT_DUCK_ZONE.getBoundaryPoses());
+      Logger.recordOutput(
+          "Field/HoodRetractionZones/BlueLeftDuckExit",
+          BLUE_LEFT_DUCK_EXIT_ZONE.getBoundaryPoses());
+      Logger.recordOutput(
+          "Field/HoodRetractionZones/BlueRightDuckExit",
+          BLUE_RIGHT_DUCK_EXIT_ZONE.getBoundaryPoses());
+      Logger.recordOutput(
+          "Field/HoodRetractionZones/RedLeftDuck", RED_LEFT_DUCK_ZONE.getBoundaryPoses());
+      Logger.recordOutput(
+          "Field/HoodRetractionZones/RedRightDuck", RED_RIGHT_DUCK_ZONE.getBoundaryPoses());
+      Logger.recordOutput(
+          "Field/HoodRetractionZones/RedLeftDuckExit", RED_LEFT_DUCK_EXIT_ZONE.getBoundaryPoses());
+      Logger.recordOutput(
+          "Field/HoodRetractionZones/RedRightDuckExit",
+          RED_RIGHT_DUCK_EXIT_ZONE.getBoundaryPoses());
     }
   }
 
