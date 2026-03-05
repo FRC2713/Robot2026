@@ -37,6 +37,7 @@ import frc2713.robot.subsystems.drive.GyroIOPigeon2;
 import frc2713.robot.subsystems.drive.ModuleIO;
 import frc2713.robot.subsystems.drive.ModuleIOSim;
 import frc2713.robot.subsystems.drive.ModuleIOTalonFX;
+import frc2713.robot.subsystems.fuelDetector.FuelDetector;
 import frc2713.robot.subsystems.intake.IntakeConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
