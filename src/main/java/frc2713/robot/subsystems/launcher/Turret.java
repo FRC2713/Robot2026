@@ -30,7 +30,6 @@ import frc2713.lib.util.Util;
 import frc2713.robot.Constants;
 import frc2713.robot.RobotContainer;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorIO>
@@ -205,11 +204,6 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
 
   public Command hubCommand(Supplier<Pose2d> robotPose) {
     return setAngle(() -> Util.fieldToRobotRelative(hubAngleSupplier.get(), robotPose.get()));
-  }
-
-  @AutoLogOutput
-  public boolean atTarget() {
-    return this.inputs.isMotionMagicAtTarget;
   }
 
   @Override

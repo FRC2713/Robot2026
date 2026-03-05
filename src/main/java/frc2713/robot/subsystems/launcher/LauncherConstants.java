@@ -24,6 +24,7 @@ import frc2713.lib.drivers.CANDeviceId;
 import frc2713.lib.dynamics.MoiUnits;
 import frc2713.lib.io.CanCoderConfig;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
+import frc2713.lib.subsystem.TalonFXSubsystemConfig.GeneralControlMode;
 import frc2713.lib.util.LoggedTunableBoolean;
 import frc2713.lib.util.LoggedTunableMeasure;
 import frc2713.lib.util.Util;
@@ -35,7 +36,6 @@ public final class LauncherConstants {
 
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
     public static CanCoderConfig canCoderConfig = new CanCoderConfig();
-    public static Angle acceptableError = Degrees.of(3);
     public static Angle staticHubAngle = Degrees.of(0);
 
     // Turret rotation limits
@@ -69,6 +69,8 @@ public final class LauncherConstants {
       config.name = "Turret";
       config.talonCANID = new CANDeviceId(52, "canivore");
       config.tunable = true; // Enable tunable gains for Motion Magic
+      config.generalControlMode = GeneralControlMode.POSITION;
+      config.acceptablePositionError = Degrees.of(3);
 
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
@@ -150,6 +152,8 @@ public final class LauncherConstants {
       leaderConfig.useFOC = false; // FOC makes the feedfowrward term units weird
       leaderConfig.tunable = true;
       leaderConfig.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+      leaderConfig.generalControlMode = GeneralControlMode.VELOCITY;
+      leaderConfig.acceptableVelocityError = RPM.of(35);
 
       followerConfig.name = "Flywheels Follower";
       followerConfig.talonCANID = new CANDeviceId(51, "canivore");
@@ -165,7 +169,6 @@ public final class LauncherConstants {
     public static int MODEL_INDEX = 5;
     public static int PARENT_INDEX = 4;
 
-    public static AngularVelocity acceptableError = RPM.of(35);
     public static AngularVelocity idleVelocity = RotationsPerSecond.of(20);
 
     public static Transform3d localTransform =
@@ -200,7 +203,6 @@ public final class LauncherConstants {
   public final class Hood {
 
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
-    public static Angle acceptableError = Degrees.of(0.5);
 
     public static final Angle minAngle = Degrees.of(0);
     public static final Angle maxAngle = Degrees.of(30);
@@ -223,6 +225,8 @@ public final class LauncherConstants {
       config.fxConfig.Slot0.kA = 0.0;
 
       config.tunable = true;
+      config.generalControlMode = GeneralControlMode.POSITION;
+      config.acceptablePositionError = Degrees.of(2);
 
       config.fxConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
       config.fxConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;

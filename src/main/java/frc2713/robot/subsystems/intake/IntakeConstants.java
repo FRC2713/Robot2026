@@ -29,6 +29,7 @@ import frc2713.lib.drivers.CANDeviceId;
 import frc2713.lib.dynamics.MoiUnits;
 import frc2713.lib.subsystem.DifferentialSubsystemConfig;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
+import frc2713.lib.subsystem.TalonFXSubsystemConfig.GeneralControlMode;
 import frc2713.lib.util.LoggedTunableMeasure;
 import frc2713.lib.util.Util;
 import java.util.function.Supplier;
@@ -116,6 +117,10 @@ public final class IntakeConstants {
               movingMass.in(Pounds) * Math.pow(sprocketPitchDiameter.in(Inches) / 2.0, 2));
       config.tunable = true;
 
+      config.generalControlMode = GeneralControlMode.POSITION;
+      TalonFXSubsystemConfig.setLinearAcceptableError(
+          config, config.metersPerRotation, Inches.of(0.2));
+
       // Differential configuration
       differentialConfig.name = config.name;
       differentialConfig.leaderCANID = new CANDeviceId(40, "canivore"); // Leader motor CAN ID
@@ -184,6 +189,5 @@ public final class IntakeConstants {
 
     public static int MODEL_INDEX = 1;
     public static int PARENT_INDEX = 0; // drivetrain
-    public static Distance acceptableError = Inches.of(0.2);
   }
 }

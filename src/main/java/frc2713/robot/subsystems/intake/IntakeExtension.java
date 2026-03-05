@@ -20,7 +20,6 @@ import frc2713.robot.subsystems.intake.intakeExtensionIO.IntakeExtensionIO;
 import frc2713.robot.subsystems.intake.intakeExtensionIO.IntakeExtensionInputsAutoLogged;
 import frc2713.robot.subsystems.launcher.LauncherConstants;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class IntakeExtension
@@ -106,24 +105,11 @@ public class IntakeExtension
         .withName("Maintain Fuel Pressure");
   }
 
-  /**
-   * Check if the extension mechanism is at the target position
-   *
-   * @return true if motion magic has reached the target position
-   */
-  @AutoLogOutput(key = "Intake Extension/AtTarget")
-  public boolean atTarget() {
-    return Math.abs(
-            getCurrentPositionAsDistance().in(Meters) - getPositionSetpointAsDistance().in(Meters))
-        <= IntakeConstants.Extension.acceptableError.in(Meters);
-  }
-
   public Command extendAndWaitCommand() {
     return positionSetpointUntilOnTargetCommand(
         () ->
             convertSubsystemPositionToMotorPosition(
-                IntakeConstants.Extension.extendedPosition.get()),
-        () -> convertSubsystemPositionToMotorPosition(IntakeConstants.Extension.acceptableError));
+                IntakeConstants.Extension.extendedPosition.get()));
   }
 
   @Override

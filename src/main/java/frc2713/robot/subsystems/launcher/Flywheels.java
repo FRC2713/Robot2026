@@ -24,11 +24,9 @@ import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.MotorFollowerSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.RobotTime;
-import frc2713.lib.util.Util;
 import frc2713.robot.subsystems.launcher.LaunchingSolutionManager.LaunchSolution;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, MotorIO>
@@ -59,8 +57,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   }
 
   public Command setVelocityUntilTarget(Supplier<AngularVelocity> desiredVelocity) {
-    return velocitySetpointUntilOnTargetCommand(
-        desiredVelocity, () -> LauncherConstants.Flywheels.acceptableError);
+    return velocitySetpointUntilOnTargetCommand(desiredVelocity);
   }
 
   public Command stop() {
@@ -125,12 +122,6 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
           if (isReady.getAsBoolean())
             this.launchFuel(LaunchingSolutionManager.getInstance().getSolution());
         });
-  }
-
-  @AutoLogOutput
-  public boolean atTarget() {
-    return Util.epsilonEquals(
-        inputs.velocity, velocitySetpoint, LauncherConstants.Flywheels.acceptableError);
   }
 
   @Override

@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputs;
+import frc2713.lib.subsystem.TalonFXSubsystemConfig.GeneralControlMode;
 import frc2713.lib.util.RobotTime;
 import frc2713.lib.util.Util;
 import java.util.function.DoubleSupplier;
@@ -69,6 +70,7 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
     Logger.recordOutput(
         pb.makePath("currentCommand"),
         (getCurrentCommand() == null) ? "Default" : getCurrentCommand().getName());
+    atTarget();
   }
 
   /**
@@ -457,14 +459,9 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
    * @return A command that sets the motor to the specified position setpoint and ends when on
    *     target.
    */
-  public Command positionSetpointUntilOnTargetCommand(
-      Supplier<Angle> positionSupplier, Supplier<Angle> epsilonSupplier) {
+  public Command positionSetpointUntilOnTargetCommand(Supplier<Angle> positionSupplier) {
     return new ParallelDeadlineGroup(
-            new WaitUntilCommand(
-                () ->
-                    Util.epsilonEquals(
-                        positionSupplier.get(), inputs.position, epsilonSupplier.get())),
-            positionSetpointCommand(positionSupplier))
+            new WaitUntilCommand(this::atTarget), positionSetpointCommand(positionSupplier))
         .withName(pb.makeName("PositionUntilOnTargetControl"));
   }
 
@@ -477,14 +474,9 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
    * @return A command that sets the motor to the specified velocity setpoint and ends when on
    *     target.
    */
-  public Command velocitySetpointUntilOnTargetCommand(
-      Supplier<AngularVelocity> velocitySupplier, Supplier<AngularVelocity> epsilonSupplier) {
+  public Command velocitySetpointUntilOnTargetCommand(Supplier<AngularVelocity> velocitySupplier) {
     return new ParallelDeadlineGroup(
-            new WaitUntilCommand(
-                () ->
-                    Util.epsilonEquals(
-                        velocitySupplier.get(), inputs.velocity, epsilonSupplier.get())),
-            velocitySetpointCommand(velocitySupplier))
+            new WaitUntilCommand(this::atTarget), velocitySetpointCommand(velocitySupplier))
         .withName(pb.makeName("VelocityUntilOnTargetControl"));
   }
 
@@ -677,5 +669,20 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
         () -> {
           io.setEnableSoftLimits(prev.fwd, prev.rev);
         });
+  }
+
+  public boolean atTarget() {
+    var atTarget = false;
+    if (config.generalControlMode == GeneralControlMode.POSITION) {
+      atTarget =
+          Util.epsilonEquals(
+              getCurrentPosition(), positionSetpoint, config.acceptablePositionError);
+    } else if (config.generalControlMode == GeneralControlMode.VELOCITY) {
+      atTarget =
+          Util.epsilonEquals(
+              getCurrentVelocity(), velocitySetpoint, config.acceptableVelocityError);
+    }
+    Logger.recordOutput(pb.makePath("AtTarget"), atTarget);
+    return atTarget;
   }
 }

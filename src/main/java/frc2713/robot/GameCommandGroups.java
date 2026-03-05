@@ -97,9 +97,12 @@ public final class GameCommandGroups {
               flywheels.hubCommand(),
               hood.hubCommand(),
               turret.hubCommand(drive::getPose),
-              flywheels.simulateLaunchedFuel(() -> flywheels.atTarget() && hood.atTarget()),
-              feeder.feedWhenReady(() -> flywheels.atTarget() && hood.atTarget()),
-              dyeRotor.feedWhenReady(() -> flywheels.atTarget() && hood.atTarget()))
+              flywheels.simulateLaunchedFuel(
+                  () -> flywheels.atTarget() && hood.atTarget() && turret.atTarget()),
+              feeder.feedWhenReady(
+                  () -> flywheels.atTarget() && hood.atTarget() && turret.atTarget()),
+              dyeRotor.feedWhenReady(
+                  () -> flywheels.atTarget() && hood.atTarget() && turret.atTarget()))
           .withName("Hub Shooting");
     }
 
