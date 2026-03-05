@@ -19,7 +19,7 @@ public class FuelDetector extends SubsystemBase {
   public static final int kImageWidth = 640;
   public static final int kImageHeight = 480;
 
-  public boolean isLimelights;
+  public boolean isLimelights; //Does nothing unless legacy detection is activated. If legacy detecttion is activates, sets the expected source of the fuel data
 
   private StringSubscriber simFuelSub;
   private DoubleArraySubscriber realFuelSub;
