@@ -189,6 +189,7 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
     this.yController = DriveConstants.AutoConstants.yTrajectoryController.createPIDController();
     this.headingController =
         DriveConstants.AutoConstants.headingTrajectoryController.createPIDController();
+    this.headingController.enableContinuousInput(-Math.PI, Math.PI);
 
     // Configure SysId
     sysId =
