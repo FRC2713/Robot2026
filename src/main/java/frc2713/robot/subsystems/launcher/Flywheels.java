@@ -5,13 +5,18 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.InchesPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -23,10 +28,17 @@ import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.MotorFollowerSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
+import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.lib.util.RobotTime;
+import frc2713.robot.Constants;
+import frc2713.robot.FieldConstants;
+import frc2713.robot.RobotContainer;
+import frc2713.robot.subsystems.intake.IntakeSimulationBridge;
 import frc2713.robot.subsystems.launcher.LaunchingSolutionManager.LaunchSolution;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -36,6 +48,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   private FuelTrajectories fuelTrajectories = new FuelTrajectories();
   private Time lastUpdateTime = RobotTime.getTimestamp();
   private Time lastLaunchTime = RobotTime.getTimestamp();
+  private IntakeSimulationBridge intakeSimulationBridge = null;
 
   public Flywheels(
       final TalonFXSubsystemConfig leaderConfig,
@@ -51,6 +64,11 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
         leaderLauncherMotorIO,
         followerLauncherMotorIO);
     this.fuelTrajectories = new FuelTrajectories();
+  }
+
+  /** Sets the intake simulation bridge for launch integration (sim only). */
+  public void setIntakeSimulationBridge(IntakeSimulationBridge bridge) {
+    this.intakeSimulationBridge = bridge;
   }
 
   public Command setVelocity(Supplier<AngularVelocity> desiredVelocity) {
@@ -208,17 +226,61 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   }
 
   public void launchFuel(LaunchSolution solution) {
-    Time now = RobotTime.getTimestamp();
-    // Enforce max fire rate by checking time since last launch. If we haven't waited long enough,
-    // skip this launch.
-    if (now.minus(lastLaunchTime).in(Seconds)
-        >= (1.0 / LauncherConstants.Flywheels.launchRateFuelPerSecond)) {
-      lastLaunchTime = now;
+    if (Constants.currentMode == Constants.Mode.SIM) {
+      // Only launch if we have a note in the intake (when intake sim is active)
+      if (intakeSimulationBridge != null && !intakeSimulationBridge.hasGamePiece()) {
+        return;
+      }
+      Time now = RobotTime.getTimestamp();
+      // Enforce max fire rate by checking time since last launch. If we haven't waited long enough,
+      // skip this launch.
+      if (now.minus(lastLaunchTime).in(Seconds)
+          >= (1.0 / LauncherConstants.Flywheels.launchRateFuelPerSecond)) {
+        lastLaunchTime = now;
+        // Consume the note from intake before creating projectile
+        if (intakeSimulationBridge != null) {
+          intakeSimulationBridge.obtainGamePiece();
+        }
 
-      this.fuelTrajectories.launch(
-          this.getGlobalPose().getTranslation(),
-          getLaunchVector(solution),
-          RotationsPerSecond.of(0));
+        /**
+         * Existing: FuelTrajectories for visualization this.fuelTrajectories.launch(
+         * this.getGlobalPose().getTranslation(), getLaunchVector(solution),
+         * RotationsPerSecond.of(0));
+         */
+
+        // MapleSim projectile when in simulation
+        Pose2d robotPose = RobotContainer.drive.getPose();
+        Translation2d shooterOffset =
+            getGlobalPose()
+                .getTranslation()
+                .toTranslation2d()
+                .minus(robotPose.getTranslation())
+                .rotateBy(robotPose.getRotation().unaryMinus());
+
+        RebuiltFuelOnFly fuelOnFly =
+            new RebuiltFuelOnFly(
+                robotPose.getTranslation(),
+                shooterOffset,
+                ChassisSpeeds.fromRobotRelativeSpeeds(
+                    RobotContainer.drive.getMeasuredChassisSpeeds(), robotPose.getRotation()),
+                Rotation2d.fromRadians(getGlobalPose().getRotation().getZ()),
+                Meters.of(getGlobalPose().getTranslation().getZ()),
+                getSurfaceSpeed(),
+                Radians.of(Math.PI / 2 - RobotContainer.hood.getCurrentPosition().in(Radians)));
+
+        fuelOnFly
+            .withTargetPosition(() -> AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint))
+            .withTargetTolerance(new Translation3d(0.5, 1.2, 0.3))
+            .withProjectileTrajectoryDisplayCallBack(
+                (hit) ->
+                    Logger.recordOutput(
+                        pb.makePath("MapleSim/FuelProjectileHit"), hit.toArray(Pose3d[]::new)),
+                (miss) ->
+                    Logger.recordOutput(
+                        pb.makePath("MapleSim/FuelProjectileMiss"), miss.toArray(Pose3d[]::new)));
+
+        SimulatedArena.getInstance().addGamePieceProjectile(fuelOnFly);
+      }
     }
   }
 }

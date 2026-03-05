@@ -35,7 +35,7 @@ public class ModuleIOSim implements ModuleIO {
   private static final double TURN_KP = 8.0;
   private static final double TURN_KD = 0.0;
   private static final DCMotor DRIVE_GEARBOX = DCMotor.getKrakenX60Foc(1);
-  private static final DCMotor TURN_GEARBOX = DCMotor.getKrakenX60Foc(1);
+  private static final DCMotor TURN_GEARBOX = DCMotor.getKrakenX44Foc(1);
 
   private final DCMotorSim driveSim;
   private final DCMotorSim turnSim;

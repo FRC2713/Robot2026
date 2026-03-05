@@ -123,13 +123,20 @@ public class DriverControls {
         .onFalse(
             Commands.parallel(GameCommandGroups.Launching.stopShooting(drive, feeder, dyeRotor)));
 
-    // shoot when flywheels are ready
+    /* shoot when flywheels are ready
     controller
         .rightTrigger(.98)
         .whileTrue(
             GameCommandGroups.Launching.dumbShot(
                 drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
         .onFalse(GameCommandGroups.Launching.stopShootingAndRetract(drive, feeder, dyeRotor, hood));
+        */
+    controller
+        .rightTrigger(.98)
+        .whileTrue(
+            GameCommandGroups.Launching.otfShot(
+                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension))
+        .onFalse(GameCommandGroups.Launching.stopShooting(drive, feeder, dyeRotor));
   }
 
   public double getLeftY() {

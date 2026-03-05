@@ -7,6 +7,9 @@
 
 package frc2713.robot;
 
+import static edu.wpi.first.units.Units.Pounds;
+
+import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc2713.lib.drivers.CANDeviceId;
 
@@ -38,5 +41,10 @@ public final class Constants {
 
   public static void disableHAL() {
     disableHAL = true;
+  }
+
+  public static class Robot {
+    public static final Mass massWithBumpers = Pounds.of(135.0);
+    public static final double wheelCof = 1.2;
   }
 }

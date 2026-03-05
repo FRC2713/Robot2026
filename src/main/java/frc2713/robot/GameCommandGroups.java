@@ -61,8 +61,7 @@ public final class GameCommandGroups {
               turret.otfCommand(),
               flywheels.simulateLaunchedFuel(flywheels::atTarget),
               feeder.feedWhenReady(flywheels::atTarget),
-              dyeRotor.feedWhenReady(flywheels::atTarget),
-              extension.maintainFuelPressureCommand())
+              dyeRotor.feedWhenReady(flywheels::atTarget))
           .withName("OTF Shooting");
     }
 

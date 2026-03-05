@@ -54,7 +54,8 @@ public final class LauncherConstants {
     // Overall gear ratio from motor rotations to turret rotations
     // motor has an absolute encoder, so this can be encoder 1
     public static final double motorToTurretGearRatio =
-        (spurGear1Teeth / pinionGearTeeth) * (sprocketGearTeeth / sprocketPinionTeeth);
+        ((double) spurGear1Teeth / (double) pinionGearTeeth)
+            * ((double) sprocketGearTeeth / (double) sprocketPinionTeeth);
 
     // Gear ratio from motor rotations to encoder rotations (encoder is after the first stage
     // reduction)
@@ -76,8 +77,6 @@ public final class LauncherConstants {
       config.fxConfig.Slot0.kS = Util.modeDependentValue(0.0, 0.15); // static friction compensation
       config.fxConfig.Slot0.kV = Util.modeDependentValue(0.0, 0.12); // velocity feedforward
       config.fxConfig.Slot0.kA = Util.modeDependentValue(0.0, 0.01); // acceleration feedforward
-
-      config.fxConfig.Feedback.SensorToMechanismRatio = 1 / motorToTurretGearRatio;
 
       // Motion Magic parameters
       config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 5.0; // rotations per second

@@ -37,6 +37,11 @@ public class IntakeRoller extends MotorFollowerSubsystem<MotorInputsAutoLogged, 
     return voltageCommand(() -> IntakeConstants.Roller.outtakeVoltageDesired);
   }
 
+  /** Returns true when rollers are spinning in intake direction (positive voltage). */
+  public boolean isIntaking() {
+    return inputs.appliedVolts.in(Volts) > 1.0;
+  }
+
   @Override
   public void periodic() {
     super.periodic();

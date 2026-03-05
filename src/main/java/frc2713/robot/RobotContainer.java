@@ -10,6 +10,8 @@ package frc2713.robot;
 import choreo.auto.AutoFactory;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -36,12 +38,14 @@ import frc2713.robot.oi.DriverControls;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.drive.GyroIO;
 import frc2713.robot.subsystems.drive.GyroIOPigeon2;
+import frc2713.robot.subsystems.drive.GyroIOSim;
 import frc2713.robot.subsystems.drive.ModuleIO;
-import frc2713.robot.subsystems.drive.ModuleIOSim;
 import frc2713.robot.subsystems.drive.ModuleIOTalonFX;
+import frc2713.robot.subsystems.drive.ModuleIOTalonFXSim;
 import frc2713.robot.subsystems.intake.IntakeConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
+import frc2713.robot.subsystems.intake.IntakeSimulationBridge;
 import frc2713.robot.subsystems.intake.intakeExtensionIO.IntakeExtensionIO;
 import frc2713.robot.subsystems.intake.intakeExtensionIO.IntakeExtensionIOSim;
 import frc2713.robot.subsystems.intake.intakeExtensionIO.IntakeExtensionIOTalonFX;
@@ -57,6 +61,8 @@ import frc2713.robot.subsystems.vision.Vision;
 import frc2713.robot.subsystems.vision.VisionIO;
 import frc2713.robot.subsystems.vision.VisionIOSLAMDunk;
 import java.util.Arrays;
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -78,6 +84,9 @@ public class RobotContainer {
   private static DyeRotor dyeRotor;
   private static Feeder feeder;
   public static Vision vision;
+
+  private SwerveDriveSimulation driveSimulation = null;
+  private IntakeSimulationBridge intakeSimulationBridge = null;
 
   // Lazy loaders
   @SuppressWarnings("unused")
@@ -108,7 +117,8 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontLeft),
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
-                new ModuleIOTalonFX(TunerConstants.BackRight));
+                new ModuleIOTalonFX(TunerConstants.BackRight),
+                pose -> {});
         flywheels =
             new Flywheels(
                 LauncherConstants.Flywheels.leaderConfig,
@@ -150,13 +160,18 @@ public class RobotContainer {
 
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
+        driveSimulation =
+            new SwerveDriveSimulation(Drive.mapleSimConfig, new Pose2d(3, 3, new Rotation2d()));
+        SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
         drive =
             new Drive(
-                new GyroIO() {},
-                new ModuleIOSim(TunerConstants.FrontLeft),
-                new ModuleIOSim(TunerConstants.FrontRight),
-                new ModuleIOSim(TunerConstants.BackLeft),
-                new ModuleIOSim(TunerConstants.BackRight));
+                new GyroIOSim(driveSimulation.getGyroSimulation()) {},
+                new ModuleIOTalonFXSim(TunerConstants.FrontLeft, driveSimulation.getModules()[0]),
+                new ModuleIOTalonFXSim(TunerConstants.FrontRight, driveSimulation.getModules()[1]),
+                new ModuleIOTalonFXSim(TunerConstants.BackLeft, driveSimulation.getModules()[2]),
+                new ModuleIOTalonFXSim(TunerConstants.BackRight, driveSimulation.getModules()[3]),
+                driveSimulation::setSimulationWorldPose);
+        drive.setPose(new Pose2d(3, 3, new Rotation2d()));
         flywheels =
             new Flywheels(
                 LauncherConstants.Flywheels.leaderConfig,
@@ -189,6 +204,8 @@ public class RobotContainer {
             new IntakeExtension(
                 IntakeConstants.Extension.config,
                 new IntakeExtensionIOSim(IntakeConstants.Extension.config));
+        intakeSimulationBridge = new IntakeSimulationBridge(driveSimulation, intakeRoller);
+        flywheels.setIntakeSimulationBridge(intakeSimulationBridge);
         dyeRotor =
             new DyeRotor(
                 SerializerConstants.DyeRotor.config,
@@ -208,7 +225,8 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {},
-                new ModuleIO() {});
+                new ModuleIO() {},
+                pose -> {});
         flywheels =
             new Flywheels(
                 LauncherConstants.Flywheels.leaderConfig,
@@ -389,5 +407,30 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.get();
+  }
+
+  public void resetSimulationField() {
+    if (Constants.currentMode != Constants.Mode.SIM) return;
+
+    Pose2d resetPose = new Pose2d(3, 3, new Rotation2d());
+    driveSimulation.setSimulationWorldPose(resetPose);
+    drive.setPose(resetPose);
+    SimulatedArena.getInstance().resetFieldForAuto();
+  }
+
+  public void updateSimulation() {
+    if (Constants.currentMode != Constants.Mode.SIM) return;
+
+    if (intakeSimulationBridge != null) {
+      intakeSimulationBridge.update();
+    }
+    SimulatedArena.getInstance().simulationPeriodic();
+    Logger.recordOutput(
+        "FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
+
+    // Get the positions of the fuel (both on the field and in the air)
+    Pose3d[] fuelPoses = SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel");
+    // Publish to telemetry using AdvantageKit
+    Logger.recordOutput("FieldSimulation/FuelPositions", fuelPoses);
   }
 }

@@ -31,8 +31,16 @@ import frc2713.lib.subsystem.DifferentialSubsystemConfig;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.LoggedTunableMeasure;
 import frc2713.lib.util.Util;
+import org.ironmaple.simulation.IntakeSimulation;
 
 public final class IntakeConstants {
+
+  /** Maple-sim intake simulation config (OTB = over-the-bumper). */
+  public static final class Sim {
+    public static final IntakeSimulation.IntakeSide intakeSide =
+        IntakeSimulation.IntakeSide.FRONT; // Intake faces forward for driving into fuel
+    public static final int capacity = 80;
+  }
 
   public static final class Roller {
 
