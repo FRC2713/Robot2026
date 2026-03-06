@@ -11,7 +11,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
+import frc2713.lib.subsystem.TalonFXSubsystemConfig.GeneralControlMode;
 import frc2713.lib.util.RobotTime;
+import frc2713.lib.util.Util;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -142,5 +144,21 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
         () -> {
           io.setEnableSoftLimits(prevLeader.fwd, prevLeader.rev);
         });
+  }
+
+  @Override
+  public boolean atTarget() {
+    var atTarget = false;
+    if (config.generalControlMode == GeneralControlMode.POSITION) {
+      atTarget =
+          Util.epsilonEquals(
+              getCurrentPosition(), positionSetpoint, config.acceptablePositionError);
+    } else if (config.generalControlMode == GeneralControlMode.VELOCITY) {
+      atTarget =
+          Util.epsilonEquals(
+              getCurrentVelocity(), velocitySetpoint, config.acceptableVelocityError);
+    }
+    Logger.recordOutput(pb.makePath("AtTarget"), atTarget);
+    return atTarget;
   }
 }

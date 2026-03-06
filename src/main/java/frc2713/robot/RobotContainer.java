@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc2713.lib.io.CanCoderIO;
-import frc2713.lib.io.CanCoderIOHardware;
 import frc2713.lib.io.CanCoderInputs;
 import frc2713.lib.io.CanCoderInputsAutoLogged;
 import frc2713.lib.io.MotorIO;
@@ -28,9 +27,9 @@ import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.commands.autos.NeutralScoreNeutral;
-import frc2713.robot.commands.autos.NeutralScoreOutpostOTF;
 import frc2713.robot.commands.autos.NeutralSweepLeftToRight;
 import frc2713.robot.commands.autos.NeutralSweepRightToLeft;
+import frc2713.robot.commands.autos.RightNeutralOutpost;
 import frc2713.robot.commands.autos.RightSideAutoBump;
 import frc2713.robot.generated.TunerConstants;
 import frc2713.robot.oi.DevControls;
@@ -120,12 +119,21 @@ public class RobotContainer {
         hood =
             new Hood(LauncherConstants.Hood.config, new TalonFXIO(LauncherConstants.Hood.config));
 
+        // turret =
+        //     new Turret(
+        //         LauncherConstants.Turret.config,
+        //         new TalonFXIO(LauncherConstants.Turret.config),
+        //         new CanCoderInputsAutoLogged(),
+        //         new CanCoderIOHardware(LauncherConstants.Turret.canCoderConfig));
         turret =
             new Turret(
                 LauncherConstants.Turret.config,
-                new TalonFXIO(LauncherConstants.Turret.config),
+                new MotorIO() {},
                 new CanCoderInputsAutoLogged(),
-                new CanCoderIOHardware(LauncherConstants.Turret.canCoderConfig));
+                new CanCoderIO() {
+                  @Override
+                  public void readInputs(CanCoderInputs inputs) {}
+                });
 
         intakeRoller =
             new IntakeRoller(
@@ -312,8 +320,8 @@ public class RobotContainer {
             () ->
                 GameCommandGroups.Launching.getOtfShot(flywheels, hood, turret, feeder, dyeRotor)));
     autoChooser.addOption(
-        "Trench to neutral otf to outpost",
-        NeutralScoreOutpostOTF.routine(
+        "RightNeutralOutpost",
+        RightNeutralOutpost.routine(
             autoFactory,
             drive,
             intakeExtension,

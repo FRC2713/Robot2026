@@ -5,7 +5,6 @@ import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
@@ -16,7 +15,7 @@ import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 import java.util.function.Supplier;
 
-public class NeutralScoreOutpostOTF {
+public class RightNeutralOutpost {
   public static AutoRoutine getRoutine(
       AutoFactory factory,
       Drive driveSubsystem,
@@ -33,8 +32,8 @@ public class NeutralScoreOutpostOTF {
 
     AutoTrajectory faceFuelTrench = routine.trajectory("FaceFuelTrench");
     AutoTrajectory intakeFuel = routine.trajectory("IntakeFuel");
-    AutoTrajectory oTFToOutpost = routine.trajectory("OTFToOutpost");
     AutoTrajectory moveToOutpostTrench = routine.trajectory("MoveToOutpostTrench");
+    AutoTrajectory oTFToOutpost = routine.trajectory("OTFToOutpost");
     AutoTrajectory outpostToTrench = routine.trajectory("OutpostToTrench");
     AutoTrajectory faceFuelTrench2 = routine.trajectory("FaceFuelTrench");
 
@@ -58,26 +57,24 @@ public class NeutralScoreOutpostOTF {
         .done()
         .onTrue(
             Commands.sequence(
-                Commands.print("Moving to shooting position"),
-                Commands.sequence(Commands.race(intakeRoller.stop(), new WaitCommand(1))),
-                moveToOutpostTrench.cmd()));
+                Commands.print("Moving to shooting position"), moveToOutpostTrench.cmd()));
 
     moveToOutpostTrench.done().onTrue(Commands.parallel(otfShotSupplier.get(), oTFToOutpost.cmd()));
 
-    oTFToOutpost
-        .done()
-        .onTrue(
-            Commands.deadline(
-                Commands.sequence(
-                    Commands.print("Launching at outpost"),
-                    Commands.waitSeconds(4),
-                    Commands.print("Moving back to trench"),
-                    outpostToTrench.cmd()),
-                otfShotSupplier.get()));
+    // oTFToOutpost
+    //     .done()
+    //     .onTrue(
+    //         Commands.deadline(
+    //             Commands.sequence(
+    //                 Commands.print("Launching at outpost"),
+    //                 Commands.waitSeconds(4),
+    //                 Commands.print("Moving back to trench"),
+    //                 outpostToTrench.cmd()),
+    //             otfShotSupplier.get()));
 
-    outpostToTrench.done().onTrue(faceFuelTrench2.cmd());
+    // outpostToTrench.done().onTrue(faceFuelTrench2.cmd());
 
-    faceFuelTrench2.done();
+    // faceFuelTrench2.done();
 
     return routine;
   }
@@ -93,7 +90,7 @@ public class NeutralScoreOutpostOTF {
       DyeRotor dyeRotor,
       Feeder feeder,
       Supplier<Command> otfShotSupplier) {
-    return NeutralScoreOutpostOTF.getRoutine(
+    return RightNeutralOutpost.getRoutine(
             factory,
             driveSubsystem,
             intakeExtension,

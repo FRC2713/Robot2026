@@ -114,6 +114,8 @@ public class LaunchingSolutionManager extends SubsystemBase {
     // Use 2D horizontal distance for map lookups (maps are indexed by ground distance)
     double horizontalDist = rangeVec.toTranslation2d().getNorm();
 
+    Logger.recordOutput(pb.makePath("distance"), horizontalDist);
+
     // B. Check Range
     if (horizontalDist > 8.0 || horizontalDist < 0.9) {
       return new LaunchSolution(new Rotation2d(), 0, new Rotation2d(), horizontalDist, false);
