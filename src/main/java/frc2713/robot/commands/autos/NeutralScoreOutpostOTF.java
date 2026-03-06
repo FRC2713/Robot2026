@@ -31,38 +31,36 @@ public class NeutralScoreOutpostOTF {
       Supplier<Command> otfShotSupplier) {
     AutoRoutine routine = factory.newRoutine("Start Collect Shoot");
 
-    AutoTrajectory faceFuelTrench = routine.trajectory("FaceFuelTrench");
-    AutoTrajectory intakeFuel = routine.trajectory("IntakeFuel");
+    AutoTrajectory intakeFuelRight = routine.trajectory("IntakeFuelRight");
+    AutoTrajectory neutralToRightTrenchForward = routine.trajectory("NeutralToRightTrenchForward");
     AutoTrajectory oTFToOutpost = routine.trajectory("OTFToOutpost");
-    AutoTrajectory moveToOutpostTrench = routine.trajectory("MoveToOutpostTrench");
     AutoTrajectory outpostToTrench = routine.trajectory("OutpostToTrench");
-    AutoTrajectory faceFuelTrench2 = routine.trajectory("FaceFuelTrench");
+    AutoTrajectory faceFuelRightTrenchBackward = routine.trajectory("FaceFuelRightTrenchBackward");
 
     routine
         .active()
         .onTrue(
             Commands.sequence(
                 Commands.print("Going to fuel"),
-                faceFuelTrench.resetOdometry(),
-                faceFuelTrench.cmd()));
-
-    faceFuelTrench
-        .done()
-        .onTrue(
-            Commands.sequence(
-                Commands.print("Starting intake and collecting fuel"),
+                intakeFuelRight.resetOdometry(),
                 Commands.parallel(
-                    intakeExtension.extendCommand(), intakeRoller.intake(), intakeFuel.cmd())));
+                    intakeFuelRight.cmd(),
+                    Commands.sequence(
+                        new WaitCommand(0.3),
+                        intakeExtension.extendCommand(),
+                        intakeRoller.intake()))));
 
-    intakeFuel
+    intakeFuelRight
         .done()
         .onTrue(
             Commands.sequence(
-                Commands.print("Moving to shooting position"),
-                Commands.sequence(Commands.race(intakeRoller.stop(), new WaitCommand(1))),
-                moveToOutpostTrench.cmd()));
+                Commands.print("Moving to trench"),
+                Commands.race(intakeRoller.stop(), new WaitCommand(0.2)),
+                neutralToRightTrenchForward.cmd()));
 
-    moveToOutpostTrench.done().onTrue(Commands.parallel(otfShotSupplier.get(), oTFToOutpost.cmd()));
+    neutralToRightTrenchForward
+        .done()
+        .onTrue(Commands.parallel(otfShotSupplier.get(), oTFToOutpost.cmd()));
 
     oTFToOutpost
         .done()
@@ -75,9 +73,9 @@ public class NeutralScoreOutpostOTF {
                     outpostToTrench.cmd()),
                 otfShotSupplier.get()));
 
-    outpostToTrench.done().onTrue(faceFuelTrench2.cmd());
+    outpostToTrench.done().onTrue(faceFuelRightTrenchBackward.cmd());
 
-    faceFuelTrench2.done();
+    faceFuelRightTrenchBackward.done();
 
     return routine;
   }

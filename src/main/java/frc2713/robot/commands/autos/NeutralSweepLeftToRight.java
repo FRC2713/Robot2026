@@ -56,7 +56,7 @@ public class NeutralSweepLeftToRight {
         .onTrue(
             Commands.sequence(
                 Commands.print("Sweeping to launching position"),
-                Commands.sequence(Commands.race(intakeRoller.stop(), new WaitCommand(0.5))),
+                Commands.sequence(Commands.race(intakeRoller.stop(), new WaitCommand(0.2))),
                 sweepToLaunchTrenchRight.cmd()));
 
     sweepToLaunchTrenchRight.done().onTrue(otfShotSupplier.get());
