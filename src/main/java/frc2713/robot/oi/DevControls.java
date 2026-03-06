@@ -5,16 +5,15 @@ import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.FeetPerSecondPerSecond;
-import static edu.wpi.first.units.Units.InchesPerSecond;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc2713.robot.GameCommandGroups;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
-import frc2713.robot.subsystems.intake.IntakeConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.launcher.Flywheels;
@@ -104,23 +103,32 @@ public class DevControls {
         .onFalse(this.setToNormalDriveCmd());
 
     // Turret angle controls
-    // controller.a().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleOne));
-
-    // controller.b().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleTwo));
-
-    controller
-        .a()
-        .onTrue(intakeExtension.setDistanceCommand(IntakeConstants.Extension.extendedPosition));
-    controller
-        .b()
-        .onTrue(
-            intakeExtension.setDistanceCommand(
-                IntakeConstants.Extension.retractedPosition, () -> InchesPerSecond.of(5.0)));
 
     controller
         .leftBumper()
-        .whileTrue(Commands.sequence(intakeExtension.extendAndWaitCommand(), intakeRoller.intake()))
-        .onFalse(Commands.parallel(intakeRoller.stop(), intakeExtension.retractCommand()));
+        .whileTrue(hood.setAngleCommand(() -> hood.getCurrentPosition().minus(Degrees.of(2))));
+    controller
+        .rightBumper()
+        .whileTrue(hood.setAngleCommand(() -> hood.getCurrentPosition().plus(Degrees.of(2))));
+
+    controller.a().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleOne));
+
+    controller.b().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleTwo));
+
+    // controller
+    //     .a()
+    //     .onTrue(intakeExtension.setDistanceCommand(IntakeConstants.Extension.extendedPosition));
+    // controller
+    //     .b()
+    //     .onTrue(
+    //         intakeExtension.setDistanceCommand(
+    //             IntakeConstants.Extension.retractedPosition, () -> InchesPerSecond.of(5.0)));
+
+    // controller
+    //     .leftBumper()
+    //     .whileTrue(Commands.sequence(intakeExtension.extendAndWaitCommand(),
+    // intakeRoller.intake()))
+    //     .onFalse(Commands.parallel(intakeRoller.stop(), intakeExtension.retractCommand()));
     // .onFalse(intakeExtension.retractCommand()); // Bring hood down
 
     // controller.b().onTrue(hood.hubCommand()).onFalse(hood.setAngleCommand(() -> Degrees.of(10)));
@@ -161,6 +169,14 @@ public class DevControls {
 
     controller.povUp().onTrue(hood.setAngleCommand(() -> Degrees.of(25)));
     controller.povDown().onTrue(hood.setAngleCommand(() -> Degrees.of(0)));
+
+    // shoot when flywheels are ready
+    controller
+        .rightTrigger(.98)
+        .whileTrue(
+            GameCommandGroups.Launching.dumbShot(
+                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
+        .onFalse(GameCommandGroups.Launching.stopShooting(drive, feeder, dyeRotor));
   }
 
   public double getLeftY() {

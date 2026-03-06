@@ -84,6 +84,10 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
         });
   }
 
+  public Angle getCurrentPosition() {
+    return this.inputs.position;
+  }
+
   @AutoLogOutput public boolean ducking = false;
 
   public final Supplier<Angle> otfAngSupplier =
