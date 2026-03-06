@@ -276,6 +276,9 @@ public final class LauncherConstants {
       angleMap.put(4.5, 30.0);
       angleMap.put(5.0, 30.0);
     }
+    // 5.486 2000 28.74
+    // 4.786 1750 26
+
   }
 
   public static LoggedTunableMeasure<Time> otfLinearProjectionSeconds =
