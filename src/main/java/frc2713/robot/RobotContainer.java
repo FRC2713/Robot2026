@@ -32,6 +32,7 @@ import frc2713.robot.commands.autos.NeutralScoreNeutral;
 import frc2713.robot.commands.autos.NeutralSweepLeftToRight;
 import frc2713.robot.commands.autos.NeutralSweepRightToLeft;
 import frc2713.robot.commands.autos.RightNeutralOutpost;
+import frc2713.robot.commands.autos.RightNeutralOutpostStatic;
 import frc2713.robot.commands.autos.RightSideAutoBump;
 import frc2713.robot.generated.TunerConstants;
 import frc2713.robot.oi.DevControls;
@@ -298,7 +299,7 @@ public class RobotContainer {
 
     autoChooser.addOption("DriveTest", DriveTest.routine(autoFactory));
     autoChooser.addOption(
-        "Right Side Bump Auto",
+        "Trench to Neutral, Launch At Bump",
         RightSideAutoBump.routine(
             autoFactory,
             drive,
@@ -308,9 +309,11 @@ public class RobotContainer {
             hood,
             turret,
             dyeRotor,
-            feeder));
+            feeder,
+            () ->
+                GameCommandGroups.Launching.getOtfShot(flywheels, hood, turret, feeder, dyeRotor)));
     autoChooser.addOption(
-        "Trench to neutral launch then refuel",
+        "Trench to Neutral, Launch At Trench, Refuel",
         NeutralScoreNeutral.routine(
             autoFactory,
             drive,
@@ -324,7 +327,21 @@ public class RobotContainer {
             () ->
                 GameCommandGroups.Launching.getOtfShot(flywheels, hood, turret, feeder, dyeRotor)));
     autoChooser.addOption(
-        "RightNeutralOutpost",
+        "Trench to Neutral, Launch, Then Move To Outpost",
+        RightNeutralOutpostStatic.routine(
+            autoFactory,
+            drive,
+            intakeExtension,
+            intakeRoller,
+            flywheels,
+            hood,
+            turret,
+            dyeRotor,
+            feeder,
+            () ->
+                GameCommandGroups.Launching.getOtfShot(flywheels, hood, turret, feeder, dyeRotor)));
+    autoChooser.addOption(
+        "Trench to Neutral, Launch while Moving To Outpost",
         RightNeutralOutpost.routine(
             autoFactory,
             drive,
@@ -339,7 +356,7 @@ public class RobotContainer {
                 GameCommandGroups.Launching.getOtfShot(flywheels, hood, turret, feeder, dyeRotor)));
 
     autoChooser.addOption(
-        "Trench Sweep Right to Left",
+        "Trench to Neutral, Sweep Right to Left, Launch",
         NeutralSweepRightToLeft.routine(
             autoFactory,
             drive,
@@ -354,7 +371,7 @@ public class RobotContainer {
                 GameCommandGroups.Launching.getOtfShot(flywheels, hood, turret, feeder, dyeRotor)));
 
     autoChooser.addOption(
-        "Trench Sweep Left to Right",
+        "Trench to Neutral, Sweep Left to Right, Launch",
         NeutralSweepLeftToRight.routine(
             autoFactory,
             drive,

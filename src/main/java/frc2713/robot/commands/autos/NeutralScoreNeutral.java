@@ -16,6 +16,10 @@ import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 import java.util.function.Supplier;
 
+/**
+ * Starts at right trench. collects from Neutral Zone once. Goes back to right trench. Shots while
+ * stationary. Goes to Neutral Zone and waits for teleop.
+ */
 public class NeutralScoreNeutral {
   public static AutoRoutine getRoutine(
       AutoFactory factory,
@@ -29,18 +33,19 @@ public class NeutralScoreNeutral {
       //   Launcher intakeAndShooter,
       Feeder feeder,
       Supplier<Command> otfShotSupplier) {
-    AutoRoutine routine = factory.newRoutine("Start Collect Shoot");
+    AutoRoutine routine = factory.newRoutine("NeutralScoreNeutral");
 
     AutoTrajectory faceFuelTrench = routine.trajectory("FaceFuelTrench");
     AutoTrajectory intakeFuel = routine.trajectory("IntakeFuel");
     AutoTrajectory moveToLaunchTrench = routine.trajectory("MoveToLaunchTrench");
     AutoTrajectory launchToFuel = routine.trajectory("LaunchToFuel");
+    AutoTrajectory intakeFuel2 = routine.trajectory("IntakeFuel");
 
     routine
         .active()
         .onTrue(
             Commands.sequence(
-                Commands.print("Going to fuel"),
+                Commands.print("[AUTO] Going to fuel"),
                 faceFuelTrench.resetOdometry(),
                 faceFuelTrench.cmd()));
 
@@ -48,7 +53,7 @@ public class NeutralScoreNeutral {
         .done()
         .onTrue(
             Commands.sequence(
-                Commands.print("Starting intake and collecting fuel"),
+                Commands.print("[AUTO] Starting intake and collecting fuel"),
                 Commands.parallel(
                     intakeExtension.extendCommand(), intakeRoller.intake(), intakeFuel.cmd())));
 
@@ -56,14 +61,14 @@ public class NeutralScoreNeutral {
         .done()
         .onTrue(
             Commands.sequence(
-                Commands.print("Moving to shooting position"),
+                Commands.print("[AUTO] Moving to shooting position"),
                 Commands.sequence(Commands.race(intakeRoller.stop(), new WaitCommand(1))),
                 moveToLaunchTrench.cmd()));
     moveToLaunchTrench
         .done()
         .onTrue(
             Commands.sequence(
-                Commands.print("Starting launch sequence"),
+                Commands.print("[AUTO] Starting launch sequence"),
                 Commands.sequence(
                         Commands.race(otfShotSupplier.get(), new WaitCommand(6)),
                         Commands.race(hood.retract(), new WaitCommand(1)),
@@ -74,9 +79,9 @@ public class NeutralScoreNeutral {
         .done()
         .onTrue(
             Commands.sequence(
-                Commands.print("Moving to shooting position"),
+                Commands.print("[AUTO] Going to fuel again"),
                 Commands.parallel(
-                    intakeExtension.extendCommand(), intakeRoller.intake(), intakeFuel.cmd())));
+                    intakeExtension.extendCommand(), intakeRoller.intake(), intakeFuel2.cmd())));
     return routine;
   }
 

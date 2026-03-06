@@ -16,6 +16,10 @@ import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 import java.util.function.Supplier;
 
+/**
+ * Starts at right trench. Collects from Neutral Zone once. Goes to LEFT trench. Shots while
+ * stationary.
+ */
 public class NeutralSweepRightToLeft {
   public static AutoRoutine getRoutine(
       AutoFactory factory,
@@ -29,7 +33,7 @@ public class NeutralSweepRightToLeft {
       //   Launcher intakeAndShooter,
       Feeder feeder,
       Supplier<Command> otfShotSupplier) {
-    AutoRoutine routine = factory.newRoutine("Start Neutral Sweep Right to Left");
+    AutoRoutine routine = factory.newRoutine("NeutralSweepRightToLeft");
 
     AutoTrajectory faceFuelTrench = routine.trajectory("FaceFuelTrench");
     AutoTrajectory intakeFuel = routine.trajectory("IntakeFuel");
@@ -39,7 +43,7 @@ public class NeutralSweepRightToLeft {
         .active()
         .onTrue(
             Commands.sequence(
-                Commands.print("Going to fuel"),
+                Commands.print("[AUTO] Going to fuel"),
                 faceFuelTrench.resetOdometry(),
                 faceFuelTrench.cmd()));
 
@@ -47,7 +51,7 @@ public class NeutralSweepRightToLeft {
         .done()
         .onTrue(
             Commands.sequence(
-                Commands.print("Starting intake and collecting fuel"),
+                Commands.print("[AUTO] Starting intake and collecting fuel"),
                 Commands.parallel(
                     intakeExtension.extendCommand(), intakeRoller.intake(), intakeFuel.cmd())));
 
@@ -55,7 +59,7 @@ public class NeutralSweepRightToLeft {
         .done()
         .onTrue(
             Commands.sequence(
-                Commands.print("Sweeping to launching position"),
+                Commands.print("[AUTO] Sweeping to launching position"),
                 Commands.sequence(Commands.race(intakeRoller.stop(), new WaitCommand(0.2))),
                 sweepToLaunchTrenchLeft.cmd()));
 
