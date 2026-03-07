@@ -95,11 +95,11 @@ public final class IntakeConstants {
                 .withMotionMagicJerk(0);
 
     static {
-      config.unitToRotorRatio = 1.0;
+      config.unitToRotorRatio = averageGearRatio;
       config.metersPerRotation = sprocketPitchDiameter.in(Meters) * Math.PI;
       var avgGains =
           new Slot0Configs()
-              .withKP(Util.modeDependentValue(10, 8))
+              .withKP(Util.modeDependentValue(5, 8))
               .withKI(0)
               .withKD(Util.modeDependentValue(0., 0.4))
               .withKS(0)
