@@ -189,7 +189,10 @@ public final class LauncherConstants {
     public static AngularVelocity staticHubVelocity = RotationsPerSecond.of(20);
     public static LoggedTunableMeasure<AngularVelocity> staticTowerVelocity =
         new LoggedTunableMeasure<AngularVelocity>("Flywheels/staticShotVelocity", RPM.of(1500));
-    public static InterpolatingDoubleTreeMap velocityMap = new InterpolatingDoubleTreeMap();
+    public static InterpolatingDoubleTreeMap ballVelocityMap =
+        new InterpolatingDoubleTreeMap(); // attempting to depreciate
+    public static InterpolatingDoubleTreeMap rpmMap = new InterpolatingDoubleTreeMap();
+    public static InterpolatingDoubleTreeMap rpmForAZMap = new InterpolatingDoubleTreeMap();
 
     public static Distance WHEEL_DIAMETER = Inches.of(4);
     // How many fuel we can launch per second at max firing rate
@@ -201,13 +204,25 @@ public final class LauncherConstants {
 
     static {
       // Distance (m) -> Ball Velocity (ft/s)
-      velocityMap.put(1.0, 20.0);
-      velocityMap.put(1.5, 20.0);
-      velocityMap.put(2.5, 22.0);
-      velocityMap.put(3.2, 23.0);
-      velocityMap.put(4.0, 26.0);
-      velocityMap.put(5.17, 29.0);
-      velocityMap.put(5.4, 30.0);
+      ballVelocityMap.put(1.0, 20.0);
+      ballVelocityMap.put(1.5, 20.0);
+      ballVelocityMap.put(2.5, 22.0);
+      ballVelocityMap.put(3.2, 23.0);
+      ballVelocityMap.put(4.0, 26.0);
+      ballVelocityMap.put(5.17, 29.0);
+      ballVelocityMap.put(5.4, 30.0);
+    }
+
+    static {
+      rpmMap.put(5.486, 2000.0);
+      rpmMap.put(4.786, 1750.0);
+      rpmMap.put(4.175, 1550.0);
+    }
+
+    static {
+      rpmForAZMap.put(5.486, 2000.0);
+      rpmForAZMap.put(4.786, 1750.0);
+      rpmForAZMap.put(4.175, 1550.0);
     }
   }
 
@@ -274,21 +289,23 @@ public final class LauncherConstants {
         new LoggedTunableMeasure<Angle>("Hood/Static Hub", Degrees.of(25));
 
     public static InterpolatingDoubleTreeMap angleMap = new InterpolatingDoubleTreeMap();
+    public static InterpolatingDoubleTreeMap angleForAZMap = new InterpolatingDoubleTreeMap();
 
     static {
       // Distance (m) -> Hood Pitch (Degrees)
-      angleMap.put(0.9, 9.0);
-      angleMap.put(1.0, 11.0);
-      angleMap.put(1.5, 18.0);
-      angleMap.put(2.0, 24.0);
-      angleMap.put(3.0, 28.0);
-      angleMap.put(4.0, 30.0);
-      angleMap.put(4.5, 30.0);
-      angleMap.put(5.0, 30.0);
+      angleMap.put(5.486, 28.74);
+      angleMap.put(4.786, 26.0);
+      angleMap.put(4.175, 25.0);
     }
     // 5.486 2000 28.74
     // 4.786 1750 26
 
+    static {
+      // Distance (m) -> Hood Pitch (Degrees)
+      angleForAZMap.put(5.486, 28.74);
+      angleForAZMap.put(4.786, 26.0);
+      angleForAZMap.put(4.175, 25.0);
+    }
   }
 
   public static LoggedTunableMeasure<Time> otfLinearProjectionSeconds =

@@ -42,7 +42,7 @@ public class IntakeExtension
               AngularVelocity cruiseAngularVelocity =
                   convertSubsystemVelocityToMotorVelocity(cruiseVelocity.get());
               Logger.recordOutput(pb.makePath("cruiseLinearVelocity"), cruiseVelocity.get());
-              Logger.recordOutput(pb.makePath("cruiseAnguularVelocity"), cruiseAngularVelocity);
+              Logger.recordOutput(pb.makePath("cruiseAngularVelocity"), cruiseAngularVelocity);
               setMotionMagicConfigImpl(
                   IntakeConstants.Extension.motionMagicGains
                       .get()

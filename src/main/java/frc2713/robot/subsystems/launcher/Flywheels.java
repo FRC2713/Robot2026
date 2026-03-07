@@ -96,7 +96,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
           // Fallback to distance-based lookup
           Logger.recordOutput(super.pb.makePath("OTF", "response"), "lookup map");
           targetSurfaceSpeed =
-              FeetPerSecond.of(LauncherConstants.Flywheels.velocityMap.get(toGoal.in(Meters)));
+              FeetPerSecond.of(LauncherConstants.Flywheels.ballVelocityMap.get(toGoal.in(Meters)));
         }
 
         // Convert surface speed to angular velocity: omega = v / r
@@ -164,7 +164,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   public LinearVelocity getLaunchVelocity() {
     Distance toGoal = this.getDistance2d(LaunchingSolutionManager.currentGoal);
     LinearVelocity vel =
-        FeetPerSecond.of(LauncherConstants.Flywheels.velocityMap.get(toGoal.in(Meters)));
+        FeetPerSecond.of(LauncherConstants.Flywheels.ballVelocityMap.get(toGoal.in(Meters)));
     Logger.recordOutput(pb.makePath("launchVelocity"), vel);
     return vel;
   }
