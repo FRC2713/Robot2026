@@ -34,14 +34,14 @@ public class RightNeutralOutpost {
     AutoTrajectory intakeFuel = routine.trajectory("IntakeFuel");
     AutoTrajectory moveToOutpostTrench = routine.trajectory("MoveToOutpostTrench");
     AutoTrajectory oTFToOutpost = routine.trajectory("OTFToOutpost");
-    AutoTrajectory outpostToTrench = routine.trajectory("OutpostToTrench");
-    AutoTrajectory faceFuelTrench2 = routine.trajectory("FaceFuelTrench");
+    // AutoTrajectory outpostToTrench = routine.trajectory("OutpostToTrench");
+    // AutoTrajectory faceFuelTrench2 = routine.trajectory("FaceFuelTrench");
 
     routine
         .active()
         .onTrue(
             Commands.sequence(
-                Commands.print("Going to fuel"),
+                Commands.print("[AUTO] Going to fuel"),
                 faceFuelTrench.resetOdometry(),
                 faceFuelTrench.cmd()));
 
@@ -49,7 +49,7 @@ public class RightNeutralOutpost {
         .done()
         .onTrue(
             Commands.sequence(
-                Commands.print("Starting intake and collecting fuel"),
+                Commands.print("[AUTO] Starting intake and collecting fuel"),
                 Commands.parallel(
                     intakeExtension.extendCommand(), intakeRoller.intake(), intakeFuel.cmd())));
 
@@ -57,20 +57,25 @@ public class RightNeutralOutpost {
         .done()
         .onTrue(
             Commands.sequence(
-                Commands.print("Moving to shooting position"), moveToOutpostTrench.cmd()));
+                Commands.print("[AUTO] Moving to shooting position 1"), moveToOutpostTrench.cmd()));
 
-    moveToOutpostTrench.done().onTrue(Commands.parallel(otfShotSupplier.get(), oTFToOutpost.cmd()));
+    moveToOutpostTrench
+        .done()
+        .onTrue(
+            Commands.sequence(
+                Commands.print("[AUTO] Moving to shooting position 2"),
+                Commands.runOnce(() -> driveSubsystem.stop()),
+                Commands.deadline(Commands.waitSeconds(5), otfShotSupplier.get()),
+                oTFToOutpost.cmd()));
 
-    // oTFToOutpost
-    //     .done()
-    //     .onTrue(
-    //         Commands.deadline(
-    //             Commands.sequence(
-    //                 Commands.print("Launching at outpost"),
-    //                 Commands.waitSeconds(4),
-    //                 Commands.print("Moving back to trench"),
-    //                 outpostToTrench.cmd()),
-    //             otfShotSupplier.get()));
+    oTFToOutpost
+        .done()
+        .onTrue(
+            Commands.deadline(
+                Commands.sequence(
+                    Commands.runOnce(() -> driveSubsystem.stop()),
+                    Commands.print("[AUTO] Launching at outpost"),
+                    Commands.deadline(Commands.waitSeconds(5), otfShotSupplier.get()))));
 
     // outpostToTrench.done().onTrue(faceFuelTrench2.cmd());
 
