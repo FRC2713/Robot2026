@@ -6,9 +6,7 @@ import choreo.auto.AutoTrajectory;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class DriveTest {
-  public static AutoRoutine getRoutine(AutoFactory factory
-      //   Drive
-      ) {
+  public static AutoRoutine getRoutine(AutoFactory factory) {
     AutoRoutine routine = factory.newRoutine("DriveTest");
 
     AutoTrajectory driveTest = routine.trajectory("DriveTest");
