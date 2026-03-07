@@ -69,21 +69,21 @@ public class IntakeExtension
   }
 
   /**
-   * Move to the extended position with motion magic
+   * Move to the extended position with motion magic, does not stop until setpoint is reached
    *
    * @return
    */
-  public Command extendCommand() {
-    return setDistanceCommand(IntakeConstants.Extension.extendedPosition);
+  public Command extendFullyCommand() {
+    return Commands.repeatingSequence(setDistanceCommand(IntakeConstants.Extension.extendedPosition)).until(() -> this.atTarget());
   }
 
-  /**
-   * Move to the retracted postion with motion magic
+    /**
+   * Move to the extended position with motion magic, does not stop until setpoint is reached
    *
    * @return
    */
-  public Command retractCommand() {
-    return setDistanceCommand(IntakeConstants.Extension.retractedPosition);
+  public Command retractFullyCommand() {
+    return Commands.repeatingSequence(setDistanceCommand(IntakeConstants.Extension.retractedPosition)).until(() -> this.atTarget());
   }
 
   /**

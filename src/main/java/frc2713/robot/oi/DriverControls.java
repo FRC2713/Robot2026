@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc2713.robot.GameCommandGroups;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
+import frc2713.robot.subsystems.intake.IntakeConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.launcher.Flywheels;
@@ -96,17 +97,13 @@ public class DriverControls {
                 "Inch Right"))
         .onFalse(this.setToNormalDriveCmd());
 
-    controller
-        .rightBumper()
-        .onTrue(flywheels.velocitySetpointCommand(LauncherConstants.Flywheels.PIDTest))
-        .onFalse(flywheels.velocitySetpointCommand(() -> RPM.of(0)));
-
     // intake fuel
     controller
         .leftTrigger(0.25)
         .onTrue(
             Commands.parallel(
-                    intakeExtension.extendCommand(),
+                    intakeExtension.setDistanceCommand(IntakeConstants.Extension.extendedPosition),
+                    // intakeExtension.extendFullyCommand(), // TODO: does this match driver's expecation?
                     Commands.sequence(
                         Commands.waitSeconds(0.5),
                         Commands.parallel(intakeRoller.intake(), dyeRotor.stirFuel())))
@@ -117,19 +114,22 @@ public class DriverControls {
     controller
         .leftBumper()
         .onTrue(
-            Commands.parallel(intakeRoller.intake(), intakeExtension.retractCommand())
+            Commands.parallel(
+                intakeExtension.setDistanceCommand(IntakeConstants.Extension.retractedPosition),
+                // intakeExtension.retractFullyCommand(), // TODO: does this match driver's expecation?
+                intakeRoller.intake())
                 .withName("Retract Intake"))
         .onFalse(intakeRoller.stop().withName("Stop Intake"));
 
     // shoot against the hubwhen flywheels and hub are ready
-    // controller
-    //     .rightBumper()
-    //     .whileTrue(
-    //         GameCommandGroups.Launching.hubShot(drive, flywheels, hood, turret, feeder,
-    // dyeRotor))
-    //     .onFalse(
-    //         Commands.parallel(GameCommandGroups.Launching.stopShooting(drive, feeder,
-    // dyeRotor)));
+    controller
+        .rightBumper()
+        .whileTrue(
+            GameCommandGroups.Launching.hubShot(drive, flywheels, hood, turret, feeder,
+    dyeRotor))
+        .onFalse(
+            Commands.parallel(GameCommandGroups.Launching.stopShooting(drive, feeder,
+    dyeRotor)));
 
     // shoot when flywheels are ready
     controller

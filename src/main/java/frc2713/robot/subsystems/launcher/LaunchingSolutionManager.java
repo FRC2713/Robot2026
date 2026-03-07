@@ -60,18 +60,20 @@ public class LaunchingSolutionManager extends SubsystemBase {
     Pose3d robotPose = KinematicsManager.getInstance().getGlobalPose(0);
     Translation3d robotLinVel = KinematicsManager.getInstance().getGlobalLinearVelocity(0);
 
-    if (FieldConstants.AllianceZone.region.contains(robotPose.getTranslation().toTranslation2d())) {
-      // Shooting To Alliance Zone
+    if (FieldConstants.NeutralZone.region.contains(robotPose.getTranslation().toTranslation2d())) {
+      // Shooting Into Alliance Zone
       LaunchingSolutionManager.currentHoodMap = LauncherConstants.Hood.angleForAZMap;
       LaunchingSolutionManager.currentRPMMap = LauncherConstants.Flywheels.rpmForAZMap;
       if (robotPose.getTranslation().getY() < FieldConstants.LinesHorizontal.center) {
-        // Shooting to Outpost Side
-        LaunchingSolutionManager.setGoal(FieldConstants.AllianceZone.outpostSideCornerTarget);
-        Logger.recordOutput(pb.makePath("pose based target"), "Alliance Outpost");
+        // Shooting to Bottom Side
+        LaunchingSolutionManager.currentGoal =
+            AllianceFlipUtil.applyX(FieldConstants.AllianceZone.bottomSideCornerTarget);
+        Logger.recordOutput(pb.makePath("pose based target"), "Alliance Bottom");
       } else {
-        // Shooting to Depot Side
-        LaunchingSolutionManager.setGoal(FieldConstants.AllianceZone.depotSideCornerTarget);
-        Logger.recordOutput(pb.makePath("pose based target"), "Alliance Depot");
+        // Shooting to Top Side
+        LaunchingSolutionManager.currentGoal =
+            AllianceFlipUtil.applyX(FieldConstants.AllianceZone.topSideCornerTarget);
+        Logger.recordOutput(pb.makePath("pose based target"), "Alliance Top");
       }
     } else {
       // Shooting to Hub
@@ -80,6 +82,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
       LaunchingSolutionManager.currentRPMMap = LauncherConstants.Flywheels.rpmMap;
       Logger.recordOutput(pb.makePath("pose based target"), "Hub");
     }
+    Logger.recordOutput(pb.makePath("current goal"), currentGoal);
 
     // 2. Solve for the Launch Vector
     if (LauncherConstants.otfFutureProjectionEnabled.get()) {

@@ -21,6 +21,14 @@ public class AllianceFlipUtil {
     return new Translation2d(applyX(translation.getX()), applyY(translation.getY()));
   }
 
+  public static Translation2d applyY(Translation2d translation) {
+    return new Translation2d(translation.getX(), applyY(translation.getY()));
+  }
+
+  public static Translation2d applyX(Translation2d translation) {
+    return new Translation2d(applyX(translation.getX()), translation.getY());
+  }
+
   public static Rotation2d apply(Rotation2d rotation) {
     return shouldFlip() ? rotation.rotateBy(Rotation2d.kPi) : rotation;
   }
@@ -36,6 +44,14 @@ public class AllianceFlipUtil {
         applyX(translation.getX()), applyY(translation.getY()), translation.getZ());
   }
 
+  public static Translation3d applyX(Translation3d translation) {
+    return new Translation3d(applyX(translation.getX()), translation.getY(), translation.getZ());
+  }
+
+  public static Translation3d applyY(Translation3d translation) {
+    return new Translation3d(translation.getX(), applyY(translation.getY()), translation.getZ());
+  }
+
   public static Rotation3d apply(Rotation3d rotation) {
     return shouldFlip() ? rotation.rotateBy(new Rotation3d(0.0, 0.0, Math.PI)) : rotation;
   }
@@ -48,5 +64,9 @@ public class AllianceFlipUtil {
     return !Constants.disableHAL
         && DriverStation.getAlliance().isPresent()
         && DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
+  }
+
+  public static int shouldFlipInt() {
+    return (shouldFlip() ? -1 : 1);
   }
 }

@@ -152,8 +152,10 @@ public class DevControls {
     // B button - index fuel
     // controller.b().whileTrue(feeder.feedShooter()).onFalse(feeder.stop());
 
-    // controller.x().whileTrue(flywheels.setVelocity(() ->
-    // LauncherConstants.Flywheels.launchVelocity.get())).onFalse(flywheels.stop());
+    // controller
+    //     .x()
+    //     .onTrue(flywheels.velocitySetpointCommand(LauncherConstants.Flywheels.PIDTest))
+    //     .onFalse(flywheels.velocitySetpointCommand(() -> RPM.of(0)));
 
     // Y button - index fuel in parallel (same effect since it's the same command)
     controller
