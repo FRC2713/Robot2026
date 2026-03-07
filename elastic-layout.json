@@ -98,8 +98,8 @@
           },
           {
             "title": "Hood Ducking?",
-            "x": 1280.0,
-            "y": 0.0,
+            "x": 1024.0,
+            "y": 384.0,
             "width": 256.0,
             "height": 128.0,
             "type": "Boolean Box",
@@ -114,14 +114,14 @@
             }
           },
           {
-            "title": "Computed Turret Angle",
+            "title": "Cluster Heading",
             "x": 1024.0,
             "y": 0.0,
-            "width": 256.0,
-            "height": 256.0,
+            "width": 384.0,
+            "height": 384.0,
             "type": "Radial Gauge",
             "properties": {
-              "topic": "/AdvantageKit/RealOutputs/Turret/ComputedTurretPositionDeg",
+              "topic": "/fuelDetector/clusterHeading",
               "period": 0.06,
               "data_type": "double",
               "start_angle": 0.0,

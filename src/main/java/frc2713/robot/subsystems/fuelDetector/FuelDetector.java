@@ -8,6 +8,8 @@ import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringSubscriber;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc2713.robot.RobotContainer;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import org.littletonrobotics.junction.Logger;
@@ -42,7 +44,11 @@ public class FuelDetector extends SubsystemBase {
               .getDoubleArrayTopic("/limelight-d/tcornxy")
               .subscribe(new double[0]);
     }
-    BooleanPublisher pythonBeacon = NetworkTableInstance.getDefault().getBooleanTopic("/fuelDetector/robotConnected").publish(); //Tells the Python code running on a coproccessor what server is being used for NT
+    BooleanPublisher pythonBeacon =
+        NetworkTableInstance.getDefault()
+            .getBooleanTopic("/fuelDetector/robotConnected")
+            .publish(); // Tells the Python code running on a coproccessor what server is being used
+    // for NT
     pythonBeacon.set(true);
 
     fuelHeading =
@@ -56,6 +62,14 @@ public class FuelDetector extends SubsystemBase {
       return getRotation2D(getDataFromNT(), isLimelights);
     } else {
       return new Rotation2d(Units.degreesToRadians(fuelHeading.get()));
+    }
+  }
+  public Rotation2d getHeading(boolean fieldRelative) {
+    Rotation2d heading = getHeading();
+    if(fieldRelative) {
+      return RobotContainer.drive.getPose().rotateBy(heading).getRotation();
+    } else {
+      return heading;
     }
   }
 
