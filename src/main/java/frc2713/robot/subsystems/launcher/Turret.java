@@ -160,31 +160,11 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
   public final Supplier<Angle> otfAngleSupplier =
       () -> {
         var solution = LaunchingSolutionManager.getInstance().getSolution();
-        Angle targetAngle;
-
-        if (solution.isValid()) {
-          // Convert the field-relative yaw to robot-relative using the current robot heading.
-          // This must happen here (not in LaunchingSolutionManager) so we always use the
-          // robot's heading RIGHT NOW, not a projected or stale heading from a previous cycle.
-          targetAngle =
-              Util.fieldToRobotRelative(
+        Angle targetAngle = Util.fieldToRobotRelative(
                   Degrees.of(solution.turretFieldYaw().getDegrees()),
                   RobotContainer.drive.getPose());
-          Logger.recordOutput(super.pb.makePath("OTF", "response"), "using solution");
-        } else if (solution.effectiveDistanceMeters() <= 0.9) {
-          // invalid bc we're too close
-          Logger.recordOutput(super.pb.makePath("OTF", "response"), "hub shot");
-          targetAngle =
-              Util.fieldToRobotRelative(
-                  LauncherConstants.Turret.staticHubAngle, RobotContainer.drive.getPose());
-        } else {
-          Logger.recordOutput(super.pb.makePath("OTF", "response"), "stay at measured");
-          targetAngle = inputs.position;
-        }
-
         targetAngle = convertToClosestBoundedTurretAngleDegrees(targetAngle, inputs.position);
-        Logger.recordOutput(super.pb.makePath("OTF", "solutionIsValid"), solution.isValid());
-        Logger.recordOutput(pb.makePath("OTF", "targetAngleDegrees"), targetAngle.in(Degrees));
+        Logger.recordOutput(pb.makePath("OTF", "targetAngleBoundedDegrees"), targetAngle.in(Degrees));
         return targetAngle;
       };
 
@@ -199,7 +179,7 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
       };
 
   public Command otfCommand() {
-    return setAngle(otfAngleSupplier).withName("OTF Tracking");
+    return setAngle(otfAngleSupplier).;
   }
 
   public Command hubCommand(Supplier<Pose2d> robotPose) {

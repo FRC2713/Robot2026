@@ -80,35 +80,14 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   public final Supplier<AngularVelocity> otfVelocitySupplier =
       () -> {
         var solution = LaunchingSolutionManager.getInstance().getSolution();
-        Distance toGoal = this.getDistance2d(LaunchingSolutionManager.currentGoal);
-        boolean solutionIsValid = solution.isValid();
 
-        LinearVelocity targetSurfaceSpeed;
-        if (solutionIsValid) {
-          targetSurfaceSpeed = MetersPerSecond.of(solution.flywheelSpeedMetersPerSecond());
-          Logger.recordOutput(super.pb.makePath("OTF", "response"), "using solution");
-        } else if (solution.effectiveDistanceMeters() <= 0.9) {
-          // invalid bc we're too close
-          Logger.recordOutput(super.pb.makePath("OTF", "response"), "hub shot");
-          targetSurfaceSpeed = FeetPerSecond.of(5);
-
-        } else {
-          // Fallback to distance-based lookup
-          Logger.recordOutput(super.pb.makePath("OTF", "response"), "lookup map");
-          targetSurfaceSpeed =
-              FeetPerSecond.of(LauncherConstants.Flywheels.ballVelocityMap.get(toGoal.in(Meters)));
-        }
-
-        // Convert surface speed to angular velocity: omega = v / r
+        // Convert surface speed to angular velocity: omega = v / r, will switch to a tuned binary tree
+        double surfaceSpeedMps = solution.ballSpeedMetersPerSecond();
         double wheelRadiusMeters = LauncherConstants.Flywheels.WHEEL_DIAMETER.div(2).in(Meters);
-        double surfaceSpeedMps = targetSurfaceSpeed.in(MetersPerSecond);
         AngularVelocity targetVelocity =
             RotationsPerSecond.of(surfaceSpeedMps / (wheelRadiusMeters * 2 * Math.PI));
 
-        Logger.recordOutput(super.pb.makePath("OTF", "solutionIsValid"), solutionIsValid);
-        Logger.recordOutput(super.pb.makePath("OTF", "distanceToGoal"), toGoal);
-        Logger.recordOutput(super.pb.makePath("OTF", "targetSurfaceSpeed"), targetSurfaceSpeed);
-        Logger.recordOutput(super.pb.makePath("OTF", "targetVelocity"), targetVelocity);
+        Logger.recordOutput(pb.makePath("OTF", "targetFlywheelVelocity"), targetVelocity);
         return targetVelocity;
       };
 
@@ -172,7 +151,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   public LinearVelocity getOnTheFlyLaunchVelocity(LaunchSolution solution) {
 
     if (solution.isValid()) {
-      double targetSpeedMps = solution.flywheelSpeedMetersPerSecond();
+      double targetSpeedMps = solution.ballSpeedMetersPerSecond();
       Logger.recordOutput(super.pb.makePath("launchVelocity"), targetSpeedMps);
       return MetersPerSecond.of(targetSpeedMps);
     }

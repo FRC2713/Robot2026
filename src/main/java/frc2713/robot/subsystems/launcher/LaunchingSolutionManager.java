@@ -14,6 +14,7 @@ import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.FieldConstants;
+
 import org.littletonrobotics.junction.Logger;
 
 public class LaunchingSolutionManager extends SubsystemBase {
@@ -24,7 +25,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
   // --- Data Structures ---
   public static record LaunchSolution(
       Rotation2d turretFieldYaw, // desired global yaw for the turret
-      double flywheelSpeedMetersPerSecond, // Required exit velocity
+      double ballSpeedMetersPerSecond, // Required exit velocity
       Rotation2d hoodPitch, // Required vertical angle
       double effectiveDistanceMeters,
       boolean isValid // False if target is out of range or blocked
@@ -36,17 +37,13 @@ public class LaunchingSolutionManager extends SubsystemBase {
 
   public static Translation3d currentGoal = FieldConstants.Hub.topCenterPoint;
   public static InterpolatingDoubleTreeMap currentHoodMap = LauncherConstants.Hood.angleMap;
-  public static InterpolatingDoubleTreeMap currentRPMMap = LauncherConstants.Flywheels.rpmMap;
+  public static InterpolatingDoubleTreeMap currentSpeedMap = LauncherConstants.Flywheels.ballVelocityMap;
 
   public LaunchingSolutionManager() {
     if (instance != null) {
       throw new IllegalStateException("LaunchingSolutionManager already initialized!");
     }
     instance = this;
-  }
-
-  public static void setGoal(Translation3d goal) {
-    LaunchingSolutionManager.currentGoal = AllianceFlipUtil.apply(goal);
   }
 
   public static LaunchingSolutionManager getInstance() {
@@ -60,10 +57,11 @@ public class LaunchingSolutionManager extends SubsystemBase {
     Pose3d robotPose = KinematicsManager.getInstance().getGlobalPose(0);
     Translation3d robotLinVel = KinematicsManager.getInstance().getGlobalLinearVelocity(0);
 
+    // 2. Decide on the goal
     if (FieldConstants.NeutralZone.region.contains(robotPose.getTranslation().toTranslation2d())) {
       // Shooting Into Alliance Zone
       LaunchingSolutionManager.currentHoodMap = LauncherConstants.Hood.angleForAZMap;
-      LaunchingSolutionManager.currentRPMMap = LauncherConstants.Flywheels.rpmForAZMap;
+      LaunchingSolutionManager.currentSpeedMap = LauncherConstants.Flywheels.ballVelocityAZMap;
       if (robotPose.getTranslation().getY() < FieldConstants.LinesHorizontal.center) {
         // Shooting to Bottom Side
         LaunchingSolutionManager.currentGoal =
@@ -77,24 +75,18 @@ public class LaunchingSolutionManager extends SubsystemBase {
       }
     } else {
       // Shooting to Hub
-      LaunchingSolutionManager.setGoal(FieldConstants.Hub.topCenterPoint);
+      LaunchingSolutionManager.currentGoal = AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint);
       LaunchingSolutionManager.currentHoodMap = LauncherConstants.Hood.angleMap;
-      LaunchingSolutionManager.currentRPMMap = LauncherConstants.Flywheels.rpmMap;
+      LaunchingSolutionManager.currentSpeedMap = LauncherConstants.Flywheels.ballVelocityMap;
       Logger.recordOutput(pb.makePath("pose based target"), "Hub");
     }
-    Logger.recordOutput(pb.makePath("current goal"), currentGoal);
 
-    // 2. Solve for the Launch Vector
-    if (LauncherConstants.otfFutureProjectionEnabled.get()) {
-      Translation3d robotAngVel = KinematicsManager.getInstance().getGlobalAngularVelocity(0);
-      Translation3d robotLinAccel = KinematicsManager.getInstance().getGlobalLinearAcceleration(0);
-      Translation3d robotAngAccel = KinematicsManager.getInstance().getGlobalAngularAcceleration(0);
-      currentSolution =
-          calculateWithProjection(
-              robotPose, robotLinVel, robotAngVel, robotLinAccel, robotAngAccel);
-    } else {
-      currentSolution = calculate(robotPose, robotLinVel);
-    }
+    // 3. Solve for the Launch Vector
+    currentSolution = calculate(robotPose, robotLinVel);
+
+    // 4. Log
+    Logger.recordOutput(pb.makePath("current goal"), currentGoal);
+    Logger.recordOutput(pb.makePath("current solution"), currentSolution);
   }
 
   public LaunchSolution getSolution() {
@@ -109,14 +101,15 @@ public class LaunchingSolutionManager extends SubsystemBase {
       Translation3d angularAccel) {
 
     // x(t) = x + (x_dot * t) + (0.5 * x_dot_dot * t^2)
-    double t = LauncherConstants.otfLinearProjectionSeconds.get().in(Seconds);
-    Translation3d projectedLinVel = linearVel.plus(linearAccel.times(t));
+    // t should actually be calculated instead of being from elastic
+    double tof = LauncherConstants.otfLinearProjectionSeconds.get().in(Seconds); 
+    Translation3d projectedLinVel = linearVel.plus(linearAccel.times(tof));
     Translation3d projectedTranslation =
-        robotPose.getTranslation().plus(linearVel.times(t)).plus(linearAccel.times(0.5 * t * t));
+        robotPose.getTranslation().plus(linearVel.times(tof)).plus(linearAccel.times(0.5 * tof * tof));
 
     // Δθ = (θ_dot * t) + (0.5 * θ_dot_dot * t^2)
-    t = LauncherConstants.otfAngularProjectionSeconds.get().in(Seconds);
-    Translation3d angularDisplacement = angularVel.times(t).plus(angularAccel.times(0.5 * t * t));
+    tof = LauncherConstants.otfAngularProjectionSeconds.get().in(Seconds);
+    Translation3d angularDisplacement = angularVel.times(tof).plus(angularAccel.times(0.5 * tof * tof));
     Rotation3d projectedRotation =
         robotPose
             .getRotation()
@@ -139,12 +132,10 @@ public class LaunchingSolutionManager extends SubsystemBase {
     // Use 2D horizontal distance for map lookups (maps are indexed by ground distance)
     double horizontalDist = rangeVec.toTranslation2d().getNorm();
 
-    Logger.recordOutput(pb.makePath("distance"), horizontalDist);
-
-    // B. Check Range
-    if (horizontalDist > 8.0 || horizontalDist < 0.9) {
-      return new LaunchSolution(new Rotation2d(), 0, new Rotation2d(), horizontalDist, false);
-    }
+    // B. Check Range (skipping)
+    // if (horizontalDist > 8.0 || horizontalDist < 0.9) {
+    //   return new LaunchSolution(new Rotation2d(), 0, new Rotation2d(), horizontalDist, false);
+    // }
 
     // C. Get Ideal Static Launch Params (Ground Relative)
     double idealSpeed =

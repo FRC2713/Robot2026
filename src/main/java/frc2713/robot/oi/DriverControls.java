@@ -102,8 +102,7 @@ public class DriverControls {
         .leftTrigger(0.25)
         .onTrue(
             Commands.parallel(
-                    intakeExtension.setDistanceCommand(IntakeConstants.Extension.extendedPosition),
-                    // intakeExtension.extendFullyCommand(), // TODO: does this match driver's expecation?
+                    intakeExtension.extendCommand(),
                     Commands.sequence(
                         Commands.waitSeconds(0.5),
                         Commands.parallel(intakeRoller.intake(), dyeRotor.stirFuel())))
@@ -115,8 +114,7 @@ public class DriverControls {
         .leftBumper()
         .onTrue(
             Commands.parallel(
-                intakeExtension.setDistanceCommand(IntakeConstants.Extension.retractedPosition),
-                // intakeExtension.retractFullyCommand(), // TODO: does this match driver's expecation?
+                intakeExtension.retractCommand(),
                 intakeRoller.intake())
                 .withName("Retract Intake"))
         .onFalse(intakeRoller.stop().withName("Stop Intake"));
@@ -125,8 +123,7 @@ public class DriverControls {
     controller
         .rightBumper()
         .whileTrue(
-            GameCommandGroups.Launching.hubShot(drive, flywheels, hood, turret, feeder,
-    dyeRotor))
+            GameCommandGroups.Launching.otfShot(drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension))
         .onFalse(
             Commands.parallel(GameCommandGroups.Launching.stopShooting(drive, feeder,
     dyeRotor)));

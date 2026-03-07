@@ -86,6 +86,14 @@ public class IntakeExtension
     return Commands.repeatingSequence(setDistanceCommand(IntakeConstants.Extension.retractedPosition)).until(() -> this.atTarget());
   }
 
+  public Command extendCommand() {
+    return setDistanceCommand(IntakeConstants.Extension.extendedPosition);
+  }
+
+  public Command retractCommand() {
+    return setDistanceCommand(IntakeConstants.Extension.retractedPosition);
+  }
+
   /**
    * Maintain fuel pressure by retracting the intake at a rate that shrinks the hopper volume by the
    * same rate that fuel is leaving the hopper

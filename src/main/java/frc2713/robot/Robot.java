@@ -105,7 +105,7 @@ public class Robot extends LoggedRobot {
       RobotContainer.drive.setPose(visionPose.get());
     }
 
-    LaunchingSolutionManager.setGoal(FieldConstants.Hub.topCenterPoint);
+    LaunchingSolutionManager.currentGoal = FieldConstants.Hub.topCenterPoint;
   }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */

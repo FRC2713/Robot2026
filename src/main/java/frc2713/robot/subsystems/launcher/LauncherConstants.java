@@ -189,10 +189,10 @@ public final class LauncherConstants {
     public static AngularVelocity staticHubVelocity = RotationsPerSecond.of(20);
     public static LoggedTunableMeasure<AngularVelocity> staticTowerVelocity =
         new LoggedTunableMeasure<AngularVelocity>("Flywheels/staticShotVelocity", RPM.of(1500));
-    public static InterpolatingDoubleTreeMap ballVelocityMap =
-        new InterpolatingDoubleTreeMap(); // attempting to depreciate
+    public static InterpolatingDoubleTreeMap ballVelocityMap = new InterpolatingDoubleTreeMap();
+    public static InterpolatingDoubleTreeMap ballVelocityAZMap = new InterpolatingDoubleTreeMap();
+
     public static InterpolatingDoubleTreeMap rpmMap = new InterpolatingDoubleTreeMap();
-    public static InterpolatingDoubleTreeMap rpmForAZMap = new InterpolatingDoubleTreeMap();
 
     public static Distance WHEEL_DIAMETER = Inches.of(4);
     // How many fuel we can launch per second at max firing rate
@@ -211,18 +211,21 @@ public final class LauncherConstants {
       ballVelocityMap.put(4.0, 26.0);
       ballVelocityMap.put(5.17, 29.0);
       ballVelocityMap.put(5.4, 30.0);
+
+      ballVelocityAZMap.put(1.0, 20.0);
+      ballVelocityAZMap.put(1.5, 20.0);
+      ballVelocityAZMap.put(2.5, 22.0);
+      ballVelocityAZMap.put(3.2, 23.0);
+      ballVelocityAZMap.put(4.0, 26.0);
+      ballVelocityAZMap.put(5.17, 29.0);
+      ballVelocityAZMap.put(5.4, 30.0);
     }
 
     static {
-      rpmMap.put(5.486, 2000.0);
-      rpmMap.put(4.786, 1750.0);
-      rpmMap.put(4.175, 1550.0);
-    }
-
-    static {
-      rpmForAZMap.put(5.486, 2000.0);
-      rpmForAZMap.put(4.786, 1750.0);
-      rpmForAZMap.put(4.175, 1550.0);
+      // Ball Velocity (m) -> RPM (ft/s)
+      rpmMap.put(30.0, 2000.0);
+      rpmMap.put(26.0, 1750.0);
+      rpmMap.put(23.0, 1500.0);
     }
   }
 
