@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
+import frc2713.robot.subsystems.intake.IntakeConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.launcher.Flywheels;
@@ -83,6 +84,25 @@ public final class GameCommandGroups {
           // extension.maintainFuelPressureCommand(),
           // rollers.voltageCommand(IntakeConstants.Roller.intakeVoltageDesired)
           );
+    }
+
+    public static Command toowerShot(
+        Drive drive,
+        Flywheels flywheels,
+        Hood hood,
+        Turret turret,
+        Feeder feeder,
+        DyeRotor dyeRotor,
+        IntakeExtension extension,
+        IntakeRoller rollers) {
+      return Commands.parallel(
+          flywheels.setVelocity(LauncherConstants.Flywheels.staticTowerVelocity),
+          hood.setAngleCommand(LauncherConstants.Hood.staticTowerAngle),
+          turret.setAngle(LauncherConstants.Turret.TowerShot),
+          feeder.feedWhenReady(() -> flywheels.atTarget()),
+          dyeRotor.feedWhenReady(() -> flywheels.atTarget()),
+          extension.maintainFuelPressureCommand(),
+          rollers.voltageCommand(IntakeConstants.Roller.intakeVoltageDesired));
     }
 
     /** Hub shooting command. */

@@ -119,6 +119,12 @@ public final class LauncherConstants {
         new LoggedTunableMeasure<>("Flywheels/PIDTestAngleOne", Degrees.of(10));
     public static final LoggedTunableMeasure<Angle> PIDTestAngleTwo =
         new LoggedTunableMeasure<>("Flywheels/PIDTestAngleTwo", Degrees.of(-10));
+    public static final LoggedTunableMeasure<Angle> LeftTrench =
+        new LoggedTunableMeasure<>("Flywheels/PIDTestAngleOne", Degrees.of(30));
+    public static final LoggedTunableMeasure<Angle> RightTrench =
+        new LoggedTunableMeasure<>("Flywheels/PIDTestAngleOne", Degrees.of(30));
+    public static final LoggedTunableMeasure<Angle> TowerShot =
+        new LoggedTunableMeasure<>("Flywheels/PIDTestAngleOne", Degrees.of(30));
   }
 
   public final class Flywheels {
@@ -126,6 +132,10 @@ public final class LauncherConstants {
         new LoggedTunableMeasure<>("Flywheels/PIDTest", RPM.of(2000));
     public static final LoggedTunableMeasure<AngularVelocity> launchVelocity =
         new LoggedTunableMeasure<>("Flywheels/launchVelocity", RPM.of(2500));
+    public static final LoggedTunableMeasure<AngularVelocity> RightLeftTrench =
+        new LoggedTunableMeasure<>("Flywheels/PIDTest", RPM.of(3000));
+    public static final LoggedTunableMeasure<AngularVelocity> TowerShot =
+        new LoggedTunableMeasure<>("Flywheels/launchVelocity", RPM.of(4000));
 
     public static TalonFXSubsystemConfig leaderConfig = new TalonFXSubsystemConfig();
     public static TalonFXSubsystemConfig followerConfig = new TalonFXSubsystemConfig();
