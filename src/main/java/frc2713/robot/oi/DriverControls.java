@@ -1,5 +1,7 @@
 package frc2713.robot.oi;
 
+import static edu.wpi.first.units.Units.RPM;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -12,6 +14,7 @@ import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.launcher.Flywheels;
 import frc2713.robot.subsystems.launcher.Hood;
+import frc2713.robot.subsystems.launcher.LauncherConstants;
 import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
@@ -93,10 +96,10 @@ public class DriverControls {
                 "Inch Right"))
         .onFalse(this.setToNormalDriveCmd());
 
-    // controller
-    //     .rightBumper()
-    //     .onTrue(flywheels.velocitySetpointCommand(LauncherConstants.Flywheels.PIDTest))
-    //     .onFalse(flywheels.velocitySetpointCommand(() -> RPM.of(0)));
+    controller
+        .rightBumper()
+        .onTrue(flywheels.velocitySetpointCommand(LauncherConstants.Flywheels.PIDTest))
+        .onFalse(flywheels.velocitySetpointCommand(() -> RPM.of(0)));
 
     // intake fuel
     controller
@@ -119,12 +122,14 @@ public class DriverControls {
         .onFalse(intakeRoller.stop().withName("Stop Intake"));
 
     // shoot against the hubwhen flywheels and hub are ready
-    controller
-        .rightBumper()
-        .whileTrue(
-            GameCommandGroups.Launching.hubShot(drive, flywheels, hood, turret, feeder, dyeRotor))
-        .onFalse(
-            Commands.parallel(GameCommandGroups.Launching.stopShooting(drive, feeder, dyeRotor)));
+    // controller
+    //     .rightBumper()
+    //     .whileTrue(
+    //         GameCommandGroups.Launching.hubShot(drive, flywheels, hood, turret, feeder,
+    // dyeRotor))
+    //     .onFalse(
+    //         Commands.parallel(GameCommandGroups.Launching.stopShooting(drive, feeder,
+    // dyeRotor)));
 
     // shoot when flywheels are ready
     controller
