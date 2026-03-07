@@ -69,7 +69,7 @@ public class RightNeutralOutpost {
                 Commands.sequence(
                     Commands.runOnce(() -> driveSubsystem.stop()),
                     Commands.print("[AUTO] Launching at outpost"),
-                    Commands.deadline(Commands.waitSeconds(5), otfShotSupplier.get()))));
+                    Commands.deadline(Commands.waitSeconds(3), otfShotSupplier.get()))));
 
     outpostToTrench.done().onTrue(faceFuelRightTrenchBackward.cmd());
 
