@@ -45,6 +45,9 @@ public class VisionConstants {
   public static PoseEstimatorErrorStDevs POSE_ESTIMATOR_STATE_STDEVS =
       new PoseEstimatorErrorStDevs(Meters.of(0.01), Degrees.of(999));
 
+  public static PoseEstimatorErrorStDevs POSE_ESTIMATOR_STATE_LOW_TAGS_STDEVS =
+      new PoseEstimatorErrorStDevs(Meters.of(0.1), Degrees.of(9999));
+
   public static LoggedTunableMeasure<Time> LATENCY_THRESHOLD =
       new LoggedTunableMeasure<Time>("Vision/latencyThreshold", Seconds.of(0.2));
 }
