@@ -19,7 +19,6 @@ import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
-import frc2713.robot.Constants;
 import frc2713.robot.FieldConstants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -30,7 +29,7 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
 
   public Hood(final TalonFXSubsystemConfig config, final MotorIO launcherMotorIO) {
     super(config, new MotorInputsAutoLogged(), launcherMotorIO);
-    if (Constants.enableOTFFeatures) setDefaultCommand(otfCommand());
+    // if (Constants.enableOTFFeatures) setDefaultCommand(otfCommand());
   }
 
   public Command setAngleCommand(Supplier<Angle> desiredAngle) {

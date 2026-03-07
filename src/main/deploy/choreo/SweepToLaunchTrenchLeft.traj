@@ -31,24 +31,24 @@
  "trajectory":{
   "config":{
    "frontLeft":{
-    "x":0.2794,
-    "y":0.2794
+    "x":0.23495,
+    "y":0.3429
    },
    "backLeft":{
-    "x":-0.2794,
-    "y":0.2794
+    "x":-0.23495,
+    "y":0.3429
    },
-   "mass":68.0388555,
-   "inertia":6.0,
-   "gearing":6.5,
-   "radius":0.0508,
-   "vmax":628.3185307179587,
-   "tmax":1.2,
-   "cof":1.5,
+   "mass":61.23496995,
+   "inertia":7.6,
+   "gearing":6.0,
+   "radius":0.043434,
+   "vmax":605.8037833672317,
+   "tmax":1.1,
+   "cof":1.2,
    "bumper":{
-    "front":0.4064,
-    "side":0.4064,
-    "back":0.4064
+    "front":0.422275,
+    "side":0.4826,
+    "back":0.422275
    },
    "differentialTrackWidth":0.5588
   },

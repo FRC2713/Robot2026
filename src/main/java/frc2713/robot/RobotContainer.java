@@ -26,6 +26,7 @@ import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.commands.DriveCommands;
+import frc2713.robot.commands.autos.DriveTest;
 import frc2713.robot.commands.autos.NeutralScoreNeutral;
 import frc2713.robot.commands.autos.NeutralSweepLeftToRight;
 import frc2713.robot.commands.autos.NeutralSweepRightToLeft;
@@ -293,6 +294,8 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+
+    autoChooser.addOption("DriveTest", DriveTest.routine(autoFactory));
     autoChooser.addOption(
         "Right Side Bump Auto",
         RightSideAutoBump.routine(
@@ -369,6 +372,9 @@ public class RobotContainer {
 
     // configure the kinematics calculations
     configureKinematics();
+
+    hood.setDefaultCommand(
+        hood.autoRetractCommand(drive::getPose, LauncherConstants.Hood.staticHubAngle));
   }
 
   /** Use this robot to configure the transforms between subsystems. */

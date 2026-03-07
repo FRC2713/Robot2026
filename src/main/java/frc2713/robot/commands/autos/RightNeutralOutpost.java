@@ -62,16 +62,14 @@ public class RightNeutralOutpost {
         .done()
         .onTrue(Commands.parallel(otfShotSupplier.get(), oTFToOutpost.cmd()));
 
-    // oTFToOutpost
-    //     .done()
-    //     .onTrue(
-    //         Commands.deadline(
-    //             Commands.sequence(
-    //                 Commands.print("Launching at outpost"),
-    //                 Commands.waitSeconds(4),
-    //                 Commands.print("Moving back to trench"),
-    //                 outpostToTrench.cmd()),
-    //             otfShotSupplier.get()));
+    oTFToOutpost
+        .done()
+        .onTrue(
+            Commands.deadline(
+                Commands.sequence(
+                    Commands.runOnce(() -> driveSubsystem.stop()),
+                    Commands.print("[AUTO] Launching at outpost"),
+                    Commands.deadline(Commands.waitSeconds(5), otfShotSupplier.get()))));
 
     outpostToTrench.done().onTrue(faceFuelRightTrenchBackward.cmd());
 
