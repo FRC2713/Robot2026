@@ -41,6 +41,7 @@ public class RightNeutralOutpost {
         .active()
         .onTrue(
             Commands.sequence(
+                Commands.deadline(Commands.waitSeconds(1), otfShotSupplier.get()),
                 Commands.print("[AUTO] Going to fuel"),
                 faceFuelTrench.resetOdometry(),
                 faceFuelTrench.cmd()));
@@ -75,7 +76,7 @@ public class RightNeutralOutpost {
                 Commands.sequence(
                     Commands.runOnce(() -> driveSubsystem.stop()),
                     Commands.print("[AUTO] Launching at outpost"),
-                    Commands.deadline(Commands.waitSeconds(5), otfShotSupplier.get()))));
+                    Commands.deadline(Commands.waitSeconds(3), otfShotSupplier.get()))));
 
     // outpostToTrench.done().onTrue(faceFuelTrench2.cmd());
 
