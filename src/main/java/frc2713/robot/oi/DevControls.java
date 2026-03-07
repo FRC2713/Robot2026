@@ -102,37 +102,6 @@ public class DevControls {
                 "Inch Right"))
         .onFalse(this.setToNormalDriveCmd());
 
-    // Turret angle controls
-
-    controller
-        .leftBumper()
-        .whileTrue(hood.setAngleCommand(() -> hood.getCurrentPosition().minus(Degrees.of(2))));
-    controller
-        .rightBumper()
-        .whileTrue(hood.setAngleCommand(() -> hood.getCurrentPosition().plus(Degrees.of(2))));
-
-    controller.a().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleOne));
-
-    controller.b().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleTwo));
-
-    // controller
-    //     .a()
-    //     .onTrue(intakeExtension.setDistanceCommand(IntakeConstants.Extension.extendedPosition));
-    // controller
-    //     .b()
-    //     .onTrue(
-    //         intakeExtension.setDistanceCommand(
-    //             IntakeConstants.Extension.retractedPosition, () -> InchesPerSecond.of(5.0)));
-
-    // controller
-    //     .leftBumper()
-    //     .whileTrue(Commands.sequence(intakeExtension.extendAndWaitCommand(),
-    // intakeRoller.intake()))
-    //     .onFalse(Commands.parallel(intakeRoller.stop(), intakeExtension.retractCommand()));
-    // .onFalse(intakeExtension.retractCommand()); // Bring hood down
-
-    // controller.b().onTrue(hood.hubCommand()).onFalse(hood.setAngleCommand(() -> Degrees.of(10)));
-
     // Test setting drive limits
     controller
         .x()
@@ -145,7 +114,47 @@ public class DevControls {
                 Optional.of(DegreesPerSecondPerSecond.of(360.0))))
         .onFalse(DriveCommands.clearDriveLimits(drive));
 
-    // DyeRotor controls
+    // Intake Controls
+    
+      controller
+        .leftTrigger(0.25)
+        .onTrue(
+            Commands.parallel(
+                    intakeExtension.extendCommand(),
+                    Commands.sequence(
+                        Commands.waitSeconds(0.5),
+                        Commands.parallel(intakeRoller.intake(), dyeRotor.stirFuel())))
+                .withName("Intaking"))
+        .onFalse(
+            Commands.parallel(intakeRoller.stop().withName("Stop Intake"), dyeRotor.stopCommand()));
+
+    controller
+        .leftBumper()
+        .onTrue(
+            Commands.parallel(intakeExtension.retractCommand(), intakeRoller.intake())
+                .withName("Retract Intake"))
+        .onFalse(intakeRoller.stop().withName("Stop Intake"));
+
+  // Hood Controls
+    controller.povUp().onTrue(hood.setAngleCommand(() -> Degrees.of(25)));
+
+    controller.povDown().onTrue(hood.setAngleCommand(() -> Degrees.of(0)));
+
+    // controller
+    //     .leftBumper()
+    //     .whileTrue(hood.setAngleCommand(() -> hood.getCurrentPosition().minus(Degrees.of(2))));
+    // controller
+    //     .rightBumper()
+    //     .whileTrue(hood.setAngleCommand(() -> hood.getCurrentPosition().plus(Degrees.of(2))));
+
+    // Turret Controls
+
+    controller.a().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleOne));
+
+    controller.b().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleTwo));
+
+    // Serializer controls
+
     // A button - index fuel
     // controller.a().whileTrue(dyeRotor.indexFuel()).onFalse(dyeRotor.stopCommand());
 
@@ -163,16 +172,12 @@ public class DevControls {
         .whileTrue(
             Commands.sequence(
                 flywheels.setVelocityUntilTarget(
-                    () ->
-                        LauncherConstants.Flywheels.launchVelocity
-                            .get()), // Spin up flywheels to launch velocity
+                    LauncherConstants.Flywheels
+                        .PIDTest), // Spin up flywheels to a test launch velocity
                 Commands.parallel(dyeRotor.indexFuel(), feeder.feedShooter())))
         .onFalse(Commands.parallel(dyeRotor.stopCommand(), feeder.stop(), flywheels.stop()));
 
-    controller.povUp().onTrue(hood.setAngleCommand(() -> Degrees.of(25)));
-    controller.povDown().onTrue(hood.setAngleCommand(() -> Degrees.of(0)));
-
-    // shoot when flywheels are ready
+    // Shoot when flywheels are ready
     controller
         .rightTrigger(.98)
         .whileTrue(

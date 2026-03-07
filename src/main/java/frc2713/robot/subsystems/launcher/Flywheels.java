@@ -65,12 +65,11 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   }
 
   public Command hubCommand() {
-    return setVelocity(() -> LauncherConstants.Flywheels.staticHubVelocity);
+    return setVelocity(LauncherConstants.Flywheels.staticHubVelocity);
   }
 
-  /** Command to continuously track the on-the-fly flywheel velocity */
   public Command idleSpeedCommand() {
-    return setVelocity(() -> LauncherConstants.Flywheels.idleVelocity);
+    return setVelocity(LauncherConstants.Flywheels.idleVelocity);
   }
 
   /**
@@ -81,7 +80,8 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
       () -> {
         var solution = LaunchingSolutionManager.getInstance().getSolution();
 
-        // Convert surface speed to angular velocity: omega = v / r, will switch to a tuned binary tree
+        // Convert surface speed to angular velocity: omega = v / r, will switch to a tuned binary
+        // tree
         double surfaceSpeedMps = solution.ballSpeedMetersPerSecond();
         double wheelRadiusMeters = LauncherConstants.Flywheels.WHEEL_DIAMETER.div(2).in(Meters);
         AngularVelocity targetVelocity =

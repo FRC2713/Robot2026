@@ -1,7 +1,5 @@
 package frc2713.robot.oi;
 
-import static edu.wpi.first.units.Units.RPM;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -10,12 +8,10 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc2713.robot.GameCommandGroups;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
-import frc2713.robot.subsystems.intake.IntakeConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.launcher.Flywheels;
 import frc2713.robot.subsystems.launcher.Hood;
-import frc2713.robot.subsystems.launcher.LauncherConstants;
 import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
@@ -113,20 +109,18 @@ public class DriverControls {
     controller
         .leftBumper()
         .onTrue(
-            Commands.parallel(
-                intakeExtension.retractCommand(),
-                intakeRoller.intake())
+            Commands.parallel(intakeExtension.retractCommand(), intakeRoller.intake())
                 .withName("Retract Intake"))
         .onFalse(intakeRoller.stop().withName("Stop Intake"));
 
-    // shoot against the hubwhen flywheels and hub are ready
-    controller
-        .rightBumper()
-        .whileTrue(
-            GameCommandGroups.Launching.otfShot(drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension))
-        .onFalse(
-            Commands.parallel(GameCommandGroups.Launching.stopShooting(drive, feeder,
-    dyeRotor)));
+    // shoot otf
+    // controller
+    //     .rightBumper()
+    //     .whileTrue(
+    //         GameCommandGroups.Launching.otfShot(
+    //             drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension))
+    //     .onFalse(
+    //         Commands.parallel(GameCommandGroups.Launching.stopShooting(drive, feeder, dyeRotor)));
 
     // shoot when flywheels are ready
     controller
@@ -134,7 +128,25 @@ public class DriverControls {
         .whileTrue(
             GameCommandGroups.Launching.dumbShot(
                 drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
-        .onFalse(GameCommandGroups.Launching.stopShootingAndRetract(drive, feeder, dyeRotor, hood));
+        .onFalse(GameCommandGroups.Launching.stopShootingAndRetractHub(drive, feeder, dyeRotor, hood));
+
+    controller
+        .a()
+        .onTrue(
+            GameCommandGroups.Launching.toowerShot(
+                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller).withName("Tower Shot"));
+    controller
+        .b()
+        .onTrue(
+            GameCommandGroups.Launching.rightTrenchShot(
+                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller).withName("Right Trench Shot"));
+    controller
+        .x()
+        .onTrue(
+            GameCommandGroups.Launching.leftTrenchShot(
+                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller).withName("Left Trench Shot"));
+
+    // controller
   }
 
   public double getLeftY() {

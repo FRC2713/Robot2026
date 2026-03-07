@@ -115,27 +115,19 @@ public final class LauncherConstants {
     public static int MODEL_INDEX = 3;
     public static int PARENT_INDEX = 0; // drivetrain
 
-    public static final LoggedTunableMeasure<Angle> PIDTestAngleOne =
-        new LoggedTunableMeasure<>("Flywheels/PIDTestAngleOne", Degrees.of(10));
-    public static final LoggedTunableMeasure<Angle> PIDTestAngleTwo =
-        new LoggedTunableMeasure<>("Flywheels/PIDTestAngleTwo", Degrees.of(-10));
-    public static final LoggedTunableMeasure<Angle> LeftTrench =
-        new LoggedTunableMeasure<>("Flywheels/PIDTestAngleOne", Degrees.of(30));
-    public static final LoggedTunableMeasure<Angle> RightTrench =
-        new LoggedTunableMeasure<>("Flywheels/PIDTestAngleOne", Degrees.of(30));
-    public static final LoggedTunableMeasure<Angle> TowerShot =
-        new LoggedTunableMeasure<>("Flywheels/PIDTestAngleOne", Degrees.of(30));
+    public static LoggedTunableMeasure<Angle> PIDTestAngleOne =
+        new LoggedTunableMeasure<>("Turret/PIDTestAngleOne", Degrees.of(10));
+    public static LoggedTunableMeasure<Angle> PIDTestAngleTwo =
+        new LoggedTunableMeasure<>("Turret/PIDTestAngleTwo", Degrees.of(-10));
+    public static LoggedTunableMeasure<Angle> staticLeftTrench =
+        new LoggedTunableMeasure<>("Turret/Turret Static Trench L", Degrees.of(10));
+    public static LoggedTunableMeasure<Angle> staticRightTrench =
+        new LoggedTunableMeasure<>("Turret/Turret Static Trench R", Degrees.of(-10));
+    public static LoggedTunableMeasure<Angle> staticTowerShot =
+        new LoggedTunableMeasure<>("Turret/Turret Static Tower", Degrees.of(3));
   }
 
   public final class Flywheels {
-    public static final LoggedTunableMeasure<AngularVelocity> PIDTest =
-        new LoggedTunableMeasure<>("Flywheels/PIDTest", RPM.of(2000));
-    public static final LoggedTunableMeasure<AngularVelocity> launchVelocity =
-        new LoggedTunableMeasure<>("Flywheels/launchVelocity", RPM.of(2500));
-    public static final LoggedTunableMeasure<AngularVelocity> RightLeftTrench =
-        new LoggedTunableMeasure<>("Flywheels/PIDTest", RPM.of(3000));
-    public static final LoggedTunableMeasure<AngularVelocity> TowerShot =
-        new LoggedTunableMeasure<>("Flywheels/launchVelocity", RPM.of(4000));
 
     public static TalonFXSubsystemConfig leaderConfig = new TalonFXSubsystemConfig();
     public static TalonFXSubsystemConfig followerConfig = new TalonFXSubsystemConfig();
@@ -179,16 +171,11 @@ public final class LauncherConstants {
     public static int MODEL_INDEX = 5;
     public static int PARENT_INDEX = 4;
 
-    public static AngularVelocity idleVelocity = RotationsPerSecond.of(20);
-
     public static Transform3d localTransform =
         new Transform3d(
             new Translation3d(Inches.of(-5).in(Meters), 0, Inches.of(2).in(Meters)),
             new Rotation3d(0, Degrees.of(-90).in(Radians), 0));
 
-    public static AngularVelocity staticHubVelocity = RotationsPerSecond.of(20);
-    public static LoggedTunableMeasure<AngularVelocity> staticTowerVelocity =
-        new LoggedTunableMeasure<AngularVelocity>("Flywheels/staticShotVelocity", RPM.of(1500));
     public static InterpolatingDoubleTreeMap ballVelocityMap = new InterpolatingDoubleTreeMap();
     public static InterpolatingDoubleTreeMap ballVelocityAZMap = new InterpolatingDoubleTreeMap();
 
@@ -227,6 +214,17 @@ public final class LauncherConstants {
       rpmMap.put(26.0, 1750.0);
       rpmMap.put(23.0, 1500.0);
     }
+
+    public static LoggedTunableMeasure<AngularVelocity> idleVelocity =
+        new LoggedTunableMeasure<>("Flywheels/Idle Velocity", RotationsPerSecond.of(20));
+    public static LoggedTunableMeasure<AngularVelocity> PIDTest =
+        new LoggedTunableMeasure<>("Flywheels/PIDTest", RPM.of(2000));
+    public static LoggedTunableMeasure<AngularVelocity> staticRightLeftTrench =
+        new LoggedTunableMeasure<>("Flywheels/Flywheels Static Trench", RPM.of(3000));
+    public static LoggedTunableMeasure<AngularVelocity> staticHubVelocity =
+        new LoggedTunableMeasure<>("Flywheels/Flywheels Static Hub", RotationsPerSecond.of(20));
+    public static LoggedTunableMeasure<AngularVelocity> staticTowerVelocity =
+        new LoggedTunableMeasure<AngularVelocity>("Flywheels/Flywheels Static Tower", RPM.of(1500));
   }
 
   public final class Hood {
@@ -235,6 +233,7 @@ public final class LauncherConstants {
 
     public static final Angle minAngle = Degrees.of(0);
     public static final Angle maxAngle = Degrees.of(30);
+
     // 9 tooth pinion to 20 tooth gear, 16 tooth gear to 38 tooth gear, 10 tooth gear to 124 tooth
     // gear for total reduction of 0.0306
     public static double gearRatio = ((52 / 8.0) * (38 / 16.0) * (124 / 10.0));
@@ -286,11 +285,6 @@ public final class LauncherConstants {
     public static int MODEL_INDEX = 4;
     public static int PARENT_INDEX = 3; // turret
 
-    public static LoggedTunableMeasure<Angle> staticTowerAngle =
-        new LoggedTunableMeasure<Angle>("Hood/Static Tower", Degrees.of(25));
-    public static LoggedTunableMeasure<Angle> staticHubAngle =
-        new LoggedTunableMeasure<Angle>("Hood/Static Hub", Degrees.of(25));
-
     public static InterpolatingDoubleTreeMap angleMap = new InterpolatingDoubleTreeMap();
     public static InterpolatingDoubleTreeMap angleForAZMap = new InterpolatingDoubleTreeMap();
 
@@ -309,6 +303,13 @@ public final class LauncherConstants {
       angleForAZMap.put(4.786, 26.0);
       angleForAZMap.put(4.175, 25.0);
     }
+
+    public static LoggedTunableMeasure<Angle> staticTowerAngle =
+        new LoggedTunableMeasure<Angle>("Hood/Hood Static Tower", Degrees.of(25));
+    public static LoggedTunableMeasure<Angle> staticRightLeftTrenchAngle =
+        new LoggedTunableMeasure<Angle>("Hood/Hood Static Trench", Degrees.of(25));
+    public static LoggedTunableMeasure<Angle> staticHubAngle =
+        new LoggedTunableMeasure<Angle>("Hood/Hood Static Hub", Degrees.of(25));
   }
 
   public static LoggedTunableMeasure<Time> otfLinearProjectionSeconds =

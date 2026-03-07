@@ -98,7 +98,45 @@ public final class GameCommandGroups {
       return Commands.parallel(
           flywheels.setVelocity(LauncherConstants.Flywheels.staticTowerVelocity),
           hood.setAngleCommand(LauncherConstants.Hood.staticTowerAngle),
-          turret.setAngle(LauncherConstants.Turret.TowerShot),
+          turret.setAngle(LauncherConstants.Turret.staticTowerShot),
+          feeder.feedWhenReady(() -> flywheels.atTarget()),
+          dyeRotor.feedWhenReady(() -> flywheels.atTarget()),
+          extension.maintainFuelPressureCommand(),
+          rollers.voltageCommand(IntakeConstants.Roller.intakeVoltageDesired));
+    }
+
+    public static Command leftTrenchShot(
+        Drive drive,
+        Flywheels flywheels,
+        Hood hood,
+        Turret turret,
+        Feeder feeder,
+        DyeRotor dyeRotor,
+        IntakeExtension extension,
+        IntakeRoller rollers) {
+      return Commands.parallel(
+          flywheels.setVelocity(LauncherConstants.Flywheels.staticRightLeftTrench),
+          hood.setAngleCommand(LauncherConstants.Hood.staticRightLeftTrenchAngle),
+          turret.setAngle(LauncherConstants.Turret.staticLeftTrench),
+          feeder.feedWhenReady(() -> flywheels.atTarget()),
+          dyeRotor.feedWhenReady(() -> flywheels.atTarget()),
+          extension.maintainFuelPressureCommand(),
+          rollers.voltageCommand(IntakeConstants.Roller.intakeVoltageDesired));
+    }
+
+    public static Command rightTrenchShot(
+        Drive drive,
+        Flywheels flywheels,
+        Hood hood,
+        Turret turret,
+        Feeder feeder,
+        DyeRotor dyeRotor,
+        IntakeExtension extension,
+        IntakeRoller rollers) {
+      return Commands.parallel(
+          flywheels.setVelocity(LauncherConstants.Flywheels.staticRightLeftTrench),
+          hood.setAngleCommand(LauncherConstants.Hood.staticRightLeftTrenchAngle),
+          turret.setAngle(LauncherConstants.Turret.staticRightTrench),
           feeder.feedWhenReady(() -> flywheels.atTarget()),
           dyeRotor.feedWhenReady(() -> flywheels.atTarget()),
           extension.maintainFuelPressureCommand(),
@@ -133,7 +171,7 @@ public final class GameCommandGroups {
           .withName("Stopped Shooting");
     }
 
-    public static Command stopShootingAndRetract(
+    public static Command stopShootingAndRetractHub(
         Drive drive, Feeder feeder, DyeRotor dyeRotor, Hood hood) {
       return Commands.parallel(stopShooting(drive, feeder, dyeRotor), hood.retract());
     }

@@ -14,7 +14,6 @@ import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.FieldConstants;
-
 import org.littletonrobotics.junction.Logger;
 
 public class LaunchingSolutionManager extends SubsystemBase {
@@ -37,7 +36,8 @@ public class LaunchingSolutionManager extends SubsystemBase {
 
   public static Translation3d currentGoal = FieldConstants.Hub.topCenterPoint;
   public static InterpolatingDoubleTreeMap currentHoodMap = LauncherConstants.Hood.angleMap;
-  public static InterpolatingDoubleTreeMap currentSpeedMap = LauncherConstants.Flywheels.ballVelocityMap;
+  public static InterpolatingDoubleTreeMap currentSpeedMap =
+      LauncherConstants.Flywheels.ballVelocityMap;
 
   public LaunchingSolutionManager() {
     if (instance != null) {
@@ -75,7 +75,8 @@ public class LaunchingSolutionManager extends SubsystemBase {
       }
     } else {
       // Shooting to Hub
-      LaunchingSolutionManager.currentGoal = AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint);
+      LaunchingSolutionManager.currentGoal =
+          AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint);
       LaunchingSolutionManager.currentHoodMap = LauncherConstants.Hood.angleMap;
       LaunchingSolutionManager.currentSpeedMap = LauncherConstants.Flywheels.ballVelocityMap;
       Logger.recordOutput(pb.makePath("pose based target"), "Hub");
@@ -102,14 +103,18 @@ public class LaunchingSolutionManager extends SubsystemBase {
 
     // x(t) = x + (x_dot * t) + (0.5 * x_dot_dot * t^2)
     // t should actually be calculated instead of being from elastic
-    double tof = LauncherConstants.otfLinearProjectionSeconds.get().in(Seconds); 
+    double tof = LauncherConstants.otfLinearProjectionSeconds.get().in(Seconds);
     Translation3d projectedLinVel = linearVel.plus(linearAccel.times(tof));
     Translation3d projectedTranslation =
-        robotPose.getTranslation().plus(linearVel.times(tof)).plus(linearAccel.times(0.5 * tof * tof));
+        robotPose
+            .getTranslation()
+            .plus(linearVel.times(tof))
+            .plus(linearAccel.times(0.5 * tof * tof));
 
     // Δθ = (θ_dot * t) + (0.5 * θ_dot_dot * t^2)
     tof = LauncherConstants.otfAngularProjectionSeconds.get().in(Seconds);
-    Translation3d angularDisplacement = angularVel.times(tof).plus(angularAccel.times(0.5 * tof * tof));
+    Translation3d angularDisplacement =
+        angularVel.times(tof).plus(angularAccel.times(0.5 * tof * tof));
     Rotation3d projectedRotation =
         robotPose
             .getRotation()

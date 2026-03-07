@@ -160,11 +160,12 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
   public final Supplier<Angle> otfAngleSupplier =
       () -> {
         var solution = LaunchingSolutionManager.getInstance().getSolution();
-        Angle targetAngle = Util.fieldToRobotRelative(
-                  Degrees.of(solution.turretFieldYaw().getDegrees()),
-                  RobotContainer.drive.getPose());
+        Angle targetAngle =
+            Util.fieldToRobotRelative(
+                Degrees.of(solution.turretFieldYaw().getDegrees()), RobotContainer.drive.getPose());
         targetAngle = convertToClosestBoundedTurretAngleDegrees(targetAngle, inputs.position);
-        Logger.recordOutput(pb.makePath("OTF", "targetAngleBoundedDegrees"), targetAngle.in(Degrees));
+        Logger.recordOutput(
+            pb.makePath("OTF", "targetAngleBoundedDegrees"), targetAngle.in(Degrees));
         return targetAngle;
       };
 
@@ -179,7 +180,7 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
       };
 
   public Command otfCommand() {
-    return setAngle(otfAngleSupplier).;
+    return setAngle(otfAngleSupplier);
   }
 
   public Command hubCommand(Supplier<Pose2d> robotPose) {
