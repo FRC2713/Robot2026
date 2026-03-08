@@ -95,7 +95,9 @@ public class IntakeExtension
   }
 
   public Command retractCommand() {
-    return setDistanceCommand(IntakeConstants.Extension.retractedPosition, IntakeConstants.Extension.retractCruiseVelocity);
+    return setDistanceCommand(
+        IntakeConstants.Extension.retractedPosition,
+        IntakeConstants.Extension.retractCruiseVelocity);
   }
 
   /**

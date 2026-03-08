@@ -47,6 +47,7 @@ public class RightNeutralOutpost {
             Commands.sequence(
                 Commands.print("[AUTO] Going to fuel"),
                 intakeFuelRight.resetOdometry(),
+                // otfShotSupplier.get().withTimeout(1),
                 Commands.parallel(
                     intakeFuelRight.cmd(),
                     Commands.sequence(
