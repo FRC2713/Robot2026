@@ -37,6 +37,7 @@ import frc2713.robot.commands.autos.RightSideAutoBump;
 import frc2713.robot.generated.TunerConstants;
 import frc2713.robot.oi.DevControls;
 import frc2713.robot.oi.DriverControls;
+import frc2713.robot.oi.OperatorControls;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.drive.GyroIO;
 import frc2713.robot.subsystems.drive.GyroIOPigeon2;
@@ -92,6 +93,7 @@ public class RobotContainer {
 
   // Controllers
   public static DriverControls driverControls;
+  public static OperatorControls operatorControls;
   public static DevControls devControls;
 
   // Dashboard inputs
@@ -277,6 +279,8 @@ public class RobotContainer {
     devControls =
         new DevControls(
             drive, flywheels, turret, hood, intakeRoller, intakeExtension, dyeRotor, feeder);
+    operatorControls = 
+            new OperatorControls(drive, flywheels, turret, hood, intakeRoller, intakeExtension, dyeRotor, feeder);
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -432,6 +436,7 @@ public class RobotContainer {
   private void configureButtonBindings() {
     driverControls.configureButtonBindings();
     devControls.configureButtonBindings();
+    operatorControls.configureButtonBindings();
 
     // Default commands
     // Set drive command to accept inputs from both driver and dev controllers
