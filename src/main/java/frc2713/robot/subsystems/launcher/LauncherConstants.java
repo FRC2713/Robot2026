@@ -39,7 +39,7 @@ public final class LauncherConstants {
     public static Angle staticHubAngle = Degrees.of(0);
 
     // Turret rotation limits
-    public static final double FORWARD_LIMIT_DEGREES = 210.0;
+    public static final double FORWARD_LIMIT_DEGREES = 210;
     public static final double REVERSE_LIMIT_DEGREES = -210.0;
 
     public static final Angle forwardSoftLimit = Degrees.of(FORWARD_LIMIT_DEGREES);
@@ -75,16 +75,16 @@ public final class LauncherConstants {
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
       // PID gains for Motion Magic
-      config.fxConfig.Slot0.kP = Util.modeDependentValue(0.0, 80.0);
+      config.fxConfig.Slot0.kP = Util.modeDependentValue(450.0, 80.0);
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = Util.modeDependentValue(0.0, 16.0);
-      config.fxConfig.Slot0.kS = Util.modeDependentValue(0.0, 0.15); // static friction compensation
+      config.fxConfig.Slot0.kS = Util.modeDependentValue(0.2, 0.15); // static friction compensation
       config.fxConfig.Slot0.kV = Util.modeDependentValue(0.0, 0.12); // velocity feedforward
       config.fxConfig.Slot0.kA = Util.modeDependentValue(0.0, 0.01); // acceleration feedforward
 
       // Motion Magic parameters
-      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 5.0; // rotations per second
-      config.fxConfig.MotionMagic.MotionMagicAcceleration = 15.0; // rotations per second^2
+      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 20.0; // rotations per second
+      config.fxConfig.MotionMagic.MotionMagicAcceleration = 20.0; // rotations per second^2
       config.fxConfig.MotionMagic.MotionMagicJerk = 100; // limit jerk for smooth motion
 
       // Gear ratio: motor rotations per turret rotation = GEAR_1/GEAR_0 = 120/60 = 2.0
@@ -115,17 +115,19 @@ public final class LauncherConstants {
     public static int MODEL_INDEX = 3;
     public static int PARENT_INDEX = 0; // drivetrain
 
-    public static final LoggedTunableMeasure<Angle> PIDTestAngleOne =
-        new LoggedTunableMeasure<>("Flywheels/PIDTestAngleOne", Degrees.of(100));
-    public static final LoggedTunableMeasure<Angle> PIDTestAngleTwo =
-        new LoggedTunableMeasure<>("Flywheels/PIDTestAngleTwo", Degrees.of(-100));
+    public static LoggedTunableMeasure<Angle> PIDTestAngleOne =
+        new LoggedTunableMeasure<>("Turret/PIDTestAngleOne", Degrees.of(10));
+    public static LoggedTunableMeasure<Angle> PIDTestAngleTwo =
+        new LoggedTunableMeasure<>("Turret/PIDTestAngleTwo", Degrees.of(-10));
+    public static LoggedTunableMeasure<Angle> staticLeftTrench =
+        new LoggedTunableMeasure<>("Turret/Turret Static Trench L", Degrees.of(10));
+    public static LoggedTunableMeasure<Angle> staticRightTrench =
+        new LoggedTunableMeasure<>("Turret/Turret Static Trench R", Degrees.of(-10));
+    public static LoggedTunableMeasure<Angle> staticTowerShot =
+        new LoggedTunableMeasure<>("Turret/Turret Static Tower", Degrees.of(3));
   }
 
   public final class Flywheels {
-    public static final LoggedTunableMeasure<AngularVelocity> PIDTest =
-        new LoggedTunableMeasure<>("Flywheels/PIDTest", RPM.of(2000));
-    public static final LoggedTunableMeasure<AngularVelocity> launchVelocity =
-        new LoggedTunableMeasure<>("Flywheels/launchVelocity", RPM.of(2500));
 
     public static TalonFXSubsystemConfig leaderConfig = new TalonFXSubsystemConfig();
     public static TalonFXSubsystemConfig followerConfig = new TalonFXSubsystemConfig();
@@ -153,7 +155,7 @@ public final class LauncherConstants {
       leaderConfig.tunable = true;
       leaderConfig.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
       leaderConfig.generalControlMode = GeneralControlMode.VELOCITY;
-      leaderConfig.acceptableVelocityError = RPM.of(35);
+      leaderConfig.acceptableVelocityError = RPM.of(100);
 
       followerConfig.name = "Flywheels Follower";
       followerConfig.talonCANID = new CANDeviceId(51, "canivore");
@@ -169,16 +171,15 @@ public final class LauncherConstants {
     public static int MODEL_INDEX = 5;
     public static int PARENT_INDEX = 4;
 
-    public static AngularVelocity idleVelocity = RotationsPerSecond.of(20);
-
     public static Transform3d localTransform =
         new Transform3d(
             new Translation3d(Inches.of(-5).in(Meters), 0, Inches.of(2).in(Meters)),
             new Rotation3d(0, Degrees.of(-90).in(Radians), 0));
 
-    public static AngularVelocity staticHubVelocity = RotationsPerSecond.of(20);
-    public static AngularVelocity staticTowerVelocity = RPM.of(1500);
-    public static InterpolatingDoubleTreeMap velocityMap = new InterpolatingDoubleTreeMap();
+    public static InterpolatingDoubleTreeMap ballVelocityMap = new InterpolatingDoubleTreeMap();
+    public static InterpolatingDoubleTreeMap ballVelocityAZMap = new InterpolatingDoubleTreeMap();
+
+    public static InterpolatingDoubleTreeMap rpmMap = new InterpolatingDoubleTreeMap();
 
     public static Distance WHEEL_DIAMETER = Inches.of(4);
     // How many fuel we can launch per second at max firing rate
@@ -190,14 +191,40 @@ public final class LauncherConstants {
 
     static {
       // Distance (m) -> Ball Velocity (ft/s)
-      velocityMap.put(1.0, 20.0);
-      velocityMap.put(1.5, 20.0);
-      velocityMap.put(2.5, 22.0);
-      velocityMap.put(3.2, 23.0);
-      velocityMap.put(4.0, 26.0);
-      velocityMap.put(5.17, 29.0);
-      velocityMap.put(5.4, 30.0);
+      ballVelocityMap.put(1.0, 20.0);
+      ballVelocityMap.put(1.5, 20.0);
+      ballVelocityMap.put(2.5, 22.0);
+      ballVelocityMap.put(3.2, 23.0);
+      ballVelocityMap.put(4.0, 26.0);
+      ballVelocityMap.put(5.17, 29.0);
+      ballVelocityMap.put(5.4, 30.0);
+
+      ballVelocityAZMap.put(1.0, 20.0);
+      ballVelocityAZMap.put(1.5, 20.0);
+      ballVelocityAZMap.put(2.5, 22.0);
+      ballVelocityAZMap.put(3.2, 23.0);
+      ballVelocityAZMap.put(4.0, 26.0);
+      ballVelocityAZMap.put(5.17, 29.0);
+      ballVelocityAZMap.put(5.4, 30.0);
     }
+
+    static {
+      // Ball Velocity (m) -> RPM (ft/s)
+      rpmMap.put(30.0, 2000.0);
+      rpmMap.put(26.0, 1750.0);
+      rpmMap.put(23.0, 1500.0);
+    }
+
+    public static LoggedTunableMeasure<AngularVelocity> idleVelocity =
+        new LoggedTunableMeasure<>("Flywheels/Idle Velocity", RotationsPerSecond.of(20));
+    public static LoggedTunableMeasure<AngularVelocity> PIDTest =
+        new LoggedTunableMeasure<>("Flywheels/PIDTest", RPM.of(2000));
+    public static LoggedTunableMeasure<AngularVelocity> staticRightLeftTrench =
+        new LoggedTunableMeasure<>("Flywheels/Flywheels Static Trench", RPM.of(3000));
+    public static LoggedTunableMeasure<AngularVelocity> staticHubVelocity =
+        new LoggedTunableMeasure<>("Flywheels/Flywheels Static Hub", RotationsPerSecond.of(20));
+    public static LoggedTunableMeasure<AngularVelocity> staticTowerVelocity =
+        new LoggedTunableMeasure<AngularVelocity>("Flywheels/Flywheels Static Tower", RPM.of(1500));
   }
 
   public final class Hood {
@@ -206,6 +233,7 @@ public final class LauncherConstants {
 
     public static final Angle minAngle = Degrees.of(0);
     public static final Angle maxAngle = Degrees.of(30);
+
     // 9 tooth pinion to 20 tooth gear, 16 tooth gear to 38 tooth gear, 10 tooth gear to 124 tooth
     // gear for total reduction of 0.0306
     public static double gearRatio = ((52 / 8.0) * (38 / 16.0) * (124 / 10.0));
@@ -257,24 +285,31 @@ public final class LauncherConstants {
     public static int MODEL_INDEX = 4;
     public static int PARENT_INDEX = 3; // turret
 
-    public static LoggedTunableMeasure<Angle> staticTowerAngle =
-        new LoggedTunableMeasure<Angle>("Hood/Static Tower", Degrees.of(25));
-    public static LoggedTunableMeasure<Angle> staticHubAngle =
-        new LoggedTunableMeasure<Angle>("Hood/Static Hub", Degrees.of(25));
-
     public static InterpolatingDoubleTreeMap angleMap = new InterpolatingDoubleTreeMap();
+    public static InterpolatingDoubleTreeMap angleForAZMap = new InterpolatingDoubleTreeMap();
 
     static {
       // Distance (m) -> Hood Pitch (Degrees)
-      angleMap.put(0.9, 9.0);
-      angleMap.put(1.0, 11.0);
-      angleMap.put(1.5, 18.0);
-      angleMap.put(2.0, 24.0);
-      angleMap.put(3.0, 28.0);
-      angleMap.put(4.0, 30.0);
-      angleMap.put(4.5, 30.0);
-      angleMap.put(5.0, 30.0);
+      angleMap.put(5.486, 28.74);
+      angleMap.put(4.786, 26.0);
+      angleMap.put(4.175, 25.0);
     }
+    // 5.486 2000 28.74
+    // 4.786 1750 26
+
+    static {
+      // Distance (m) -> Hood Pitch (Degrees)
+      angleForAZMap.put(5.486, 28.74);
+      angleForAZMap.put(4.786, 26.0);
+      angleForAZMap.put(4.175, 25.0);
+    }
+
+    public static LoggedTunableMeasure<Angle> staticTowerAngle =
+        new LoggedTunableMeasure<Angle>("Hood/Hood Static Tower", Degrees.of(25));
+    public static LoggedTunableMeasure<Angle> staticRightLeftTrenchAngle =
+        new LoggedTunableMeasure<Angle>("Hood/Hood Static Trench", Degrees.of(25));
+    public static LoggedTunableMeasure<Angle> staticHubAngle =
+        new LoggedTunableMeasure<Angle>("Hood/Hood Static Hub", Degrees.of(25));
   }
 
   public static LoggedTunableMeasure<Time> otfLinearProjectionSeconds =

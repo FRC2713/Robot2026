@@ -40,6 +40,20 @@ public final class GameCommandGroups {
           .withName("OTF Shooting");
     }
 
+    public static Command otfShotHoodProtect(
+        Drive drive,
+        Flywheels flywheels,
+        Hood hood,
+        Turret turret,
+        Feeder feeder,
+        DyeRotor dyeRotor,
+        IntakeExtension extension) {
+      return Commands.either(
+          Commands.none(),
+          otfShot(drive, flywheels, hood, turret, feeder, dyeRotor, extension),
+          () -> hood.inRetractionZone(() -> drive.getPose()));
+    }
+
     /** OTF shooting with drive limits. Use for driver/operator triggers. */
     public static Command otfShot(
         Drive drive,
@@ -76,9 +90,67 @@ public final class GameCommandGroups {
         IntakeExtension extension,
         IntakeRoller rollers) {
       return Commands.parallel(
-          flywheels.setVelocity(() -> LauncherConstants.Flywheels.staticTowerVelocity),
-          hood.dumbCommand(),
+          flywheels.setVelocity(LauncherConstants.Flywheels.staticTowerVelocity),
+          // hood.dumbCommand(),
           // turret.setAngle(() -> Degrees.of(0.0)),
+          feeder.feedWhenReady(() -> flywheels.atTarget()),
+          dyeRotor.feedWhenReady(() -> flywheels.atTarget())
+          // extension.maintainFuelPressureCommand(),
+          // rollers.voltageCommand(IntakeConstants.Roller.intakeVoltageDesired)
+          );
+    }
+
+    public static Command toowerShot(
+        Drive drive,
+        Flywheels flywheels,
+        Hood hood,
+        Turret turret,
+        Feeder feeder,
+        DyeRotor dyeRotor,
+        IntakeExtension extension,
+        IntakeRoller rollers) {
+      return Commands.parallel(
+          flywheels.setVelocity(LauncherConstants.Flywheels.staticTowerVelocity),
+          hood.setAngleCommand(LauncherConstants.Hood.staticTowerAngle),
+          turret.setAngle(LauncherConstants.Turret.staticTowerShot),
+          feeder.feedWhenReady(() -> flywheels.atTarget()),
+          dyeRotor.feedWhenReady(() -> flywheels.atTarget()),
+          extension.maintainFuelPressureCommand(),
+          rollers.voltageCommand(IntakeConstants.Roller.intakeVoltageDesired));
+    }
+
+    public static Command leftTrenchShot(
+        Drive drive,
+        Flywheels flywheels,
+        Hood hood,
+        Turret turret,
+        Feeder feeder,
+        DyeRotor dyeRotor,
+        IntakeExtension extension,
+        IntakeRoller rollers) {
+      return Commands.parallel(
+          flywheels.setVelocity(LauncherConstants.Flywheels.staticRightLeftTrench),
+          hood.setAngleCommand(LauncherConstants.Hood.staticRightLeftTrenchAngle),
+          turret.setAngle(LauncherConstants.Turret.staticLeftTrench),
+          feeder.feedWhenReady(() -> flywheels.atTarget()),
+          dyeRotor.feedWhenReady(() -> flywheels.atTarget()),
+          extension.maintainFuelPressureCommand(),
+          rollers.voltageCommand(IntakeConstants.Roller.intakeVoltageDesired));
+    }
+
+    public static Command rightTrenchShot(
+        Drive drive,
+        Flywheels flywheels,
+        Hood hood,
+        Turret turret,
+        Feeder feeder,
+        DyeRotor dyeRotor,
+        IntakeExtension extension,
+        IntakeRoller rollers) {
+      return Commands.parallel(
+          flywheels.setVelocity(LauncherConstants.Flywheels.staticRightLeftTrench),
+          hood.setAngleCommand(LauncherConstants.Hood.staticRightLeftTrenchAngle),
+          turret.setAngle(LauncherConstants.Turret.staticRightTrench),
           feeder.feedWhenReady(() -> flywheels.atTarget()),
           dyeRotor.feedWhenReady(() -> flywheels.atTarget()),
           extension.maintainFuelPressureCommand(),
@@ -113,7 +185,7 @@ public final class GameCommandGroups {
           .withName("Stopped Shooting");
     }
 
-    public static Command stopShootingAndRetract(
+    public static Command stopShootingAndRetractHood(
         Drive drive, Feeder feeder, DyeRotor dyeRotor, Hood hood) {
       return Commands.parallel(stopShooting(drive, feeder, dyeRotor), hood.retract());
     }

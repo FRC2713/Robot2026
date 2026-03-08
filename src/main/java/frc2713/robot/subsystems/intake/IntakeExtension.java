@@ -42,7 +42,7 @@ public class IntakeExtension
               AngularVelocity cruiseAngularVelocity =
                   convertSubsystemVelocityToMotorVelocity(cruiseVelocity.get());
               Logger.recordOutput(pb.makePath("cruiseLinearVelocity"), cruiseVelocity.get());
-              Logger.recordOutput(pb.makePath("cruiseAnguularVelocity"), cruiseAngularVelocity);
+              Logger.recordOutput(pb.makePath("cruiseAngularVelocity"), cruiseAngularVelocity);
               setMotionMagicConfigImpl(
                   IntakeConstants.Extension.motionMagicGains
                       .get()
@@ -69,19 +69,31 @@ public class IntakeExtension
   }
 
   /**
-   * Move to the extended position with motion magic
+   * Move to the extended position with motion magic, does not stop until setpoint is reached
    *
    * @return
    */
+  public Command extendFullyCommand() {
+    return Commands.repeatingSequence(
+            setDistanceCommand(IntakeConstants.Extension.extendedPosition))
+        .until(() -> this.atTarget());
+  }
+
+  /**
+   * Move to the extended position with motion magic, does not stop until setpoint is reached
+   *
+   * @return
+   */
+  public Command retractFullyCommand() {
+    return Commands.repeatingSequence(
+            setDistanceCommand(IntakeConstants.Extension.retractedPosition))
+        .until(() -> this.atTarget());
+  }
+
   public Command extendCommand() {
     return setDistanceCommand(IntakeConstants.Extension.extendedPosition);
   }
 
-  /**
-   * Move to the retracted postion with motion magic
-   *
-   * @return
-   */
   public Command retractCommand() {
     return setDistanceCommand(IntakeConstants.Extension.retractedPosition);
   }

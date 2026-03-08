@@ -199,7 +199,7 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
       };
 
   public Command otfCommand() {
-    return setAngle(otfAngleSupplier).withName("OTF Tracking");
+    return setAngle(otfAngleSupplier);
   }
 
   public Command hubCommand(Supplier<Pose2d> robotPose) {

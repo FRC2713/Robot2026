@@ -14,9 +14,9 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc2713.lib.io.CanCoderIO;
-import frc2713.lib.io.CanCoderIOHardware;
 import frc2713.lib.io.CanCoderInputs;
 import frc2713.lib.io.CanCoderInputsAutoLogged;
 import frc2713.lib.io.MotorIO;
@@ -27,10 +27,12 @@ import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.commands.DriveCommands;
+import frc2713.robot.commands.autos.DriveTest;
 import frc2713.robot.commands.autos.NeutralScoreNeutral;
-import frc2713.robot.commands.autos.NeutralScoreOutpostOTF;
 import frc2713.robot.commands.autos.NeutralSweepLeftToRight;
 import frc2713.robot.commands.autos.NeutralSweepRightToLeft;
+import frc2713.robot.commands.autos.RightNeutralOutpost;
+import frc2713.robot.commands.autos.RightNeutralOutpostStatic;
 import frc2713.robot.commands.autos.RightSideAutoBump;
 import frc2713.robot.generated.TunerConstants;
 import frc2713.robot.oi.DevControls;
@@ -120,12 +122,21 @@ public class RobotContainer {
         hood =
             new Hood(LauncherConstants.Hood.config, new TalonFXIO(LauncherConstants.Hood.config));
 
+        // turret =
+        //     new Turret(
+        //         LauncherConstants.Turret.config,
+        //         new TalonFXIO(LauncherConstants.Turret.config),
+        //         new CanCoderInputsAutoLogged(),
+        //         new CanCoderIOHardware(LauncherConstants.Turret.canCoderConfig));
         turret =
             new Turret(
                 LauncherConstants.Turret.config,
-                new TalonFXIO(LauncherConstants.Turret.config),
+                new MotorIO() {},
                 new CanCoderInputsAutoLogged(),
-                new CanCoderIOHardware(LauncherConstants.Turret.canCoderConfig));
+                new CanCoderIO() {
+                  @Override
+                  public void readInputs(CanCoderInputs inputs) {}
+                });
 
         intakeRoller =
             new IntakeRoller(
@@ -285,8 +296,10 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+
+    autoChooser.addOption("DriveTest", DriveTest.routine(autoFactory));
     autoChooser.addOption(
-        "Right Side Bump Auto",
+        "Trench to Neutral, Launch At Bump",
         RightSideAutoBump.routine(
             autoFactory,
             drive,
@@ -296,9 +309,11 @@ public class RobotContainer {
             hood,
             turret,
             dyeRotor,
-            feeder));
+            feeder,
+            () ->
+                GameCommandGroups.Launching.getOtfShot(flywheels, hood, turret, feeder, dyeRotor)));
     autoChooser.addOption(
-        "Trench to neutral launch then refuel",
+        "Trench to Neutral, Launch At Trench, Refuel",
         NeutralScoreNeutral.routine(
             autoFactory,
             drive,
@@ -312,8 +327,22 @@ public class RobotContainer {
             () ->
                 GameCommandGroups.Launching.getOtfShot(flywheels, hood, turret, feeder, dyeRotor)));
     autoChooser.addOption(
-        "Trench to neutral otf to outpost",
-        NeutralScoreOutpostOTF.routine(
+        "Trench to Neutral, Launch, Then Move To Outpost",
+        RightNeutralOutpostStatic.routine(
+            autoFactory,
+            drive,
+            intakeExtension,
+            intakeRoller,
+            flywheels,
+            hood,
+            turret,
+            dyeRotor,
+            feeder,
+            () ->
+                GameCommandGroups.Launching.getOtfShot(flywheels, hood, turret, feeder, dyeRotor)));
+    autoChooser.addOption(
+        "Trench to Neutral, Launch while Moving To Outpost",
+        RightNeutralOutpost.routine(
             autoFactory,
             drive,
             intakeExtension,
@@ -327,7 +356,7 @@ public class RobotContainer {
                 GameCommandGroups.Launching.getOtfShot(flywheels, hood, turret, feeder, dyeRotor)));
 
     autoChooser.addOption(
-        "Trench Sweep Right to Left",
+        "Trench to Neutral, Sweep Right to Left, Launch",
         NeutralSweepRightToLeft.routine(
             autoFactory,
             drive,
@@ -342,7 +371,7 @@ public class RobotContainer {
                 GameCommandGroups.Launching.getOtfShot(flywheels, hood, turret, feeder, dyeRotor)));
 
     autoChooser.addOption(
-        "Trench Sweep Left to Right",
+        "Trench to Neutral, Sweep Left to Right, Launch",
         NeutralSweepLeftToRight.routine(
             autoFactory,
             drive,
@@ -361,6 +390,12 @@ public class RobotContainer {
 
     // configure the kinematics calculations
     configureKinematics();
+
+    // hood.setDefaultCommand(
+    //     hood.autoRetractCommand(drive::getPose, LauncherConstants.Hood.staticHubAngle));
+
+    new Trigger(() -> hood.inRetractionZone(drive::getPose))
+        .whileTrue(hood.retract().repeatedly().withName("Ducking"));
   }
 
   /** Use this robot to configure the transforms between subsystems. */

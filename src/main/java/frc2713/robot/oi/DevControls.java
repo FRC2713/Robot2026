@@ -5,16 +5,15 @@ import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.FeetPerSecondPerSecond;
-import static edu.wpi.first.units.Units.InchesPerSecond;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc2713.robot.GameCommandGroups;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
-import frc2713.robot.subsystems.intake.IntakeConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.launcher.Flywheels;
@@ -103,28 +102,6 @@ public class DevControls {
                 "Inch Right"))
         .onFalse(this.setToNormalDriveCmd());
 
-    // Turret angle controls
-    // controller.a().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleOne));
-
-    // controller.b().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleTwo));
-
-    controller
-        .a()
-        .onTrue(intakeExtension.setDistanceCommand(IntakeConstants.Extension.extendedPosition));
-    controller
-        .b()
-        .onTrue(
-            intakeExtension.setDistanceCommand(
-                IntakeConstants.Extension.retractedPosition, () -> InchesPerSecond.of(5.0)));
-
-    controller
-        .leftBumper()
-        .whileTrue(Commands.sequence(intakeExtension.extendAndWaitCommand(), intakeRoller.intake()))
-        .onFalse(Commands.parallel(intakeRoller.stop(), intakeExtension.retractCommand()));
-    // .onFalse(intakeExtension.retractCommand()); // Bring hood down
-
-    // controller.b().onTrue(hood.hubCommand()).onFalse(hood.setAngleCommand(() -> Degrees.of(10)));
-
     // Test setting drive limits
     controller
         .x()
@@ -137,15 +114,57 @@ public class DevControls {
                 Optional.of(DegreesPerSecondPerSecond.of(360.0))))
         .onFalse(DriveCommands.clearDriveLimits(drive));
 
-    // DyeRotor controls
+    // Intake Controls
+
+    controller
+        .leftTrigger(0.25)
+        .onTrue(
+            Commands.parallel(
+                    intakeExtension.extendCommand(),
+                    Commands.sequence(
+                        Commands.waitSeconds(0.5),
+                        Commands.parallel(intakeRoller.intake(), dyeRotor.stirFuel())))
+                .withName("Intaking"))
+        .onFalse(
+            Commands.parallel(intakeRoller.stop().withName("Stop Intake"), dyeRotor.stopCommand()));
+
+    controller
+        .leftBumper()
+        .onTrue(
+            Commands.parallel(intakeExtension.retractCommand(), intakeRoller.intake())
+                .withName("Retract Intake"))
+        .onFalse(intakeRoller.stop().withName("Stop Intake"));
+
+    // Hood Controls
+    controller.povUp().onTrue(hood.setAngleCommand(() -> Degrees.of(25)));
+
+    controller.povDown().onTrue(hood.setAngleCommand(() -> Degrees.of(0)));
+
+    // controller
+    //     .leftBumper()
+    //     .whileTrue(hood.setAngleCommand(() -> hood.getCurrentPosition().minus(Degrees.of(2))));
+    // controller
+    //     .rightBumper()
+    //     .whileTrue(hood.setAngleCommand(() -> hood.getCurrentPosition().plus(Degrees.of(2))));
+
+    // Turret Controls
+
+    controller.a().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleOne));
+
+    controller.b().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleTwo));
+
+    // Serializer controls
+
     // A button - index fuel
     // controller.a().whileTrue(dyeRotor.indexFuel()).onFalse(dyeRotor.stopCommand());
 
     // B button - index fuel
     // controller.b().whileTrue(feeder.feedShooter()).onFalse(feeder.stop());
 
-    // controller.x().whileTrue(flywheels.setVelocity(() ->
-    // LauncherConstants.Flywheels.launchVelocity.get())).onFalse(flywheels.stop());
+    // controller
+    //     .x()
+    //     .onTrue(flywheels.velocitySetpointCommand(LauncherConstants.Flywheels.PIDTest))
+    //     .onFalse(flywheels.velocitySetpointCommand(() -> RPM.of(0)));
 
     // Y button - index fuel in parallel (same effect since it's the same command)
     controller
@@ -153,14 +172,18 @@ public class DevControls {
         .whileTrue(
             Commands.sequence(
                 flywheels.setVelocityUntilTarget(
-                    () ->
-                        LauncherConstants.Flywheels.launchVelocity
-                            .get()), // Spin up flywheels to launch velocity
+                    LauncherConstants.Flywheels
+                        .PIDTest), // Spin up flywheels to a test launch velocity
                 Commands.parallel(dyeRotor.indexFuel(), feeder.feedShooter())))
         .onFalse(Commands.parallel(dyeRotor.stopCommand(), feeder.stop(), flywheels.stop()));
 
-    controller.povUp().onTrue(hood.setAngleCommand(() -> Degrees.of(25)));
-    controller.povDown().onTrue(hood.setAngleCommand(() -> Degrees.of(0)));
+    // Shoot when flywheels are ready
+    controller
+        .rightTrigger(.98)
+        .whileTrue(
+            GameCommandGroups.Launching.dumbShot(
+                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
+        .onFalse(GameCommandGroups.Launching.stopShooting(drive, feeder, dyeRotor));
   }
 
   public double getLeftY() {

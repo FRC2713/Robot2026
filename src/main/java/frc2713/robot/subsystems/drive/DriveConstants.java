@@ -15,7 +15,7 @@ public class DriveConstants {
         new LoggedTunableGains("yTraj", new Slot0Configs().withKP(2), new MotionMagicConfigs());
     public static final LoggedTunableGains headingTrajectoryController =
         new LoggedTunableGains(
-            "headingTraj", new Slot0Configs().withKP(3).withKD(0.0), new MotionMagicConfigs());
+            "headingTraj", new Slot0Configs().withKP(5.7).withKD(0.0), new MotionMagicConfigs());
   }
 
   public static final LoggedTunableNumber speedScalar =

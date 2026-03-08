@@ -16,7 +16,11 @@ import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 import java.util.function.Supplier;
 
-public class NeutralScoreOutpostOTF {
+/**
+ * Starts at right trench. Collects from Neutral Zone once. Goes to RIGHT trench. Shoots fo X
+ * seconds Goes to Outpost. Shoots at Outpost for Y seconds. Moves to Neutral Zone.
+ */
+public class RightNeutralOutpostStatic {
   public static AutoRoutine getRoutine(
       AutoFactory factory,
       Drive driveSubsystem,
@@ -29,55 +33,57 @@ public class NeutralScoreOutpostOTF {
       //   Launcher intakeAndShooter,
       Feeder feeder,
       Supplier<Command> otfShotSupplier) {
-    AutoRoutine routine = factory.newRoutine("Start Collect Shoot");
+    AutoRoutine routine = factory.newRoutine("RightNeutralOutpostStatic");
 
-    AutoTrajectory faceFuelTrench = routine.trajectory("FaceFuelTrench");
-    AutoTrajectory intakeFuel = routine.trajectory("IntakeFuel");
+    AutoTrajectory intakeFuelRight = routine.trajectory("IntakeFuelRight");
+    AutoTrajectory neutralToRightTrenchForward = routine.trajectory("NeutralToRightTrenchForward");
     AutoTrajectory oTFToOutpost = routine.trajectory("OTFToOutpost");
-    AutoTrajectory moveToOutpostTrench = routine.trajectory("MoveToOutpostTrench");
     AutoTrajectory outpostToTrench = routine.trajectory("OutpostToTrench");
-    AutoTrajectory faceFuelTrench2 = routine.trajectory("FaceFuelTrench");
+    AutoTrajectory faceFuelRightTrenchBackward = routine.trajectory("FaceFuelRightTrenchBackward");
 
     routine
         .active()
         .onTrue(
             Commands.sequence(
-                Commands.print("Going to fuel"),
-                faceFuelTrench.resetOdometry(),
-                faceFuelTrench.cmd()));
-
-    faceFuelTrench
-        .done()
-        .onTrue(
-            Commands.sequence(
-                Commands.print("Starting intake and collecting fuel"),
+                Commands.print("[AUTO] Going to fuel"),
+                intakeFuelRight.resetOdometry(),
                 Commands.parallel(
-                    intakeExtension.extendCommand(), intakeRoller.intake(), intakeFuel.cmd())));
+                    intakeFuelRight.cmd(),
+                    Commands.sequence(
+                        new WaitCommand(0.3),
+                        intakeExtension.extendCommand(),
+                        intakeRoller.intake()))));
 
-    intakeFuel
+    intakeFuelRight
         .done()
         .onTrue(
             Commands.sequence(
-                Commands.print("Moving to shooting position"),
-                Commands.sequence(Commands.race(intakeRoller.stop(), new WaitCommand(1))),
-                moveToOutpostTrench.cmd()));
+                Commands.print("[AUTO] Moving to trench"),
+                Commands.runOnce(() -> driveSubsystem.stop()),
+                Commands.race(intakeRoller.stop(), new WaitCommand(0.2)),
+                neutralToRightTrenchForward.cmd()));
 
-    moveToOutpostTrench.done().onTrue(Commands.parallel(otfShotSupplier.get(), oTFToOutpost.cmd()));
+    neutralToRightTrenchForward
+        .done()
+        .onTrue(
+            Commands.sequence(
+                Commands.print("[AUTO] Shooting from trench"),
+                Commands.runOnce(() -> driveSubsystem.stop()),
+                Commands.deadline(Commands.waitSeconds(5.0), otfShotSupplier.get()),
+                oTFToOutpost.cmd()));
 
     oTFToOutpost
         .done()
         .onTrue(
             Commands.deadline(
                 Commands.sequence(
-                    Commands.print("Launching at outpost"),
-                    Commands.waitSeconds(4),
-                    Commands.print("Moving back to trench"),
-                    outpostToTrench.cmd()),
-                otfShotSupplier.get()));
+                    Commands.runOnce(() -> driveSubsystem.stop()),
+                    Commands.print("[AUTO] Launching at outpost"),
+                    Commands.deadline(Commands.waitSeconds(3), otfShotSupplier.get()))));
 
-    outpostToTrench.done().onTrue(faceFuelTrench2.cmd());
+    outpostToTrench.done().onTrue(faceFuelRightTrenchBackward.cmd());
 
-    faceFuelTrench2.done();
+    faceFuelRightTrenchBackward.done().onTrue(Commands.runOnce(() -> driveSubsystem.stop()));
 
     return routine;
   }
@@ -93,7 +99,7 @@ public class NeutralScoreOutpostOTF {
       DyeRotor dyeRotor,
       Feeder feeder,
       Supplier<Command> otfShotSupplier) {
-    return NeutralScoreOutpostOTF.getRoutine(
+    return RightNeutralOutpostStatic.getRoutine(
             factory,
             driveSubsystem,
             intakeExtension,

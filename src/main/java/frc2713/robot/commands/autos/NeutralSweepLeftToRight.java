@@ -16,6 +16,10 @@ import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 import java.util.function.Supplier;
 
+/**
+ * Starts at left trench. Collects from Neutral Zone once. Goes to RIGHT trench. Shots while
+ * stationary.
+ */
 public class NeutralSweepLeftToRight {
   public static AutoRoutine getRoutine(
       AutoFactory factory,
@@ -29,7 +33,7 @@ public class NeutralSweepLeftToRight {
       //   Launcher intakeAndShooter,
       Feeder feeder,
       Supplier<Command> otfShotSupplier) {
-    AutoRoutine routine = factory.newRoutine("Start Neutral Sweep Left to Right");
+    AutoRoutine routine = factory.newRoutine("NeutralSweepLeftToRight");
 
     AutoTrajectory faceFuelTrenchLeft = routine.trajectory("FaceFuelTrenchLeft");
     AutoTrajectory intakeFuelLeft = routine.trajectory("IntakeFuelLeft");
@@ -39,7 +43,7 @@ public class NeutralSweepLeftToRight {
         .active()
         .onTrue(
             Commands.sequence(
-                Commands.print("Going to fuel"),
+                Commands.print("[AUTO] Going to fuel"),
                 faceFuelTrenchLeft.resetOdometry(),
                 faceFuelTrenchLeft.cmd()));
 
@@ -47,7 +51,7 @@ public class NeutralSweepLeftToRight {
         .done()
         .onTrue(
             Commands.sequence(
-                Commands.print("Starting intake and collecting fuel"),
+                Commands.print("[AUTO] Starting intake and collecting fuel"),
                 Commands.parallel(
                     intakeExtension.extendCommand(), intakeRoller.intake(), intakeFuelLeft.cmd())));
 
@@ -55,8 +59,8 @@ public class NeutralSweepLeftToRight {
         .done()
         .onTrue(
             Commands.sequence(
-                Commands.print("Sweeping to launching position"),
-                Commands.sequence(Commands.race(intakeRoller.stop(), new WaitCommand(0.5))),
+                Commands.print("[AUTO] Sweeping to launching position"),
+                Commands.sequence(Commands.race(intakeRoller.stop(), new WaitCommand(0.2))),
                 sweepToLaunchTrenchRight.cmd()));
 
     sweepToLaunchTrenchRight.done().onTrue(otfShotSupplier.get());

@@ -84,6 +84,15 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
         });
   }
 
+  @AutoLogOutput
+  public boolean inRetractionZone(Supplier<Pose2d> poseSupplier) {
+    return FieldConstants.HoodRetractionZones.isInRetractionZone(poseSupplier.get());
+  }
+
+  public Angle getCurrentPosition() {
+    return this.inputs.position;
+  }
+
   @AutoLogOutput public boolean ducking = false;
 
   public final Supplier<Angle> otfAngSupplier =
