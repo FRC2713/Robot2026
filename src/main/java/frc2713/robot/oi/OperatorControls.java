@@ -47,7 +47,7 @@ public class OperatorControls {
         .leftBumper()
         .onTrue(
             GameCommandGroups.Launching.leftTrenchShot(
-                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
+                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller).withName("Static LTrench Shot"))
         .onFalse(
             GameCommandGroups.Launching.stopShootingAndRetractHood(drive, feeder, dyeRotor, hood));
 
@@ -57,17 +57,17 @@ public class OperatorControls {
             GameCommandGroups.Launching.rightTrenchShot(
                 drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
         .onFalse(
-            GameCommandGroups.Launching.stopShootingAndRetractHood(drive, feeder, dyeRotor, hood));
+            GameCommandGroups.Launching.stopShootingAndRetractHood(drive, feeder, dyeRotor, hood).withName("Static R Trench Shot"));
 
     controller
         .rightTrigger(0.98)
-        .onTrue(GameCommandGroups.OperatorOverriderrs.unjam(feeder))
-        .onFalse(GameCommandGroups.OperatorOverriderrs.stopUnjam(feeder));
+        .onTrue(GameCommandGroups.OperatorOverriderrs.unjam(feeder).withName("Unjamming"))
+        .onFalse(GameCommandGroups.OperatorOverriderrs.stopUnjam(feeder).withName("Stop Unjamming"));
 
     controller
         .rightTrigger(0.98)
-        .onTrue(GameCommandGroups.OperatorOverriderrs.stir(dyeRotor, intakeRoller))
-        .onFalse(GameCommandGroups.OperatorOverriderrs.stopStir(dyeRotor, intakeRoller));
+        .onTrue(GameCommandGroups.OperatorOverriderrs.stir(dyeRotor, intakeRoller).withName("Stir"))
+        .onFalse(GameCommandGroups.OperatorOverriderrs.stopStir(dyeRotor, intakeRoller).withName("Stop Stir"));
 
     controller
         .y()
