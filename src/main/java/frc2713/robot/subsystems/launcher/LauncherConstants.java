@@ -39,8 +39,8 @@ public final class LauncherConstants {
     public static Angle staticHubAngle = Degrees.of(0);
 
     // Turret rotation limits
-    public static final double FORWARD_LIMIT_DEGREES = 20;
-    public static final double REVERSE_LIMIT_DEGREES = -20.0;
+    public static final double FORWARD_LIMIT_DEGREES = 210;
+    public static final double REVERSE_LIMIT_DEGREES = -210.0;
 
     public static final Angle forwardSoftLimit = Degrees.of(FORWARD_LIMIT_DEGREES);
     public static final Angle reverseSoftLimit = Degrees.of(REVERSE_LIMIT_DEGREES);

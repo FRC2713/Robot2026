@@ -1,5 +1,7 @@
 package frc2713.robot.subsystems.launcher;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
@@ -8,6 +10,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -16,6 +19,7 @@ import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
+import frc2713.robot.Constants;
 import frc2713.robot.FieldConstants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -26,7 +30,7 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
 
   public Hood(final TalonFXSubsystemConfig config, final MotorIO launcherMotorIO) {
     super(config, new MotorInputsAutoLogged(), launcherMotorIO);
-    // if (Constants.enableOTFFeatures) setDefaultCommand(otfCommand());
+    if (Constants.enableOTFFeatures) setDefaultCommand(otfCommand());
   }
 
   public Command setAngleCommand(Supplier<Angle> desiredAngle) {
@@ -80,6 +84,11 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
         });
   }
 
+  @AutoLogOutput
+  public boolean inRetractionZone(Supplier<Pose2d> poseSupplier) {
+    return FieldConstants.HoodRetractionZones.isInRetractionZone(poseSupplier.get());
+  }
+
   public Angle getCurrentPosition() {
     return this.inputs.position;
   }
@@ -89,7 +98,26 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   public final Supplier<Angle> otfAngSupplier =
       () -> {
         var solution = LaunchingSolutionManager.getInstance().getSolution();
-        return solution.hoodPitch().getMeasure();
+        Distance toGoal = this.getDistance2d(LaunchingSolutionManager.currentGoal);
+        boolean launchSolutionValid = solution.isValid();
+
+        Angle aimAngle;
+        if (launchSolutionValid) {
+          aimAngle = solution.hoodPitch().getMeasure();
+        } else {
+          // Fallback to distance-based lookup
+          aimAngle = Degrees.of(LauncherConstants.Hood.angleMap.get(toGoal.in(Meters)));
+        }
+
+        Logger.recordOutput(super.pb.makePath("OTF", "solutionIsValid"), launchSolutionValid);
+        Logger.recordOutput(super.pb.makePath("OTF", "distanceToGoal"), toGoal);
+        Logger.recordOutput(super.pb.makePath("OTF", "aimAngleDeg"), aimAngle.in(Degrees));
+        Logger.recordOutput(
+            super.pb.makePath("OTF", "currentAngleDeg"), inputs.position.in(Degrees));
+        Logger.recordOutput(
+            super.pb.makePath("OTF", "lookupAngle"),
+            Degrees.of(LauncherConstants.Hood.angleMap.get(toGoal.in(Meters))));
+        return aimAngle;
       };
 
   @Override

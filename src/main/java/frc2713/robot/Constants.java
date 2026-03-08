@@ -18,7 +18,9 @@ import frc2713.lib.drivers.CANDeviceId;
 public final class Constants {
   public static final Mode simMode = Mode.SIM;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
-  public static final boolean enableOTFFeatures = currentMode == Mode.SIM;
+
+  // sets default behaviour to track OTF solutions
+  public static final boolean enableOTFFeatures = false; // currentMode == Mode.SIM;
 
   public static final CANDeviceId launcherMotorDeviceId = new CANDeviceId(2);
   public static boolean tuningMode = true;

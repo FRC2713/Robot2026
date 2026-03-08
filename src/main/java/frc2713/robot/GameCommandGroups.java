@@ -40,6 +40,20 @@ public final class GameCommandGroups {
           .withName("OTF Shooting");
     }
 
+    public static Command otfShotHoodProtect(
+        Drive drive,
+        Flywheels flywheels,
+        Hood hood,
+        Turret turret,
+        Feeder feeder,
+        DyeRotor dyeRotor,
+        IntakeExtension extension) {
+      return Commands.either(
+          Commands.none(),
+          otfShot(drive, flywheels, hood, turret, feeder, dyeRotor, extension),
+          () -> hood.inRetractionZone(() -> drive.getPose()));
+    }
+
     /** OTF shooting with drive limits. Use for driver/operator triggers. */
     public static Command otfShot(
         Drive drive,
@@ -171,7 +185,7 @@ public final class GameCommandGroups {
           .withName("Stopped Shooting");
     }
 
-    public static Command stopShootingAndRetractHub(
+    public static Command stopShootingAndRetractHood(
         Drive drive, Feeder feeder, DyeRotor dyeRotor, Hood hood) {
       return Commands.parallel(stopShooting(drive, feeder, dyeRotor), hood.retract());
     }

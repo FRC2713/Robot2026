@@ -114,13 +114,15 @@ public class DriverControls {
         .onFalse(intakeRoller.stop().withName("Stop Intake"));
 
     // shoot otf
-    // controller
-    //     .rightBumper()
-    //     .whileTrue(
-    //         GameCommandGroups.Launching.otfShot(
-    //             drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension))
-    //     .onFalse(
-    //         Commands.parallel(GameCommandGroups.Launching.stopShooting(drive, feeder, dyeRotor)));
+    controller
+        .rightBumper()
+        .whileTrue(
+            GameCommandGroups.Launching.otfShotHoodProtect(
+                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension))
+        .onFalse(
+            Commands.parallel(
+                GameCommandGroups.Launching.stopShootingAndRetractHood(
+                    drive, feeder, dyeRotor, hood)));
 
     // shoot when flywheels are ready
     controller
@@ -128,23 +130,35 @@ public class DriverControls {
         .whileTrue(
             GameCommandGroups.Launching.dumbShot(
                 drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
-        .onFalse(GameCommandGroups.Launching.stopShootingAndRetractHub(drive, feeder, dyeRotor, hood));
+        .onFalse(
+            GameCommandGroups.Launching.stopShootingAndRetractHood(drive, feeder, dyeRotor, hood));
 
     controller
         .a()
         .onTrue(
             GameCommandGroups.Launching.toowerShot(
-                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller).withName("Tower Shot"));
+                    drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)
+                .withName("Tower Shot"))
+        .onFalse(
+            GameCommandGroups.Launching.stopShootingAndRetractHood(drive, feeder, dyeRotor, hood));
+
     controller
         .b()
         .onTrue(
             GameCommandGroups.Launching.rightTrenchShot(
-                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller).withName("Right Trench Shot"));
+                    drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)
+                .withName("Right Trench Shot"))
+        .onFalse(
+            GameCommandGroups.Launching.stopShootingAndRetractHood(drive, feeder, dyeRotor, hood));
+
     controller
         .x()
         .onTrue(
             GameCommandGroups.Launching.leftTrenchShot(
-                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller).withName("Left Trench Shot"));
+                    drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)
+                .withName("Left Trench Shot"))
+        .onFalse(
+            GameCommandGroups.Launching.stopShootingAndRetractHood(drive, feeder, dyeRotor, hood));
 
     // controller
   }

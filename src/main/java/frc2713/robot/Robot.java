@@ -9,6 +9,7 @@ package frc2713.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.generated.BuildConstants;
 import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
 import org.littletonrobotics.junction.LogFileUtil;
@@ -105,7 +106,8 @@ public class Robot extends LoggedRobot {
       RobotContainer.drive.setPose(visionPose.get());
     }
 
-    LaunchingSolutionManager.currentGoal = FieldConstants.Hub.topCenterPoint;
+    LaunchingSolutionManager.currentGoal =
+        AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint);
   }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */

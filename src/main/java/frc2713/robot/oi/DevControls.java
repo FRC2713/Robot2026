@@ -115,8 +115,8 @@ public class DevControls {
         .onFalse(DriveCommands.clearDriveLimits(drive));
 
     // Intake Controls
-    
-      controller
+
+    controller
         .leftTrigger(0.25)
         .onTrue(
             Commands.parallel(
@@ -135,7 +135,7 @@ public class DevControls {
                 .withName("Retract Intake"))
         .onFalse(intakeRoller.stop().withName("Stop Intake"));
 
-  // Hood Controls
+    // Hood Controls
     controller.povUp().onTrue(hood.setAngleCommand(() -> Degrees.of(25)));
 
     controller.povDown().onTrue(hood.setAngleCommand(() -> Degrees.of(0)));
