@@ -133,33 +133,6 @@ public class DriverControls {
         .onFalse(
             GameCommandGroups.Launching.stopShootingAndRetractHood(drive, feeder, dyeRotor, hood));
 
-    controller
-        .a()
-        .onTrue(
-            GameCommandGroups.Launching.toowerShot(
-                    drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)
-                .withName("Tower Shot"))
-        .onFalse(
-            GameCommandGroups.Launching.stopShootingAndRetractHood(drive, feeder, dyeRotor, hood));
-
-    controller
-        .b()
-        .onTrue(
-            GameCommandGroups.Launching.rightTrenchShot(
-                    drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)
-                .withName("Right Trench Shot"))
-        .onFalse(
-            GameCommandGroups.Launching.stopShootingAndRetractHood(drive, feeder, dyeRotor, hood));
-
-    controller
-        .x()
-        .onTrue(
-            GameCommandGroups.Launching.leftTrenchShot(
-                    drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)
-                .withName("Left Trench Shot"))
-        .onFalse(
-            GameCommandGroups.Launching.stopShootingAndRetractHood(drive, feeder, dyeRotor, hood));
-
     // controller
   }
 

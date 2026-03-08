@@ -22,6 +22,7 @@ import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.robot.Constants;
 import frc2713.robot.FieldConstants;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -32,6 +33,8 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
     super(config, new MotorInputsAutoLogged(), launcherMotorIO);
     if (Constants.enableOTFFeatures) setDefaultCommand(otfCommand());
   }
+
+  @AutoLog public boolean disableDucking = true;
 
   public Command setAngleCommand(Supplier<Angle> desiredAngle) {
     return motionMagicSetpointCommand(desiredAngle);
@@ -86,7 +89,8 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
 
   @AutoLogOutput
   public boolean inRetractionZone(Supplier<Pose2d> poseSupplier) {
-    return FieldConstants.HoodRetractionZones.isInRetractionZone(poseSupplier.get());
+    return !disableDucking
+        && FieldConstants.HoodRetractionZones.isInRetractionZone(poseSupplier.get());
   }
 
   public Angle getCurrentPosition() {

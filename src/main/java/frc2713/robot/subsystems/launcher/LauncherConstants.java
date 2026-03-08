@@ -133,7 +133,7 @@ public final class LauncherConstants {
     public static TalonFXSubsystemConfig leaderConfig = new TalonFXSubsystemConfig();
     public static TalonFXSubsystemConfig followerConfig = new TalonFXSubsystemConfig();
     public static MomentOfInertia flywhMomentOfInertia = MoiUnits.PoundSquareInches.of(10.410164);
-    public static double gearRatio =  18.0 / 24.0; // 1:1.33 reduction from motor to flywheel
+    public static double gearRatio = 18.0 / 24.0; // 1:1.33 reduction from motor to flywheel
 
     static {
       leaderConfig.name = "Flywheels";
@@ -235,9 +235,8 @@ public final class LauncherConstants {
     public static final Angle minAngle = Degrees.of(0);
     public static final Angle maxAngle = Degrees.of(30);
 
-    // 9 tooth pinion to 52 tooth gear, 16 tooth gear to 48 tooth gear to 38 to gear to 124 tooth sector gear
-    // Comes out to 56.58 : 1
-    public static double gearRatio = ((52 / 9.0) * (48.0 / 16.0) * (124 / 38.0));
+    // 8t pinion to 20t gear, 13t gear to  30t gear, 10t gear to 146 sector gear
+    public static double gearRatio = ((20 / 8.0) * (30.0 / 13.0) * (146.0 / 10.0));
 
     public static final Angle retractedPosition = Degrees.of(0);
 
