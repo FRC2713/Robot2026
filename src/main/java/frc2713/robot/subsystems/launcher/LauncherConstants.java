@@ -39,8 +39,8 @@ public final class LauncherConstants {
     public static Angle staticHubAngle = Degrees.of(0);
 
     // Turret rotation limits
-    public static final double FORWARD_LIMIT_DEGREES = 210;
-    public static final double REVERSE_LIMIT_DEGREES = -210.0;
+    public static final double FORWARD_LIMIT_DEGREES = 30.0;
+    public static final double REVERSE_LIMIT_DEGREES = -100.0;
 
     public static final Angle forwardSoftLimit = Degrees.of(FORWARD_LIMIT_DEGREES);
     public static final Angle reverseSoftLimit = Degrees.of(REVERSE_LIMIT_DEGREES);
@@ -133,16 +133,16 @@ public final class LauncherConstants {
     public static TalonFXSubsystemConfig leaderConfig = new TalonFXSubsystemConfig();
     public static TalonFXSubsystemConfig followerConfig = new TalonFXSubsystemConfig();
     public static MomentOfInertia flywhMomentOfInertia = MoiUnits.PoundSquareInches.of(10.410164);
-    public static double gearRatio = 18.0 / 24.0; // 1:1.33 reduction from motor to flywheel
+    public static double gearRatio = 24.0 / 18.0; // 1.33:1 reduction from motor to flywheel
 
     static {
       leaderConfig.name = "Flywheels";
       leaderConfig.talonCANID = new CANDeviceId(50, "canivore");
-      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(0.5, 3.5);
+      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(0.75, 3.5);
       leaderConfig.fxConfig.Slot0.kI = 0.0;
       leaderConfig.fxConfig.Slot0.kD = 0.0;
       leaderConfig.fxConfig.Slot0.kS = 2.0;
-      leaderConfig.fxConfig.Slot0.kV = 0.12 * (1.0 / gearRatio);
+      leaderConfig.fxConfig.Slot0.kV = 0.12 * gearRatio;
       leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimit = 120.0;
       leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
       leaderConfig.fxConfig.CurrentLimits.SupplyCurrentLimit = 70.0;
@@ -167,6 +167,7 @@ public final class LauncherConstants {
       followerConfig.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
       followerConfig.fxConfig.CurrentLimits.SupplyCurrentLimit = 70.0;
       followerConfig.fxConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+      followerConfig.fxConfig.MotorOutput.PeakReverseDutyCycle = 0;
     }
 
     public static int MODEL_INDEX = 5;
@@ -210,10 +211,10 @@ public final class LauncherConstants {
     }
 
     static {
-      // Ball Velocity (m) -> RPM (ft/s)
-      rpmMap.put(30.0, 2000.0);
-      rpmMap.put(26.0, 1750.0);
-      rpmMap.put(23.0, 1500.0);
+      // Ball Velocity (ft/s) -> RPM (rpm)
+      rpmMap.put(30.0, 4500.0);
+      rpmMap.put(25.0, 3500.0);
+      rpmMap.put(20.0, 2750.0);
     }
 
     public static LoggedTunableMeasure<AngularVelocity> idleVelocity =
@@ -221,11 +222,11 @@ public final class LauncherConstants {
     public static LoggedTunableMeasure<AngularVelocity> PIDTest =
         new LoggedTunableMeasure<>("Flywheels/PIDTest", RPM.of(2000));
     public static LoggedTunableMeasure<AngularVelocity> staticRightLeftTrench =
-        new LoggedTunableMeasure<>("Flywheels/Flywheels Static Trench", RPM.of(3000));
+        new LoggedTunableMeasure<>("Flywheels/Flywheels Static Trench", RPM.of(3150));
     public static LoggedTunableMeasure<AngularVelocity> staticHubVelocity =
         new LoggedTunableMeasure<>("Flywheels/Flywheels Static Hub", RotationsPerSecond.of(20));
     public static LoggedTunableMeasure<AngularVelocity> staticTowerVelocity =
-        new LoggedTunableMeasure<AngularVelocity>("Flywheels/Flywheels Static Tower", RPM.of(1500));
+        new LoggedTunableMeasure<AngularVelocity>("Flywheels/Flywheels Static Tower", RPM.of(3000));
   }
 
   public final class Hood {

@@ -68,7 +68,7 @@ public class OperatorControls {
             GameCommandGroups.OperatorOverriderrs.stopUnjam(feeder).withName("Stop Unjamming"));
 
     controller
-        .rightTrigger(0.98)
+        .leftTrigger(0.98)
         .onTrue(GameCommandGroups.OperatorOverriderrs.stir(dyeRotor, intakeRoller).withName("Stir"))
         .onFalse(
             GameCommandGroups.OperatorOverriderrs.stopStir(dyeRotor, intakeRoller)

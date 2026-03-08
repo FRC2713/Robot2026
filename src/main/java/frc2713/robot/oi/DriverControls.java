@@ -118,11 +118,19 @@ public class DriverControls {
         .rightBumper()
         .whileTrue(
             GameCommandGroups.Launching.otfShotHoodProtect(
-                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension))
+                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
         .onFalse(
             Commands.parallel(
                 GameCommandGroups.Launching.stopShootingAndRetractHood(
                     drive, feeder, dyeRotor, hood)));
+
+    // controller
+    //     .a()
+    //     .whileFalse(DriveCommands.changeDefaultDriveCommand(drive,
+    //             DriveCommands.joystickDriveAtAngle(drive,
+    //              () -> driverControls.getLeftY() + devControls.getLeftY(),
+    //              () -> driverControls.getLeftX() + devControls.getLeftX(),
+    //              () -> ), null))
 
     // shoot when flywheels are ready
     controller

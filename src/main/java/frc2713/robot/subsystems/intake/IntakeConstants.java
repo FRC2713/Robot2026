@@ -31,6 +31,7 @@ import frc2713.lib.subsystem.DifferentialSubsystemConfig;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig.GeneralControlMode;
 import frc2713.lib.util.LoggedTunableMeasure;
+import frc2713.lib.util.LoggedTunableNumber;
 import frc2713.lib.util.Util;
 import java.util.function.Supplier;
 
@@ -181,13 +182,15 @@ public final class IntakeConstants {
     }
 
     public static LoggedTunableMeasure<Distance> extendedPosition =
-        new LoggedTunableMeasure<>(config.name + "/Extended Position", Inches.of(11.5));
+        new LoggedTunableMeasure<>(config.name + "/Extended Position", Inches.of(10.5));
     public static LoggedTunableMeasure<Distance> pidTestPosition =
         new LoggedTunableMeasure<>(config.name + "/PID Test Position", Inches.of(0));
     public static LoggedTunableMeasure<Distance> retractedPosition =
         new LoggedTunableMeasure<>(config.name + "/Retracted Position", Inches.of(0));
     public static final LoggedTunableMeasure<LinearVelocity> retractCruiseVelocity =
         new LoggedTunableMeasure<>(config.name + "/Retract Cruise Velocity", InchesPerSecond.of(4));
+    public static final LoggedTunableNumber fuelPressureScalingFactor =
+        new LoggedTunableNumber(config.name + "/Fuel Pressure Scaling", 1.1);
 
     public static int MODEL_INDEX = 1;
     public static int PARENT_INDEX = 0; // drivetrain

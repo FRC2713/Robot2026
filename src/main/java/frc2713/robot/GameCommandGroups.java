@@ -48,10 +48,11 @@ public final class GameCommandGroups {
         Turret turret,
         Feeder feeder,
         DyeRotor dyeRotor,
-        IntakeExtension extension) {
+        IntakeExtension extension,
+        IntakeRoller intakeRoller) {
       return Commands.either(
           Commands.none(),
-          otfShot(drive, flywheels, hood, turret, feeder, dyeRotor, extension),
+          otfShot(drive, flywheels, hood, turret, feeder, dyeRotor, extension, intakeRoller),
           () -> hood.inRetractionZone(() -> drive.getPose()));
     }
 
@@ -63,7 +64,8 @@ public final class GameCommandGroups {
         Turret turret,
         Feeder feeder,
         DyeRotor dyeRotor,
-        IntakeExtension extension) {
+        IntakeExtension extension,
+        IntakeRoller intakeRoller) {
       return Commands.parallel(
               DriveCommands.setDriveLimits(
                   drive,
@@ -74,6 +76,7 @@ public final class GameCommandGroups {
               flywheels.otfCommand(),
               hood.otfCommand(),
               turret.otfCommand(),
+              intakeRoller.intake(),
               flywheels.simulateLaunchedFuel(flywheels::atTarget),
               feeder.feedWhenReady(flywheels::atTarget),
               dyeRotor.feedWhenReady(flywheels::atTarget),
