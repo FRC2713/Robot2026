@@ -70,6 +70,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
 
     // 4. Log
     Logger.recordOutput(pb.makePath("used robot pose"), robotPose);
+    Logger.recordOutput(pb.makePath("used robot lin vel"), robotLinVel);
     Logger.recordOutput(pb.makePath("current goal"), LaunchingSolutionManager.currentGoal);
     Logger.recordOutput(pb.makePath("current solution"), currentSolution);
   }

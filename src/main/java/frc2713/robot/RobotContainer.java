@@ -279,8 +279,9 @@ public class RobotContainer {
     devControls =
         new DevControls(
             drive, flywheels, turret, hood, intakeRoller, intakeExtension, dyeRotor, feeder);
-    operatorControls = 
-            new OperatorControls(drive, flywheels, turret, hood, intakeRoller, intakeExtension, dyeRotor, feeder);
+    operatorControls =
+        new OperatorControls(
+            drive, flywheels, turret, hood, intakeRoller, intakeExtension, dyeRotor, feeder);
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
