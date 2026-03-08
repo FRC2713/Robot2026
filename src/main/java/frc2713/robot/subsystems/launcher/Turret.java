@@ -30,6 +30,7 @@ import frc2713.lib.util.Util;
 import frc2713.robot.Constants;
 import frc2713.robot.RobotContainer;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorIO>
@@ -44,6 +45,7 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
     if (Constants.enableOTFFeatures) setDefaultCommand(otfCommand());
   }
 
+  @AutoLogOutput
   public static Angle turretPositionFromEncoders(Angle e1, Angle e2) {
     Angle encoder1Rotations =
         CrtSolver.calculateAbsoluteMotorTurns(

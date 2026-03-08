@@ -72,7 +72,7 @@ public final class LauncherConstants {
       config.generalControlMode = GeneralControlMode.POSITION;
       config.acceptablePositionError = Degrees.of(3);
 
-      config.fxConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+      config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
       // PID gains for Motion Magic
@@ -154,7 +154,7 @@ public final class LauncherConstants {
       leaderConfig.momentOfInertia = flywhMomentOfInertia.times(0.5);
       leaderConfig.useFOC = false; // FOC makes the feedfowrward term units weird
       leaderConfig.tunable = true;
-      leaderConfig.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+      leaderConfig.fxConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
       leaderConfig.generalControlMode = GeneralControlMode.VELOCITY;
       leaderConfig.acceptableVelocityError = RPM.of(100);
 
