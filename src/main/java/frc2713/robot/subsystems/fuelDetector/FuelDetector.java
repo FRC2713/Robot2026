@@ -9,7 +9,6 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringSubscriber;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc2713.robot.RobotContainer;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import org.littletonrobotics.junction.Logger;
@@ -64,10 +63,11 @@ public class FuelDetector extends SubsystemBase {
       return new Rotation2d(Units.degreesToRadians(fuelHeading.get()));
     }
   }
+
   public Rotation2d getHeading(boolean fieldRelative) {
     Rotation2d heading = getHeading();
-    if(fieldRelative) {
-      return RobotContainer.drive.getPose().rotateBy(heading).getRotation();
+    if (fieldRelative) {
+      return heading.relativeTo(RobotContainer.drive.getPose().getRotation());
     } else {
       return heading;
     }

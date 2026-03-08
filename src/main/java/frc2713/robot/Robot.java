@@ -101,6 +101,8 @@ public class Robot extends LoggedRobot {
         "matchData/autoWinnerColor",
         "#" + (autoWinner.equals("B") ? "0000FF" : autoWinner.equals("R") ? "FF0000" : "000000"));
     Logger.recordOutput("matchData/time", DriverStation.getMatchTime());
+
+    RobotContainer.getAndPublishFuelHeading();
     // Return to non-RT thread priority (do not modify the first argument)
     // Threads.setCurrentThreadPriority(false, 10);
   }
