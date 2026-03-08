@@ -72,6 +72,7 @@ public final class LauncherConstants {
       config.generalControlMode = GeneralControlMode.POSITION;
       config.acceptablePositionError = Degrees.of(3);
 
+      config.fxConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
       // PID gains for Motion Magic
@@ -132,7 +133,7 @@ public final class LauncherConstants {
     public static TalonFXSubsystemConfig leaderConfig = new TalonFXSubsystemConfig();
     public static TalonFXSubsystemConfig followerConfig = new TalonFXSubsystemConfig();
     public static MomentOfInertia flywhMomentOfInertia = MoiUnits.PoundSquareInches.of(10.410164);
-    public static double gearRatio = 24.0 / 18.0; // 1.33:1 overdrive from motor to flywheel
+    public static double gearRatio = 18.0 / 24.0; // 1:1.33 reduction from motor to flywheel
 
     static {
       leaderConfig.name = "Flywheels";
@@ -234,9 +235,8 @@ public final class LauncherConstants {
     public static final Angle minAngle = Degrees.of(0);
     public static final Angle maxAngle = Degrees.of(30);
 
-    // 9 tooth pinion to 20 tooth gear, 16 tooth gear to 38 tooth gear, 10 tooth gear to 124 tooth
-    // gear for total reduction of 0.0306
-    public static double gearRatio = ((52 / 8.0) * (38 / 16.0) * (124 / 10.0));
+    // 8t pinion to 20t gear, 13t gear to  30t gear, 10t gear to 146 sector gear
+    public static double gearRatio = ((20 / 8.0) * (30.0 / 13.0) * (146.0 / 10.0));
 
     public static final Angle retractedPosition = Degrees.of(0);
 

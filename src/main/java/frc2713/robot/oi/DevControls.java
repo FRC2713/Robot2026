@@ -26,7 +26,7 @@ import java.util.Optional;
 
 @SuppressWarnings("unused")
 public class DevControls {
-  private final CommandVader4Controller controller = new CommandVader4Controller(1);
+  private final CommandVader4Controller controller = new CommandVader4Controller(2);
 
   private final Drive drive;
   private final Flywheels flywheels;

@@ -18,6 +18,7 @@ import frc2713.robot.subsystems.launcher.LauncherConstants;
 import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
+import frc2713.robot.subsystems.serializer.SerializerConstants;
 import java.util.Optional;
 
 /**
@@ -188,6 +189,26 @@ public final class GameCommandGroups {
     public static Command stopShootingAndRetractHood(
         Drive drive, Feeder feeder, DyeRotor dyeRotor, Hood hood) {
       return Commands.parallel(stopShooting(drive, feeder, dyeRotor), hood.retract());
+    }
+  }
+
+  public static final class OperatorOverriderrs {
+    public static Command stir(DyeRotor dyeRotor, IntakeRoller rollers) {
+      return Commands.parallel(dyeRotor.stirFuel(), rollers.intake());
+    }
+
+    public static Command stopStir(DyeRotor dyeRotor, IntakeRoller rollers) {
+      return Commands.parallel(dyeRotor.stopCommand(), rollers.stop());
+    }
+
+    // this is here just in case we want unjamming to involve more
+    public static Command unjam(Feeder feeder) {
+      return feeder.setVelocity(SerializerConstants.Feeder.unjammingSpeed);
+    }
+
+    // this is here just in case we want unjamming to involve more
+    public static Command stopUnjam(Feeder feeder) {
+      return Commands.parallel(feeder.stop());
     }
   }
 }

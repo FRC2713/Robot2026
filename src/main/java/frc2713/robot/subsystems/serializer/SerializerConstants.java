@@ -102,5 +102,9 @@ public final class SerializerConstants {
 
     public static LoggedTunableMeasure<AngularVelocity> shootingSpeed =
         new LoggedTunableMeasure<AngularVelocity>("Feeder/Speed", RotationsPerSecond.of(100));
+
+    public static LoggedTunableMeasure<AngularVelocity> unjammingSpeed =
+        new LoggedTunableMeasure<AngularVelocity>(
+            "Feeder/UnJamming Speed", RotationsPerSecond.of(100));
   }
 }
