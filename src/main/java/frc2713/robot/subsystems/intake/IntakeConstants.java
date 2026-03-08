@@ -186,6 +186,8 @@ public final class IntakeConstants {
         new LoggedTunableMeasure<>(config.name + "/PID Test Position", Inches.of(0));
     public static LoggedTunableMeasure<Distance> retractedPosition =
         new LoggedTunableMeasure<>(config.name + "/Retracted Position", Inches.of(0));
+            public static final LoggedTunableMeasure<LinearVelocity> retractCruiseVelocity =
+        new LoggedTunableMeasure<>(config.name + "/Retract Cruise Velocity", InchesPerSecond.of(4));
 
     public static int MODEL_INDEX = 1;
     public static int PARENT_INDEX = 0; // drivetrain
