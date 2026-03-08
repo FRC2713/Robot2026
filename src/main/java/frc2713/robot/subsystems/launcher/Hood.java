@@ -33,8 +33,6 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
     if (Constants.enableOTFFeatures) setDefaultCommand(otfCommand());
   }
 
-  public boolean disableDucking = true;
-
   public Command setAngleCommand(Supplier<Angle> desiredAngle) {
     return motionMagicSetpointCommand(desiredAngle);
   }
@@ -97,6 +95,7 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   }
 
   @AutoLogOutput public boolean ducking = false;
+  @AutoLogOutput public boolean disableDucking = true;
 
   public final Supplier<Angle> otfAngSupplier =
       () -> {
