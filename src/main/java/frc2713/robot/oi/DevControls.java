@@ -1,10 +1,7 @@
 package frc2713.robot.oi;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
-import static edu.wpi.first.units.Units.FeetPerSecond;
-import static edu.wpi.first.units.Units.FeetPerSecondPerSecond;
+import static edu.wpi.first.units.Units.RPM;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -22,11 +19,10 @@ import frc2713.robot.subsystems.launcher.LauncherConstants;
 import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
-import java.util.Optional;
 
 @SuppressWarnings("unused")
 public class DevControls {
-  private final CommandVader4Controller controller = new CommandVader4Controller(1);
+  private final CommandVader4Controller controller = new CommandVader4Controller(2);
 
   private final Drive drive;
   private final Flywheels flywheels;
@@ -103,16 +99,16 @@ public class DevControls {
         .onFalse(this.setToNormalDriveCmd());
 
     // Test setting drive limits
-    controller
-        .x()
-        .onTrue(
-            DriveCommands.setDriveLimits(
-                drive,
-                Optional.of(FeetPerSecond.of(2.0)),
-                Optional.of(FeetPerSecondPerSecond.of(12.0)),
-                Optional.of(DegreesPerSecond.of(90.0)),
-                Optional.of(DegreesPerSecondPerSecond.of(360.0))))
-        .onFalse(DriveCommands.clearDriveLimits(drive));
+    // controller
+    //     .x()
+    //     .onTrue(
+    //         DriveCommands.setDriveLimits(
+    //             drive,
+    //             Optional.of(FeetPerSecond.of(2.0)),
+    //             Optional.of(FeetPerSecondPerSecond.of(12.0)),
+    //             Optional.of(DegreesPerSecond.of(90.0)),
+    //             Optional.of(DegreesPerSecondPerSecond.of(360.0))))
+    //     .onFalse(DriveCommands.clearDriveLimits(drive));
 
     // Intake Controls
 
@@ -161,10 +157,15 @@ public class DevControls {
     // B button - index fuel
     // controller.b().whileTrue(feeder.feedShooter()).onFalse(feeder.stop());
 
+    controller
+        .x()
+        .onTrue(flywheels.velocitySetpointCommand(LauncherConstants.Flywheels.PIDTest))
+        .onFalse(flywheels.velocitySetpointCommand(() -> RPM.of(0)));
+
     // controller
     //     .x()
-    //     .onTrue(flywheels.velocitySetpointCommand(LauncherConstants.Flywheels.PIDTest))
-    //     .onFalse(flywheels.velocitySetpointCommand(() -> RPM.of(0)));
+    //     .onTrue(flywheels.dutyCycleCommand(() -> 1.0))
+    //     .onFalse(flywheels.dutyCycleCommand(() -> 0.0));
 
     // Y button - index fuel in parallel (same effect since it's the same command)
     controller
@@ -184,6 +185,18 @@ public class DevControls {
             GameCommandGroups.Launching.dumbShot(
                 drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
         .onFalse(GameCommandGroups.Launching.stopShooting(drive, feeder, dyeRotor));
+
+    controller
+        .rightBumper()
+        .whileTrue(
+            GameCommandGroups.Launching.otfShotHoodProtect(
+                    drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)
+                .withName("OTF Shot"))
+        .onFalse(
+            Commands.parallel(
+                    GameCommandGroups.Launching.stopShootingAndRetractHood(
+                        drive, feeder, dyeRotor, hood))
+                .withName("Stop Shot"));
   }
 
   public double getLeftY() {

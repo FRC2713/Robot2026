@@ -95,7 +95,9 @@ public class IntakeExtension
   }
 
   public Command retractCommand() {
-    return setDistanceCommand(IntakeConstants.Extension.retractedPosition);
+    return setDistanceCommand(
+        IntakeConstants.Extension.retractedPosition,
+        IntakeConstants.Extension.retractCruiseVelocity);
   }
 
   /**
@@ -112,7 +114,8 @@ public class IntakeExtension
     Logger.recordOutput(
         pb.makePath("volumePerInch (in^3)"), IntakeConstants.Extension.volumePerInch);
     LinearVelocity velocityToMaintain =
-        InchesPerSecond.of(volumeLostPerSecond / IntakeConstants.Extension.volumePerInch / 2.0);
+        InchesPerSecond.of(volumeLostPerSecond / IntakeConstants.Extension.volumePerInch / 2.0)
+            .times(IntakeConstants.Extension.fuelPressureScalingFactor.get());
     return setDistanceCommand(IntakeConstants.Extension.retractedPosition, () -> velocityToMaintain)
         .withName("Maintain Fuel Pressure");
   }

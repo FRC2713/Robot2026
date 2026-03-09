@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.InchesPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
@@ -82,11 +83,13 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
 
         // Convert surface speed to angular velocity: omega = v / r, will switch to a tuned binary
         // tree
-        double surfaceSpeedMps = solution.ballSpeedMetersPerSecond();
-        double wheelRadiusMeters = LauncherConstants.Flywheels.WHEEL_DIAMETER.div(2).in(Meters);
-        AngularVelocity targetVelocity =
-            RotationsPerSecond.of(surfaceSpeedMps / (wheelRadiusMeters * 2 * Math.PI));
+        // double surfaceSpeedMps = solution.ballSpeedMetersPerSecond();
+        // double wheelRadiusMeters = LauncherConstants.Flywheels.WHEEL_DIAMETER.div(2).in(Meters);
+        // AngularVelocity targetVelocity =
+        //     RotationsPerSecond.of(surfaceSpeedMps / (wheelRadiusMeters * 2 * Math.PI));
 
+        AngularVelocity targetVelocity =
+            RPM.of(LauncherConstants.Flywheels.rpmMap.get(solution.ballSpeedMetersPerSecond()));
         Logger.recordOutput(pb.makePath("OTF", "targetFlywheelVelocity"), targetVelocity);
         return targetVelocity;
       };
