@@ -25,6 +25,7 @@ import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.MotorFollowerSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.RobotTime;
+import frc2713.robot.Robot;
 import frc2713.robot.subsystems.launcher.LaunchingSolutionManager.LaunchSolution;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
@@ -96,14 +97,6 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
 
   public Command otfCommand() {
     return setVelocity(otfVelocitySupplier);
-  }
-
-  public Command simulateLaunchedFuel(BooleanSupplier isReady) {
-    return Commands.run(
-        () -> {
-          if (isReady.getAsBoolean())
-            this.launchFuel(LaunchingSolutionManager.getInstance().getSolution());
-        });
   }
 
   @Override
@@ -181,7 +174,15 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
     return structureVel.plus(launchVelGlobal);
   }
 
-  public void launchFuel(LaunchSolution solution) {
+  public Command simulateLaunchFuelCommand(BooleanSupplier isReady) {
+    return Commands.run(
+        () -> {
+          if (isReady.getAsBoolean() && Robot.isSimulation())
+            this.simulateLaunchFuel(LaunchingSolutionManager.getInstance().getSolution());
+        });
+  }
+
+  public void simulateLaunchFuel(LaunchSolution solution) {
     Time now = RobotTime.getTimestamp();
     // Enforce max fire rate by checking time since last launch. If we haven't waited long enough,
     // skip this launch.
