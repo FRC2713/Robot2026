@@ -20,6 +20,7 @@ import com.ctre.phoenix6.mechanisms.DifferentialMotorConstants;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
@@ -54,6 +55,7 @@ public final class IntakeConstants {
           gearRatio; // 12 tooth pinion to 24 tooth gear for 0.5 reduction
       leaderConfig.momentOfInertia = rollersMomentOfInertia.times(0.5);
       leaderConfig.useFOC = true;
+      leaderConfig.motor = DCMotor.getKrakenX44Foc(1);
 
       followerConfig.name = "Intake Rollers Follower";
       followerConfig.talonCANID = new CANDeviceId(43); // Example CAN ID, replace with actual ID
@@ -61,8 +63,10 @@ public final class IntakeConstants {
           gearRatio; // 12 tooth pinion to 24 tooth gear for 0.5 reduction
       followerConfig.momentOfInertia = rollersMomentOfInertia.times(0.5);
       followerConfig.useFOC = true;
+      leaderConfig.motor = DCMotor.getKrakenX44Foc(1);
     }
 
+    // TODO: Use closed loop velocity control here.
     public static LoggedTunableMeasure<Voltage> intakeVoltageDesired =
         new LoggedTunableMeasure<Voltage>("Intake Rollers/Intake", Volts.of(10.0));
     public static Voltage outtakeVoltageDesired = Volts.of(-5.0);
@@ -111,6 +115,7 @@ public final class IntakeConstants {
       config.talonCANID = new CANDeviceId(40); // Only used for sim, no real CAN ID
       config.fxConfig.Slot0 = avgGains;
       config.fxConfig.MotionMagic = motionMagicGains.get();
+      config.motor = DCMotor.getKrakenX44(1);
 
       // MOI = m*r^2, where r is the radius to the center of mass (half the pitch diameter)
       config.momentOfInertia =

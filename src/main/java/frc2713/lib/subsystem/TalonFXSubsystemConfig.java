@@ -10,6 +10,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
@@ -21,6 +22,7 @@ public class TalonFXSubsystemConfig {
   public String name = "UNNAMED";
   public CANDeviceId talonCANID;
   public TalonFXConfiguration fxConfig = new TalonFXConfiguration();
+  public DCMotor motor = DCMotor.getKrakenX60(1);
   // Marks Slot0 and MotionMagic as live-tunable
   public boolean tunable = false;
   public boolean useFOC = true;
