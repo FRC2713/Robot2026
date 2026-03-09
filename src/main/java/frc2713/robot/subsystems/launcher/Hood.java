@@ -128,7 +128,6 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
       setAngleCommand(() -> getCurrentPosition());
     }
     super.periodic();
-    Logger.recordOutput(super.pb.makePath("Ducking Disabled"), disableDucking);
   }
 
   @Override
