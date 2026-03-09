@@ -104,7 +104,7 @@ public final class GameCommandGroups {
           );
     }
 
-    public static Command toowerShot(
+    public static Command towerShot(
         Drive drive,
         Flywheels flywheels,
         Hood hood,
