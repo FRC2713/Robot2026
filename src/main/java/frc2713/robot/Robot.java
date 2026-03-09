@@ -89,11 +89,6 @@ public class Robot extends LoggedRobot {
     // the Command-based framework to work.
     CommandScheduler.getInstance().run();
 
-    FieldConstants.HoodRetractionZones.logZones();
-
-    // Elastic
-    ShiftManager.periodic();
-
     // Return to non-RT thread priority (do not modify the first argument)
     // Threads.setCurrentThreadPriority(false, 10);
   }
@@ -140,6 +135,8 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
+    FieldConstants.HoodRetractionZones.logZones();
+
   }
 
   /** This function is called periodically during operator control. */
