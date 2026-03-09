@@ -77,7 +77,7 @@ public class OperatorControls {
     controller
         .y()
         .onTrue(
-            GameCommandGroups.Launching.toowerShot(
+            GameCommandGroups.Launching.towerShot(
                 drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
         .onFalse(
             GameCommandGroups.Launching.stopShootingAndRetractHood(drive, feeder, dyeRotor, hood));

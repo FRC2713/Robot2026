@@ -35,7 +35,7 @@ public final class GameCommandGroups {
               flywheels.otfCommand(),
               hood.otfCommand(),
               turret.otfCommand(),
-              flywheels.simulateLaunchedFuel(flywheels::atTarget),
+              flywheels.simulateLaunchFuelCommand(flywheels::atTarget),
               feeder.feedWhenReady(flywheels::atTarget),
               dyeRotor.feedWhenReady(flywheels::atTarget))
           .withName("OTF Shooting");
@@ -77,7 +77,7 @@ public final class GameCommandGroups {
               hood.otfCommand(),
               turret.otfCommand(),
               intakeRoller.intake(),
-              flywheels.simulateLaunchedFuel(flywheels::atTarget),
+              flywheels.simulateLaunchFuelCommand(flywheels::atTarget),
               feeder.feedWhenReady(flywheels::atTarget),
               dyeRotor.feedWhenReady(flywheels::atTarget),
               extension.maintainFuelPressureCommand())
@@ -104,7 +104,7 @@ public final class GameCommandGroups {
           );
     }
 
-    public static Command toowerShot(
+    public static Command towerShot(
         Drive drive,
         Flywheels flywheels,
         Hood hood,
@@ -173,7 +173,7 @@ public final class GameCommandGroups {
               flywheels.hubCommand(),
               hood.hubCommand(),
               turret.hubCommand(drive::getPose),
-              flywheels.simulateLaunchedFuel(
+              flywheels.simulateLaunchFuelCommand(
                   () -> flywheels.atTarget() && hood.atTarget() && turret.atTarget()),
               feeder.feedWhenReady(
                   () -> flywheels.atTarget() && hood.atTarget() && turret.atTarget()),
