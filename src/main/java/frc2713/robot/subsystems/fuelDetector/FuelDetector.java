@@ -67,7 +67,7 @@ public class FuelDetector extends SubsystemBase {
   public Rotation2d getHeading(boolean fieldRelative) {
     Rotation2d heading = getHeading();
     if (fieldRelative) {
-      return heading.relativeTo(RobotContainer.drive.getPose().getRotation());
+      return RobotContainer.drive.getPose().getRotation().plus(heading);
     } else {
       return heading;
     }
