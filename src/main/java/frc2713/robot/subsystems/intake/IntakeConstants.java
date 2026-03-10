@@ -69,7 +69,6 @@ public final class IntakeConstants {
       leaderConfig.fxConfig.CurrentLimits.SupplyCurrentLimit = 70.0;
       leaderConfig.fxConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-
       followerConfig.name = "Intake Rollers Follower";
       followerConfig.talonCANID = new CANDeviceId(43); // Example CAN ID, replace with actual ID
       followerConfig.unitToRotorRatio =
@@ -78,10 +77,10 @@ public final class IntakeConstants {
       followerConfig.useFOC = true;
       followerConfig.motor = DCMotor.getKrakenX44Foc(1);
       followerConfig.fxConfig.CurrentLimits = leaderConfig.fxConfig.CurrentLimits;
-
     }
 
-    public static final AngularVelocity freeSpeed = RadiansPerSecond.of(leaderConfig.motor.freeSpeedRadPerSec).div(gearRatio);
+    public static final AngularVelocity freeSpeed =
+        RadiansPerSecond.of(leaderConfig.motor.freeSpeedRadPerSec).div(gearRatio);
 
     // TODO: Use closed loop velocity control here.
     public static LoggedTunableMeasure<Voltage> intakeVoltageDesired =

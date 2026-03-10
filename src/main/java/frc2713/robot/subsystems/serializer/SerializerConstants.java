@@ -47,7 +47,7 @@ public final class SerializerConstants {
 
       config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-      config.unitToRotorRatio =gearRatio;
+      config.unitToRotorRatio = gearRatio;
 
       config.momentOfInertia = MoiUnits.PoundSquareInches.of(89.2780792);
 
@@ -101,7 +101,9 @@ public final class SerializerConstants {
       // tripled it
       config.momentOfInertia = MoiUnits.PoundSquareInches.of(0.075 * 3);
     }
-    public static AngularVelocity freeSpeed = RadiansPerSecond.of(config.motor.freeSpeedRadPerSec).div(gearRatio);
+
+    public static AngularVelocity freeSpeed =
+        RadiansPerSecond.of(config.motor.freeSpeedRadPerSec).div(gearRatio);
 
     // TODO: Change these to RPM
     public static LoggedTunableMeasure<AngularVelocity> shootingSpeed =
