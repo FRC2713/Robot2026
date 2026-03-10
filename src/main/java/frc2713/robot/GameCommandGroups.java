@@ -29,15 +29,24 @@ public final class GameCommandGroups {
   public static final class Launching {
 
     /** OTF shooting without drive limits. Use for auto routines. */
-    public static Command getOtfShot(
-        Flywheels flywheels, Hood hood, Turret turret, Feeder feeder, DyeRotor dyeRotor) {
+    public static Command autoOtfShot(
+        Drive drive,
+        Flywheels flywheels,
+        Hood hood,
+        Turret turret,
+        Feeder feeder,
+        DyeRotor dyeRotor,
+        IntakeExtension extension,
+        IntakeRoller intakeRoller) {
       return Commands.parallel(
               flywheels.otfCommand(),
               hood.otfCommand(),
               turret.otfCommand(),
+              intakeRoller.intake(),
               flywheels.simulateLaunchFuelCommand(flywheels::atTarget),
               feeder.feedWhenReady(flywheels::atTarget),
-              dyeRotor.feedWhenReady(flywheels::atTarget))
+              dyeRotor.feedWhenReady(flywheels::atTarget),
+              extension.maintainFuelPressureCommand())
           .withName("OTF Shooting");
     }
 

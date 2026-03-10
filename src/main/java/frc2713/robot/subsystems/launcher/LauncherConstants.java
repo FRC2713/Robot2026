@@ -106,6 +106,8 @@ public final class LauncherConstants {
                   Inches.of(0.5).in(Meters),
                   Inches.of(18.484119).in(Meters)),
               new Rotation3d(0, 0, 0));
+
+      config.posOffset = Degrees.of(5.888672);
     }
 
     static {
@@ -196,8 +198,8 @@ public final class LauncherConstants {
       ballVelocityMap.put(1.0, 20.0);
       ballVelocityMap.put(1.5, 20.0);
       ballVelocityMap.put(2.5, 22.0);
-      ballVelocityMap.put(3.2, 23.0);
-      ballVelocityMap.put(4.0, 26.0);
+      ballVelocityMap.put(3.2, 24.0);
+      ballVelocityMap.put(4.0, 28.0);
       ballVelocityMap.put(5.17, 29.0);
       ballVelocityMap.put(5.4, 30.0);
 
@@ -214,6 +216,7 @@ public final class LauncherConstants {
       // Ball Velocity (ft/s) -> RPM (rpm)
       rpmMap.put(30.0, 4500.0);
       rpmMap.put(25.0, 3500.0);
+      rpmMap.put(23.0, 3200.0);
       rpmMap.put(20.0, 2750.0);
     }
 
