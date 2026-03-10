@@ -33,6 +33,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc2713.robot.generated.TunerConstants;
+import java.util.Arrays;
 import java.util.Queue;
 
 /**
@@ -213,19 +214,53 @@ public class ModuleIOTalonFXS implements ModuleIO {
     inputs.turnCurrentAmps = turnCurrent.getValueAsDouble();
 
     // Update odometry inputs
-    inputs.odometryTimestamps =
-        timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
+    inputs.odometryTimestamps = drainDoubleQueue(timestampQueue);
     inputs.odometryDrivePositionsRad =
-        drivePositionQueue.stream()
-            .mapToDouble((Double value) -> Units.rotationsToRadians(value))
-            .toArray();
-    inputs.odometryTurnPositions =
-        turnPositionQueue.stream()
-            .map((Double value) -> Rotation2d.fromRotations(value))
-            .toArray(Rotation2d[]::new);
-    timestampQueue.clear();
-    drivePositionQueue.clear();
-    turnPositionQueue.clear();
+        drainDoubleQueueWithConversion(drivePositionQueue, Units::rotationsToRadians);
+    inputs.odometryTurnPositions = drainRotationQueue(turnPositionQueue);
+  }
+
+  private static double[] drainDoubleQueue(Queue<Double> queue) {
+    int size = queue.size();
+    double[] values = new double[size];
+    int count = 0;
+    while (count < size) {
+      Double value = queue.poll();
+      if (value == null) {
+        break;
+      }
+      values[count++] = value;
+    }
+    return (count == size) ? values : Arrays.copyOf(values, count);
+  }
+
+  private static double[] drainDoubleQueueWithConversion(
+      Queue<Double> queue, java.util.function.DoubleUnaryOperator converter) {
+    int size = queue.size();
+    double[] values = new double[size];
+    int count = 0;
+    while (count < size) {
+      Double value = queue.poll();
+      if (value == null) {
+        break;
+      }
+      values[count++] = converter.applyAsDouble(value);
+    }
+    return (count == size) ? values : Arrays.copyOf(values, count);
+  }
+
+  private static Rotation2d[] drainRotationQueue(Queue<Double> queue) {
+    int size = queue.size();
+    Rotation2d[] values = new Rotation2d[size];
+    int count = 0;
+    while (count < size) {
+      Double value = queue.poll();
+      if (value == null) {
+        break;
+      }
+      values[count++] = Rotation2d.fromRotations(value);
+    }
+    return (count == size) ? values : Arrays.copyOf(values, count);
   }
 
   @Override

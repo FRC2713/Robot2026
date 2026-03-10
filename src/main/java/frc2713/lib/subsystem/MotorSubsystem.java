@@ -19,6 +19,7 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -38,10 +39,12 @@ import org.littletonrobotics.junction.inputs.LoggableInputs;
 
 public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends MotorIO>
     extends SubsystemBase {
+  private static final double MICROS_TO_SECONDS = 1.0e-6;
   protected final IO io;
   protected final MI inputs;
   protected final TalonFXSubsystemConfig config;
   protected final AdvantageScopePathBuilder pb;
+  private final String periodicTimingKey;
 
   protected Angle positionSetpoint = Radians.of(0.0);
   protected AngularVelocity velocitySetpoint = RotationsPerSecond.of(0.0);
@@ -53,6 +56,7 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
     this.io = io;
 
     this.pb = new AdvantageScopePathBuilder(this.getName());
+    this.periodicTimingKey = "LoopTiming/Subsystems/" + this.getName() + "/PeriodicSec";
 
     // setDefaultCommand(
     //     this.dutyCycleCommand(() -> 0.0)
@@ -62,15 +66,29 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
 
   @Override
   public void periodic() {
-    Time timestamp = RobotTime.getTimestamp();
-    io.readInputs(inputs);
-    Logger.processInputs(getName(), inputs);
+    long periodicStartMicros = startPeriodicTimerMicros();
+    try {
+      Time timestamp = RobotTime.getTimestamp();
+      io.readInputs(inputs);
+      Logger.processInputs(getName(), inputs);
 
-    Logger.recordOutput(pb.makePath("LatencyPeriodSec"), RobotTime.getTimestamp().minus(timestamp));
+      Logger.recordOutput(pb.makePath("LatencyPeriodSec"), RobotTime.getTimestamp().minus(timestamp));
+      Logger.recordOutput(
+          pb.makePath("currentCommand"),
+          (getCurrentCommand() == null) ? "Default" : getCurrentCommand().getName());
+      atTarget();
+    } finally {
+      recordPeriodicTimerMicros(periodicStartMicros);
+    }
+  }
+
+  protected final long startPeriodicTimerMicros() {
+    return RobotController.getFPGATime();
+  }
+
+  protected final void recordPeriodicTimerMicros(long startMicros) {
     Logger.recordOutput(
-        pb.makePath("currentCommand"),
-        (getCurrentCommand() == null) ? "Default" : getCurrentCommand().getName());
-    atTarget();
+        periodicTimingKey, (RobotController.getFPGATime() - startMicros) * MICROS_TO_SECONDS);
   }
 
   /**

@@ -124,10 +124,16 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
 
   @Override
   public void periodic() {
-    if (DriverStation.isDisabled()) {
-      setAngleCommand(() -> getCurrentPosition());
+    long periodicStartMicros = startPeriodicTimerMicros();
+    try {
+      if (DriverStation.isDisabled()) {
+        setAngleCommand(() -> getCurrentPosition());
+      }
+      super.periodic();
+    } finally {
+      // Overwrite parent timing with full hood periodic duration.
+      recordPeriodicTimerMicros(periodicStartMicros);
     }
-    super.periodic();
   }
 
   @Override

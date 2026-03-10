@@ -35,6 +35,14 @@ import org.littletonrobotics.junction.Logger;
 
 public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorIO>
     implements ArticulatedComponent {
+  private static final Rotation3d ZERO_ROTATION = new Rotation3d();
+
+  // Reused buffer for visualization logging to avoid per-loop array allocation.
+  private final Pose3d[] goalVectorPoses = new Pose3d[] {new Pose3d(), new Pose3d()};
+  private Pose3d cachedGoalPose = new Pose3d();
+  private Translation3d lastLoggedGoal = null;
+  private final Translation3d baseTranslation;
+  private final Rotation3d baseRotation;
 
   public Turret(
       final TalonFXSubsystemConfig config,
@@ -42,6 +50,9 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
       final CanCoderInputsAutoLogged cancoderInputs,
       final CanCoderIO cancoderIO) {
     super(config, new MotorInputsAutoLogged(), turretMotorIO, cancoderInputs, cancoderIO);
+    baseTranslation = config.initialTransform.getTranslation();
+    baseRotation = config.initialTransform.getRotation();
+    goalVectorPoses[1] = cachedGoalPose;
     if (Constants.enableOTFFeatures) setDefaultCommand(otfCommand());
   }
 
@@ -172,20 +183,20 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
               Util.fieldToRobotRelative(
                   Degrees.of(solution.turretFieldYaw().getDegrees()),
                   RobotContainer.drive.getPose());
-          Logger.recordOutput(super.pb.makePath("OTF", "response"), "using solution");
+          Logger.recordOutput(pb.makePath("OTF", "response"), "using solution");
         } else if (solution.effectiveDistanceMeters() <= 0.9) {
           // invalid bc we're too close
-          Logger.recordOutput(super.pb.makePath("OTF", "response"), "hub shot");
+          Logger.recordOutput(pb.makePath("OTF", "response"), "hub shot");
           targetAngle =
               Util.fieldToRobotRelative(
                   LauncherConstants.Turret.staticHubAngle, RobotContainer.drive.getPose());
         } else {
-          Logger.recordOutput(super.pb.makePath("OTF", "response"), "stay at measured");
+          Logger.recordOutput(pb.makePath("OTF", "response"), "stay at measured");
           targetAngle = inputs.position;
         }
 
         targetAngle = convertToClosestBoundedTurretAngleDegrees(targetAngle, inputs.position);
-        Logger.recordOutput(super.pb.makePath("OTF", "solutionIsValid"), solution.isValid());
+        Logger.recordOutput(pb.makePath("OTF", "solutionIsValid"), solution.isValid());
         Logger.recordOutput(pb.makePath("OTF", "targetAngleDegrees"), targetAngle.in(Degrees));
         return targetAngle;
       };
@@ -210,18 +221,29 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
 
   @Override
   public void periodic() {
-    super.periodic();
+    long periodicStartMicros = startPeriodicTimerMicros();
+    try {
+      super.periodic();
 
-    // Log the goal pose for visualization
-    Pose3d goalPose = new Pose3d(LaunchingSolutionManager.currentGoal, new Rotation3d());
-    Logger.recordOutput(pb.makePath("goalVector"), new Pose3d[] {this.getGlobalPose(), goalPose});
+      // Log the goal pose for visualization while minimizing per-loop allocations.
+      Translation3d currentGoal = LaunchingSolutionManager.currentGoal;
+      if (lastLoggedGoal == null || !currentGoal.equals(lastLoggedGoal)) {
+        cachedGoalPose = new Pose3d(currentGoal, ZERO_ROTATION);
+        lastLoggedGoal = currentGoal;
+        goalVectorPoses[1] = cachedGoalPose;
+      }
+      goalVectorPoses[0] = this.getGlobalPose();
+      Logger.recordOutput(pb.makePath("goalVector"), goalVectorPoses);
+    } finally {
+      // Overwrite parent timing with full turret periodic duration.
+      recordPeriodicTimerMicros(periodicStartMicros);
+    }
   }
 
   @Override
   public Transform3d getTransform3d() {
-    // Use the computed turret position from the Vernier dual-encoder system (in degrees)
-    return config.initialTransform.plus(
-        new Transform3d(new Translation3d(), new Rotation3d(0, 0, inputs.position.in(Radians))));
+    Rotation3d turretRelativeRotation = new Rotation3d(0.0, 0.0, inputs.position.in(Radians));
+    return new Transform3d(baseTranslation, baseRotation.plus(turretRelativeRotation));
   }
 
   @Override

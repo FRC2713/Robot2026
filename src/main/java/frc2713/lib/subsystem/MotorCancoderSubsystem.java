@@ -34,10 +34,16 @@ public class MotorCancoderSubsystem<MI extends MotorInputs & LoggableInputs, IO 
 
   @Override
   public void periodic() {
-    super.periodic();
+    long periodicStartMicros = startPeriodicTimerMicros();
+    try {
+      super.periodic();
 
-    cancoderIO.readInputs(cancoderInputs);
-    Logger.processInputs(getName() + "/cancoder", cancoderInputs);
+      cancoderIO.readInputs(cancoderInputs);
+      Logger.processInputs(getName() + "/cancoder", cancoderInputs);
+    } finally {
+      // Overwrite base timing with full motor+cancoder periodic duration.
+      recordPeriodicTimerMicros(periodicStartMicros);
+    }
   }
 
   /** Returns whether this subsystem has a CANcoder. Always true for MotorCancoderSubsystem. */

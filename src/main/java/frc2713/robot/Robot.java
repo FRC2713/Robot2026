@@ -18,6 +18,7 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+import edu.wpi.first.wpilibj.Timer;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -26,8 +27,10 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
  * project.
  */
 public class Robot extends LoggedRobot {
+  private static final double LOOP_TARGET_SECONDS = 0.02;
   private Command autonomousCommand;
   private RobotContainer robotContainer;
+  private double lastRobotPeriodicStartSec = Double.NaN;
 
   public Robot() {
     // Record metadata
@@ -77,6 +80,13 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during all modes. */
   @Override
   public void robotPeriodic() {
+    double periodicStartSec = Timer.getFPGATimestamp();
+    if (!Double.isNaN(lastRobotPeriodicStartSec)) {
+      Logger.recordOutput(
+          "LoopTiming/RobotPeriodicPeriodSec", periodicStartSec - lastRobotPeriodicStartSec);
+    }
+    lastRobotPeriodicStartSec = periodicStartSec;
+
     // Optionally switch the thread to high priority to improve loop
     // timing (see the template project documentation for details)
     // Threads.setCurrentThreadPriority(true, 99);
@@ -86,12 +96,21 @@ public class Robot extends LoggedRobot {
     // finished or interrupted commands, and running subsystem periodic() methods.
     // This must be called from the robot's periodic block in order for anything in
     // the Command-based framework to work.
+    double schedulerStartSec = Timer.getFPGATimestamp();
     CommandScheduler.getInstance().run();
+    double schedulerDurationSec = Timer.getFPGATimestamp() - schedulerStartSec;
+    Logger.recordOutput("LoopTiming/CommandSchedulerRunSec", schedulerDurationSec);
 
     // FieldConstants.HoodRetractionZones.logZones();
 
     // Elastic
     // ShiftManager.periodic();
+
+    double periodicDurationSec = Timer.getFPGATimestamp() - periodicStartSec;
+    Logger.recordOutput("LoopTiming/RobotPeriodicDurationSec", periodicDurationSec);
+    Logger.recordOutput(
+        "LoopTiming/RobotPeriodicOverrun",
+        periodicDurationSec > LOOP_TARGET_SECONDS || schedulerDurationSec > LOOP_TARGET_SECONDS);
 
     // Return to non-RT thread priority (do not modify the first argument)
     // Threads.setCurrentThreadPriority(false, 10);

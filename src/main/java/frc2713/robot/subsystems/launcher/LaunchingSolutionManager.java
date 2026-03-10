@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.subsystem.KinematicsManager;
@@ -18,6 +19,9 @@ import frc2713.robot.FieldConstants;
 import org.littletonrobotics.junction.Logger;
 
 public class LaunchingSolutionManager extends SubsystemBase {
+  private static final double MICROS_TO_SECONDS = 1.0e-6;
+  private static final String PERIODIC_TIMING_KEY =
+      "LoopTiming/Subsystems/LaunchingSolutionManager/PeriodicSec";
   private static LaunchingSolutionManager instance;
 
   AdvantageScopePathBuilder pb = new AdvantageScopePathBuilder("LaunchingSolutionManager");
@@ -54,25 +58,31 @@ public class LaunchingSolutionManager extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // 1. Get Robot State (ID 0 = Chassis)
-    Pose3d robotPose = KinematicsManager.getInstance().getGlobalPose(0);
-    Translation3d robotLinVel = KinematicsManager.getInstance().getGlobalLinearVelocity(0);
+    long periodicStartMicros = RobotController.getFPGATime();
+    try {
+      // 1. Get Robot State (ID 0 = Chassis)
+      Pose3d robotPose = KinematicsManager.getInstance().getGlobalPose(0);
+      Translation3d robotLinVel = KinematicsManager.getInstance().getGlobalLinearVelocity(0);
 
-    // 2. Select goal
-    if (FieldConstants.NeutralZone.region.contains(robotPose.getTranslation().toTranslation2d())) {
-      LaunchingSolutionManager.configureForFeeding(robotPose.toPose2d());
-    } else {
-      LaunchingSolutionManager.configureForScoring();
+      // 2. Select goal
+      if (FieldConstants.NeutralZone.region.contains(robotPose.getTranslation().toTranslation2d())) {
+        LaunchingSolutionManager.configureForFeeding(robotPose.toPose2d());
+      } else {
+        LaunchingSolutionManager.configureForScoring();
+      }
+
+      // 3. Solve for the Launch Vector
+      currentSolution = calculate(robotPose, robotLinVel, LaunchingSolutionManager.currentGoal);
+
+      // 4. Log
+      Logger.recordOutput(pb.makePath("used robot pose"), robotPose);
+      Logger.recordOutput(pb.makePath("used robot lin vel"), robotLinVel);
+      Logger.recordOutput(pb.makePath("current goal"), LaunchingSolutionManager.currentGoal);
+      Logger.recordOutput(pb.makePath("current solution"), currentSolution);
+    } finally {
+      Logger.recordOutput(
+          PERIODIC_TIMING_KEY, (RobotController.getFPGATime() - periodicStartMicros) * MICROS_TO_SECONDS);
     }
-
-    // 3. Solve for the Launch Vector
-    currentSolution = calculate(robotPose, robotLinVel, LaunchingSolutionManager.currentGoal);
-
-    // 4. Log
-    Logger.recordOutput(pb.makePath("used robot pose"), robotPose);
-    Logger.recordOutput(pb.makePath("used robot lin vel"), robotLinVel);
-    Logger.recordOutput(pb.makePath("current goal"), LaunchingSolutionManager.currentGoal);
-    Logger.recordOutput(pb.makePath("current solution"), currentSolution);
   }
 
   public LaunchSolution getSolution() {

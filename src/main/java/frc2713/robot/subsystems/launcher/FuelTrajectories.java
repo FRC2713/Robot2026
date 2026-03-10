@@ -16,6 +16,7 @@ public class FuelTrajectories {
   private static Distance fuelRadius = GamePieceConstants.Fuel.radius;
   private static double fuelDragCoeff = GamePieceConstants.Fuel.dragCoeff;
   private static double fuelLiftCoeff = GamePieceConstants.Fuel.liftCoeff;
+  private Translation3d[] positionBuffer = new Translation3d[0];
 
   public FuelTrajectories() {}
 
@@ -35,10 +36,12 @@ public class FuelTrajectories {
   }
 
   public Translation3d[] getPositions() {
-    Translation3d[] t = new Translation3d[fuel.size()];
-    for (int i = 0; i < fuel.size(); i++) {
-      t[i] = fuel.get(i).position;
+    if (positionBuffer.length != fuel.size()) {
+      positionBuffer = new Translation3d[fuel.size()];
     }
-    return t;
+    for (int i = 0; i < fuel.size(); i++) {
+      positionBuffer[i] = fuel.get(i).position;
+    }
+    return positionBuffer;
   }
 }

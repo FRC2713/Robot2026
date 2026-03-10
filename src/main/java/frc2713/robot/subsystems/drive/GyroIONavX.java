@@ -11,6 +11,7 @@ import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import java.util.Arrays;
 import java.util.Queue;
 
 /** IO implementation for NavX. */
@@ -30,13 +31,35 @@ public class GyroIONavX implements GyroIO {
     inputs.yawPosition = Rotation2d.fromDegrees(-navX.getYaw());
     inputs.yawVelocityRadPerSec = Units.degreesToRadians(-navX.getRawGyroZ());
 
-    inputs.odometryYawTimestamps =
-        yawTimestampQueue.stream().mapToDouble((Double value) -> value).toArray();
-    inputs.odometryYawPositions =
-        yawPositionQueue.stream()
-            .map((Double value) -> Rotation2d.fromDegrees(-value))
-            .toArray(Rotation2d[]::new);
-    yawTimestampQueue.clear();
-    yawPositionQueue.clear();
+    inputs.odometryYawTimestamps = drainDoubleQueue(yawTimestampQueue);
+    inputs.odometryYawPositions = drainYawQueue(yawPositionQueue);
+  }
+
+  private static double[] drainDoubleQueue(Queue<Double> queue) {
+    int size = queue.size();
+    double[] values = new double[size];
+    int count = 0;
+    while (count < size) {
+      Double value = queue.poll();
+      if (value == null) {
+        break;
+      }
+      values[count++] = value;
+    }
+    return (count == size) ? values : Arrays.copyOf(values, count);
+  }
+
+  private static Rotation2d[] drainYawQueue(Queue<Double> queue) {
+    int size = queue.size();
+    Rotation2d[] values = new Rotation2d[size];
+    int count = 0;
+    while (count < size) {
+      Double value = queue.poll();
+      if (value == null) {
+        break;
+      }
+      values[count++] = Rotation2d.fromDegrees(-value);
+    }
+    return (count == size) ? values : Arrays.copyOf(values, count);
   }
 }

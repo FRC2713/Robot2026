@@ -52,34 +52,40 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
 
   @Override
   public void periodic() {
-    // Call the parent periodic for the leader motor
-    super.periodic();
+    long periodicStartMicros = startPeriodicTimerMicros();
+    try {
+      // Call the parent periodic for the leader motor
+      super.periodic();
 
-    // Handle the follower motor separately
-    Time timestamp = RobotTime.getTimestamp();
-    followerIO.readInputs(followerInputs);
-    Logger.processInputs(getName() + "/Follower", followerInputs);
-    Logger.recordOutput(pb.makePath("LatencyPeriodSec"), RobotTime.getTimestamp().minus(timestamp));
-    Logger.recordOutput(
-        pb.makePath("currentCommand"),
-        (getCurrentCommand() == null) ? "Default" : getCurrentCommand().getName());
+      // Handle the follower motor separately
+      Time timestamp = RobotTime.getTimestamp();
+      followerIO.readInputs(followerInputs);
+      Logger.processInputs(getName() + "/Follower", followerInputs);
+      Logger.recordOutput(pb.makePath("LatencyPeriodSec"), RobotTime.getTimestamp().minus(timestamp));
+      Logger.recordOutput(
+          pb.makePath("currentCommand"),
+          (getCurrentCommand() == null) ? "Default" : getCurrentCommand().getName());
 
-    // Log setpoints for comparison with measurements (in same units as inputs)
-    Logger.recordOutput(
-        pb.makePath("Setpoints", "velocityRotPerSec"), velocitySetpoint.in(RotationsPerSecond));
-    Logger.recordOutput(pb.makePath("Setpoints", "positionRot"), positionSetpoint.in(Rotations));
-    // Also log measurements as doubles for easy comparison
-    Logger.recordOutput(
-        pb.makePath("Measurements", "leaderVelocityRotPerSec"),
-        inputs.velocity.in(RotationsPerSecond));
-    Logger.recordOutput(
-        pb.makePath("Measurements", "followerVelocityRotPerSec"),
-        followerInputs.velocity.in(RotationsPerSecond));
-    Logger.recordOutput(
-        pb.makePath("Measurements", "leaderAppliedVolts"), inputs.appliedVolts.in(Volts));
-    Logger.recordOutput(
-        pb.makePath("Measurements", "followerAppliedVolts"), followerInputs.appliedVolts.in(Volts));
-    Logger.recordOutput(pb.makePath("Measurements", "closedLoopError"), inputs.closedLoopError);
+      // Log setpoints for comparison with measurements (in same units as inputs)
+      Logger.recordOutput(
+          pb.makePath("Setpoints", "velocityRotPerSec"), velocitySetpoint.in(RotationsPerSecond));
+      Logger.recordOutput(pb.makePath("Setpoints", "positionRot"), positionSetpoint.in(Rotations));
+      // Also log measurements as doubles for easy comparison
+      Logger.recordOutput(
+          pb.makePath("Measurements", "leaderVelocityRotPerSec"),
+          inputs.velocity.in(RotationsPerSecond));
+      Logger.recordOutput(
+          pb.makePath("Measurements", "followerVelocityRotPerSec"),
+          followerInputs.velocity.in(RotationsPerSecond));
+      Logger.recordOutput(
+          pb.makePath("Measurements", "leaderAppliedVolts"), inputs.appliedVolts.in(Volts));
+      Logger.recordOutput(
+          pb.makePath("Measurements", "followerAppliedVolts"), followerInputs.appliedVolts.in(Volts));
+      Logger.recordOutput(pb.makePath("Measurements", "closedLoopError"), inputs.closedLoopError);
+    } finally {
+      // Overwrite base timing with full follower-subsystem periodic duration.
+      recordPeriodicTimerMicros(periodicStartMicros);
+    }
   }
 
   // Getters

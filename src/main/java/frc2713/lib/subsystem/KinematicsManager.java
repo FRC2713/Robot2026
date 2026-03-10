@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.io.ArticulatedComponent;
@@ -13,6 +14,8 @@ import java.util.*;
 import org.littletonrobotics.junction.Logger;
 
 public class KinematicsManager extends SubsystemBase {
+  private static final double MICROS_TO_SECONDS = 1.0e-6;
+  private static final String PERIODIC_TIMING_KEY = "LoopTiming/Subsystems/Kinematics/PeriodicSec";
   private static KinematicsManager instance;
 
   // Data Classes
@@ -95,28 +98,34 @@ public class KinematicsManager extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // 1. Rebuild topology if new components were added
-    if (isDirty) {
-      rebuildTopology();
-      Pose3d[] zeroedComponentPoses = new Pose3d[publishableIndices.length];
-      Arrays.fill(zeroedComponentPoses, new Pose3d());
-      Logger.recordOutput(pb.makePath("zeroedComponentPoses"), zeroedComponentPoses);
-    }
+    long periodicStartMicros = RobotController.getFPGATime();
+    try {
+      // 1. Rebuild topology if new components were added
+      if (isDirty) {
+        rebuildTopology();
+        Pose3d[] zeroedComponentPoses = new Pose3d[publishableIndices.length];
+        Arrays.fill(zeroedComponentPoses, new Pose3d());
+        Logger.recordOutput(pb.makePath("zeroedComponentPoses"), zeroedComponentPoses);
+      }
 
-    // 2. Update Kinematics
-    updateKinematics();
-    // Fast Copy: Only iterate the specific indices we care about
-    for (int i = 0; i < publishableIndices.length; i++) {
-      int nodeID = publishableIndices[i];
-      mechanismPosesBuffer[i] = localPoses[nodeID];
-    }
+      // 2. Update Kinematics
+      updateKinematics();
+      // Fast Copy: Only iterate the specific indices we care about
+      for (int i = 0; i < publishableIndices.length; i++) {
+        int nodeID = publishableIndices[i];
+        mechanismPosesBuffer[i] = localPoses[nodeID];
+      }
 
-    // Log the pre-filled buffer
-    if (mechanismPosesBuffer.length > 0) {
-      Logger.recordOutput(pb.makePath("mechanismPoses"), mechanismPosesBuffer);
+      // Log the pre-filled buffer
+      if (mechanismPosesBuffer.length > 0) {
+        Logger.recordOutput(pb.makePath("mechanismPoses"), mechanismPosesBuffer);
+      }
+      Logger.recordOutput(pb.makePath("localPoses"), localPoses);
+      Logger.recordOutput(pb.makePath("globalPoses"), globalPoses);
+    } finally {
+      Logger.recordOutput(
+          PERIODIC_TIMING_KEY, (RobotController.getFPGATime() - periodicStartMicros) * MICROS_TO_SECONDS);
     }
-    Logger.recordOutput(pb.makePath("localPoses"), localPoses);
-    Logger.recordOutput(pb.makePath("globalPoses"), globalPoses);
   }
 
   private void rebuildTopology() {

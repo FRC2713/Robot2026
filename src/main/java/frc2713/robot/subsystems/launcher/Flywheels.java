@@ -101,24 +101,30 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
 
   @Override
   public void periodic() {
-    super.periodic();
+    long periodicStartMicros = startPeriodicTimerMicros();
+    try {
+      super.periodic();
 
-    if (Robot.isSimulation()) {
-      // update ball_vector visualization
-      Pose3d globalPose = this.getGlobalPose();
-      Logger.recordOutput(
-          super.pb.makePath("ball_vector"),
-          new Pose3d[] {
-            globalPose,
-            globalPose.plus(new Transform3d(new Translation3d(1, 0, 0), new Rotation3d()))
-          });
+      if (Robot.isSimulation()) {
+        // update ball_vector visualization
+        Pose3d globalPose = this.getGlobalPose();
+        Logger.recordOutput(
+            super.pb.makePath("ball_vector"),
+            new Pose3d[] {
+              globalPose,
+              globalPose.plus(new Transform3d(new Translation3d(1, 0, 0), new Rotation3d()))
+            });
 
-      // update fuel trajectories physics for balls already in flight
-      Time now = RobotTime.getTimestamp();
-      Time dt = now.minus(lastUpdateTime);
-      fuelTrajectories.update(dt);
-      this.lastUpdateTime = now;
-      Logger.recordOutput(pb.makePath("fuel_trajectories"), fuelTrajectories.getPositions());
+        // update fuel trajectories physics for balls already in flight
+        Time now = RobotTime.getTimestamp();
+        Time dt = now.minus(lastUpdateTime);
+        fuelTrajectories.update(dt);
+        this.lastUpdateTime = now;
+        Logger.recordOutput(pb.makePath("fuel_trajectories"), fuelTrajectories.getPositions());
+      }
+    } finally {
+      // Overwrite parent timing with full flywheels periodic duration.
+      recordPeriodicTimerMicros(periodicStartMicros);
     }
   }
 

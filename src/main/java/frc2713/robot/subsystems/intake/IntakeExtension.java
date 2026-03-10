@@ -129,20 +129,26 @@ public class IntakeExtension
 
   @Override
   public void periodic() {
-    io.readInputs(inputs);
-    super.periodic();
+    long periodicStartMicros = startPeriodicTimerMicros();
+    try {
+      io.readInputs(inputs);
+      super.periodic();
 
-    Logger.recordOutput(pb.makePath("CurrentDistanceMeters"), getCurrentPositionAsDistance());
-    Logger.recordOutput(pb.makePath("SetpointDistanceMeters"), getPositionSetpointAsDistance());
+      Logger.recordOutput(pb.makePath("CurrentDistanceMeters"), getCurrentPositionAsDistance());
+      Logger.recordOutput(pb.makePath("SetpointDistanceMeters"), getPositionSetpointAsDistance());
 
-    Logger.recordOutput(pb.makePath("AtTarget"), atTarget());
+      Logger.recordOutput(pb.makePath("AtTarget"), atTarget());
 
-    Logger.recordOutput(
-        pb.makePath("LinearVelocity"),
-        convertMotorVelocityToSubsystemVelocity(getCurrentVelocity()));
+      Logger.recordOutput(
+          pb.makePath("LinearVelocity"),
+          convertMotorVelocityToSubsystemVelocity(getCurrentVelocity()));
 
-    if (DriverStation.isDisabled()) {
-      setPositionSetpointImpl(inputs.position);
+      if (DriverStation.isDisabled()) {
+        setPositionSetpointImpl(inputs.position);
+      }
+    } finally {
+      // Overwrite parent timing with full intake extension periodic duration.
+      recordPeriodicTimerMicros(periodicStartMicros);
     }
   }
 

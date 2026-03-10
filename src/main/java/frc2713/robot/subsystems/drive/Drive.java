@@ -67,6 +67,8 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Drive extends SubsystemBase implements ArticulatedComponent {
+  private static final double MICROS_TO_SECONDS = 1.0e-6;
+  private static final String PERIODIC_TIMING_KEY = "LoopTiming/Subsystems/Drive/PeriodicSec";
   // TunerConstants doesn't include these constants, so they are declared locally
   static final double ODOMETRY_FREQUENCY = TunerConstants.kCANBus.isNetworkFD() ? 250.0 : 100.0;
   public static final double DRIVE_BASE_RADIUS =
@@ -252,101 +254,108 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
 
   @Override
   public void periodic() {
-    odometryLock.lock(); // Prevents odometry updates while reading data
-    gyroIO.updateInputs(gyroInputs);
-    Logger.processInputs("Drive/Gyro", gyroInputs);
-    for (var module : modules) {
-      module.periodic();
-    }
-    odometryLock.unlock();
-
-    // Stop moving when disabled
-    if (DriverStation.isDisabled()) {
+    long periodicStartMicros = RobotController.getFPGATime();
+    try {
+      odometryLock.lock(); // Prevents odometry updates while reading data
+      gyroIO.updateInputs(gyroInputs);
+      Logger.processInputs("Drive/Gyro", gyroInputs);
       for (var module : modules) {
-        module.stop();
+        module.periodic();
       }
-    }
+      odometryLock.unlock();
 
-    // Log empty setpoint states when disabled
-    if (DriverStation.isDisabled()) {
+      // Stop moving when disabled
+      if (DriverStation.isDisabled()) {
+        for (var module : modules) {
+          module.stop();
+        }
+      }
+
+      // Log empty setpoint states when disabled
+      if (DriverStation.isDisabled()) {
+        Logger.recordOutput(
+            drivePb.makePath("SwerveStates", "Setpoints"), new SwerveModuleState[] {});
+        Logger.recordOutput(
+            drivePb.makePath("SwerveStates", "SetpointsOptimized"), new SwerveModuleState[] {});
+      }
+
+      // Update odometry
+      double[] sampleTimestamps =
+          modules[0].getOdometryTimestamps(); // All signals are sampled together
+      int sampleCount = sampleTimestamps.length;
+      for (int i = 0; i < sampleCount; i++) {
+        // Read wheel positions and deltas from each module
+        SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
+        SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
+        for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
+          modulePositions[moduleIndex] = modules[moduleIndex].getOdometryPositions()[i];
+          moduleDeltas[moduleIndex] =
+              new SwerveModulePosition(
+                  modulePositions[moduleIndex].distanceMeters
+                      - lastModulePositions[moduleIndex].distanceMeters,
+                  modulePositions[moduleIndex].angle);
+          lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
+        }
+
+        // Update gyro angle
+        if (gyroInputs.connected) {
+          // Use the real gyro angle
+          rawGyroRotation = gyroInputs.odometryYawPositions[i];
+        } else {
+          // Use the angle delta from the kinematics and module deltas
+          Twist2d twist = kinematics.toTwist2d(moduleDeltas);
+          rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
+        }
+
+        // Apply update
+        poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+        odometryPoseEstimator.updateWithTime(
+            sampleTimestamps[i], rawGyroRotation, modulePositions);
+      }
+
+      // Update gyro alert
+      gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
       Logger.recordOutput(
-          drivePb.makePath("SwerveStates", "Setpoints"), new SwerveModuleState[] {});
+          "Drive/isInNeutralZone",
+          FieldConstants.NeutralZone.region.contains(new Rectangle2d(getPose(), 1.0, 1.0)));
+
+      // Sim uses different gains
+      if (Robot.isReal()) {
+        loggedTunableDriveGains.ifChanged(
+            hashCode(),
+            (Slot0Configs gains) -> {
+              // Apply updated PID/FF gains
+              for (int i = 0; i < 4; i++) {
+                modules[i].setDriveGains(gains);
+              }
+            });
+        loggedTunableTurnGains.ifChanged(
+            hashCode(),
+            (Slot0Configs gains) -> {
+              // Apply updated PID/FF gains
+              for (int i = 0; i < 4; i++) {
+                modules[i].setTurnGains(gains);
+              }
+            });
+        loggedTunablePositionGains.ifChanged(
+            hashCode(),
+            (Slot0Configs gains) -> {
+              // Update position controller PID gains
+              positionController.setPID(gains.kP, gains.kI, gains.kD);
+              // Update x and y controllers to point to the same instance
+              xController = positionController;
+              yController = positionController;
+            });
+        loggedTunableHeadingGains.ifChanged(
+            hashCode(),
+            (Slot0Configs gains) -> {
+              // Update heading controller PID gains
+              headingController.setPID(gains.kP, gains.kI, gains.kD);
+            });
+      }
+    } finally {
       Logger.recordOutput(
-          drivePb.makePath("SwerveStates", "SetpointsOptimized"), new SwerveModuleState[] {});
-    }
-
-    // Update odometry
-    double[] sampleTimestamps =
-        modules[0].getOdometryTimestamps(); // All signals are sampled together
-    int sampleCount = sampleTimestamps.length;
-    for (int i = 0; i < sampleCount; i++) {
-      // Read wheel positions and deltas from each module
-      SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
-      SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
-      for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
-        modulePositions[moduleIndex] = modules[moduleIndex].getOdometryPositions()[i];
-        moduleDeltas[moduleIndex] =
-            new SwerveModulePosition(
-                modulePositions[moduleIndex].distanceMeters
-                    - lastModulePositions[moduleIndex].distanceMeters,
-                modulePositions[moduleIndex].angle);
-        lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
-      }
-
-      // Update gyro angle
-      if (gyroInputs.connected) {
-        // Use the real gyro angle
-        rawGyroRotation = gyroInputs.odometryYawPositions[i];
-      } else {
-        // Use the angle delta from the kinematics and module deltas
-        Twist2d twist = kinematics.toTwist2d(moduleDeltas);
-        rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
-      }
-
-      // Apply update
-      poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
-      odometryPoseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
-    }
-
-    // Update gyro alert
-    gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
-    Logger.recordOutput(
-        "Drive/isInNeutralZone",
-        FieldConstants.NeutralZone.region.contains(new Rectangle2d(getPose(), 1.0, 1.0)));
-
-    // Sim uses different gains
-    if (Robot.isReal()) {
-      loggedTunableDriveGains.ifChanged(
-          hashCode(),
-          (Slot0Configs gains) -> {
-            // Apply updated PID/FF gains
-            for (int i = 0; i < 4; i++) {
-              modules[i].setDriveGains(gains);
-            }
-          });
-      loggedTunableTurnGains.ifChanged(
-          hashCode(),
-          (Slot0Configs gains) -> {
-            // Apply updated PID/FF gains
-            for (int i = 0; i < 4; i++) {
-              modules[i].setTurnGains(gains);
-            }
-          });
-      loggedTunablePositionGains.ifChanged(
-          hashCode(),
-          (Slot0Configs gains) -> {
-            // Update position controller PID gains
-            positionController.setPID(gains.kP, gains.kI, gains.kD);
-            // Update x and y controllers to point to the same instance
-            xController = positionController;
-            yController = positionController;
-          });
-      loggedTunableHeadingGains.ifChanged(
-          hashCode(),
-          (Slot0Configs gains) -> {
-            // Update heading controller PID gains
-            headingController.setPID(gains.kP, gains.kI, gains.kD);
-          });
+          PERIODIC_TIMING_KEY, (RobotController.getFPGATime() - periodicStartMicros) * MICROS_TO_SECONDS);
     }
   }
 
