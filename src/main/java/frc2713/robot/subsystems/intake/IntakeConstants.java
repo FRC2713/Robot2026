@@ -15,6 +15,7 @@ import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.Slot1Configs;
+import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.mechanisms.DifferentialMotorConstants;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -87,6 +88,11 @@ public final class IntakeConstants {
     public static final Distance height = Inches.of(15.5);
     public static final Distance width = Inches.of(30.0);
     public static final double volumePerInch = height.in(Inches) * width.in(Inches);
+    
+    // Soft limits (in rotations of the mechanism)
+    public static final double forwardSoftLimit = 11.5 / (sprocketPitchDiameter.in(Inches) * Math.PI); // ~12 inches max extension
+    public static final double reverseSoftLimit = 0 / (sprocketPitchDiameter.in(Inches) * Math.PI); // -0.5 inches to allow slight over-retraction
+    
     // A supplier to prevent changes by subsystem from propagating
     public static final Supplier<MotionMagicConfigs> motionMagicGains =
         () ->
@@ -153,6 +159,12 @@ public final class IntakeConstants {
                       .withStatorCurrentLimit(80.0)
                       .withStatorCurrentLimitEnable(true))
               .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(averageGearRatio))
+              .withSoftwareLimitSwitch(
+                  new SoftwareLimitSwitchConfigs()
+                      .withForwardSoftLimitEnable(true)
+                      .withForwardSoftLimitThreshold(forwardSoftLimit)
+                      .withReverseSoftLimitEnable(true)
+                      .withReverseSoftLimitThreshold(reverseSoftLimit))
               .withClosedLoopGeneral(
                   new ClosedLoopGeneralConfigs()
                       // differential mechanism is not continuous on the difference axis
