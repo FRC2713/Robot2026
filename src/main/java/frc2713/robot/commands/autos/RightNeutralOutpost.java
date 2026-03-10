@@ -52,8 +52,8 @@ public class RightNeutralOutpost {
                     intakeFuelRight.cmd(),
                     Commands.sequence(
                         new WaitCommand(0.3),
-                        intakeExtension.extendCommand(),
-                        intakeRoller.intake()))));
+                        Commands.parallel(
+                            intakeExtension.extendCommand(), intakeRoller.intake())))));
 
     intakeFuelRight
         .done()

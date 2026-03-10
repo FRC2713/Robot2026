@@ -6,6 +6,7 @@ import choreo.auto.AutoTrajectory;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc2713.robot.GameCommandGroups;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
@@ -41,6 +42,14 @@ public class NeutralScoreNeutral {
     AutoTrajectory launchToFuel = routine.trajectory("LaunchToFuel");
     AutoTrajectory intakeFuel2 = routine.trajectory("IntakeFuel");
 
+    faceFuelTrench
+        .atTranslation("BeginIntaking", 0.2)
+        .onTrue(
+            Commands.parallel(
+                Commands.print("[AUTO] Marker-based intake start"),
+                intakeExtension.extendCommand(),
+                intakeRoller.intake()));
+
     routine
         .active()
         .onTrue(
@@ -52,18 +61,18 @@ public class NeutralScoreNeutral {
     faceFuelTrench
         .done()
         .onTrue(
-            Commands.sequence(
+            Commands.parallel(
                 Commands.print("[AUTO] Starting intake and collecting fuel"),
-                Commands.parallel(
-                    intakeExtension.extendCommand(), intakeRoller.intake(), intakeFuel.cmd())));
+                intakeExtension.extendCommand(),
+                intakeRoller.intake(),
+                intakeFuel.cmd()));
 
     intakeFuel
         .done()
         .onTrue(
             Commands.sequence(
-                Commands.print("[AUTO] Moving to shooting position"),
-                Commands.sequence(Commands.race(intakeRoller.stop(), new WaitCommand(1))),
-                moveToLaunchTrench.cmd()));
+                Commands.print("[AUTO] Moving to shooting position"), moveToLaunchTrench.cmd()));
+
     moveToLaunchTrench
         .done()
         .onTrue(
@@ -71,8 +80,12 @@ public class NeutralScoreNeutral {
                 Commands.print("[AUTO] Starting launch sequence"),
                 Commands.sequence(
                         Commands.race(otfShotSupplier.get(), new WaitCommand(6)),
-                        Commands.race(hood.retract(), new WaitCommand(1)),
-                        launchToFuel.cmd())
+                        Commands.sequence(
+                            hood.retract().withTimeout(0.1),
+                            Commands.parallel(
+                                launchToFuel.cmd(),
+                                GameCommandGroups.Launching.stopShooting(
+                                    driveSubsystem, feeder, dyeRotor))))
                     .withName("OTF Shooting")));
 
     launchToFuel
@@ -81,7 +94,10 @@ public class NeutralScoreNeutral {
             Commands.sequence(
                 Commands.print("[AUTO] Going to fuel again"),
                 Commands.parallel(
-                    intakeExtension.extendCommand(), intakeRoller.intake(), intakeFuel2.cmd())));
+                    intakeExtension.extendCommand(),
+                    intakeRoller.intake(),
+                    intakeFuel2.cmd(),
+                    Commands.run(() -> driveSubsystem.stop()))));
     return routine;
   }
 
