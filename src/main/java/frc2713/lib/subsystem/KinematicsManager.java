@@ -13,6 +13,8 @@ import java.util.*;
 import org.littletonrobotics.junction.Logger;
 
 public class KinematicsManager extends SubsystemBase {
+  private static final Pose3d ZERO_POSE = new Pose3d();
+  private static final Translation3d ZERO_TRANSLATION = new Translation3d();
   private static KinematicsManager instance;
 
   // Data Classes
@@ -53,6 +55,10 @@ public class KinematicsManager extends SubsystemBase {
   private final Map<ArticulatedComponent, Integer> componentToIdMap = new HashMap<>();
 
   private final AdvantageScopePathBuilder pb = new AdvantageScopePathBuilder("Kinematics");
+  private final String mechanismPosesPath = pb.makePath("mechanismPoses");
+  private final String localPosesPath = pb.makePath("localPoses");
+  private final String globalPosesPath = pb.makePath("globalPoses");
+  private final String zeroedComponentPosesPath = pb.makePath("zeroedComponentPoses");
   private boolean isDirty = false; // Tracks if we need to re-sort
 
   public KinematicsManager() {
@@ -99,8 +105,8 @@ public class KinematicsManager extends SubsystemBase {
     if (isDirty) {
       rebuildTopology();
       Pose3d[] zeroedComponentPoses = new Pose3d[publishableIndices.length];
-      Arrays.fill(zeroedComponentPoses, new Pose3d());
-      Logger.recordOutput(pb.makePath("zeroedComponentPoses"), zeroedComponentPoses);
+      Arrays.fill(zeroedComponentPoses, ZERO_POSE);
+      Logger.recordOutput(zeroedComponentPosesPath, zeroedComponentPoses);
     }
 
     // 2. Update Kinematics
@@ -113,25 +119,31 @@ public class KinematicsManager extends SubsystemBase {
 
     // Log the pre-filled buffer
     if (mechanismPosesBuffer.length > 0) {
-      Logger.recordOutput(pb.makePath("mechanismPoses"), mechanismPosesBuffer);
+      Logger.recordOutput(mechanismPosesPath, mechanismPosesBuffer);
     }
-    Logger.recordOutput(pb.makePath("localPoses"), localPoses);
-    Logger.recordOutput(pb.makePath("globalPoses"), globalPoses);
+    Logger.recordOutput(localPosesPath, localPoses);
+    Logger.recordOutput(globalPosesPath, globalPoses);
   }
 
   private void rebuildTopology() {
     // Find max ID to size arrays
-    int maxId = nodes.stream().mapToInt(n -> n.id).max().orElse(0);
+    int maxId = 0;
+    for (Node node : nodes) {
+      if (node.id > maxId) {
+        maxId = node.id;
+      }
+    }
 
     this.globalPoses = new Pose3d[maxId + 1];
     this.localPoses = new Pose3d[maxId + 1];
-    Arrays.fill(this.globalPoses, new Pose3d());
-    Arrays.fill(this.localPoses, new Pose3d());
+    Arrays.fill(this.globalPoses, ZERO_POSE);
+    Arrays.fill(this.localPoses, ZERO_POSE);
 
     // Topological Sort
     // We sort the 'nodes' list so parents appear before children
     List<Node> sorted = new ArrayList<>();
     List<Node> remaining = new ArrayList<>(nodes);
+    boolean[] resolvedById = new boolean[maxId + 1];
 
     boolean progress = true;
     while (!remaining.isEmpty() && progress) {
@@ -141,10 +153,16 @@ public class KinematicsManager extends SubsystemBase {
 
         // Check if parent is processed
         boolean parentProcessed =
-            (current.parentId == -1) || sorted.stream().anyMatch(n -> n.id == current.parentId);
+            (current.parentId == -1)
+                || (current.parentId >= 0
+                    && current.parentId < resolvedById.length
+                    && resolvedById[current.parentId]);
 
         if (parentProcessed) {
           sorted.add(current);
+          if (current.id >= 0 && current.id < resolvedById.length) {
+            resolvedById[current.id] = true;
+          }
           remaining.remove(i);
           i--;
           progress = true;
@@ -155,7 +173,7 @@ public class KinematicsManager extends SubsystemBase {
     // Add any stragglers (cycles/missing parents) to prevent crash
     sorted.addAll(remaining);
 
-    this.orderedNodes = sorted.toArray(new Node[0]);
+    this.orderedNodes = sorted.toArray(new Node[sorted.size()]);
 
     // Resize velocity arrays
     int size = globalPoses.length;
@@ -163,25 +181,32 @@ public class KinematicsManager extends SubsystemBase {
     this.globalAngVels = new Translation3d[size];
     this.globalLinAccels = new Translation3d[size];
     this.globalAngAccels = new Translation3d[size];
-    Arrays.fill(this.globalLinVels, new Translation3d());
-    Arrays.fill(this.globalAngVels, new Translation3d());
-    Arrays.fill(this.globalLinAccels, new Translation3d());
-    Arrays.fill(this.globalAngAccels, new Translation3d());
+    Arrays.fill(this.globalLinVels, ZERO_TRANSLATION);
+    Arrays.fill(this.globalAngVels, ZERO_TRANSLATION);
+    Arrays.fill(this.globalLinAccels, ZERO_TRANSLATION);
+    Arrays.fill(this.globalAngAccels, ZERO_TRANSLATION);
 
-    // 1. Filter nodes to find which ones are publishable
-    List<Integer> indicesList = new ArrayList<>();
+    // 1. Count publishable nodes
+    int publishableCount = 0;
     for (Node node : orderedNodes) {
       if (node.publishable) {
-        indicesList.add(node.id);
+        publishableCount++;
       }
     }
 
-    // 2. specific optimization: Pre-allocate the primitive arrays once
-    this.publishableIndices = indicesList.stream().mapToInt(i -> i).toArray();
+    // 2. Fill primitive publishable index array
+    this.publishableIndices = new int[publishableCount];
+    int publishableWriteIndex = 0;
+    for (Node node : orderedNodes) {
+      if (node.publishable) {
+        this.publishableIndices[publishableWriteIndex++] = node.id;
+      }
+    }
+
     this.mechanismPosesBuffer = new Pose3d[this.publishableIndices.length];
 
     // Initialize buffer to prevent nulls if logged before first update
-    Arrays.fill(this.mechanismPosesBuffer, new Pose3d());
+    Arrays.fill(this.mechanismPosesBuffer, ZERO_POSE);
 
     this.isDirty = false;
   }
@@ -209,8 +234,8 @@ public class KinematicsManager extends SubsystemBase {
         // --- ROOT (Chassis) ---
 
         // Assume Root's "Relative" velocity is actually Field-Relative velocity
-        globalPoses[node.id] = new Pose3d().plus(transform);
-        localPoses[node.id] = new Pose3d();
+        globalPoses[node.id] = ZERO_POSE.plus(transform);
+        localPoses[node.id] = ZERO_POSE;
         globalLinVels[node.id] = localLinDelta;
         globalAngVels[node.id] = localAngDelta;
         globalLinAccels[node.id] = localLinAccelDelta;
@@ -253,8 +278,7 @@ public class KinematicsManager extends SubsystemBase {
         // where Alpha is angular acceleration and Omega is angular velocity
 
         // Angular acceleration term: Alpha x Radius
-        Translation3d angAccelTerm =
-            new Translation3d(globalAngAccels[node.parentId].cross(radius));
+        Translation3d angAccelTerm = new Translation3d(globalAngAccels[node.parentId].cross(radius));
 
         // Centripetal acceleration term: Omega x (Omega x Radius)
         Translation3d omegaCrossRadius =
@@ -275,12 +299,12 @@ public class KinematicsManager extends SubsystemBase {
 
   public Pose3d getGlobalPoseFor(ArticulatedComponent component) {
     Integer id = componentToIdMap.get(component);
-    if (id == null) return new Pose3d(); // Not registered
+    if (id == null) return ZERO_POSE; // Not registered
     return getGlobalPose(id);
   }
 
   public Pose3d getGlobalPose(int id) {
-    if (id < 0 || id >= globalPoses.length) return new Pose3d();
+    if (id < 0 || id >= globalPoses.length) return ZERO_POSE;
     return globalPoses[id];
   }
 
@@ -288,7 +312,7 @@ public class KinematicsManager extends SubsystemBase {
 
   public Translation3d getGlobalLinearVelocity(ArticulatedComponent c) {
     Integer id = componentToIdMap.get(c);
-    if (id == null || id >= globalLinVels.length) return new Translation3d();
+    if (id == null || id >= globalLinVels.length) return ZERO_TRANSLATION;
     return globalLinVels[id];
   }
 
@@ -297,13 +321,12 @@ public class KinematicsManager extends SubsystemBase {
   }
 
   public Translation3d getGlobalAngularVelocity(int index) {
-    return new Translation3d(
-        globalAngVels[index].getX(), globalAngVels[index].getY(), globalAngVels[index].getZ());
+    return globalAngVels[index];
   }
 
   public Translation3d getGlobalLinearAcceleration(ArticulatedComponent c) {
     Integer id = componentToIdMap.get(c);
-    if (id == null || id >= globalLinAccels.length) return new Translation3d();
+    if (id == null || id >= globalLinAccels.length) return ZERO_TRANSLATION;
     return globalLinAccels[id];
   }
 
@@ -313,15 +336,12 @@ public class KinematicsManager extends SubsystemBase {
 
   public Translation3d getGlobalAngularAcceleration(ArticulatedComponent c) {
     Integer id = componentToIdMap.get(c);
-    if (id == null || id >= globalAngAccels.length) return new Translation3d();
+    if (id == null || id >= globalAngAccels.length) return ZERO_TRANSLATION;
     return globalAngAccels[id];
   }
 
   public Translation3d getGlobalAngularAcceleration(int index) {
-    return new Translation3d(
-        globalAngAccels[index].getX(),
-        globalAngAccels[index].getY(),
-        globalAngAccels[index].getZ());
+    return globalAngAccels[index];
   }
 
   public Pose3d limitPoseToField(Pose3d pose) {
