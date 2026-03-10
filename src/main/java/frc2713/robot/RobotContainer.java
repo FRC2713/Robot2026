@@ -7,6 +7,9 @@
 
 package frc2713.robot;
 
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import choreo.auto.AutoFactory;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -183,6 +186,8 @@ public class RobotContainer {
                     LauncherConstants.Turret.canCoderConfig,
                     () -> {
                       var state = new SimCanCoderIO.SimCanCoderState();
+                      state.position = Rotations.of(0);
+                      state.velocity = RotationsPerSecond.of(0);
                       return state;
                     }));
 

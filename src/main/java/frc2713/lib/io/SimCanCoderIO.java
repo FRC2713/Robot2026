@@ -2,6 +2,8 @@ package frc2713.lib.io;
 
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.sim.CANcoderSimState;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import java.util.function.Supplier;
 
 /**
@@ -12,8 +14,8 @@ public class SimCanCoderIO extends CanCoderIOHardware {
 
   /** State supplied by the mechanism sim for CANcoder position and velocity. */
   public static class SimCanCoderState {
-    public double positionRotations = Double.NaN;
-    public double velocityRotationsPerSecond = Double.NaN;
+    public Angle position = null;
+    public AngularVelocity velocity = null;
   }
 
   protected final CANcoderSimState simState;
@@ -33,8 +35,8 @@ public class SimCanCoderIO extends CanCoderIOHardware {
             ? +1.0
             : -1.0;
     var suppliedState = supplier.get();
-    simState.setRawPosition(invertMultiplier * suppliedState.positionRotations);
-    simState.setVelocity(invertMultiplier * suppliedState.velocityRotationsPerSecond);
+    simState.setRawPosition(suppliedState.position.times(invertMultiplier));
+    simState.setVelocity(suppliedState.velocity.times(invertMultiplier));
 
     super.readInputs(inputs);
   }

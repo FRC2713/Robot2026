@@ -45,6 +45,7 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
 
   protected Angle positionSetpoint = Radians.of(0.0);
   protected AngularVelocity velocitySetpoint = RotationsPerSecond.of(0.0);
+  protected boolean initialized = false;
 
   public MotorSubsystem(TalonFXSubsystemConfig config, MI inputs, IO io) {
     super(config.name);
@@ -66,11 +67,20 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
     io.readInputs(inputs);
     Logger.processInputs(getName(), inputs);
 
+    if (!initialized) {
+      initialize();
+    }
+
     Logger.recordOutput(pb.makePath("LatencyPeriodSec"), RobotTime.getTimestamp().minus(timestamp));
     Logger.recordOutput(
         pb.makePath("currentCommand"),
         (getCurrentCommand() == null) ? "Default" : getCurrentCommand().getName());
     atTarget();
+  }
+
+  /** Initialize the subsystem. Does nothing by default. */
+  protected void initialize() {
+    this.initialized = true;
   }
 
   /**
