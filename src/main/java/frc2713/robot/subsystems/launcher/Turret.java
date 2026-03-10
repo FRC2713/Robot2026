@@ -39,9 +39,13 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
     implements ArticulatedComponent {
 
   private Alert invalidEncoder1Alert =
-      new Alert(pb.makePath("Encoder 1 value is invalid.  CRT solution cannot be found"), AlertType.kError);
+      new Alert(
+          pb.makePath("Encoder 1 value is invalid.  CRT solution cannot be found"),
+          AlertType.kError);
   private Alert invalidEncoder2Alert =
-      new Alert(pb.makePath("Encoder 2 value is invalid.  CRT solution cannot be found"), AlertType.kError);
+      new Alert(
+          pb.makePath("Encoder 2 value is invalid.  CRT solution cannot be found"),
+          AlertType.kError);
 
   public Turret(
       final TalonFXSubsystemConfig config,
@@ -54,12 +58,11 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
 
   @AutoLogOutput
   public Angle getTurretPositionFromEncoders(Angle e1, Angle e2) {
-    if (e1 == null) {
-      invalidEncoder1Alert.set(true);
-      return Rotations.of(0);
-    }
-    if (e2 == null) {
-      invalidEncoder2Alert.set(true);
+    if (e1 == null || e2 == null) {
+      if (initialized) {
+        if (e1 == null) invalidEncoder1Alert.set(true);
+        if (e2 == null) invalidEncoder2Alert.set(true);
+      }
       return Rotations.of(0);
     }
     invalidEncoder1Alert.set(false);

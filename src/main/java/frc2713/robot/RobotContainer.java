@@ -1,14 +1,4 @@
-// Copyright (c) 2021-2026 Littleton Robotics
-// http://github.com/Mechanical-Advantage
-//
-// Use of this source code is governed by a BSD
-// license that can be found in the LICENSE file
-// at the root directory of this project.
-
 package frc2713.robot;
-
-import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import choreo.auto.AutoFactory;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -24,7 +14,6 @@ import frc2713.lib.io.CanCoderIOHardware;
 import frc2713.lib.io.CanCoderInputs;
 import frc2713.lib.io.CanCoderInputsAutoLogged;
 import frc2713.lib.io.MotorIO;
-import frc2713.lib.io.SimCanCoderIO;
 import frc2713.lib.io.SimTalonFXIO;
 import frc2713.lib.io.TalonFXIO;
 import frc2713.lib.subsystem.KinematicsManager;
@@ -59,6 +48,7 @@ import frc2713.robot.subsystems.launcher.Hood;
 import frc2713.robot.subsystems.launcher.LauncherConstants;
 import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
 import frc2713.robot.subsystems.launcher.Turret;
+import frc2713.robot.subsystems.launcher.TurretSim;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 import frc2713.robot.subsystems.serializer.SerializerConstants;
@@ -177,19 +167,7 @@ public class RobotContainer {
             new Hood(
                 LauncherConstants.Hood.config, new SimTalonFXIO(LauncherConstants.Hood.config));
 
-        turret =
-            new Turret(
-                LauncherConstants.Turret.config,
-                new SimTalonFXIO(LauncherConstants.Turret.config),
-                new CanCoderInputsAutoLogged(),
-                new SimCanCoderIO(
-                    LauncherConstants.Turret.canCoderConfig,
-                    () -> {
-                      var state = new SimCanCoderIO.SimCanCoderState();
-                      state.position = Rotations.of(0);
-                      state.velocity = RotationsPerSecond.of(0);
-                      return state;
-                    }));
+        turret = new TurretSim();
 
         intakeRoller =
             new IntakeRoller(

@@ -7,6 +7,7 @@ import frc2713.lib.drivers.CANDeviceId;
 public class CanCoderConfig {
   public CANDeviceId canId;
   public CANcoderConfiguration config = new CANcoderConfiguration();
+  public double mechanismToSensorRatio = 1.0;
 
   public CanCoderConfig() {}
 
