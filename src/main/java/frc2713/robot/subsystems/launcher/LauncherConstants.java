@@ -165,11 +165,7 @@ public final class LauncherConstants {
       followerConfig.unitToRotorRatio = gearRatio; // 1.33:1 reduction from motor to flywheel
       followerConfig.momentOfInertia = flywhMomentOfInertia.times(0.5);
       followerConfig.useFOC = false;
-      followerConfig.fxConfig.CurrentLimits.StatorCurrentLimit = 120.0;
-      followerConfig.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-      followerConfig.fxConfig.CurrentLimits.SupplyCurrentLimit = 70.0;
-      followerConfig.fxConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-      followerConfig.fxConfig.MotorOutput.PeakReverseDutyCycle = 0;
+      followerConfig.fxConfig.CurrentLimits = leaderConfig.fxConfig.CurrentLimits;
     }
 
     public static int MODEL_INDEX = 5;

@@ -26,7 +26,7 @@ public class IntakeRoller extends MotorFollowerSubsystem<MotorInputsAutoLogged, 
   }
 
   public Command intake() {
-    return voltageCommand(IntakeConstants.Roller.intakeVoltageDesired);
+    return velocitySetpointCommand(() -> IntakeConstants.Roller.intakeSpeed);
   }
 
   public Command stop() {

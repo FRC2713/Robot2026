@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.InchesPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Pounds;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Volts;
@@ -21,6 +22,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
@@ -57,19 +59,37 @@ public final class IntakeConstants {
       leaderConfig.useFOC = true;
       leaderConfig.motor = DCMotor.getKrakenX44Foc(1);
 
+      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(0.75, 3.5);
+      leaderConfig.fxConfig.Slot0.kI = 0.0;
+      leaderConfig.fxConfig.Slot0.kD = 0.0;
+      leaderConfig.fxConfig.Slot0.kS = 2.0;
+      leaderConfig.fxConfig.Slot0.kV = 0.12 * gearRatio;
+      leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimit = 120.0;
+      leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+      leaderConfig.fxConfig.CurrentLimits.SupplyCurrentLimit = 70.0;
+      leaderConfig.fxConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+
+
       followerConfig.name = "Intake Rollers Follower";
       followerConfig.talonCANID = new CANDeviceId(43); // Example CAN ID, replace with actual ID
       followerConfig.unitToRotorRatio =
           gearRatio; // 12 tooth pinion to 24 tooth gear for 0.5 reduction
       followerConfig.momentOfInertia = rollersMomentOfInertia.times(0.5);
       followerConfig.useFOC = true;
-      leaderConfig.motor = DCMotor.getKrakenX44Foc(1);
+      followerConfig.motor = DCMotor.getKrakenX44Foc(1);
+      followerConfig.fxConfig.CurrentLimits = leaderConfig.fxConfig.CurrentLimits;
+
     }
+
+    public static final AngularVelocity freeSpeed = RadiansPerSecond.of(leaderConfig.motor.freeSpeedRadPerSec).div(gearRatio);
 
     // TODO: Use closed loop velocity control here.
     public static LoggedTunableMeasure<Voltage> intakeVoltageDesired =
         new LoggedTunableMeasure<Voltage>("Intake Rollers/Intake", Volts.of(10.0));
     public static Voltage outtakeVoltageDesired = Volts.of(-5.0);
+
+    public static AngularVelocity intakeSpeed = freeSpeed.times(0.8);
+    public static AngularVelocity idleSpeed = freeSpeed.times(0.3);
   }
 
   public static final class Extension {
