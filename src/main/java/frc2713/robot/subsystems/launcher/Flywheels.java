@@ -30,6 +30,7 @@ import frc2713.robot.Robot;
 import frc2713.robot.subsystems.launcher.LaunchingSolutionManager.LaunchSolution;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, MotorIO>
@@ -76,6 +77,8 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
     return setVelocity(LauncherConstants.Flywheels.idleVelocity);
   }
 
+  @AutoLogOutput public AngularVelocity oTFFudgeFactor = RPM.of(0);
+
   /**
    * Supplier that continuously calculates the on-the-fly flywheel velocity. Uses the launch
    * solution if valid, otherwise falls back to distance-based lookup.
@@ -94,7 +97,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
         AngularVelocity targetVelocity =
             RPM.of(LauncherConstants.Flywheels.rpmMap.get(solution.ballSpeedMetersPerSecond()));
         Logger.recordOutput(pb.makePath("OTF", "targetFlywheelVelocity"), targetVelocity);
-        return targetVelocity;
+        return targetVelocity.plus(oTFFudgeFactor);
       };
 
   public Command otfCommand() {

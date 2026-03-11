@@ -7,6 +7,9 @@
 
 package frc2713.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.RPM;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc2713.lib.util.AllianceFlipUtil;
@@ -112,6 +115,9 @@ public class Robot extends LoggedRobot {
 
     LaunchingSolutionManager.currentGoal =
         AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint);
+
+    if (RobotContainer.hood != null) RobotContainer.hood.oTFFudgeFactor = Degrees.of(0);
+    if (RobotContainer.flywheels != null) RobotContainer.flywheels.oTFFudgeFactor = RPM.of(0);
   }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */

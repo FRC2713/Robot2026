@@ -100,6 +100,7 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
 
   @AutoLogOutput public boolean ducking = false;
   @AutoLogOutput public boolean disableDucking = true;
+  @AutoLogOutput public Angle oTFFudgeFactor = Degrees.of(0);
 
   public final Supplier<Angle> otfAngSupplier =
       () -> {
@@ -123,7 +124,7 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
         Logger.recordOutput(
             super.pb.makePath("OTF", "lookupAngle"),
             Degrees.of(LauncherConstants.Hood.angleMap.get(toGoal.in(Meters))));
-        return aimAngle;
+        return aimAngle.plus(oTFFudgeFactor);
       };
 
   @Override

@@ -1,5 +1,8 @@
 package frc2713.robot.oi;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.RPM;
+
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc2713.robot.GameCommandGroups;
 import frc2713.robot.subsystems.drive.Drive;
@@ -87,5 +90,16 @@ public class OperatorControls {
 
     // disable ducking
     controller.a().onTrue(Commands.run(() -> hood.disableDucking = !hood.disableDucking));
+
+    // Fudging Hood and Flywheel setpoints
+    controller.povLeft().onTrue(Commands.runOnce(() -> hood.oTFFudgeFactor.plus(Degrees.of(5))));
+
+    controller.povRight().onTrue(Commands.runOnce(() -> hood.oTFFudgeFactor.plus(Degrees.of(-5))));
+
+    controller.povUp().onTrue(Commands.runOnce(() -> flywheels.oTFFudgeFactor.plus(RPM.of(100))));
+
+    controller
+        .povDown()
+        .onTrue(Commands.runOnce(() -> flywheels.oTFFudgeFactor.plus(RPM.of(-100))));
   }
 }
