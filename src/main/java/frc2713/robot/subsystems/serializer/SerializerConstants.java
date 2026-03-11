@@ -3,6 +3,7 @@ package frc2713.robot.subsystems.serializer;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
@@ -19,6 +20,7 @@ import frc2713.lib.drivers.CANDeviceId;
 import frc2713.lib.dynamics.MoiUnits;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.LoggedTunableMeasure;
+import frc2713.lib.util.Util;
 
 public final class SerializerConstants {
 
@@ -35,11 +37,14 @@ public final class SerializerConstants {
 
       // Velocity PID gains for VelocityVoltage control
       // Units: kP/kV/kS are in volts
-      config.fxConfig.Slot0.kP = 0.0; // Volts per rps of error (lower to reduce oscillation)
+      config.fxConfig.Slot0.kP =
+          Util.modeDependentValue(15., 0.0); // Volts per rps of error (lower to reduce oscillation)
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 0.0; // Small damping to reduce oscillation
-      config.fxConfig.Slot0.kS = 0.0; // Volts to overcome static friction
+      config.fxConfig.Slot0.kS =
+          Util.modeDependentValue(0.275, 0.); // Volts to overcome static friction
       config.fxConfig.Slot0.kV = 0.12 * gearRatio; // Volts per rps (feedforward)
+      config.tunable = true;
 
       config.fxConfig.CurrentLimits =
           new CurrentLimitsConfigs()
@@ -61,11 +66,9 @@ public final class SerializerConstants {
     }
 
     public static LoggedTunableMeasure<AngularVelocity> indexingSpeed =
-        new LoggedTunableMeasure<AngularVelocity>(
-            "DyeRotor/Index Speed", RotationsPerSecond.of(1.3));
+        new LoggedTunableMeasure<AngularVelocity>("Dye Rotor/Index Speed", RPM.of(78));
     public static LoggedTunableMeasure<AngularVelocity> stirSpeed =
-        new LoggedTunableMeasure<AngularVelocity>(
-            "DyeRotor/Stir Speed", RotationsPerSecond.of(0.5));
+        new LoggedTunableMeasure<AngularVelocity>("Dye Rotor/Stir Speed", RPM.of(30));
     public static AngularVelocity outdexingSpeed = RotationsPerSecond.of(-3);
 
     public static int MODEL_INDEX = 2;
@@ -110,10 +113,9 @@ public final class SerializerConstants {
 
     // TODO: Change these to RPM
     public static LoggedTunableMeasure<AngularVelocity> shootingSpeed =
-        new LoggedTunableMeasure<AngularVelocity>("Feeder/Speed", RotationsPerSecond.of(100));
+        new LoggedTunableMeasure<AngularVelocity>("Feeder/Speed", RPM.of(6000));
 
     public static LoggedTunableMeasure<AngularVelocity> unjammingSpeed =
-        new LoggedTunableMeasure<AngularVelocity>(
-            "Feeder/UnJamming Speed", RotationsPerSecond.of(100));
+        new LoggedTunableMeasure<AngularVelocity>("Feeder/UnJamming Speed", RPM.of(6000));
   }
 }

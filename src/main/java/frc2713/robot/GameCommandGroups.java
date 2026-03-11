@@ -196,7 +196,7 @@ public final class GameCommandGroups {
       return Commands.parallel(
               DriveCommands.clearDriveLimits(drive),
               feeder.stop(),
-              dyeRotor.stopCommand(),
+              dyeRotor.stop(),
               flywheels.idleSpeedCommand())
           .withName("Stopped Shooting");
     }
@@ -213,7 +213,7 @@ public final class GameCommandGroups {
     }
 
     public static Command stopStir(DyeRotor dyeRotor, IntakeRoller rollers) {
-      return Commands.parallel(dyeRotor.stopCommand(), rollers.stop());
+      return Commands.parallel(dyeRotor.stop(), rollers.stop());
     }
 
     // this is here just in case we want unjamming to involve more
