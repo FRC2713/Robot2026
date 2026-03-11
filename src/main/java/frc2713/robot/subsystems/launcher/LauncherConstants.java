@@ -15,7 +15,6 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
@@ -38,7 +37,6 @@ public final class LauncherConstants {
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
     public static CanCoderConfig canCoderConfig = new CanCoderConfig();
     public static Angle staticHubAngle = Degrees.of(0);
-    public static DCMotor motor = DCMotor.getKrakenX60(1);
 
     // Turret rotation limits
     public static final double FORWARD_LIMIT_DEGREES = 15.0;

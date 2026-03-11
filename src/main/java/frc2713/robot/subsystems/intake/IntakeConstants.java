@@ -77,7 +77,6 @@ public final class IntakeConstants {
       followerConfig.momentOfInertia = rollersMomentOfInertia.times(0.5);
       followerConfig.useFOC = true;
       followerConfig.motor = DCMotor.getKrakenX44Foc(1);
-      followerConfig.useFOC = false;
       followerConfig.fxConfig.CurrentLimits = leaderConfig.fxConfig.CurrentLimits;
     }
 
