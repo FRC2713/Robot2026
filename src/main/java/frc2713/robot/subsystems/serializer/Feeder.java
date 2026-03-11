@@ -6,6 +6,8 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc2713.lib.logging.PeriodicTimingLogger;
+import frc2713.lib.logging.TimeLogged;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.MotorSubsystem;
@@ -49,8 +51,11 @@ public class Feeder extends MotorSubsystem<MotorInputsAutoLogged, MotorIO> {
   }
 
   @Override
+  @TimeLogged("Performance/SubsystemPeriodic/Feeder")
   public void periodic() {
-    super.periodic();
-    // Additional periodic code for feeder can be added here
+    try (var ignored = PeriodicTimingLogger.time(this)) {
+      super.periodic();
+      // Additional periodic code for feeder can be added here
+    }
   }
 }

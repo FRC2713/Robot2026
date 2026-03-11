@@ -12,6 +12,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc2713.lib.io.ArticulatedComponent;
+import frc2713.lib.logging.PeriodicTimingLogger;
+import frc2713.lib.logging.TimeLogged;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.MotorSubsystem;
@@ -94,11 +96,14 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   @AutoLogOutput public boolean disableDucking = false;
 
   @Override
+  @TimeLogged("Performance/SubsystemPeriodic/Hood")
   public void periodic() {
-    if (DriverStation.isDisabled()) {
-      setAngleCommand(() -> getCurrentPosition());
+    try (var ignored = PeriodicTimingLogger.time(this)) {
+      if (DriverStation.isDisabled()) {
+        setAngleCommand(() -> getCurrentPosition());
+      }
+      super.periodic();
     }
-    super.periodic();
   }
 
   @Override

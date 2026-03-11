@@ -22,6 +22,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc2713.lib.io.ArticulatedComponent;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
+import frc2713.lib.logging.PeriodicTimingLogger;
+import frc2713.lib.logging.TimeLogged;
 import frc2713.lib.subsystem.MotorFollowerSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.RobotTime;
@@ -86,25 +88,28 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   }
 
   @Override
+  @TimeLogged("Performance/SubsystemPeriodic/Flywheels")
   public void periodic() {
-    super.periodic();
+    try (var ignored = PeriodicTimingLogger.time(this)) {
+      super.periodic();
 
-    if (Robot.isSimulation()) {
-      // update ball_vector visualization
-      Pose3d globalPose = this.getGlobalPose();
-      Logger.recordOutput(
-          super.pb.makePath("ball_vector"),
-          new Pose3d[] {
-            globalPose,
-            globalPose.plus(new Transform3d(new Translation3d(1, 0, 0), new Rotation3d()))
-          });
+      if (Robot.isSimulation()) {
+        // update ball_vector visualization
+        Pose3d globalPose = this.getGlobalPose();
+        Logger.recordOutput(
+            super.pb.makePath("ball_vector"),
+            new Pose3d[] {
+              globalPose,
+              globalPose.plus(new Transform3d(new Translation3d(1, 0, 0), new Rotation3d()))
+            });
 
-      // update fuel trajectories physics for balls already in flight
-      Time now = RobotTime.getTimestamp();
-      Time dt = now.minus(lastUpdateTime);
-      fuelTrajectories.update(dt);
-      this.lastUpdateTime = now;
-      Logger.recordOutput(pb.makePath("fuel_trajectories"), fuelTrajectories.getPositions());
+        // update fuel trajectories physics for balls already in flight
+        Time now = RobotTime.getTimestamp();
+        Time dt = now.minus(lastUpdateTime);
+        fuelTrajectories.update(dt);
+        this.lastUpdateTime = now;
+        Logger.recordOutput(pb.makePath("fuel_trajectories"), fuelTrajectories.getPositions());
+      }
     }
   }
 
