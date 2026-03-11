@@ -14,6 +14,8 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -36,6 +38,15 @@ import org.littletonrobotics.junction.Logger;
 public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorIO>
     implements ArticulatedComponent {
 
+  private Alert invalidEncoder1Alert =
+      new Alert(
+          pb.makePath("Encoder 1 value is invalid.  CRT solution cannot be found"),
+          AlertType.kError);
+  private Alert invalidEncoder2Alert =
+      new Alert(
+          pb.makePath("Encoder 2 value is invalid.  CRT solution cannot be found"),
+          AlertType.kError);
+
   public Turret(
       final TalonFXSubsystemConfig config,
       final MotorIO turretMotorIO,
@@ -46,14 +57,27 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
   }
 
   @AutoLogOutput
-  public static Angle turretPositionFromEncoders(Angle e1, Angle e2) {
-    Angle encoder1Rotations =
+  public Angle getTurretPositionFromEncoders(Angle e1, Angle e2) {
+    if (e1 == null || e2 == null) {
+      if (initialized) {
+        if (e1 == null) invalidEncoder1Alert.set(true);
+        if (e2 == null) invalidEncoder2Alert.set(true);
+      }
+      return Rotations.of(0);
+    }
+    invalidEncoder1Alert.set(false);
+    invalidEncoder2Alert.set(false);
+    Angle turretAngle =
         CrtSolver.calculateAbsoluteMotorTurns(
-            e1,
-            e2,
-            LauncherConstants.Turret.pinionGearTeeth,
-            LauncherConstants.Turret.spurGear1Teeth);
-    return encoder1Rotations.div(LauncherConstants.Turret.motorToTurretGearRatio);
+                e1,
+                e2,
+                LauncherConstants.Turret.pinionGearTeeth,
+                LauncherConstants.Turret.spurGear1Teeth)
+            .div(LauncherConstants.Turret.motorToTurretGearRatio);
+
+    Logger.recordOutput(this.pb.makePath("calculated_angle"), turretAngle);
+
+    return turretAngle;
   }
 
   public static Angle convertToClosestBoundedTurretAngleDegrees(Angle desiredAngle, Angle current) {
@@ -209,8 +233,21 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
   }
 
   @Override
+  public void initialize() {
+
+    this.io.setCurrentPosition(
+        getTurretPositionFromEncoders(
+            this.inputs.rawRotorPosition, this.cancoderInputs.absolutePosition));
+    super.initialize();
+  }
+
+  @Override
   public void periodic() {
     super.periodic();
+
+    if (!initialized) {
+      initialize();
+    }
 
     // Log the goal pose for visualization
     Pose3d goalPose = new Pose3d(LaunchingSolutionManager.currentGoal, new Rotation3d());
