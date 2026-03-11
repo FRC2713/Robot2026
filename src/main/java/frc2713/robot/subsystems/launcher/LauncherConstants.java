@@ -41,8 +41,8 @@ public final class LauncherConstants {
     public static DCMotor motor = DCMotor.getKrakenX60(1);
 
     // Turret rotation limits
-    public static final double FORWARD_LIMIT_DEGREES = 30.0;
-    public static final double REVERSE_LIMIT_DEGREES = -100.0;
+    public static final double FORWARD_LIMIT_DEGREES = 15.0;
+    public static final double REVERSE_LIMIT_DEGREES = -365.0;
 
     public static final Angle forwardSoftLimit = Degrees.of(FORWARD_LIMIT_DEGREES);
     public static final Angle reverseSoftLimit = Degrees.of(REVERSE_LIMIT_DEGREES);
@@ -78,16 +78,17 @@ public final class LauncherConstants {
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
       // PID gains for Motion Magic
-      config.fxConfig.Slot0.kP = Util.modeDependentValue(450.0, 80.0);
+      config.fxConfig.Slot0.kP = Util.modeDependentValue(550.0, 80.0);
       config.fxConfig.Slot0.kI = 0.0;
-      config.fxConfig.Slot0.kD = Util.modeDependentValue(0.0, 16.0);
-      config.fxConfig.Slot0.kS = Util.modeDependentValue(0.2, 0.15); // static friction compensation
+      config.fxConfig.Slot0.kD = Util.modeDependentValue(8.0, 16.0);
+      config.fxConfig.Slot0.kS =
+          Util.modeDependentValue(0.23, 0.15); // static friction compensation
       config.fxConfig.Slot0.kV = Util.modeDependentValue(0.0, 0.12); // velocity feedforward
       config.fxConfig.Slot0.kA = Util.modeDependentValue(0.0, 0.01); // acceleration feedforward
 
       // Motion Magic parameters
       config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 20.0; // rotations per second
-      config.fxConfig.MotionMagic.MotionMagicAcceleration = 20.0; // rotations per second^2
+      config.fxConfig.MotionMagic.MotionMagicAcceleration = 10.0; // rotations per second^2
       config.fxConfig.MotionMagic.MotionMagicJerk = 100; // limit jerk for smooth motion
 
       // Gear ratio: motor rotations per turret rotation = GEAR_1/GEAR_0 = 120/60 = 2.0
@@ -108,6 +109,8 @@ public final class LauncherConstants {
                   Inches.of(0.5).in(Meters),
                   Inches.of(18.484119).in(Meters)),
               new Rotation3d(0, 0, 0));
+
+      config.posOffset = Degrees.of(5.888672);
     }
 
     static {
@@ -140,10 +143,10 @@ public final class LauncherConstants {
     static {
       leaderConfig.name = "Flywheels";
       leaderConfig.talonCANID = new CANDeviceId(50, "canivore");
-      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(0.75, 3.5);
+      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(0.85, 3.5);
       leaderConfig.fxConfig.Slot0.kI = 0.0;
-      leaderConfig.fxConfig.Slot0.kD = 0.0;
-      leaderConfig.fxConfig.Slot0.kS = 2.0;
+      leaderConfig.fxConfig.Slot0.kD = 0.004;
+      leaderConfig.fxConfig.Slot0.kS = Util.modeDependentValue(0.15, 2.0);
       leaderConfig.fxConfig.Slot0.kV = 0.12 * gearRatio;
       leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimit = 120.0;
       leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
@@ -152,7 +155,7 @@ public final class LauncherConstants {
 
       leaderConfig.unitToRotorRatio = gearRatio; // 1.33:1 reduction from motor to flywheel
       leaderConfig.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-      leaderConfig.fxConfig.MotorOutput.PeakReverseDutyCycle = 0;
+      leaderConfig.fxConfig.Voltage.PeakReverseVoltage = 0;
       leaderConfig.momentOfInertia = flywhMomentOfInertia.times(0.5);
       leaderConfig.useFOC = false; // FOC makes the feedfowrward term units weird
       leaderConfig.tunable = true;
@@ -194,8 +197,8 @@ public final class LauncherConstants {
       ballVelocityMap.put(1.0, 20.0);
       ballVelocityMap.put(1.5, 20.0);
       ballVelocityMap.put(2.5, 22.0);
-      ballVelocityMap.put(3.2, 23.0);
-      ballVelocityMap.put(4.0, 26.0);
+      ballVelocityMap.put(3.2, 24.0);
+      ballVelocityMap.put(4.0, 28.0);
       ballVelocityMap.put(5.17, 29.0);
       ballVelocityMap.put(5.4, 30.0);
 
@@ -212,13 +215,14 @@ public final class LauncherConstants {
       // Ball Velocity (ft/s) -> RPM (rpm)
       rpmMap.put(30.0, 4500.0);
       rpmMap.put(25.0, 3500.0);
+      rpmMap.put(23.0, 3200.0);
       rpmMap.put(20.0, 2750.0);
     }
 
     public static LoggedTunableMeasure<AngularVelocity> idleVelocity =
         new LoggedTunableMeasure<>("Flywheels/Idle Velocity", RotationsPerSecond.of(20));
     public static LoggedTunableMeasure<AngularVelocity> PIDTest =
-        new LoggedTunableMeasure<>("Flywheels/PIDTest", RPM.of(2000));
+        new LoggedTunableMeasure<>("Flywheels/PIDTest", RPM.of(4000));
     public static LoggedTunableMeasure<AngularVelocity> staticRightLeftTrench =
         new LoggedTunableMeasure<>("Flywheels/Flywheels Static Trench", RPM.of(3150));
     public static LoggedTunableMeasure<AngularVelocity> staticHubVelocity =
