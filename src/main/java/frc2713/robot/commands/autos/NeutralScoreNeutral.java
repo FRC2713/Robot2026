@@ -85,7 +85,7 @@ public class NeutralScoreNeutral {
                             Commands.parallel(
                                 launchToFuel.cmd(),
                                 GameCommandGroups.Launching.stopShooting(
-                                    driveSubsystem, feeder, dyeRotor))))
+                                    driveSubsystem, feeder, dyeRotor, flywheels))))
                     .withName("OTF Shooting")));
 
     launchToFuel

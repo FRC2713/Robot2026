@@ -119,8 +119,7 @@ public class DriverControls {
                 drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
         .onFalse(
             Commands.parallel(
-                GameCommandGroups.Launching.stopShootingAndRetractHood(
-                    drive, feeder, dyeRotor, hood)));
+                GameCommandGroups.Launching.stopShooting(drive, feeder, dyeRotor, flywheels)));
 
     // controller
     //     .a()
@@ -137,7 +136,8 @@ public class DriverControls {
             GameCommandGroups.Launching.dumbShot(
                 drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
         .onFalse(
-            GameCommandGroups.Launching.stopShootingAndRetractHood(drive, feeder, dyeRotor, hood));
+            GameCommandGroups.Launching.stopShootingAndRetractHood(
+                drive, feeder, dyeRotor, hood, flywheels));
 
     // controller
   }
