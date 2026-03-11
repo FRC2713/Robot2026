@@ -184,7 +184,7 @@ public class DevControls {
         .whileTrue(
             GameCommandGroups.Launching.dumbShot(
                 drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
-        .onFalse(GameCommandGroups.Launching.stopShooting(drive, feeder, dyeRotor));
+        .onFalse(GameCommandGroups.Launching.stopShooting(drive, feeder, dyeRotor, flywheels));
 
     controller
         .rightBumper()
@@ -195,7 +195,7 @@ public class DevControls {
         .onFalse(
             Commands.parallel(
                     GameCommandGroups.Launching.stopShootingAndRetractHood(
-                        drive, feeder, dyeRotor, hood))
+                        drive, feeder, dyeRotor, hood, flywheels))
                 .withName("Stop Shot"));
   }
 

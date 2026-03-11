@@ -11,6 +11,7 @@ import static edu.wpi.first.units.Units.Seconds;
 
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.sim.ChassisReference;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -150,6 +151,7 @@ public final class LauncherConstants {
       leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
       leaderConfig.fxConfig.CurrentLimits.SupplyCurrentLimit = 70.0;
       leaderConfig.fxConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+      leaderConfig.simOrientation = ChassisReference.CounterClockwise_Positive;
 
       leaderConfig.unitToRotorRatio = gearRatio; // 1.33:1 reduction from motor to flywheel
       leaderConfig.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
@@ -218,7 +220,7 @@ public final class LauncherConstants {
     }
 
     public static LoggedTunableMeasure<AngularVelocity> idleVelocity =
-        new LoggedTunableMeasure<>("Flywheels/Idle Velocity", RotationsPerSecond.of(20));
+        new LoggedTunableMeasure<>("Flywheels/Idle Velocity", RPM.of(300));
     public static LoggedTunableMeasure<AngularVelocity> PIDTest =
         new LoggedTunableMeasure<>("Flywheels/PIDTest", RPM.of(4000));
     public static LoggedTunableMeasure<AngularVelocity> staticRightLeftTrench =

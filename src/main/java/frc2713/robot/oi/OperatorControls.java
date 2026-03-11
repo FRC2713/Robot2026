@@ -50,7 +50,8 @@ public class OperatorControls {
                     drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)
                 .withName("Static LTrench Shot"))
         .onFalse(
-            GameCommandGroups.Launching.stopShootingAndRetractHood(drive, feeder, dyeRotor, hood));
+            GameCommandGroups.Launching.stopShootingAndRetractHood(
+                drive, feeder, dyeRotor, hood, flywheels));
 
     controller
         .rightBumper()
@@ -58,7 +59,8 @@ public class OperatorControls {
             GameCommandGroups.Launching.rightTrenchShot(
                 drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
         .onFalse(
-            GameCommandGroups.Launching.stopShootingAndRetractHood(drive, feeder, dyeRotor, hood)
+            GameCommandGroups.Launching.stopShootingAndRetractHood(
+                    drive, feeder, dyeRotor, hood, flywheels)
                 .withName("Static R Trench Shot"));
 
     controller
@@ -80,7 +82,8 @@ public class OperatorControls {
             GameCommandGroups.Launching.towerShot(
                 drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
         .onFalse(
-            GameCommandGroups.Launching.stopShootingAndRetractHood(drive, feeder, dyeRotor, hood));
+            GameCommandGroups.Launching.stopShootingAndRetractHood(
+                drive, feeder, dyeRotor, hood, flywheels));
 
     // disable ducking
     controller.a().onTrue(Commands.run(() -> hood.disableDucking = !hood.disableDucking));

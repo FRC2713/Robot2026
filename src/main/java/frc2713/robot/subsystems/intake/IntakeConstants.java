@@ -22,6 +22,7 @@ import com.ctre.phoenix6.mechanisms.DifferentialMotorConstants;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.sim.ChassisReference;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
@@ -59,6 +60,8 @@ public final class IntakeConstants {
       leaderConfig.momentOfInertia = rollersMomentOfInertia.times(0.5);
       leaderConfig.useFOC = true;
       leaderConfig.motor = DCMotor.getKrakenX44Foc(1);
+      leaderConfig.simOrientation = ChassisReference.CounterClockwise_Positive;
+      leaderConfig.tunable = true;
 
       leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(0.75, 3.5);
       leaderConfig.fxConfig.Slot0.kI = 0.0;
@@ -83,13 +86,9 @@ public final class IntakeConstants {
     public static final AngularVelocity freeSpeed =
         RadiansPerSecond.of(leaderConfig.motor.freeSpeedRadPerSec).div(gearRatio);
 
-    // TODO: Use closed loop velocity control here.
-    public static LoggedTunableMeasure<Voltage> intakeVoltageDesired =
-        new LoggedTunableMeasure<Voltage>("Intake Rollers/Intake", Volts.of(10.0));
     public static Voltage outtakeVoltageDesired = Volts.of(-5.0);
-
-    public static AngularVelocity intakeSpeed = freeSpeed.times(0.8);
-    public static AngularVelocity idleSpeed = freeSpeed.times(0.3);
+    public static LoggedTunableMeasure<AngularVelocity> intakeSpeed =
+        new LoggedTunableMeasure<>("Intake Rollers/Intake Speed", freeSpeed.times(0.8));
   }
 
   public static final class Extension {
@@ -145,6 +144,7 @@ public final class IntakeConstants {
       config.fxConfig.Slot0 = avgGains;
       config.fxConfig.MotionMagic = motionMagicGains.get();
       config.motor = DCMotor.getKrakenX44(1);
+      config.simOrientation = ChassisReference.CounterClockwise_Positive;
 
       // MOI = m*r^2, where r is the radius to the center of mass (half the pitch diameter)
       config.momentOfInertia =

@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.sim.ChassisReference;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -55,6 +56,8 @@ public final class SerializerConstants {
           new Transform3d(
               new Translation3d(Inches.of(0.5).in(Meters), Inches.of(0.5).in(Meters), 0),
               new Rotation3d());
+
+      config.simOrientation = ChassisReference.CounterClockwise_Positive;
     }
 
     public static LoggedTunableMeasure<AngularVelocity> indexingSpeed =

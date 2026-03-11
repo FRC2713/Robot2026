@@ -6,6 +6,7 @@ import choreo.auto.AutoTrajectory;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc2713.robot.GameCommandGroups;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
@@ -47,21 +48,23 @@ public class RightNeutralOutpostStatic {
             Commands.sequence(
                 Commands.print("[AUTO] Going to fuel"),
                 intakeFuelRight.resetOdometry(),
-                // otfShotSupplier.get().withTimeout(1),
                 Commands.parallel(
+                    // Go to fuel while extending intake
                     intakeFuelRight.cmd(),
                     Commands.sequence(
                         new WaitCommand(0.3),
                         Commands.parallel(
-                            intakeExtension.extendCommand(), intakeRoller.intake())))));
+                            hood.retract(),
+                            intakeExtension.extendCommand(),
+                            intakeRoller.intake())))));
 
     intakeFuelRight
         .done()
         .onTrue(
-            Commands.sequence(
+            // Now go back to right trench
+            Commands.parallel(
                 Commands.print("[AUTO] Moving to trench"),
-                Commands.runOnce(() -> driveSubsystem.stop()),
-                Commands.race(intakeRoller.stop(), new WaitCommand(0.2)),
+                hood.retract(),
                 neutralToRightTrenchForward.cmd()));
 
     neutralToRightTrenchForward
@@ -71,16 +74,19 @@ public class RightNeutralOutpostStatic {
                 Commands.print("[AUTO] Shooting from trench"),
                 Commands.runOnce(() -> driveSubsystem.stop()),
                 Commands.deadline(Commands.waitSeconds(5.0), otfShotSupplier.get()),
-                oTFToOutpost.cmd()));
+                Commands.parallel(
+                    GameCommandGroups.Launching.stopShooting(
+                        driveSubsystem, feeder, dyeRotor, flywheels),
+                    intakeExtension.extendCommand(),
+                    oTFToOutpost.cmd())));
 
     oTFToOutpost
         .done()
         .onTrue(
-            Commands.deadline(
-                Commands.sequence(
-                    Commands.runOnce(() -> driveSubsystem.stop()),
-                    Commands.print("[AUTO] Launching at outpost"),
-                    Commands.deadline(Commands.waitSeconds(3), otfShotSupplier.get()))));
+            Commands.sequence(
+                Commands.print("[AUTO] Launching at outpost"),
+                Commands.runOnce(() -> driveSubsystem.stop()),
+                Commands.deadline(Commands.waitSeconds(3), otfShotSupplier.get())));
 
     outpostToTrench.done().onTrue(faceFuelRightTrenchBackward.cmd());
 
