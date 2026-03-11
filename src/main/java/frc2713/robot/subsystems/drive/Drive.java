@@ -190,7 +190,8 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
           Logger.recordOutput(odometryPb.makePath("TrajectorySetpoint"), targetPose);
         });
 
-    this.positionController = DriveConstants.AutoConstants.positionTrajectoryController.createPIDController();
+    this.positionController =
+        DriveConstants.AutoConstants.positionTrajectoryController.createPIDController();
     this.xController = this.positionController;
     this.yController = this.positionController;
     this.headingController =

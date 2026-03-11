@@ -152,7 +152,7 @@ public final class LauncherConstants {
 
       leaderConfig.unitToRotorRatio = gearRatio; // 1.33:1 reduction from motor to flywheel
       leaderConfig.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-      leaderConfig.fxConfig.MotorOutput.PeakReverseDutyCycle = 0;
+      leaderConfig.fxConfig.Voltage.PeakReverseVoltage = 0;
       leaderConfig.momentOfInertia = flywhMomentOfInertia.times(0.5);
       leaderConfig.useFOC = false; // FOC makes the feedfowrward term units weird
       leaderConfig.tunable = true;

@@ -140,7 +140,6 @@ public class Robot extends LoggedRobot {
       autonomousCommand.cancel();
     }
     FieldConstants.HoodRetractionZones.logZones();
-
   }
 
   /** This function is called periodically during operator control. */

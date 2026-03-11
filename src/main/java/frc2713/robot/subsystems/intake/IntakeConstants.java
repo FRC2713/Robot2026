@@ -54,14 +54,21 @@ public final class IntakeConstants {
       leaderConfig.unitToRotorRatio =
           gearRatio; // 12 tooth pinion to 24 tooth gear for 0.5 reduction
       leaderConfig.momentOfInertia = rollersMomentOfInertia.times(0.5);
-      leaderConfig.useFOC = true;
+      leaderConfig.useFOC = false;
+      leaderConfig.fxConfig.OpenLoopRamps.VoltageOpenLoopRampPeriod = 0.1;
+
+      leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimit = 80.0;
+      leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+      leaderConfig.fxConfig.CurrentLimits.SupplyCurrentLimit = 70.0;
+      leaderConfig.fxConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
       followerConfig.name = "Intake Rollers Follower";
       followerConfig.talonCANID = new CANDeviceId(43); // Example CAN ID, replace with actual ID
       followerConfig.unitToRotorRatio =
           gearRatio; // 12 tooth pinion to 24 tooth gear for 0.5 reduction
       followerConfig.momentOfInertia = rollersMomentOfInertia.times(0.5);
-      followerConfig.useFOC = true;
+      followerConfig.useFOC = false;
+      followerConfig.fxConfig.CurrentLimits = leaderConfig.fxConfig.CurrentLimits;
     }
 
     public static LoggedTunableMeasure<Voltage> intakeVoltageDesired =
@@ -88,11 +95,15 @@ public final class IntakeConstants {
     public static final Distance height = Inches.of(15.5);
     public static final Distance width = Inches.of(30.0);
     public static final double volumePerInch = height.in(Inches) * width.in(Inches);
-    
+
     // Soft limits (in rotations of the mechanism)
-    public static final double forwardSoftLimit = 11.5 / (sprocketPitchDiameter.in(Inches) * Math.PI); // ~12 inches max extension
-    public static final double reverseSoftLimit = 0 / (sprocketPitchDiameter.in(Inches) * Math.PI); // -0.5 inches to allow slight over-retraction
-    
+    public static final double forwardSoftLimit =
+        11.5 / (sprocketPitchDiameter.in(Inches) * Math.PI); // ~12 inches max extension
+    public static final double reverseSoftLimit =
+        0
+            / (sprocketPitchDiameter.in(Inches)
+                * Math.PI); // -0.5 inches to allow slight over-retraction
+
     // A supplier to prevent changes by subsystem from propagating
     public static final Supplier<MotionMagicConfigs> motionMagicGains =
         () ->
