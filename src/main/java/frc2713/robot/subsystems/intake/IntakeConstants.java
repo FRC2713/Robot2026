@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.InchesPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Pounds;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Volts;
@@ -21,6 +22,9 @@ import com.ctre.phoenix6.mechanisms.DifferentialMotorConstants;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.sim.ChassisReference;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
@@ -54,10 +58,17 @@ public final class IntakeConstants {
       leaderConfig.unitToRotorRatio =
           gearRatio; // 12 tooth pinion to 24 tooth gear for 0.5 reduction
       leaderConfig.momentOfInertia = rollersMomentOfInertia.times(0.5);
-      leaderConfig.useFOC = false;
-      leaderConfig.fxConfig.OpenLoopRamps.VoltageOpenLoopRampPeriod = 0.1;
+      leaderConfig.useFOC = true;
+      leaderConfig.motor = DCMotor.getKrakenX44Foc(1);
+      leaderConfig.simOrientation = ChassisReference.CounterClockwise_Positive;
+      leaderConfig.tunable = true;
 
-      leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimit = 80.0;
+      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(0.75, 3.5);
+      leaderConfig.fxConfig.Slot0.kI = 0.0;
+      leaderConfig.fxConfig.Slot0.kD = 0.0;
+      leaderConfig.fxConfig.Slot0.kS = 2.0;
+      leaderConfig.fxConfig.Slot0.kV = 0.12 * gearRatio;
+      leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimit = 120.0;
       leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
       leaderConfig.fxConfig.CurrentLimits.SupplyCurrentLimit = 70.0;
       leaderConfig.fxConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
@@ -67,13 +78,17 @@ public final class IntakeConstants {
       followerConfig.unitToRotorRatio =
           gearRatio; // 12 tooth pinion to 24 tooth gear for 0.5 reduction
       followerConfig.momentOfInertia = rollersMomentOfInertia.times(0.5);
-      followerConfig.useFOC = false;
+      followerConfig.useFOC = true;
+      followerConfig.motor = DCMotor.getKrakenX44Foc(1);
       followerConfig.fxConfig.CurrentLimits = leaderConfig.fxConfig.CurrentLimits;
     }
 
-    public static LoggedTunableMeasure<Voltage> intakeVoltageDesired =
-        new LoggedTunableMeasure<Voltage>("Intake Rollers/Intake", Volts.of(10.0));
+    public static final AngularVelocity freeSpeed =
+        RadiansPerSecond.of(leaderConfig.motor.freeSpeedRadPerSec).div(gearRatio);
+
     public static Voltage outtakeVoltageDesired = Volts.of(-5.0);
+    public static LoggedTunableMeasure<AngularVelocity> intakeSpeed =
+        new LoggedTunableMeasure<>("Intake Rollers/Intake Speed", freeSpeed.times(0.8));
   }
 
   public static final class Extension {
@@ -128,6 +143,8 @@ public final class IntakeConstants {
       config.talonCANID = new CANDeviceId(40); // Only used for sim, no real CAN ID
       config.fxConfig.Slot0 = avgGains;
       config.fxConfig.MotionMagic = motionMagicGains.get();
+      config.motor = DCMotor.getKrakenX44(1);
+      config.simOrientation = ChassisReference.CounterClockwise_Positive;
 
       // MOI = m*r^2, where r is the radius to the center of mass (half the pitch diameter)
       config.momentOfInertia =

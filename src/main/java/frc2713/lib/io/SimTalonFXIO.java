@@ -8,10 +8,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
-import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.ctre.phoenix6.sim.ChassisReference;
-import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -59,10 +56,10 @@ public class SimTalonFXIO extends TalonFXIO {
         config,
         new DCMotorSim(
             LinearSystemId.createDCMotorSystem(
-                DCMotor.getKrakenX60Foc(1),
+                config.motor,
                 config.momentOfInertia.in(KilogramSquareMeters),
                 config.unitToRotorRatio),
-            DCMotor.getKrakenX60Foc(1),
+            config.motor,
             0.001,
             0.001));
   }
@@ -70,10 +67,7 @@ public class SimTalonFXIO extends TalonFXIO {
   public SimTalonFXIO(TalonFXSubsystemConfig config, DCMotorSim sim) {
     super(config);
     this.sim = sim;
-    talon.getSimState().Orientation =
-        (config.fxConfig.MotorOutput.Inverted == InvertedValue.Clockwise_Positive)
-            ? ChassisReference.Clockwise_Positive
-            : ChassisReference.CounterClockwise_Positive;
+    talon.getSimState().Orientation = config.simOrientation;
     /* Run simulation at a faster rate so PID gains behave more reasonably */
     simNotifier =
         new Notifier(

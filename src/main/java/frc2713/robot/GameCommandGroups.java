@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
-import frc2713.robot.subsystems.intake.IntakeConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.launcher.Flywheels;
@@ -129,7 +128,7 @@ public final class GameCommandGroups {
           feeder.feedWhenReady(() -> flywheels.atTarget()),
           dyeRotor.feedWhenReady(() -> flywheels.atTarget()),
           extension.maintainFuelPressureCommand(),
-          rollers.voltageCommand(IntakeConstants.Roller.intakeVoltageDesired));
+          rollers.intake());
     }
 
     public static Command leftTrenchShot(
@@ -148,7 +147,7 @@ public final class GameCommandGroups {
           feeder.feedWhenReady(() -> flywheels.atTarget()),
           dyeRotor.feedWhenReady(() -> flywheels.atTarget()),
           extension.maintainFuelPressureCommand(),
-          rollers.voltageCommand(IntakeConstants.Roller.intakeVoltageDesired));
+          rollers.intake());
     }
 
     public static Command rightTrenchShot(
@@ -167,7 +166,7 @@ public final class GameCommandGroups {
           feeder.feedWhenReady(() -> flywheels.atTarget()),
           dyeRotor.feedWhenReady(() -> flywheels.atTarget()),
           extension.maintainFuelPressureCommand(),
-          rollers.voltageCommand(IntakeConstants.Roller.intakeVoltageDesired));
+          rollers.intake());
     }
 
     /** Hub shooting command. */
@@ -192,15 +191,19 @@ public final class GameCommandGroups {
     }
 
     /** Stop shooting and clear drive limits. */
-    public static Command stopShooting(Drive drive, Feeder feeder, DyeRotor dyeRotor) {
+    public static Command stopShooting(
+        Drive drive, Feeder feeder, DyeRotor dyeRotor, Flywheels flywheels) {
       return Commands.parallel(
-              DriveCommands.clearDriveLimits(drive), feeder.stop(), dyeRotor.stopCommand())
+              DriveCommands.clearDriveLimits(drive),
+              feeder.stop(),
+              dyeRotor.stop(),
+              flywheels.idleSpeedCommand())
           .withName("Stopped Shooting");
     }
 
     public static Command stopShootingAndRetractHood(
-        Drive drive, Feeder feeder, DyeRotor dyeRotor, Hood hood) {
-      return Commands.parallel(stopShooting(drive, feeder, dyeRotor), hood.retract());
+        Drive drive, Feeder feeder, DyeRotor dyeRotor, Hood hood, Flywheels flywheels) {
+      return Commands.parallel(stopShooting(drive, feeder, dyeRotor, flywheels), hood.retract());
     }
   }
 
@@ -210,7 +213,7 @@ public final class GameCommandGroups {
     }
 
     public static Command stopStir(DyeRotor dyeRotor, IntakeRoller rollers) {
-      return Commands.parallel(dyeRotor.stopCommand(), rollers.stop());
+      return Commands.parallel(dyeRotor.stop(), rollers.stop());
     }
 
     // this is here just in case we want unjamming to involve more

@@ -121,8 +121,7 @@ public class DevControls {
                         Commands.waitSeconds(0.5),
                         Commands.parallel(intakeRoller.intake(), dyeRotor.stirFuel())))
                 .withName("Intaking"))
-        .onFalse(
-            Commands.parallel(intakeRoller.stop().withName("Stop Intake"), dyeRotor.stopCommand()));
+        .onFalse(Commands.parallel(intakeRoller.stop().withName("Stop Intake"), dyeRotor.stop()));
 
     controller
         .leftBumper()
@@ -145,9 +144,11 @@ public class DevControls {
 
     // Turret Controls
 
-    controller.a().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleOne));
+    // controller.a().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleOne));
 
-    controller.b().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleTwo));
+    // controller.b().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleTwo));
+
+    controller.a().onTrue(feeder.feedShooter()).onFalse(feeder.stop());
 
     // Serializer controls
 
@@ -176,7 +177,7 @@ public class DevControls {
                     LauncherConstants.Flywheels
                         .PIDTest), // Spin up flywheels to a test launch velocity
                 Commands.parallel(dyeRotor.indexFuel(), feeder.feedShooter())))
-        .onFalse(Commands.parallel(dyeRotor.stopCommand(), feeder.stop(), flywheels.stop()));
+        .onFalse(Commands.parallel(dyeRotor.stop(), feeder.stop(), flywheels.stop()));
 
     // Shoot when flywheels are ready
     controller
@@ -184,7 +185,7 @@ public class DevControls {
         .whileTrue(
             GameCommandGroups.Launching.dumbShot(
                 drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
-        .onFalse(GameCommandGroups.Launching.stopShooting(drive, feeder, dyeRotor));
+        .onFalse(GameCommandGroups.Launching.stopShooting(drive, feeder, dyeRotor, flywheels));
 
     controller
         .rightBumper()
@@ -195,7 +196,7 @@ public class DevControls {
         .onFalse(
             Commands.parallel(
                     GameCommandGroups.Launching.stopShootingAndRetractHood(
-                        drive, feeder, dyeRotor, hood))
+                        drive, feeder, dyeRotor, hood, flywheels))
                 .withName("Stop Shot"));
   }
 

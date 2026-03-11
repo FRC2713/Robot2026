@@ -30,16 +30,15 @@ public class DyeRotor extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   }
 
   public Command indexFuel() {
-    return setVelocity(() -> SerializerConstants.DyeRotor.indexingSpeed.get());
+    return setVelocity(SerializerConstants.DyeRotor.indexingSpeed);
   }
 
   public Command stirFuel() {
-    return setVelocity(() -> SerializerConstants.DyeRotor.stirSpeed.get());
+    return setVelocity(SerializerConstants.DyeRotor.stirSpeed);
   }
 
   public Command feedWhenReady(BooleanSupplier isReady) {
-    return Commands.sequence(
-        Commands.waitUntil(isReady), setVelocity(SerializerConstants.DyeRotor.indexingSpeed));
+    return Commands.sequence(Commands.waitUntil(isReady), indexFuel());
     // return setVelocity(
     //     () ->
     //         isReady.getAsBoolean()
@@ -51,7 +50,7 @@ public class DyeRotor extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
     return setVelocity(() -> SerializerConstants.DyeRotor.outdexingSpeed);
   }
 
-  public Command stopCommand() {
+  public Command stop() {
     return setVelocity(() -> RotationsPerSecond.of(0));
   }
 
