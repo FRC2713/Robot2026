@@ -85,13 +85,15 @@ public final class SerializerConstants {
       config.talonCANID = new CANDeviceId(44, "canivore"); // Example CAN ID, replace with actual ID
       config.useFOC = false;
       config.motor = DCMotor.getKrakenX60(1);
+      config.tunable = true;
 
       // Velocity PID gains for VelocityVoltage control
       // Units: kP/kV/kS are in volts
-      config.fxConfig.Slot0.kP = 0.11; // Volts per rps of error
+      config.fxConfig.Slot0.kP = Util.modeDependentValue(0.5, 0.11); // Volts per rps of error
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 0.0;
-      config.fxConfig.Slot0.kS = 0.1; // Volts to overcome static friction
+      config.fxConfig.Slot0.kS =
+          Util.modeDependentValue(0.275, 0.1); // Volts to overcome static friction
       config.fxConfig.Slot0.kV = 0.12 * gearRatio; // Volts per rps (feedforward)
 
       config.fxConfig.CurrentLimits =
@@ -111,11 +113,10 @@ public final class SerializerConstants {
     public static AngularVelocity freeSpeed =
         RadiansPerSecond.of(config.motor.freeSpeedRadPerSec).div(gearRatio);
 
-    // TODO: Change these to RPM
     public static LoggedTunableMeasure<AngularVelocity> shootingSpeed =
-        new LoggedTunableMeasure<AngularVelocity>("Feeder/Speed", RPM.of(6000));
+        new LoggedTunableMeasure<AngularVelocity>("Feeder/Speed", RPM.of(freeSpeed.in(RPM)));
 
     public static LoggedTunableMeasure<AngularVelocity> unjammingSpeed =
-        new LoggedTunableMeasure<AngularVelocity>("Feeder/UnJamming Speed", RPM.of(6000));
+        new LoggedTunableMeasure<AngularVelocity>("Feeder/UnJamming Speed", RPM.of(2000));
   }
 }

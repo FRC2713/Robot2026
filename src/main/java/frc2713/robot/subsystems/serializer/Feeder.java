@@ -23,7 +23,7 @@ public class Feeder extends MotorSubsystem<MotorInputsAutoLogged, MotorIO> {
   }
 
   public Command feedShooter() {
-    return setVelocity(() -> SerializerConstants.Feeder.shootingSpeed.get());
+    return setVelocity(SerializerConstants.Feeder.shootingSpeed);
   }
 
   public Command feedWhenReady(BooleanSupplier isReady) {
