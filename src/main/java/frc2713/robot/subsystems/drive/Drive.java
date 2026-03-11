@@ -115,9 +115,12 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
       };
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, Pose2d.kZero);
+  private SwerveDrivePoseEstimator odometryPoseEstimator =
+      new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, Pose2d.kZero);
 
   private PIDController xController;
   private PIDController yController;
+  private PIDController positionController;
   private PIDController headingController;
 
   private final AdvantageScopePathBuilder odometryPb;
@@ -143,6 +146,8 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
   private ChassisSpeeds lastCommandedSpeeds = new ChassisSpeeds();
   private LoggedTunableGains loggedTunableDriveGains;
   private LoggedTunableGains loggedTunableTurnGains;
+  private LoggedTunableGains loggedTunablePositionGains;
+  private LoggedTunableGains loggedTunableHeadingGains;
 
   public Drive(
       GyroIO gyroIO,
@@ -185,8 +190,10 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
           Logger.recordOutput(odometryPb.makePath("TrajectorySetpoint"), targetPose);
         });
 
-    this.xController = DriveConstants.AutoConstants.xTrajectoryController.createPIDController();
-    this.yController = DriveConstants.AutoConstants.yTrajectoryController.createPIDController();
+    this.positionController =
+        DriveConstants.AutoConstants.positionTrajectoryController.createPIDController();
+    this.xController = this.positionController;
+    this.yController = this.positionController;
     this.headingController =
         DriveConstants.AutoConstants.headingTrajectoryController.createPIDController();
     this.headingController.enableContinuousInput(-Math.PI, Math.PI);
@@ -208,6 +215,8 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
     loggedTunableTurnGains =
         new LoggedTunableGains(
             "Drive/Turn", TunerConstants.FrontLeft.SteerMotorGains, new MotionMagicConfigs());
+    loggedTunablePositionGains = DriveConstants.AutoConstants.positionTrajectoryController;
+    loggedTunableHeadingGains = DriveConstants.AutoConstants.headingTrajectoryController;
   }
 
   @Override
@@ -296,6 +305,7 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
 
       // Apply update
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+      odometryPoseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
     }
 
     // Update gyro alert
@@ -321,6 +331,21 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
             for (int i = 0; i < 4; i++) {
               modules[i].setTurnGains(gains);
             }
+          });
+      loggedTunablePositionGains.ifChanged(
+          hashCode(),
+          (Slot0Configs gains) -> {
+            // Update position controller PID gains
+            positionController.setPID(gains.kP, gains.kI, gains.kD);
+            // Update x and y controllers to point to the same instance
+            xController = positionController;
+            yController = positionController;
+          });
+      loggedTunableHeadingGains.ifChanged(
+          hashCode(),
+          (Slot0Configs gains) -> {
+            // Update heading controller PID gains
+            headingController.setPID(gains.kP, gains.kI, gains.kD);
           });
     }
   }
@@ -559,6 +584,11 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
     return poseEstimator.getEstimatedPosition();
   }
 
+  @AutoLogOutput(key = "Odometry/RobotNoVision")
+  public Pose2d getOdomPose() {
+    return odometryPoseEstimator.getEstimatedPosition();
+  }
+
   /** Returns the current odometry rotation. */
   public Rotation2d getRotation() {
     return getPose().getRotation();
@@ -567,6 +597,7 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
     poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+    odometryPoseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
   }
 
   /** Adds a new timestamped vision measurement. */
@@ -595,17 +626,8 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
     Pose2d samplePose2d =
         new Pose2d(
             new Translation2d(sample.x, sample.y), new Rotation2d(Radians.of(sample.heading)));
-    Logger.recordOutput("TrajectoryFollowing/pose2d", samplePose2d);
-    Logger.recordOutput("TrajectoryFollowing/posex", pose.getX());
-    Logger.recordOutput("TrajectoryFollowing/samplex", sample.x);
-
-    Logger.recordOutput("TrajectoryFollowing/posey", pose.getY());
-    Logger.recordOutput("TrajectoryFollowing/sampley", sample.y);
-
-    Logger.recordOutput(
-        "TrajectoryFollowing/heading", pose.getRotation().getRadians() + Math.PI * 2);
-    Logger.recordOutput(
-        "TrajectoryFollowing/sampleheading", Rotation2d.fromRadians(sample.heading).getRadians());
+    Logger.recordOutput("TrajectoryFollowing/pose", pose);
+    Logger.recordOutput("TrajectoryFollowing/sample", samplePose2d);
     // Generate the next speeds for the robot
     ChassisSpeeds speeds =
         new ChassisSpeeds(

@@ -55,10 +55,10 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
 
     this.pb = new AdvantageScopePathBuilder(this.getName());
 
-    setDefaultCommand(
-        this.dutyCycleCommand(() -> 0.0)
-            .withName(pb.makeName("DefaultCommand"))
-            .ignoringDisable(true));
+    // setDefaultCommand(
+    //     this.dutyCycleCommand(() -> 0.0)
+    //         .withName(pb.makeName("DefaultCommand"))
+    //         .ignoringDisable(true));
   }
 
   @Override

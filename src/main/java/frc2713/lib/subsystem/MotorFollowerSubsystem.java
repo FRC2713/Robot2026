@@ -42,10 +42,10 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
     this.followerIO = followerIO;
 
     // Set the default command to stop both motors
-    setDefaultCommand(
-        this.dutyCycleCommand(() -> 0.0)
-            .withName(pb.makeName("DefaultCommand"))
-            .ignoringDisable(true));
+    // setDefaultCommand(
+    //     this.dutyCycleCommand(() -> 0.0)
+    //         .withName(pb.makeName("DefaultCommand"))
+    //         .ignoringDisable(true));
 
     this.followerIO.follow(config.talonCANID, true);
   }

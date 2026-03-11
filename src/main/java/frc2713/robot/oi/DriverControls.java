@@ -95,13 +95,11 @@ public class DriverControls {
 
     // intake fuel
     controller
-        .leftTrigger(0.25)
+        .leftTrigger(0.98)
         .onTrue(
             Commands.parallel(
                     intakeExtension.extendCommand(),
-                    Commands.sequence(
-                        Commands.waitSeconds(0.5),
-                        Commands.parallel(intakeRoller.intake(), dyeRotor.stirFuel())))
+                    Commands.parallel(intakeRoller.intake(), dyeRotor.stirFuel()))
                 .withName("Intaking"))
         .onFalse(
             Commands.parallel(intakeRoller.stop().withName("Stop Intake"), dyeRotor.stopCommand()));
