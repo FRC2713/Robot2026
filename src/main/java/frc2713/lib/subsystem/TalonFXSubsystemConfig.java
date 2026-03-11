@@ -1,7 +1,6 @@
 package frc2713.lib.subsystem;
 
 import static edu.wpi.first.units.Units.Degree;
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
@@ -34,8 +33,6 @@ public class TalonFXSubsystemConfig {
   public double metersPerRotation = 1.0;
   public double kMinPositionUnits = Double.NEGATIVE_INFINITY;
   public double kMaxPositionUnits = Double.POSITIVE_INFINITY;
-
-  public Angle posOffset = Degrees.of(0);
 
   // Moment of Inertia (KgMetersSquared) for sim
   public MomentOfInertia momentOfInertia = KilogramSquareMeters.of(.5);

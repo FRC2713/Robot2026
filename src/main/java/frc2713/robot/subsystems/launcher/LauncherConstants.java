@@ -107,8 +107,6 @@ public final class LauncherConstants {
                   Inches.of(0.5).in(Meters),
                   Inches.of(18.484119).in(Meters)),
               new Rotation3d(0, 0, 0));
-
-      config.posOffset = Degrees.of(5.888672);
     }
 
     static {
