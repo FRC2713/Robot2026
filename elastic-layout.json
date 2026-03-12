@@ -121,13 +121,20 @@
             "height": 384.0,
             "type": "Radial Gauge",
             "properties": {
-              "topic": "/fuelDetector/clusterHeading",
+              "topic": "/AdvantageKit/RealOutputs/fuelDetector/fuelHeading",
               "period": 0.06,
               "data_type": "double",
-              "start_angle": 0.0,
-              "end_angle": 360.0,
-              "min_value": 0.0,
-              "max_value": 360.0,
+              "struct_meta": {
+                "path": [
+                  "value"
+                ],
+                "schema_name": "Rotation2d",
+                "type": "double"
+              },
+              "start_angle": -180.0,
+              "end_angle": 180.0,
+              "min_value": -180.0,
+              "max_value": 180.0,
               "number_of_labels": 8,
               "wrap_value": false,
               "show_pointer": true,
