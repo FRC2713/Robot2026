@@ -99,7 +99,7 @@
           {
             "title": "Hood Ducking?",
             "x": 1024.0,
-            "y": 384.0,
+            "y": 256.0,
             "width": 256.0,
             "height": 128.0,
             "type": "Boolean Box",
@@ -114,14 +114,14 @@
             }
           },
           {
-            "title": "Cluster Heading",
+            "title": "Computed Turret Angle",
             "x": 1024.0,
             "y": 0.0,
-            "width": 384.0,
-            "height": 384.0,
+            "width": 256.0,
+            "height": 256.0,
             "type": "Radial Gauge",
             "properties": {
-              "topic": "/fuelDetector/clusterHeading",
+              "topic": "/AdvantageKit/RealOutputs/Turret/ComputedTurretPositionDeg",
               "period": 0.06,
               "data_type": "double",
               "start_angle": 0.0,
@@ -132,6 +132,23 @@
               "wrap_value": false,
               "show_pointer": true,
               "show_ticks": true
+            }
+          },
+          {
+            "title": "Ducking Disabled",
+            "x": 1024.0,
+            "y": 384.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/Hood/Ducking Disabled",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
             }
           }
         ]

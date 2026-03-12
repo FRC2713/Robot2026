@@ -2,15 +2,13 @@ package frc2713.lib.io;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
-import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.ctre.phoenix6.sim.ChassisReference;
-import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -34,6 +32,20 @@ public class SimTalonFXIO extends TalonFXIO {
     return config.unitToRotorRatio;
   }
 
+  /** Mechanism position in rotations (for driving SimCanCoderIO from motor sim). */
+  public double getSimMechanismPositionRotations() {
+    if (sim == null) return 0.0;
+    double rad = sim.getAngularPositionRad();
+    return Double.isNaN(rad) ? 0.0 : rad / (2.0 * Math.PI);
+  }
+
+  /** Mechanism velocity in rotations per second. */
+  public double getSimMechanismVelocityRps() {
+    if (sim == null) return 0.0;
+    double radPerSec = sim.getAngularVelocityRadPerSec();
+    return Double.isNaN(radPerSec) ? 0.0 : radPerSec / (2.0 * Math.PI);
+  }
+
   public SimTalonFXIO(TalonFXSubsystemConfig config) {
     // the TalonFX in the parent class will store and update the motor charecteristics in simulation
     // the DCMotorSim has the plant model that lets up update the motor state while running in
@@ -44,8 +56,10 @@ public class SimTalonFXIO extends TalonFXIO {
         config,
         new DCMotorSim(
             LinearSystemId.createDCMotorSystem(
-                DCMotor.getKrakenX60Foc(1), config.momentOfInertia, config.unitToRotorRatio),
-            DCMotor.getKrakenX60Foc(1),
+                config.motor,
+                config.momentOfInertia.in(KilogramSquareMeters),
+                config.unitToRotorRatio),
+            config.motor,
             0.001,
             0.001));
   }
@@ -53,10 +67,7 @@ public class SimTalonFXIO extends TalonFXIO {
   public SimTalonFXIO(TalonFXSubsystemConfig config, DCMotorSim sim) {
     super(config);
     this.sim = sim;
-    talon.getSimState().Orientation =
-        (config.fxConfig.MotorOutput.Inverted == InvertedValue.Clockwise_Positive)
-            ? ChassisReference.Clockwise_Positive
-            : ChassisReference.CounterClockwise_Positive;
+    talon.getSimState().Orientation = config.simOrientation;
     /* Run simulation at a faster rate so PID gains behave more reasonably */
     simNotifier =
         new Notifier(
@@ -133,7 +144,7 @@ public class SimTalonFXIO extends TalonFXIO {
     inputs.appliedVolts = Volts.of(sim.getInputVoltage());
     inputs.currentStatorAmps = Amps.of(sim.getCurrentDrawAmps());
     inputs.currentSupplyAmps = Amps.of(sim.getCurrentDrawAmps());
-    inputs.currenTorqueAmps = Amps.of(sim.getCurrentDrawAmps());
+    inputs.currentTorqueAmps = Amps.of(sim.getCurrentDrawAmps());
     // rawRotorPosition is motor shaft position: mechanism * unitToRotorRatio
     inputs.rawRotorPosition = Rotations.of(mechanismRotations * config.unitToRotorRatio);
     inputs.closedLoopError = this.lastClosedLoopError;

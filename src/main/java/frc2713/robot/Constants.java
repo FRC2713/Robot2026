@@ -19,6 +19,9 @@ public final class Constants {
   public static final Mode simMode = Mode.SIM;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
 
+  // sets default behaviour to track OTF solutions
+  public static final boolean enableOTFFeatures = false; // currentMode == Mode.SIM;
+
   public static final CANDeviceId launcherMotorDeviceId = new CANDeviceId(2);
   public static boolean tuningMode = true;
 

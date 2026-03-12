@@ -10,6 +10,8 @@ package frc2713.robot.subsystems.drive;
 import static edu.wpi.first.units.Units.*;
 
 import choreo.trajectory.SwerveSample;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
@@ -20,9 +22,12 @@ import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -36,7 +41,9 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -47,8 +54,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.io.ArticulatedComponent;
+import frc2713.lib.util.LoggedTunableGains;
 import frc2713.robot.Constants;
 import frc2713.robot.Constants.Mode;
+import frc2713.robot.FieldConstants;
+import frc2713.robot.Robot;
 import frc2713.robot.generated.TunerConstants;
 import frc2713.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
@@ -105,9 +115,39 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
       };
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, Pose2d.kZero);
+  private SwerveDrivePoseEstimator odometryPoseEstimator =
+      new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, Pose2d.kZero);
+
+  private PIDController xController;
+  private PIDController yController;
+  private PIDController positionController;
+  private PIDController headingController;
 
   private final AdvantageScopePathBuilder odometryPb;
   private final AdvantageScopePathBuilder drivePb;
+
+  // ----- Drive Limits -----
+  // These limits let us cap how fast and how quickly the robot can change speed.
+  // A value of POSITIVE_INFINITY means "no limit" (the default).
+  private static final double LOOP_PERIOD_SECS = 0.02; // 20ms robot loop
+
+  // Max allowed linear speed (m/s). Speeds above this get scaled down.
+  private double linearVelocityLimit = Double.POSITIVE_INFINITY;
+  // Max allowed linear acceleration (m/s^2). Limits how fast we speed up, slow down, or change
+  // direction.
+  private double linearAccelerationLimit = Double.POSITIVE_INFINITY;
+  // Max allowed angular (turning) speed (rad/s). Rotation rates above this get clamped.
+  private double angularVelocityLimit = Double.POSITIVE_INFINITY;
+  // Max allowed angular acceleration (rad/s^2). Limits how fast the robot can start or stop
+  // spinning.
+  private double angularAccelerationLimit = Double.POSITIVE_INFINITY;
+
+  // Remembers what we actually commanded last cycle so we can calculate acceleration
+  private ChassisSpeeds lastCommandedSpeeds = new ChassisSpeeds();
+  private LoggedTunableGains loggedTunableDriveGains;
+  private LoggedTunableGains loggedTunableTurnGains;
+  private LoggedTunableGains loggedTunablePositionGains;
+  private LoggedTunableGains loggedTunableHeadingGains;
 
   public Drive(
       GyroIO gyroIO,
@@ -150,6 +190,14 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
           Logger.recordOutput(odometryPb.makePath("TrajectorySetpoint"), targetPose);
         });
 
+    this.positionController =
+        DriveConstants.AutoConstants.positionTrajectoryController.createPIDController();
+    this.xController = this.positionController;
+    this.yController = this.positionController;
+    this.headingController =
+        DriveConstants.AutoConstants.headingTrajectoryController.createPIDController();
+    this.headingController.enableContinuousInput(-Math.PI, Math.PI);
+
     // Configure SysId
     sysId =
         new SysIdRoutine(
@@ -160,6 +208,15 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
                 (state) -> Logger.recordOutput(drivePb.makePath("SysIdState"), state.toString())),
             new SysIdRoutine.Mechanism(
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
+
+    loggedTunableDriveGains =
+        new LoggedTunableGains(
+            "Drive/Drive", TunerConstants.FrontLeft.DriveMotorGains, new MotionMagicConfigs());
+    loggedTunableTurnGains =
+        new LoggedTunableGains(
+            "Drive/Turn", TunerConstants.FrontLeft.SteerMotorGains, new MotionMagicConfigs());
+    loggedTunablePositionGains = DriveConstants.AutoConstants.positionTrajectoryController;
+    loggedTunableHeadingGains = DriveConstants.AutoConstants.headingTrajectoryController;
   }
 
   @Override
@@ -248,10 +305,49 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
 
       // Apply update
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+      odometryPoseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
     }
 
     // Update gyro alert
     gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
+    Logger.recordOutput(
+        "Drive/isInNeutralZone",
+        FieldConstants.NeutralZone.region.contains(new Rectangle2d(getPose(), 1.0, 1.0)));
+
+    // Sim uses different gains
+    if (Robot.isReal()) {
+      loggedTunableDriveGains.ifChanged(
+          hashCode(),
+          (Slot0Configs gains) -> {
+            // Apply updated PID/FF gains
+            for (int i = 0; i < 4; i++) {
+              modules[i].setDriveGains(gains);
+            }
+          });
+      loggedTunableTurnGains.ifChanged(
+          hashCode(),
+          (Slot0Configs gains) -> {
+            // Apply updated PID/FF gains
+            for (int i = 0; i < 4; i++) {
+              modules[i].setTurnGains(gains);
+            }
+          });
+      loggedTunablePositionGains.ifChanged(
+          hashCode(),
+          (Slot0Configs gains) -> {
+            // Update position controller PID gains
+            positionController.setPID(gains.kP, gains.kI, gains.kD);
+            // Update x and y controllers to point to the same instance
+            xController = positionController;
+            yController = positionController;
+          });
+      loggedTunableHeadingGains.ifChanged(
+          hashCode(),
+          (Slot0Configs gains) -> {
+            // Update heading controller PID gains
+            headingController.setPID(gains.kP, gains.kI, gains.kD);
+          });
+    }
   }
 
   /**
@@ -260,6 +356,9 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
    * @param speeds Speeds in meters/sec
    */
   public void runVelocity(ChassisSpeeds speeds) {
+    // Apply any configured velocity/acceleration limits before sending to modules
+    speeds = applyDriveLimits(speeds);
+
     // Calculate module setpoints
     ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
@@ -301,6 +400,113 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
     }
     kinematics.resetHeadings(headings);
     stop();
+  }
+
+  // ----- Drive Limit Setters -----
+
+  /** Sets the maximum linear velocity (m/s). The robot won't drive faster than this. */
+  public void setLinearVelocityLimit(LinearVelocity maxlLinearVelocity) {
+    this.linearVelocityLimit = maxlLinearVelocity.in(MetersPerSecond);
+  }
+
+  /**
+   * Sets the maximum linear acceleration (m/s^2). Limits how fast the robot speeds up, slows down,
+   * or changes direction.
+   */
+  public void setLinearAccelerationLimit(LinearAcceleration maxLinearAcceleration) {
+    this.linearAccelerationLimit = maxLinearAcceleration.in(MetersPerSecondPerSecond);
+  }
+
+  /** Sets the maximum angular (turning) velocity (rad/s). The robot won't spin faster than this. */
+  public void setAngularVelocityLimit(AngularVelocity maxAngularVelocity) {
+    this.angularVelocityLimit = maxAngularVelocity.in(RadiansPerSecond);
+  }
+
+  /**
+   * Sets the maximum angular acceleration (rad/s^2). Limits how fast the robot starts or stops
+   * spinning.
+   */
+  public void setAngularAccelerationLimit(AngularAcceleration maxAngularAcceleration) {
+    this.angularAccelerationLimit = maxAngularAcceleration.in(RadiansPerSecondPerSecond);
+  }
+
+  /** Removes all drive limits so the robot can use its full speed and acceleration. */
+  public void clearDriveLimits() {
+    this.linearVelocityLimit = Double.POSITIVE_INFINITY;
+    this.linearAccelerationLimit = Double.POSITIVE_INFINITY;
+    this.angularVelocityLimit = Double.POSITIVE_INFINITY;
+    this.angularAccelerationLimit = Double.POSITIVE_INFINITY;
+  }
+
+  /**
+   * Applies the configured velocity and acceleration limits to the desired speeds.
+   *
+   * <p>How it works:
+   *
+   * <ol>
+   *   <li>Acceleration limiting: Compares what the robot wants to do vs. what it did last cycle. If
+   *       the change is too large, it scales it down so the robot ramps smoothly.
+   *   <li>Velocity limiting: After acceleration is handled, if the speed is still above the cap, we
+   *       scale it down to the maximum allowed speed.
+   * </ol>
+   *
+   * <p>This is applied to both linear (driving) and angular (spinning) motion independently.
+   */
+  private ChassisSpeeds applyDriveLimits(ChassisSpeeds desired) {
+    double vx = desired.vxMetersPerSecond;
+    double vy = desired.vyMetersPerSecond;
+    double omega = desired.omegaRadiansPerSecond;
+
+    // --- Linear acceleration limiting ---
+    // Figure out how much the linear velocity is trying to change since last cycle
+    double dvx = vx - lastCommandedSpeeds.vxMetersPerSecond;
+    double dvy = vy - lastCommandedSpeeds.vyMetersPerSecond;
+    double deltaLinearSpeed = Math.hypot(dvx, dvy);
+
+    // The maximum change allowed in one loop cycle = maxAccel * dt
+    double maxLinearDelta = linearAccelerationLimit * LOOP_PERIOD_SECS;
+
+    if (deltaLinearSpeed > maxLinearDelta) {
+      // Scale the change down so it doesn't exceed the acceleration limit.
+      // Think of it like: we want to move toward the target speed, but only take a step
+      // of size maxLinearDelta in that direction.
+      double scale = maxLinearDelta / deltaLinearSpeed;
+      vx = lastCommandedSpeeds.vxMetersPerSecond + dvx * scale;
+      vy = lastCommandedSpeeds.vyMetersPerSecond + dvy * scale;
+    }
+
+    // --- Angular acceleration limiting ---
+    double dOmega = omega - lastCommandedSpeeds.omegaRadiansPerSecond;
+    double maxAngularDelta = angularAccelerationLimit * LOOP_PERIOD_SECS;
+
+    if (Math.abs(dOmega) > maxAngularDelta) {
+      // Clamp the angular speed change to the max allowed step
+      omega = lastCommandedSpeeds.omegaRadiansPerSecond + Math.copySign(maxAngularDelta, dOmega);
+    }
+
+    // --- Linear velocity limiting ---
+    // Cap the overall driving speed so the robot doesn't exceed the velocity limit
+    double linearSpeed = Math.hypot(vx, vy);
+    if (linearSpeed > linearVelocityLimit) {
+      double scale = linearVelocityLimit / linearSpeed;
+      vx *= scale;
+      vy *= scale;
+    }
+
+    // --- Angular velocity limiting ---
+    // Cap the rotation rate so the robot doesn't spin faster than the limit
+    omega = MathUtil.clamp(omega, -angularVelocityLimit, angularVelocityLimit);
+
+    ChassisSpeeds limited = new ChassisSpeeds(vx, vy, omega);
+
+    // Remember what we're actually commanding so next cycle can compute acceleration
+    lastCommandedSpeeds = limited;
+
+    // Log both the raw request and what we actually sent so we can see the limits in action
+    Logger.recordOutput(drivePb.makePath("SwerveChassisSpeeds", "Desired"), desired);
+    Logger.recordOutput(drivePb.makePath("SwerveChassisSpeeds", "Limited"), limited);
+
+    return limited;
   }
 
   /** Returns a command to run a quasistatic test in the specified direction. */
@@ -378,6 +584,11 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
     return poseEstimator.getEstimatedPosition();
   }
 
+  @AutoLogOutput(key = "Odometry/RobotNoVision")
+  public Pose2d getOdomPose() {
+    return odometryPoseEstimator.getEstimatedPosition();
+  }
+
   /** Returns the current odometry rotation. */
   public Rotation2d getRotation() {
     return getPose().getRotation();
@@ -386,6 +597,7 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
     poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+    odometryPoseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
   }
 
   /** Adds a new timestamped vision measurement. */
@@ -414,34 +626,17 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
     Pose2d samplePose2d =
         new Pose2d(
             new Translation2d(sample.x, sample.y), new Rotation2d(Radians.of(sample.heading)));
-    Logger.recordOutput("TrajectoryFollowing/pose2d", samplePose2d);
-    Logger.recordOutput("TrajectoryFollowing/posex", pose.getX());
-    Logger.recordOutput("TrajectoryFollowing/samplex", sample.x);
-
-    Logger.recordOutput("TrajectoryFollowing/posey", pose.getY());
-    Logger.recordOutput("TrajectoryFollowing/sampley", sample.y);
-
-    Logger.recordOutput(
-        "TrajectoryFollowing/heading", pose.getRotation().getRadians() + Math.PI * 2);
-    Logger.recordOutput(
-        "TrajectoryFollowing/sampleheading", Rotation2d.fromRadians(sample.heading).getRadians());
+    Logger.recordOutput("TrajectoryFollowing/pose", pose);
+    Logger.recordOutput("TrajectoryFollowing/sample", samplePose2d);
     // Generate the next speeds for the robot
     ChassisSpeeds speeds =
         new ChassisSpeeds(
-            sample.vx
-                + DriveConstants.AutoConstants.xTrajectoryController
-                    .createPIDController()
-                    .calculate(pose.getX(), sample.x),
-            sample.vy
-                + DriveConstants.AutoConstants.yTrajectoryController
-                    .createPIDController()
-                    .calculate(pose.getY(), sample.y),
+            sample.vx + xController.calculate(pose.getX(), sample.x),
+            sample.vy + yController.calculate(pose.getY(), sample.y),
             sample.omega
-                + DriveConstants.AutoConstants.headingTrajectoryController
-                    .createAngularPIDController()
-                    .calculate(
-                        pose.getRotation().getRadians(),
-                        Rotation2d.fromRadians(sample.heading).getRadians()));
+                + headingController.calculate(
+                    pose.getRotation().getRadians(),
+                    Rotation2d.fromRadians(sample.heading).getRadians()));
 
     this.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(speeds, this.getRotation()));
   }

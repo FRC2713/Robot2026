@@ -43,7 +43,10 @@ public class VisionConstants {
   // on other sensors (e.g., gyro/odometry) for heading, since vision rotation
   // data is considered too unreliable/noisy for this robot.
   public static PoseEstimatorErrorStDevs POSE_ESTIMATOR_STATE_STDEVS =
-      new PoseEstimatorErrorStDevs(Meters.of(0.01), Degrees.of(999));
+      new PoseEstimatorErrorStDevs(Meters.of(0.03), Degrees.of(999));
+
+  public static PoseEstimatorErrorStDevs POSE_ESTIMATOR_STATE_LOW_TAGS_STDEVS =
+      new PoseEstimatorErrorStDevs(Meters.of(1.1), Degrees.of(99999));
 
   public static LoggedTunableMeasure<Time> LATENCY_THRESHOLD =
       new LoggedTunableMeasure<Time>("Vision/latencyThreshold", Seconds.of(0.2));

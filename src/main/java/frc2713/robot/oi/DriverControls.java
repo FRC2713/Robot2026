@@ -5,8 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc2713.robot.RobotContainer;
+import frc2713.robot.GameCommandGroups;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
@@ -18,7 +17,7 @@ import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 
 public class DriverControls {
-  private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandVader4Controller controller = new CommandVader4Controller(0);
 
   private final Drive drive;
   private final Flywheels flywheels;
@@ -64,7 +63,7 @@ public class DriverControls {
                         drive)
                     .ignoringDisable(true)));
 
-    // Reset gyro to 180 deg when start button is pressed
+    // // Reset gyro to 180 deg when start button is pressed
     controller
         .back()
         .onTrue(
@@ -94,33 +93,52 @@ public class DriverControls {
                 "Inch Right"))
         .onFalse(this.setToNormalDriveCmd());
 
-    // controller
-    //     .rightBumper()
-    //     .onTrue(flywheels.velocitySetpointCommand(LauncherConstants.Flywheels.PIDTest))
-    //     .onFalse(flywheels.velocitySetpointCommand(() -> RPM.of(0)));
-
     // intake fuel
     controller
-        .leftBumper()
-        .or(controller.leftTrigger(0.25))
-        .whileTrue(
-            Commands.parallel(intakeRoller.intake(), intakeExtension.extendCommand())
+        .leftTrigger(0.98)
+        .onTrue(
+            Commands.parallel(
+                    intakeExtension.extendCommand(),
+                    Commands.parallel(intakeRoller.intake(), dyeRotor.stirFuel()))
                 .withName("Intaking"))
-        .onFalse(
-            Commands.parallel(intakeRoller.stop(), intakeExtension.retractCommand())
-                .withName("Intake Retracted"));
+        .onFalse(Commands.parallel(intakeRoller.stop().withName("Stop Intake"), dyeRotor.stop()));
 
-    // shoot against the hubwhen flywheels and hub are ready
+    controller
+        .leftBumper()
+        .onTrue(
+            Commands.parallel(intakeExtension.retractCommand(), intakeRoller.intake())
+                .withName("Retract Intake"))
+        .onFalse(intakeRoller.stop().withName("Stop Intake"));
+
+    // shoot otf
     controller
         .rightBumper()
-        .whileTrue(RobotContainer.GameCommandGroups.hubShot)
-        .onFalse(RobotContainer.GameCommandGroups.stopShooting);
+        .whileTrue(
+            GameCommandGroups.Launching.otfShotHoodProtect(
+                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
+        .onFalse(
+            Commands.parallel(
+                GameCommandGroups.Launching.stopShooting(drive, feeder, dyeRotor, flywheels)));
+
+    // controller
+    //     .a()
+    //     .whileFalse(DriveCommands.changeDefaultDriveCommand(drive,
+    //             DriveCommands.joystickDriveAtAngle(drive,
+    //              () -> driverControls.getLeftY() + devControls.getLeftY(),
+    //              () -> driverControls.getLeftX() + devControls.getLeftX(),
+    //              () -> ), null))
 
     // shoot when flywheels are ready
     controller
-        .rightTrigger(0.25)
-        .whileTrue(RobotContainer.GameCommandGroups.otfShot)
-        .onFalse(RobotContainer.GameCommandGroups.stopShooting);
+        .rightTrigger(.98)
+        .whileTrue(
+            GameCommandGroups.Launching.dumbShot(
+                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
+        .onFalse(
+            GameCommandGroups.Launching.stopShootingAndRetractHood(
+                drive, feeder, dyeRotor, hood, flywheels));
+
+    // controller
   }
 
   public double getLeftY() {

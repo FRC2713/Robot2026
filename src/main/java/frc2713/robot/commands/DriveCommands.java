@@ -7,6 +7,8 @@
 
 package frc2713.robot.commands;
 
+import static edu.wpi.first.units.Units.*;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -17,6 +19,10 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.AngularAcceleration;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearAcceleration;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
@@ -27,20 +33,21 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class DriveCommands {
-  private static final double DEADBAND = 0.1;
+  private static final double DEADBAND = 0.02;
   private static final double ANGLE_KP = 5.0;
   private static final double ANGLE_KD = 0.4;
   private static final double ANGLE_MAX_VELOCITY = 8.0;
   private static final double ANGLE_MAX_ACCELERATION = 20.0;
   private static final double FF_START_DELAY = 2.0; // Secs
   private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
-  private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
-  private static final double WHEEL_RADIUS_RAMP_RATE = 0.05; // Rad/Sec^2
+  private static final double WHEEL_RADIUS_MAX_VELOCITY = 1.25; // Rad/Sec
+  private static final double WHEEL_RADIUS_RAMP_RATE = 0.25; // Rad/Sec^2
   public static final DoubleSupplier INCH_SPEED = () -> 0.1;
 
   private DriveCommands() {}
@@ -304,6 +311,108 @@ public class DriveCommands {
                               + formatter.format(Units.metersToInches(wheelRadius))
                               + " inches");
                     })));
+  }
+
+  // ----- Drive Limit Commands -----
+  // These commands let you set or clear the drive limits from button bindings, auto routines, etc.
+
+  /** Returns a command that caps the robot's maximum driving speed. */
+  public static Command setLinearVelocityLimit(Drive drive, LinearVelocity maxLinearVelocity) {
+    return Commands.runOnce(() -> drive.setLinearVelocityLimit(maxLinearVelocity));
+  }
+
+  /** Returns a command that caps how fast the robot can change its driving speed (m/s^2). */
+  public static Command setLinearAccelerationLimit(
+      Drive drive, LinearAcceleration maxLinearAcceleration) {
+    return Commands.runOnce(() -> drive.setLinearAccelerationLimit(maxLinearAcceleration));
+  }
+
+  /** Returns a command that caps the robot's maximum turning speed (rad/s). */
+  public static Command setAngularVelocityLimit(Drive drive, AngularVelocity maxAngularVelocity) {
+    return Commands.runOnce(() -> drive.setAngularVelocityLimit(maxAngularVelocity));
+  }
+
+  /** Returns a command that caps how fast the robot can change its turning speed (rad/s^2). */
+  public static Command setAngularAccelerationLimit(
+      Drive drive, AngularAcceleration maxAngularAcceleration) {
+    return Commands.runOnce(() -> drive.setAngularAccelerationLimit(maxAngularAcceleration));
+  }
+
+  /** Returns a command that removes all drive limits, restoring full speed. */
+  public static Command clearDriveLimits(Drive drive) {
+    return Commands.runOnce(drive::clearDriveLimits);
+  }
+
+  /**
+   * Returns a command that sets whichever drive limits you provide. Any limit passed as
+   * Optional.empty() will be left unchanged from whatever it was before.
+   *
+   * <p>Example: only limit linear velocity to 2 m/s, leave everything else alone:
+   *
+   * <pre>
+   *   DriveCommands.setDriveLimits(drive,
+   *       Optional.of(MetersPerSecond.of(2.0)),
+   *       Optional.empty(),
+   *       Optional.empty(),
+   *       Optional.empty())
+   * </pre>
+   */
+  public static Command setDriveLimits(
+      Drive drive,
+      Optional<LinearVelocity> linearVelocity,
+      Optional<LinearAcceleration> linearAcceleration,
+      Optional<AngularVelocity> angularVelocity,
+      Optional<AngularAcceleration> angularAcceleration) {
+    return Commands.runOnce(
+        () -> {
+          // Only apply limits that were provided; skip the rest so they stay as-is
+          linearVelocity.ifPresent(drive::setLinearVelocityLimit);
+          linearAcceleration.ifPresent(drive::setLinearAccelerationLimit);
+          angularVelocity.ifPresent(drive::setAngularVelocityLimit);
+          angularAcceleration.ifPresent(drive::setAngularAccelerationLimit);
+        });
+  }
+
+  /**
+   * Wraps another command so that drive limits are active while it runs. When the inner command
+   * starts, the limits are applied. When it ends (for any reason), the limits are automatically
+   * cleared.
+   *
+   * <p>Example usage:
+   *
+   * <pre>
+   *   // Limit to 2 m/s and 3 m/s^2 linear while scoring, no angular limits
+   *   DriveCommands.withDriveLimits(drive,
+   *       MetersPerSecond.of(2.0),
+   *       MetersPerSecondPerSecond.of(3.0),
+   *       RadiansPerSecond.of(Double.POSITIVE_INFINITY),
+   *       RadiansPerSecondPerSecond.of(Double.POSITIVE_INFINITY),
+   *       scoringCommand)
+   * </pre>
+   *
+   * @param drive the drive subsystem
+   * @param linearVelLimit max linear velocity
+   * @param linearAccelLimit max linear acceleration
+   * @param angularVelLimit max angular velocity
+   * @param angularAccelLimit max angular acceleration
+   * @param inner the command to run while limits are active
+   */
+  public static Command withDriveLimits(
+      Drive drive,
+      LinearVelocity linearVelLimit,
+      LinearAcceleration linearAccelLimit,
+      AngularVelocity angularVelLimit,
+      AngularAcceleration angularAccelLimit,
+      Command inner) {
+    return inner
+        .beforeStarting(
+            () -> {
+              drive.setLinearVelocityLimit(linearVelLimit);
+              drive.setLinearAccelerationLimit(linearAccelLimit);
+              drive.setAngularVelocityLimit(angularVelLimit);
+              drive.setAngularAccelerationLimit(angularAccelLimit);
+            })
+        .finallyDo(() -> drive.clearDriveLimits());
   }
 
   private static class WheelRadiusCharacterizationState {
