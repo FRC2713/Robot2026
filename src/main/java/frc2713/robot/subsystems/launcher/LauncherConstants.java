@@ -40,8 +40,8 @@ public final class LauncherConstants {
     public static Angle staticHubAngle = Degrees.of(0);
 
     // Turret rotation limits
-    public static final double FORWARD_LIMIT_DEGREES = 15.0;
-    public static final double REVERSE_LIMIT_DEGREES = -365.0;
+    public static final double FORWARD_LIMIT_DEGREES = 90.0;
+    public static final double REVERSE_LIMIT_DEGREES = -90.0;
 
     public static final Angle forwardSoftLimit = Degrees.of(FORWARD_LIMIT_DEGREES);
     public static final Angle reverseSoftLimit = Degrees.of(REVERSE_LIMIT_DEGREES);
@@ -248,6 +248,7 @@ public final class LauncherConstants {
     public static double gearRatio = ((20 / 8.0) * (30.0 / 13.0) * (146.0 / 10.0));
 
     public static final Angle retractedPosition = Degrees.of(0);
+    public static final Angle startingOffset = Degrees.of(0.5);
 
     static {
       config.name = "Hood";

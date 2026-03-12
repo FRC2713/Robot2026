@@ -207,7 +207,7 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
           targetAngle = inputs.position;
         }
 
-        targetAngle = convertToClosestBoundedTurretAngleDegrees(targetAngle, inputs.position);
+        // targetAngle = convertToClosestBoundedTurretAngleDegrees(targetAngle, inputs.position);
         Logger.recordOutput(super.pb.makePath("OTF", "solutionIsValid"), solution.isValid());
         Logger.recordOutput(pb.makePath("OTF", "targetAngleDegrees"), targetAngle.in(Degrees));
         return targetAngle;
@@ -224,7 +224,7 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
       };
 
   public Command otfCommand() {
-    return setAngle(otfAngleSupplier);
+    return setAngleStopAtBounds(otfAngleSupplier);
   }
 
   public Command hubCommand(Supplier<Pose2d> robotPose) {
@@ -234,9 +234,9 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
   @Override
   public void initialize() {
 
-    this.io.setCurrentPosition(
-        getTurretPositionFromEncoders(
-            this.inputs.rawRotorPosition, this.cancoderInputs.absolutePosition));
+    // this.io.setCurrentPosition(
+    //     getTurretPositionFromEncoders(
+    //         this.inputs.rawRotorPosition, this.cancoderInputs.absolutePosition));
     super.initialize();
   }
 

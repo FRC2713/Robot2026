@@ -183,6 +183,9 @@ public class DevControls {
     //     .onTrue(flywheels.dutyCycleCommand(() -> 1.0))
     //     .onFalse(flywheels.dutyCycleCommand(() -> 0.0));
 
+    controller.povUp().onTrue(hood.setAngleCommand(() -> Degrees.of(25)));
+    controller.povDown().onTrue(hood.setAngleCommand(() -> Degrees.of(0)));
+
     // Y button - index fuel in parallel (same effect since it's the same command)
     controller
         .y()

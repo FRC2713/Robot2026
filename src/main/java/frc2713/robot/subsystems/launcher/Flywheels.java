@@ -53,7 +53,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
         leaderLauncherMotorIO,
         followerLauncherMotorIO);
     this.fuelTrajectories = new FuelTrajectories();
-    if (Constants.enableOTFFeatures) setDefaultCommand(idleSpeedCommand());
+    if (Constants.enableOTFFeatures) setDefaultCommand(stop());
   }
 
   public Command setVelocity(Supplier<AngularVelocity> desiredVelocity) {

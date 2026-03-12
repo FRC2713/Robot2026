@@ -197,7 +197,7 @@ public final class GameCommandGroups {
               DriveCommands.clearDriveLimits(drive),
               feeder.stop(),
               dyeRotor.stop(),
-              flywheels.idleSpeedCommand())
+              flywheels.stop())
           .withName("Stopped Shooting");
     }
 

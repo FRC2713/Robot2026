@@ -162,7 +162,8 @@ public class LaunchingSolutionManager extends SubsystemBase {
     // The conversion to robot-relative happens at the point of use (e.g. in Turret)
     // so that it always uses the robot's current heading, not a stale or projected one.
     Rotation2d newYaw =
-        new Rotation2d(Math.atan2(neededMuzzleVelocity.getY(), neededMuzzleVelocity.getX()));
+        new Rotation2d(Math.atan2(neededMuzzleVelocity.getY(), neededMuzzleVelocity.getX()))
+            .rotateBy(new Rotation2d(Math.PI));
 
     return new LaunchSolution(
         newYaw,
