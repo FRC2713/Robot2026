@@ -1,10 +1,14 @@
 package frc2713.robot.subsystems.fuelDetector;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.DoubleArraySubscriber;
+import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringSubscriber;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc2713.robot.RobotContainer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import org.littletonrobotics.junction.Logger;
@@ -14,30 +18,65 @@ public class FuelDetector extends SubsystemBase {
   public final int fuelDensityThreshold = 1; // fuels per grid square
   public final int kGridWidth = 9; // number of horizontal grid cells - 1
   public final int kGridHeight = 3; // number of vertical grid cells - 1
-  public final int kImageWidth = 640;
-  public final int kImageHeight = 480;
+  public static final int kImageWidth = 640;
+  public static final int kImageHeight = 480;
 
-  public boolean isLimelights; //Does nothing unless legacy detection is activated. If legacy detecttion is activates, sets the expected source of the fuel data
+  public boolean
+      isLimelights; // Does nothing unless legacy detection is activated. If legacy detecttion is
+  // activates, sets the expected source of the fuel data
 
   private StringSubscriber simFuelSub;
   private DoubleArraySubscriber realFuelSub;
+  private DoubleSubscriber fuelHeading;
+
+  private boolean useLegacyDetection =
+      false; // Flag to use Java fuel cluster detection; use only if coprocessor can't be used for
+  // some reason. Will take a heavy amount of RoboRio system resources to run, with less
+  // precision
 
   public FuelDetector() {
-    simFuelSub =
-        NetworkTableInstance.getDefault().getStringTopic("/fuelDetector/fuelData").subscribe("");
-    realFuelSub =
+    if (useLegacyDetection) {
+      simFuelSub =
+          NetworkTableInstance.getDefault().getStringTopic("/fuelDetector/fuelData").subscribe("");
+      realFuelSub =
+          NetworkTableInstance.getDefault()
+              .getDoubleArrayTopic("/limelight-d/tcornxy")
+              .subscribe(new double[0]);
+    }
+    BooleanPublisher pythonBeacon =
         NetworkTableInstance.getDefault()
-            .getDoubleArrayTopic("/limelight-d/tcornxy")
-            .subscribe(new double[0]);
+            .getBooleanTopic("/fuelDetector/robotConnected")
+            .publish(); // Tells the Python code running on a coproccessor what server is being used
+    // for NT
+    pythonBeacon.set(true);
+
+    fuelHeading =
+        NetworkTableInstance.getDefault()
+            .getDoubleTopic("/fuelDetector/clusterHeading")
+            .subscribe(0);
+  }
+
+  public Rotation2d getHeading() {
+    if (useLegacyDetection) {
+      return getRotation2D(getDataFromNT(), isLimelights);
+    } else {
+      return new Rotation2d(Units.degreesToRadians(fuelHeading.get()));
+    }
+  }
+
+  public Rotation2d getHeading(boolean fieldRelative) {
+    Rotation2d heading = getHeading();
+    if (fieldRelative) {
+      return RobotContainer.drive.getPose().getRotation().plus(heading);
+    } else {
+      return heading;
+    }
   }
 
   public void periodic() {
     // get fuel information, call algorithm
-    FuelCoordinates[] fuels = getDataFromNT();
-    // System.out.println("fuelData: " + fuelData);
-    Logger.recordOutput("First Fuel Cluster", getRotation2D(fuels, !isLimelights).getDegrees());
-    // System.out.println(
-    //    findFuelClusters(fuels, kGridWidth, kGridHeight).toString() + " fuel clusters");
+    // FuelCoordinates[] fuels = getDataFromNT();
+    // Logger.recordOutput("First Fuel Cluster", getRotation2D(fuels, !isLimelights).getDegrees());
   }
 
   public ArrayList<FuelCoordinates> filterByHighChance(FuelCoordinates[] inputs) {
@@ -64,7 +103,7 @@ public class FuelDetector extends SubsystemBase {
         output[w][h] = new FuelSquare(w, h);
       }
     }
-    for (int i = 0; i < fuelCoords.size() - 1; i++) {
+    for (int i = 0; i < fuelCoords.size(); i++) {
       fuelCoords
           .get(i)
           .assignSelfToFuelSquare(gridWidth, gridHeight, kImageWidth, kImageHeight, output);
@@ -107,15 +146,14 @@ public class FuelDetector extends SubsystemBase {
     } else {
       highChanceFuel = new ArrayList<FuelCoordinates>(Arrays.asList(inputs));
     }
-    System.out.println(highChanceFuel);
+
     FuelSquare[][] fuelSquares = divideIntoSquares(highChanceFuel, gridWidth, gridHeight);
-    // System.out.println((fuelSquares.length > 0) ? fuelSquares[0].toString() : "empty array");
     ArrayList<FuelCluster> clusters = getFuelClusters(fuelSquares);
     return clusters;
   }
 
   public static FuelCoordinates[] dataToFuelCoordinates(String data) {
-    // data is essentially a special type of .csv file
+    // data from the webcam is essentially a special type of .csv file
     // a ; seperates fuels, a , seperates fuel properties
     // In order of properties: x, y, width, height, chance
     if (data.length() > 0) {
@@ -132,11 +170,11 @@ public class FuelDetector extends SubsystemBase {
   }
 
   public static FuelCoordinates[] dataToFuelCoordinates(double[] data) {
-
     double[] fuels = data;
-    FuelCoordinates[] output = new FuelCoordinates[fuels.length];
-    for (int i = 0; i < fuels.length; i += 2) {
-      output[i] = new FuelCoordinates(fuels[i], fuels[i + 1]);
+    FuelCoordinates[] output = new FuelCoordinates[fuels.length / 8];
+    for (int i = 0; i < fuels.length; i += 8) {
+      output[i / 8] =
+          new FuelCoordinates(fuels[i], fuels[i + 1], fuels[i + 4], fuels[i + 5], kImageWidth);
     }
     return output;
   }
@@ -145,24 +183,23 @@ public class FuelDetector extends SubsystemBase {
     FuelCoordinates[] fuels;
     if (realFuelSub.exists()) {
       isLimelights = true;
-      fuels = FuelDetector.dataToFuelCoordinates(realFuelSub.get(new double[0]));
+      fuels = FuelDetector.dataToFuelCoordinates(realFuelSub.get());
     } else if (simFuelSub.exists()) {
       isLimelights = false;
-      fuels = FuelDetector.dataToFuelCoordinates(simFuelSub.get(""));
+      fuels = FuelDetector.dataToFuelCoordinates(simFuelSub.get());
     } else {
       isLimelights = false;
       fuels = new FuelCoordinates[0];
     }
-    if (fuels.length <= 0) {
-      System.out.println("No fuel data");
-    }
+
+    Logger.recordOutput("FuelDetector/is_limelights", isLimelights);
+    Logger.recordOutput("FuelDetector/n_fuels", isLimelights);
+
     return fuels;
   }
 
   public Rotation2d getRotation2D(FuelCoordinates[] fuels, boolean filter) {
     ArrayList<FuelCluster> fuelClusters = findFuelClusters(fuels, kGridWidth, kGridHeight, filter);
-    // System.out.println((fuelClusters.size() > 0) ? fuelClusters.get(0).toString() : "size of fuel
-    // clusters is 0");
     if (fuelClusters.size() > 0) {
       FuelCluster largestCluster =
           new FuelCluster(); // Note: this is the largest in terms of fuel count, not visiual size.
