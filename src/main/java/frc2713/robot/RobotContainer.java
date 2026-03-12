@@ -439,6 +439,7 @@ public class RobotContainer {
 
   public static void getAndPublishFuelHeading() {
     Logger.recordOutput(
-      "fuelDetector/fuelHeading", RobotContainer.fuels.getHeading(DriverStation.getAlliance()).getDegrees());
+        "fuelDetector/fuelHeading",
+        RobotContainer.fuels.getHeading(DriverStation.getAlliance()).getDegrees());
   }
 }

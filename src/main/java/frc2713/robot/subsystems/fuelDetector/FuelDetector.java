@@ -7,14 +7,13 @@ import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringSubscriber;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc2713.robot.RobotContainer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
-
 import org.littletonrobotics.junction.Logger;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class FuelDetector extends SubsystemBase {
   public final double fuelChanceThreshold = 0.8; // Percentage in decimal format
@@ -79,7 +78,7 @@ public class FuelDetector extends SubsystemBase {
 
   public Rotation2d getHeading(Optional<Alliance> alliance) {
     Rotation2d heading = getHeading(true);
-    if(alliance.isPresent() && alliance.get() == Alliance.Red) {
+    if (alliance.isPresent() && alliance.get() == Alliance.Red) {
       return heading.rotateBy(new Rotation2d(Math.PI));
     } else {
       return heading;
