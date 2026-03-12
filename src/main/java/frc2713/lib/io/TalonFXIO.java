@@ -41,8 +41,6 @@ public class TalonFXIO implements MotorIO {
   private final DynamicMotionMagicVoltage dynamicMotionMagicVoltage =
       new DynamicMotionMagicVoltage(0.0, 0.0, 0.0);
   private final TorqueCurrentFOC torqueCurrentFOC = new TorqueCurrentFOC(0.0);
-  private final VelocityTorqueCurrentFOC velocityTorqueCurrentFOC =
-      new VelocityTorqueCurrentFOC(0.0);
 
   // Status signals
   private final StatusSignal<Angle> positionSignal;
@@ -76,7 +74,7 @@ public class TalonFXIO implements MotorIO {
     }
 
     // Configure the gear ratio so getPosition/getVelocity return mechanism units.
-    // Note: metersPerRotation is handled at subsystem-level for linear mechanisms
+    // Note: unitRotationsPerMeter is handled at subsystem-level for linear mechanisms
     this.config.fxConfig.Feedback.SensorToMechanismRatio = config.unitToRotorRatio;
 
     CTREUtil.applyConfiguration(this.talon, this.config.fxConfig);
@@ -123,7 +121,7 @@ public class TalonFXIO implements MotorIO {
     inputs.appliedVolts = voltageSignal.getValue();
     inputs.currentStatorAmps = currentStatorSignal.getValue();
     inputs.currentSupplyAmps = currentSupplySignal.getValue();
-    inputs.currentTorqueAmps = currentTorqueSignal.getValue();
+    inputs.currenTorqueAmps = currentTorqueSignal.getValue();
     inputs.rawRotorPosition = rawRotorPositionSignal.getValue();
     inputs.closedLoopError = closedLoopErrorSignal.getValue();
     inputs.isMotionMagicAtTarget = motionMagicAtTargetSignal.getValue();
@@ -236,11 +234,6 @@ public class TalonFXIO implements MotorIO {
   @Override
   public void setTorqueCurrentFOC(Current current) {
     talon.setControl(torqueCurrentFOC.withOutput(current));
-  }
-
-  @Override
-  public void setVelocityTorqueCurrentFOC(AngularVelocity velocity) {
-    talon.setControl(velocityTorqueCurrentFOC.withVelocity(velocity));
   }
 
   @Override

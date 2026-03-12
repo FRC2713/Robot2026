@@ -6,6 +6,7 @@ import choreo.auto.AutoTrajectory;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc2713.robot.RobotContainer;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
@@ -14,12 +15,7 @@ import frc2713.robot.subsystems.launcher.Hood;
 import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
-import java.util.function.Supplier;
 
-/**
- * Starts at right trench. Collects from Neutral Zone once. Goes over right bump. Shoots fo X
- * seconds.
- */
 public class RightSideAutoBump {
   public static AutoRoutine getRoutine(
       AutoFactory factory,
@@ -30,9 +26,8 @@ public class RightSideAutoBump {
       Hood hood,
       Turret turret,
       DyeRotor serializer,
-      Feeder feeder,
-      Supplier<Command> otfShotSupplier) {
-    AutoRoutine routine = factory.newRoutine("RightSideAutoBump");
+      Feeder feeder) {
+    AutoRoutine routine = factory.newRoutine("Start Collect Shoot");
 
     AutoTrajectory faceFuelTrench = routine.trajectory("FaceFuelTrench");
     AutoTrajectory intakeFuel = routine.trajectory("IntakeFuel");
@@ -42,7 +37,7 @@ public class RightSideAutoBump {
         .active()
         .onTrue(
             Commands.sequence(
-                Commands.print("[AUTO] Going to fuel"),
+                Commands.print("Going to fuel"),
                 faceFuelTrench.resetOdometry(),
                 faceFuelTrench.cmd()));
 
@@ -50,7 +45,7 @@ public class RightSideAutoBump {
         .done()
         .onTrue(
             Commands.sequence(
-                Commands.print("[AUTO] Starting intake and collecting fuel"),
+                Commands.print("Starting intake and collecting fuel"),
                 Commands.parallel(
                     intakeExtension.extendCommand(), intakeRoller.intake(), intakeFuel.cmd())));
 
@@ -58,11 +53,10 @@ public class RightSideAutoBump {
         .done()
         .onTrue(
             Commands.sequence(
-                Commands.print("[AUTO] Moving to shooting position over bump"),
+                Commands.print("Moving to shooting position over bump"),
                 Commands.sequence(Commands.race(intakeRoller.stop(), new WaitCommand(2))),
                 moveToLaunchBump.cmd()));
-
-    moveToLaunchBump.done().onTrue(otfShotSupplier.get());
+    moveToLaunchBump.done().onTrue(RobotContainer.GameCommandGroups.otfShot);
     return routine;
   }
 
@@ -75,8 +69,7 @@ public class RightSideAutoBump {
       Hood hood,
       Turret turret,
       DyeRotor serializer,
-      Feeder feederAndIndexer,
-      Supplier<Command> otfShotSupplier) {
+      Feeder feederAndIndexer) {
     return RightSideAutoBump.getRoutine(
             factory,
             driveSubsystem,
@@ -86,8 +79,7 @@ public class RightSideAutoBump {
             hood,
             turret,
             serializer,
-            feederAndIndexer,
-            otfShotSupplier)
+            feederAndIndexer)
         .cmd();
   }
 }

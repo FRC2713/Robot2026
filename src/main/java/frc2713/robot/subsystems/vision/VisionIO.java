@@ -21,7 +21,7 @@ public interface VisionIO {
     public int tagCount;
 
     public boolean applying;
-    public String reasoning = "";
+    public String reasoning;
 
     public Distance translationStdDev =
         VisionConstants.POSE_ESTIMATOR_STATE_STDEVS.translationalStDev();

@@ -2,39 +2,33 @@ package frc2713.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Volts;
 
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
-import frc2713.lib.subsystem.MotorFollowerSubsystem;
+import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 
-public class IntakeRoller extends MotorFollowerSubsystem<MotorInputsAutoLogged, MotorIO> {
+public class IntakeRoller extends MotorSubsystem<MotorInputsAutoLogged, MotorIO> {
 
-  public IntakeRoller(
-      final TalonFXSubsystemConfig leaderConfig,
-      final TalonFXSubsystemConfig followerConfig,
-      final MotorIO leaderMotorIO,
-      final MotorIO followerMotorIO) {
-    super(
-        leaderConfig.name,
-        leaderConfig,
-        followerConfig,
-        new MotorInputsAutoLogged(),
-        new MotorInputsAutoLogged(),
-        leaderMotorIO,
-        followerMotorIO);
+  public IntakeRoller(final TalonFXSubsystemConfig config, final MotorIO intakeRollersMotorIO) {
+    super(config, new MotorInputsAutoLogged(), intakeRollersMotorIO);
+  }
+
+  public Command setIntakeVoltageCommand(Voltage volts) {
+    return voltageCommand(() -> volts);
   }
 
   public Command intake() {
-    return velocitySetpointCommand(IntakeConstants.Roller.intakeSpeed);
+    return setIntakeVoltageCommand(IntakeConstants.Roller.intakeVoltageDesired);
   }
 
   public Command stop() {
-    return voltageCommand(() -> Volts.of(0.0));
+    return setIntakeVoltageCommand(Volts.of(0.0));
   }
 
   public Command outtake() {
-    return voltageCommand(() -> IntakeConstants.Roller.outtakeVoltageDesired);
+    return setIntakeVoltageCommand(IntakeConstants.Roller.outtakeVoltageDesired);
   }
 
   @Override

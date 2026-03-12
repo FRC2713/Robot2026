@@ -6,7 +6,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
-import frc2713.robot.Robot;
 
 public class Util {
   public static final double EPSILON = 1e-12;
@@ -37,23 +36,5 @@ public class Util {
   public static Angle fieldToRobotRelative(Angle robotRelative, Pose2d robotPose) {
     Rotation2d converted = new Rotation2d(robotRelative.in(Radians)).minus(robotPose.getRotation());
     return converted.getMeasure();
-  }
-
-  public static <T> T modeDependentValue(T real, T sim) {
-    return Robot.isReal() ? real : sim;
-  }
-
-  public static <T> T modeDependentValue(T real) {
-    return modeDependentValue(real, real);
-  }
-
-  public static Angle clamp(Angle value, Angle min, Angle max) {
-    if (value.lt(min)) {
-      return min;
-    } else if (value.gt(max)) {
-      return max;
-    } else {
-      return value;
-    }
   }
 }

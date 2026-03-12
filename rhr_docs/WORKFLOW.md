@@ -1,8 +1,8 @@
 # Git Workflow for Contributing
 
 We use `git` for making code changes, with a 3-branch approach:
-- `main`: Where we merge our changes after testing. Before we have our robot, code tested and approved in simulation is merged here. Once we have our robot, this branch contains only code tested and approved on the actual robot. Exceptions can be made by the Software Director or mentors, especially for code cleanup or changes which do not impact hardware.
-- `nightly`: This is the test and tuning branch. It's where we primarly deploy from on the robot during meetings, and is kept up to date with `main`.
+- `main`: This branch contains only code tested on the actual robot. It's where we merge our changes after testing.
+- `dev`: This is the integration branch. This is where code comes together for testing on the robot.
 - `yourname/feature`: Your work. Example: `alex/shooter`, `maya/auto`, `sam/vision`
 
 <details>
@@ -36,9 +36,9 @@ your branch:               E --- F
 
 ## Daily Workflow
 ### Create your feature branch
-When you start work on anything, first, we branch off of the `main` branch.
+When you start work on anything, first, we branch off of the `dev` branch.
 ```bash
-git switch main                        # change into the main branch
+git switch dev                        # change into the dev branch
 git pull                              # get all latest changes
 git switch -c yourname/what-youre-doing # create your feature branch
 ```
@@ -55,7 +55,8 @@ Push early and often! This backs up your work and shows your build status on Git
 
 ### When Your Code Works (it builds and does what you want)
 1. Push your latest changes
-2. Go to GitHub and open a Pull Request to `main` (or `nightly` in cases we plan on testing it that night)
+2. Go to GitHub and open a Pull Request to `dev`
+   <img width="710" height="282" alt="CleanShot 2025-11-17 at 16 37 00@2x" src="https://github.com/user-attachments/assets/a2fa58bc-6b82-4817-9fa8-6a94350e29d3" />
 3. Ask for a review in Basecamp
 4. Merge it once approved
 
@@ -68,17 +69,17 @@ Push early and often! This backs up your work and shows your build status on Git
 - **Reviewers**: Feel free anyone on the team, including the Software Director and Software Mentors.
 
 ## Workflow when going to competitions
-1. Open a competition specific branch following the pattern `event-{eventCode}`, for example `event-2026marea`
-   - This ensures that we commit on every deploy
-2. When we're back from competition, merge changes into `main`
+1. Open a competition specific branch following the pattern `event-{eventName}`, for example `event-botb`
+   - This ensures that we push on every deploy
+2. When we're back from competition, merge changes into `dev` and `main`
 
 ## Common Commands Cheat Sheet
 ```bash
 # See all branches
 git branch -a
 
-# Switch to main and get latest
-git switch main
+# Switch to dev and get latest
+git switch dev
 git pull
 
 # Create new branch
@@ -89,16 +90,16 @@ git add .
 git commit -m "Your message"
 git push
 
-# Get latest changes from main into your branch
+# Get latest changes from dev into your branch
 git switch yourname-feature
-git pull origin main
+git pull origin dev
 ```
 
 ## Merge Conflicts?
 
 If you get conflicts when merging:
 1. Don't panic, this is normal
-2. Pull from main into your branch: `git pull origin main`
+2. Pull from dev into your branch: `git pull origin dev`
 3. Fix the conflicts - VSCode shows them clearly
 4. Make sure that it builds and test that it still works
 5. Commit and push
@@ -107,8 +108,8 @@ Ask a mentor if you're stuck!
 
 ## Quick Troubleshooting
 
-**"My branch is behind main"**
-→ `git pull origin main` while on your branch
+**"My branch is behind dev"**
+→ `git pull origin dev` while on your branch
 
 **"I forgot what branch I'm on"**
 → `git branch` (the one with `*` is current)
