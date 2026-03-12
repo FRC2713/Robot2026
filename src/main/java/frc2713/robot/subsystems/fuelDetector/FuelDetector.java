@@ -11,7 +11,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc2713.robot.RobotContainer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Optional;
+
 import org.littletonrobotics.junction.Logger;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class FuelDetector extends SubsystemBase {
   public final double fuelChanceThreshold = 0.8; // Percentage in decimal format
@@ -56,6 +59,7 @@ public class FuelDetector extends SubsystemBase {
             .subscribe(0);
   }
 
+  // Gets heading as a Rotation2d
   public Rotation2d getHeading() {
     if (useLegacyDetection) {
       return getRotation2D(getDataFromNT(), isLimelights);
@@ -68,6 +72,15 @@ public class FuelDetector extends SubsystemBase {
     Rotation2d heading = getHeading();
     if (fieldRelative) {
       return RobotContainer.drive.getPose().getRotation().plus(heading);
+    } else {
+      return heading;
+    }
+  }
+
+  public Rotation2d getHeading(Optional<Alliance> alliance) {
+    Rotation2d heading = getHeading(true);
+    if(alliance.isPresent() && alliance.get() == Alliance.Red) {
+      return heading.rotateBy(new Rotation2d(Math.PI));
     } else {
       return heading;
     }
