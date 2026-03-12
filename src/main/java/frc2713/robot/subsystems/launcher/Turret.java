@@ -54,6 +54,9 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
       final CanCoderIO cancoderIO) {
     super(config, new MotorInputsAutoLogged(), turretMotorIO, cancoderInputs, cancoderIO);
     if (Constants.enableOTFFeatures) setDefaultCommand(otfCommand());
+
+    // initalize to the inital transform
+    this.io.setCurrentPosition(config.initialTransform.getRotation().getMeasureZ());
   }
 
   @AutoLogOutput
