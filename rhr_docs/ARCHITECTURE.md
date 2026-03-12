@@ -1,25 +1,16 @@
-# Subsystems & Mechanisms
+# Subsystems
 
-Subsystem folders should contain related mechanisms. For example, an `intake` subsystem folder could contain a four-bar mechanism and a roller mechanism.
-> [!NOTE]
-> Note the difference in terminology between WPILib subsystems and as they are documented here and by the CAD team. We group different WPILib "subsystems" for simplicity. All mechanisms should still at some point extend WPILib's `SubsystemBase`.
+* Subsystems should contain an action. i.e. one subsystem for the pivot or intake rollers where on, one for the intake rollers
 
-## Layout
-```
-[subsystem] # The subsystem foloder
-├── [Subsystem]Constants.java # Constants for the mechanisms.
-├── [Subsystem][Mechanism_1].java # Mechanism
-├── [Subsystem][Mechanism_1]IO[Implementation].java # Mechanism IO implementation (if applicable)
-└── [Subsystem][Mechanism_2].java # Another mechanism
-```
-For example,
-```
-intake
-├── IntakeConstants.java
-├── IntakeExtension.java
-├── IntakeExtensionIOTalonFX.java
-└── IntakeRoller.java
-```
+## Folders
+
+* \[SUBSYSTEM\_NAME\]
+* \[SUBSYSTEM\_NAME\]IO
+  *
+* \[SUBSYSTEM\_NAME\]IO\[IO\_IMPLEMENTATION\]
+* \[SUBSYSTEM\_NAME\]Constants
+  * Whenever possible extend generic
+  * [See general constant rules](#constants)
 
 ## Command Patterns
 
@@ -28,7 +19,7 @@ intake
   * more complex commands are defined in their own .java in \[SUBSYSTEM\_NAME\]Commands
   * subsystems that are defined as state machines have commands handle transitioning from state to state ([example](https://github.com/Mechanical-Advantage/RobotCode2026Public/blob/main/src/main/java/org/littletonrobotics/frc2026/subsystems/intake/Intake.java))
 
-# Constants
+# Constants {#constants}
 
 * Use SI WPI units wherever possible
 * No “k” prefix

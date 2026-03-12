@@ -1,21 +1,23 @@
 package frc2713.robot.subsystems.launcher;
 
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Pounds;
+
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.Time;
 import frc2713.robot.FieldConstants;
-import frc2713.robot.GamePieceConstants;
 import frc2713.robot.util.BallTrajectorySim.Ball;
 import java.util.ArrayList;
 
 public class FuelTrajectories {
   private ArrayList<Ball> fuel = new ArrayList<>();
-  private static Mass fuelMass = GamePieceConstants.Fuel.mass;
-  private static Distance fuelRadius = GamePieceConstants.Fuel.radius;
-  private static double fuelDragCoeff = GamePieceConstants.Fuel.dragCoeff;
-  private static double fuelLiftCoeff = GamePieceConstants.Fuel.liftCoeff;
+  private static Mass fuelMass = Pounds.of(0.5);
+  private static Distance fuelRadius = Inches.of(5.91 / 2);
+  private static double fuelDragCoeff = 0.47;
+  private static double fuelLiftCoeff = 0.2;
 
   public FuelTrajectories() {}
 

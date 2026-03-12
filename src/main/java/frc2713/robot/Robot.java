@@ -7,9 +7,9 @@
 
 package frc2713.robot;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.generated.BuildConstants;
 import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
 import org.littletonrobotics.junction.LogFileUtil;
@@ -87,19 +87,32 @@ public class Robot extends LoggedRobot {
     // This must be called from the robot's periodic block in order for anything in
     // the Command-based framework to work.
     CommandScheduler.getInstance().run();
+    Logger.recordOutput("matchData/timeLeftInShift", RobotContainer.getTimeLeftInShift());
+    Logger.recordOutput("matchData/currentMatchPhase", RobotContainer.getCurrentPhase());
+    Logger.recordOutput("matchData/ourHubActive", RobotContainer.ourHubActive());
+    String autoWinner = RobotContainer.whoWonAuto();
+    Logger.recordOutput("matchData/whoWonAuto", autoWinner);
 
-    // FieldConstants.HoodRetractionZones.logZones();
+    Logger.recordOutput(
+        "matchData/FirstActive",
+        autoWinner.equals("R") ? "0000FF" : autoWinner.equals("B") ? "FF0000" : "000000");
 
-    // Elastic
-    // ShiftManager.periodic();
+    Logger.recordOutput(
+        "matchData/autoWinnerColor",
+        "#" + (autoWinner.equals("B") ? "0000FF" : autoWinner.equals("R") ? "FF0000" : "000000"));
+    Logger.recordOutput("matchData/time", DriverStation.getMatchTime());
 
+    RobotContainer.getAndPublishFuelHeading();
     // Return to non-RT thread priority (do not modify the first argument)
     // Threads.setCurrentThreadPriority(false, 10);
   }
 
   /** This function is called once when the robot is disabled. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    LaunchingSolutionManager.setFieldGoal(
+        FieldConstants.Hub.innerCenterPoint, FieldConstants.Hub.topCenterPoint);
+  }
 
   /** This function is called periodically when disabled. */
   @Override
@@ -109,9 +122,6 @@ public class Robot extends LoggedRobot {
     if (visionPose.isPresent()) {
       RobotContainer.drive.setPose(visionPose.get());
     }
-
-    LaunchingSolutionManager.currentGoal =
-        AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint);
   }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
@@ -139,7 +149,6 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
-    FieldConstants.HoodRetractionZones.logZones();
   }
 
   /** This function is called periodically during operator control. */

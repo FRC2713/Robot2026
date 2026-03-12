@@ -4,24 +4,23 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static frc2713.robot.subsystems.launcher.LauncherConstants.Hood.FORWARD_LIMIT_DEGREES;
+import static frc2713.robot.subsystems.launcher.LauncherConstants.Hood.REVERSE_LIMIT_DEGREES;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc2713.lib.io.ArticulatedComponent;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
-import frc2713.robot.Constants;
 import frc2713.robot.FieldConstants;
-import frc2713.robot.RobotContainer;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -31,34 +30,40 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
 
   public Hood(final TalonFXSubsystemConfig config, final MotorIO launcherMotorIO) {
     super(config, new MotorInputsAutoLogged(), launcherMotorIO);
-    if (Constants.enableOTFFeatures)
-      setDefaultCommand(
-          autoRetractCommand(RobotContainer.drive::getPose, otfAngSupplier)
-              .withName("OTF Lock AutoRetract"));
   }
 
   public Command setAngleCommand(Supplier<Angle> desiredAngle) {
-    return motionMagicSetpointCommand(desiredAngle);
+    return motionMagicSetpointCommand(
+        () -> convertSubsystemPositionToMotorPosition(desiredAngle.get()));
+  }
+
+  public Command setAngleStopAtBounds(Supplier<Angle> desiredAngle) {
+    return motionMagicSetpointCommand(
+        () -> {
+          Angle requested = desiredAngle.get();
+          Angle lowerBound = LauncherConstants.Hood.retractedPosition;
+          Angle upperBound = LauncherConstants.Hood.extendedPosition;
+
+          // Clamp the requested angle between bounds
+          Angle clamped =
+              Degrees.of(
+                  MathUtil.clamp(
+                      requested.in(Degrees), lowerBound.in(Degrees), upperBound.in(Degrees)));
+
+          return convertSubsystemPositionToMotorPosition(clamped);
+        });
   }
 
   public Command retract() {
     return setAngleCommand(() -> LauncherConstants.Hood.retractedPosition);
   }
 
-  public Command dumbCommand() {
-    return setAngleCommand(LauncherConstants.Hood.staticTowerAngle);
-  }
-
   public Command hubCommand() {
-    return setAngleCommand(LauncherConstants.Hood.staticHubAngle);
+    return setAngleCommand(() -> LauncherConstants.Hood.staticHubAngle);
   }
 
   public Command otfCommand() {
     return setAngleCommand(otfAngSupplier);
-  }
-
-  public Command setTargetPositionToCurrent() {
-    return new InstantCommand(() -> setCurrentPosition(getCurrentPosition()));
   }
 
   /**
@@ -88,23 +93,13 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
         });
   }
 
-  @AutoLogOutput
-  public boolean inRetractionZone(Supplier<Pose2d> poseSupplier) {
-    return !disableDucking
-        && FieldConstants.HoodRetractionZones.isInRetractionZone(poseSupplier.get());
-  }
-
-  public Angle getCurrentPosition() {
-    return this.inputs.position;
-  }
-
   @AutoLogOutput public boolean ducking = false;
-  @AutoLogOutput public boolean disableDucking = true;
 
   public final Supplier<Angle> otfAngSupplier =
       () -> {
         var solution = LaunchingSolutionManager.getInstance().getSolution();
-        Distance toGoal = this.getDistance2d(LaunchingSolutionManager.currentGoal);
+        Distance toGoal =
+            this.getDistance2d(LaunchingSolutionManager.currentGoal.positionalTarget());
         boolean launchSolutionValid = solution.isValid();
 
         Angle aimAngle;
@@ -126,11 +121,53 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
         return aimAngle;
       };
 
+  /**
+   * Like {@link #setAngleStopAtBounds}, but allows scaling the velocity and acceleration based on
+   * an input (e.g., trigger pressure).
+   *
+   * @param desiredAngle The desired angle supplier
+   * @param velocityScale Scale factor for velocity and acceleration (0.0 to 1.0)
+   */
+  public Command setAngleStopAtBounds(
+      Supplier<Angle> desiredAngle, Supplier<Double> velocityScale) {
+    return motionMagicSetpointCommand(
+        () -> {
+          double commandedDegrees = desiredAngle.get().in(Degrees);
+
+          // Clamp directly to turret limits instead of wrapping
+          double clampedDegrees =
+              MathUtil.clamp(commandedDegrees, REVERSE_LIMIT_DEGREES, FORWARD_LIMIT_DEGREES);
+
+          Logger.recordOutput(pb.makePath("setpoint", "commandedDegrees"), commandedDegrees);
+          Logger.recordOutput(pb.makePath("setpoint", "clampedDegrees"), clampedDegrees);
+
+          return convertSubsystemPositionToMotorPosition(Degrees.of(clampedDegrees));
+        },
+        () -> {
+          var mmConfig = new com.ctre.phoenix6.configs.MotionMagicConfigs();
+          double scale = MathUtil.clamp(velocityScale.get(), 0.0, 1.0);
+
+          // Scale velocity and acceleration based on input
+          mmConfig.MotionMagicCruiseVelocity =
+              config.fxConfig.MotionMagic.MotionMagicCruiseVelocity * scale;
+          mmConfig.MotionMagicAcceleration =
+              config.fxConfig.MotionMagic.MotionMagicAcceleration * scale;
+          mmConfig.MotionMagicJerk = config.fxConfig.MotionMagic.MotionMagicJerk;
+
+          Logger.recordOutput(pb.makePath("setpoint", "velocityScale"), scale);
+
+          return mmConfig;
+        },
+        0);
+  }
+
+  @AutoLogOutput
+  public boolean atTarget() {
+    return this.inputs.isMotionMagicAtTarget;
+  }
+
   @Override
   public void periodic() {
-    if (DriverStation.isDisabled()) {
-      setAngleCommand(() -> getCurrentPosition());
-    }
     super.periodic();
   }
 

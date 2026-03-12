@@ -5,9 +5,7 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.InchesPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -25,11 +23,10 @@ import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.MotorFollowerSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.RobotTime;
-import frc2713.robot.Constants;
-import frc2713.robot.Robot;
 import frc2713.robot.subsystems.launcher.LaunchingSolutionManager.LaunchSolution;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, MotorIO>
@@ -37,31 +34,25 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
 
   private FuelTrajectories fuelTrajectories = new FuelTrajectories();
   private Time lastUpdateTime = RobotTime.getTimestamp();
-  private Time lastLaunchTime = RobotTime.getTimestamp();
 
   public Flywheels(
-      final TalonFXSubsystemConfig leaderConfig,
-      final TalonFXSubsystemConfig followerConfig,
-      final MotorIO leaderLauncherMotorIO,
-      final MotorIO followerLauncherMotorIO) {
+      final TalonFXSubsystemConfig leftConfig,
+      final TalonFXSubsystemConfig rightConfig,
+      final MotorIO leftLauncherMotorIO,
+      final MotorIO rightLauncherMotorIO) {
     super(
         "Flywheels",
-        leaderConfig,
-        followerConfig,
+        leftConfig,
+        rightConfig,
         new MotorInputsAutoLogged(),
         new MotorInputsAutoLogged(),
-        leaderLauncherMotorIO,
-        followerLauncherMotorIO);
+        leftLauncherMotorIO,
+        rightLauncherMotorIO);
     this.fuelTrajectories = new FuelTrajectories();
-    if (Constants.enableOTFFeatures) setDefaultCommand(idleSpeedCommand());
   }
 
   public Command setVelocity(Supplier<AngularVelocity> desiredVelocity) {
     return velocitySetpointCommand(desiredVelocity);
-  }
-
-  public Command setVelocityUntilTarget(Supplier<AngularVelocity> desiredVelocity) {
-    return velocitySetpointUntilOnTargetCommand(desiredVelocity);
   }
 
   public Command stop() {
@@ -69,11 +60,12 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   }
 
   public Command hubCommand() {
-    return setVelocity(LauncherConstants.Flywheels.staticHubVelocity);
+    return setVelocity(() -> LauncherConstants.Flywheels.staticHubVelocity);
   }
 
+  /** Command to continuously track the on-the-fly flywheel velocity */
   public Command idleSpeedCommand() {
-    return setVelocity(LauncherConstants.Flywheels.idleVelocity);
+    return setVelocity(() -> LauncherConstants.Flywheels.idleVelocity);
   }
 
   /**
@@ -83,17 +75,34 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   public final Supplier<AngularVelocity> otfVelocitySupplier =
       () -> {
         var solution = LaunchingSolutionManager.getInstance().getSolution();
+        Distance toGoal = this.getDistance2d(LaunchingSolutionManager.currentGoal.flywheelTarget());
+        boolean solutionIsValid = solution.isValid();
 
-        // Convert surface speed to angular velocity: omega = v / r, will switch to a tuned binary
-        // tree
-        // double surfaceSpeedMps = solution.ballSpeedMetersPerSecond();
-        // double wheelRadiusMeters = LauncherConstants.Flywheels.WHEEL_DIAMETER.div(2).in(Meters);
-        // AngularVelocity targetVelocity =
-        //     RotationsPerSecond.of(surfaceSpeedMps / (wheelRadiusMeters * 2 * Math.PI));
+        LinearVelocity targetSurfaceSpeed;
+        if (solutionIsValid) {
+          targetSurfaceSpeed = MetersPerSecond.of(solution.flywheelSpeedMetersPerSecond());
+          Logger.recordOutput(super.pb.makePath("OTF", "response"), "using solution");
+        } else if (solution.effectiveDistanceMeters() <= 0.9) {
+          // invalid bc we're too close
+          Logger.recordOutput(super.pb.makePath("OTF", "response"), "hub shot");
+          targetSurfaceSpeed = FeetPerSecond.of(5);
+        } else {
+          // Fallback to distance-based lookup
+          Logger.recordOutput(super.pb.makePath("OTF", "response"), "lookup map");
+          targetSurfaceSpeed =
+              FeetPerSecond.of(LauncherConstants.Flywheels.velocityMap.get(toGoal.in(Meters)));
+        }
 
+        // Convert surface speed to angular velocity: omega = v / r
+        double wheelRadiusMeters = LauncherConstants.Flywheels.WHEEL_DIAMETER.div(2).in(Meters);
+        double surfaceSpeedMps = targetSurfaceSpeed.in(MetersPerSecond);
         AngularVelocity targetVelocity =
-            RPM.of(LauncherConstants.Flywheels.rpmMap.get(solution.ballSpeedMetersPerSecond()));
-        Logger.recordOutput(pb.makePath("OTF", "targetFlywheelVelocity"), targetVelocity);
+            RotationsPerSecond.of(surfaceSpeedMps / (wheelRadiusMeters * 2 * Math.PI));
+
+        Logger.recordOutput(super.pb.makePath("OTF", "solutionIsValid"), solutionIsValid);
+        Logger.recordOutput(super.pb.makePath("OTF", "distanceToGoal"), toGoal);
+        Logger.recordOutput(super.pb.makePath("OTF", "targetSurfaceSpeed"), targetSurfaceSpeed);
+        Logger.recordOutput(super.pb.makePath("OTF", "targetVelocity"), targetVelocity);
         return targetVelocity;
       };
 
@@ -101,27 +110,38 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
     return setVelocity(otfVelocitySupplier);
   }
 
+  public Command simulateLaunchedFuel(BooleanSupplier isReady) {
+    return Commands.run(
+        () -> {
+          if (isReady.getAsBoolean())
+            this.launchFuel(LaunchingSolutionManager.getInstance().getSolution());
+        });
+  }
+
+  @AutoLogOutput
+  public boolean atTarget() {
+    return Math.abs(this.leftInputs.closedLoopError)
+        <= LauncherConstants.Flywheels.acceptableError.in(RotationsPerSecond);
+  }
+
   @Override
   public void periodic() {
     super.periodic();
 
-    if (Robot.isSimulation()) {
-      // update ball_vector visualization
-      Pose3d globalPose = this.getGlobalPose();
-      Logger.recordOutput(
-          super.pb.makePath("ball_vector"),
-          new Pose3d[] {
-            globalPose,
-            globalPose.plus(new Transform3d(new Translation3d(1, 0, 0), new Rotation3d()))
-          });
+    // update ball_vector visualization
+    Pose3d globalPose = this.getGlobalPose();
+    Logger.recordOutput(
+        super.pb.makePath("ball_vector"),
+        new Pose3d[] {
+          globalPose, globalPose.plus(new Transform3d(new Translation3d(1, 0, 0), new Rotation3d()))
+        });
 
-      // update fuel trajectories physics for balls already in flight
-      Time now = RobotTime.getTimestamp();
-      Time dt = now.minus(lastUpdateTime);
-      fuelTrajectories.update(dt);
-      this.lastUpdateTime = now;
-      Logger.recordOutput(pb.makePath("fuel_trajectories"), fuelTrajectories.getPositions());
-    }
+    // update fuel trajectories physics for balls already in flight
+    Time now = RobotTime.getTimestamp();
+    Time dt = now.minus(lastUpdateTime);
+    fuelTrajectories.update(dt);
+    this.lastUpdateTime = now;
+    Logger.recordOutput(pb.makePath("fuel_trajectories"), fuelTrajectories.getPositions());
   }
 
   @Override
@@ -135,16 +155,16 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   }
 
   public LinearVelocity getSurfaceSpeed() {
-    AngularVelocity wheelSpeed = getLeaderCurrentVelocity();
+    AngularVelocity wheelSpeed = super.getLeftCurrentVelocity();
     Distance wheelDiameter = Inches.of(4);
     Distance wheelCircumference = wheelDiameter.times(Math.PI);
     return InchesPerSecond.of(wheelSpeed.in(RotationsPerSecond) * wheelCircumference.in(Inches));
   }
 
   public LinearVelocity getLaunchVelocity() {
-    Distance toGoal = this.getDistance2d(LaunchingSolutionManager.currentGoal);
+    Distance toGoal = this.getDistance2d(LaunchingSolutionManager.currentGoal.flywheelTarget());
     LinearVelocity vel =
-        FeetPerSecond.of(LauncherConstants.Flywheels.ballVelocityMap.get(toGoal.in(Meters)));
+        FeetPerSecond.of(LauncherConstants.Flywheels.velocityMap.get(toGoal.in(Meters)));
     Logger.recordOutput(pb.makePath("launchVelocity"), vel);
     return vel;
   }
@@ -152,7 +172,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   public LinearVelocity getOnTheFlyLaunchVelocity(LaunchSolution solution) {
 
     if (solution.isValid()) {
-      double targetSpeedMps = solution.ballSpeedMetersPerSecond();
+      double targetSpeedMps = solution.flywheelSpeedMetersPerSecond();
       Logger.recordOutput(super.pb.makePath("launchVelocity"), targetSpeedMps);
       return MetersPerSecond.of(targetSpeedMps);
     }
@@ -179,26 +199,8 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
     return structureVel.plus(launchVelGlobal);
   }
 
-  public Command simulateLaunchFuelCommand(BooleanSupplier isReady) {
-    return Commands.run(
-        () -> {
-          if (isReady.getAsBoolean() && Robot.isSimulation())
-            this.simulateLaunchFuel(LaunchingSolutionManager.getInstance().getSolution());
-        });
-  }
-
-  public void simulateLaunchFuel(LaunchSolution solution) {
-    Time now = RobotTime.getTimestamp();
-    // Enforce max fire rate by checking time since last launch. If we haven't waited long enough,
-    // skip this launch.
-    if (now.minus(lastLaunchTime).in(Seconds)
-        >= (1.0 / LauncherConstants.Flywheels.launchRateFuelPerSecond)) {
-      lastLaunchTime = now;
-
-      this.fuelTrajectories.launch(
-          this.getGlobalPose().getTranslation(),
-          getLaunchVector(solution),
-          RotationsPerSecond.of(0));
-    }
+  public void launchFuel(LaunchSolution solution) {
+    this.fuelTrajectories.launch(
+        this.getGlobalPose().getTranslation(), getLaunchVector(solution), RotationsPerSecond.of(0));
   }
 }

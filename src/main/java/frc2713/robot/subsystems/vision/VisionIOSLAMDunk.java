@@ -7,7 +7,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Quaternion;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.NetworkTable;
@@ -46,25 +45,24 @@ public class VisionIOSLAMDunk implements VisionIO {
     if (poseArray.length > 0) {
       double t = poseArray[0];
 
-      if (lastTimestamp != t && poseArray.length > 8) {
-        inputs.tagCount = (int) poseArray[8];
+      if (lastTimestamp != t && poseArray.length > 7) {
+
         inputs.timestamp = t;
         double latency = Timer.getFPGATimestamp() - t;
         inputs.latency = Seconds.of(latency);
 
         lastTimestamp = t;
-        var pose2 =
+        inputs.pose3d =
             new Pose3d(
                 new Translation3d(poseArray[1], poseArray[2], poseArray[3]),
                 new Rotation3d(
                     new Quaternion(poseArray[4], poseArray[5], poseArray[6], poseArray[7])));
 
-        pose2 =
-            pose2.transformBy(
-                new Transform3d(new Translation3d(), new Rotation3d(0, 0, Math.PI / 2)));
-        inputs.pose3d = pose2;
-
         inputs.pose = inputs.pose3d.toPose2d();
+
+        // pose =
+        //     pose.transformBy(
+        //         new Transform3d(new Translation3d(), new Rotation3d(0, 0, Math.PI / 2)));
 
         if (latency < 0) {
           inputs.reasoning = "Pose from the future!";
@@ -93,18 +91,6 @@ public class VisionIOSLAMDunk implements VisionIO {
           return;
         }
 
-        if (inputs.tagCount < 2) {
-          inputs.reasoning = "Valid. Few tags visible";
-          inputs.rotationStdDev =
-              VisionConstants.POSE_ESTIMATOR_STATE_LOW_TAGS_STDEVS.rotationalStDev();
-          inputs.translationStdDev =
-              VisionConstants.POSE_ESTIMATOR_STATE_LOW_TAGS_STDEVS.translationalStDev();
-          inputs.applying = true;
-          return;
-        }
-
-        inputs.translationStdDev = VisionConstants.POSE_ESTIMATOR_STATE_STDEVS.translationalStDev();
-        inputs.rotationStdDev = VisionConstants.POSE_ESTIMATOR_STATE_STDEVS.rotationalStDev();
         inputs.applying = true;
         inputs.reasoning = "Valid pose";
 
@@ -112,7 +98,7 @@ public class VisionIOSLAMDunk implements VisionIO {
       }
     }
 
-    if (poseArray.length <= 8) {
+    if (poseArray.length <= 7) {
       inputs.reasoning = "No pose data available";
     } else {
       inputs.reasoning = "Stale timestamp";
