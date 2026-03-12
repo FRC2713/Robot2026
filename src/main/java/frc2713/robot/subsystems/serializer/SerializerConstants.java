@@ -14,6 +14,7 @@ import com.ctre.phoenix6.sim.ChassisReference;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
 import frc2713.lib.drivers.CANDeviceId;
@@ -28,6 +29,14 @@ public final class SerializerConstants {
 
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
     public static double gearRatio = (44.0 / 8.0) * (114.0 / 12.0);
+
+    public static final InterpolatingDoubleTreeMap otfSpeeds = new InterpolatingDoubleTreeMap();
+
+    static {
+      // Distance (m), RPM
+      otfSpeeds.put(2.11, 80.);
+      otfSpeeds.put(6.44, 30.);
+    }
 
     static {
       config.name = "Dye Rotor";

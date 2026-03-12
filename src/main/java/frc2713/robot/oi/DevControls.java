@@ -148,8 +148,23 @@ public class DevControls {
 
     // controller.b().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleTwo));
 
-    controller.a().onTrue(feeder.feedShooter()).onFalse(feeder.stop());
+    controller
+        .a()
+        .onTrue(
+            Commands.parallel(
+                // turret.otfCommand(),
+                hood.setAngleCommand(LauncherConstants.Hood.staticHubAngle),
+                flywheels.setVelocity(LauncherConstants.Flywheels.PIDTest),
+                feeder.feedWhenReady(flywheels::atTarget),
+                dyeRotor.feedWhenReady(flywheels::atTarget)))
+        .onFalse(Commands.parallel(feeder.stop(), dyeRotor.stop(), flywheels.stop()));
 
+    controller
+        .b()
+        .whileTrue(
+            GameCommandGroups.Launching.otfShotHoodProtect(
+                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
+        .whileFalse(GameCommandGroups.Launching.stopShooting(drive, feeder, dyeRotor, flywheels));
     // Serializer controls
 
     // A button - index fuel

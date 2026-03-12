@@ -29,7 +29,6 @@ import frc2713.lib.subsystem.MotorCancoderSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.CrtSolver;
 import frc2713.lib.util.Util;
-import frc2713.robot.Constants;
 import frc2713.robot.RobotContainer;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -53,10 +52,7 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
       final CanCoderInputsAutoLogged cancoderInputs,
       final CanCoderIO cancoderIO) {
     super(config, new MotorInputsAutoLogged(), turretMotorIO, cancoderInputs, cancoderIO);
-    if (Constants.enableOTFFeatures) setDefaultCommand(otfCommand());
-
-    // initalize to the inital transform
-    this.io.setCurrentPosition(config.initialTransform.getRotation().getMeasureZ());
+    setDefaultCommand(otfCommand());
   }
 
   @AutoLogOutput
