@@ -32,6 +32,8 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+
 public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, MotorIO>
     implements ArticulatedComponent {
 
@@ -76,29 +78,9 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
     return setVelocity(LauncherConstants.Flywheels.idleVelocity);
   }
 
-  /**
-   * Supplier that continuously calculates the on-the-fly flywheel velocity. Uses the launch
-   * solution if valid, otherwise falls back to distance-based lookup.
-   */
-  public final Supplier<AngularVelocity> otfVelocitySupplier =
-      () -> {
-        var solution = LaunchingSolutionManager.getInstance().getSolution();
-
-        // Convert surface speed to angular velocity: omega = v / r, will switch to a tuned binary
-        // tree
-        // double surfaceSpeedMps = solution.ballSpeedMetersPerSecond();
-        // double wheelRadiusMeters = LauncherConstants.Flywheels.WHEEL_DIAMETER.div(2).in(Meters);
-        // AngularVelocity targetVelocity =
-        //     RotationsPerSecond.of(surfaceSpeedMps / (wheelRadiusMeters * 2 * Math.PI));
-
-        AngularVelocity targetVelocity = RPM.of(solution.ballSpeedMetersPerSecond());
-        // RPM.of(LauncherConstants.Flywheels.rpmMap.get(solution.ballSpeedMetersPerSecond()));
-        Logger.recordOutput(pb.makePath("OTF", "targetFlywheelVelocity"), targetVelocity);
-        return targetVelocity;
-      };
-
   public Command otfCommand() {
-    return setVelocity(otfVelocitySupplier);
+    return setVelocity(
+        () -> RPM.of(LaunchingSolutionManager.getInstance().getSolution().flywheelsRPM()));
   }
 
   @Override
@@ -152,11 +134,12 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   public LinearVelocity getOnTheFlyLaunchVelocity(LaunchSolution solution) {
 
     if (solution.isValid()) {
-      double targetSpeedMps = solution.ballSpeedMetersPerSecond();
-      Logger.recordOutput(super.pb.makePath("launchVelocity"), targetSpeedMps);
-      return MetersPerSecond.of(targetSpeedMps);
+      LinearVelocity targetSpeed =
+          FeetPerSecond.of(LauncherConstants.Flywheels.ballToFlywheelMap.reverseGet(solution.flywheelsRPM()));
+      Logger.recordOutput(super.pb.makePath("launchVelocity"), targetSpeed);
+      return targetSpeed;
     }
-    return MetersPerSecond.of(0);
+    return FeetPerSecond.of(0);
   }
 
   public Translation3d getLaunchVector(LaunchSolution solution) {

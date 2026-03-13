@@ -235,7 +235,7 @@ public final class GameCommandGroups {
             RobotContainer.drive,
             xSupplier,
             ySupplier,
-            () -> LaunchingSolutionManager.storedIntakeRotation)
-        .withName("Intake Align");
+            () -> LaunchingSolutionManager.ZoneSelectionHelpers.storedIntakeRotation)
+        .withName("Drive Intake Align");
   }
 }
