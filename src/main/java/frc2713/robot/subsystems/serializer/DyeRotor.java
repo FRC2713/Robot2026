@@ -1,5 +1,6 @@
 package frc2713.robot.subsystems.serializer;
 
+import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
@@ -15,8 +16,10 @@ import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
+import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 
 public class DyeRotor extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
     implements ArticulatedComponent {
@@ -33,17 +36,27 @@ public class DyeRotor extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
     return setVelocity(SerializerConstants.DyeRotor.indexingSpeed);
   }
 
+  @AutoLogOutput
+  public AngularVelocity dynamicIndexSpeed() {
+    return RPM.of(
+        SerializerConstants.DyeRotor.otfSpeeds.get(
+            LaunchingSolutionManager.getInstance().getSolution().effectiveDistanceMeters()));
+  }
+
+  public Command dynamicIndex() {
+    return setVelocity(this::dynamicIndexSpeed);
+  }
+
   public Command stirFuel() {
     return setVelocity(SerializerConstants.DyeRotor.stirSpeed);
   }
 
+  public Command dynamicFeedWhenReady(BooleanSupplier isReady) {
+    return Commands.sequence(Commands.waitUntil(isReady), dynamicIndex());
+  }
+
   public Command feedWhenReady(BooleanSupplier isReady) {
     return Commands.sequence(Commands.waitUntil(isReady), indexFuel());
-    // return setVelocity(
-    //     () ->
-    //         isReady.getAsBoolean()
-    //             ? SerializerConstants.DyeRotor.indexingSpeed.get()
-    //             : RotationsPerSecond.of(0));
   }
 
   public Command outtakeFuel() {

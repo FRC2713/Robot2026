@@ -14,6 +14,7 @@ import com.ctre.phoenix6.sim.ChassisReference;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
 import frc2713.lib.drivers.CANDeviceId;
@@ -28,6 +29,14 @@ public final class SerializerConstants {
 
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
     public static double gearRatio = (44.0 / 8.0) * (114.0 / 12.0);
+
+    public static final InterpolatingDoubleTreeMap otfSpeeds = new InterpolatingDoubleTreeMap();
+
+    static {
+      // Distance (m), RPM
+      otfSpeeds.put(2.11, 80.);
+      otfSpeeds.put(6.44, 30.);
+    }
 
     static {
       config.name = "Dye Rotor";
@@ -85,13 +94,15 @@ public final class SerializerConstants {
       config.talonCANID = new CANDeviceId(44, "canivore"); // Example CAN ID, replace with actual ID
       config.useFOC = false;
       config.motor = DCMotor.getKrakenX60(1);
+      config.tunable = true;
 
       // Velocity PID gains for VelocityVoltage control
       // Units: kP/kV/kS are in volts
-      config.fxConfig.Slot0.kP = 0.11; // Volts per rps of error
+      config.fxConfig.Slot0.kP = Util.modeDependentValue(0.5, 0.11); // Volts per rps of error
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = 0.0;
-      config.fxConfig.Slot0.kS = 0.1; // Volts to overcome static friction
+      config.fxConfig.Slot0.kS =
+          Util.modeDependentValue(0.275, 0.1); // Volts to overcome static friction
       config.fxConfig.Slot0.kV = 0.12 * gearRatio; // Volts per rps (feedforward)
 
       config.fxConfig.CurrentLimits =
@@ -111,11 +122,10 @@ public final class SerializerConstants {
     public static AngularVelocity freeSpeed =
         RadiansPerSecond.of(config.motor.freeSpeedRadPerSec).div(gearRatio);
 
-    // TODO: Change these to RPM
     public static LoggedTunableMeasure<AngularVelocity> shootingSpeed =
-        new LoggedTunableMeasure<AngularVelocity>("Feeder/Speed", RPM.of(6000));
+        new LoggedTunableMeasure<AngularVelocity>("Feeder/Speed", RPM.of(freeSpeed.in(RPM)));
 
     public static LoggedTunableMeasure<AngularVelocity> unjammingSpeed =
-        new LoggedTunableMeasure<AngularVelocity>("Feeder/UnJamming Speed", RPM.of(6000));
+        new LoggedTunableMeasure<AngularVelocity>("Feeder/UnJamming Speed", RPM.of(2000));
   }
 }

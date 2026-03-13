@@ -29,7 +29,6 @@ import frc2713.lib.subsystem.MotorCancoderSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.CrtSolver;
 import frc2713.lib.util.Util;
-import frc2713.robot.Constants;
 import frc2713.robot.RobotContainer;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -53,7 +52,7 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
       final CanCoderInputsAutoLogged cancoderInputs,
       final CanCoderIO cancoderIO) {
     super(config, new MotorInputsAutoLogged(), turretMotorIO, cancoderInputs, cancoderIO);
-    if (Constants.enableOTFFeatures) setDefaultCommand(otfCommand());
+    setDefaultCommand(otfCommand());
   }
 
   @AutoLogOutput
@@ -208,7 +207,7 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
           targetAngle = inputs.position;
         }
 
-        targetAngle = convertToClosestBoundedTurretAngleDegrees(targetAngle, inputs.position);
+        // targetAngle = convertToClosestBoundedTurretAngleDegrees(targetAngle, inputs.position);
         Logger.recordOutput(super.pb.makePath("OTF", "solutionIsValid"), solution.isValid());
         Logger.recordOutput(pb.makePath("OTF", "targetAngleDegrees"), targetAngle.in(Degrees));
         return targetAngle;
@@ -225,7 +224,7 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
       };
 
   public Command otfCommand() {
-    return setAngle(otfAngleSupplier);
+    return setAngleStopAtBounds(otfAngleSupplier);
   }
 
   public Command hubCommand(Supplier<Pose2d> robotPose) {
@@ -235,9 +234,9 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
   @Override
   public void initialize() {
 
-    this.io.setCurrentPosition(
-        getTurretPositionFromEncoders(
-            this.inputs.rawRotorPosition, this.cancoderInputs.absolutePosition));
+    // this.io.setCurrentPosition(
+    //     getTurretPositionFromEncoders(
+    //         this.inputs.rawRotorPosition, this.cancoderInputs.absolutePosition));
     super.initialize();
   }
 

@@ -40,8 +40,8 @@ public final class LauncherConstants {
     public static Angle staticHubAngle = Degrees.of(0);
 
     // Turret rotation limits
-    public static final double FORWARD_LIMIT_DEGREES = 15.0;
-    public static final double REVERSE_LIMIT_DEGREES = -365.0;
+    public static final double FORWARD_LIMIT_DEGREES = 90.0;
+    public static final double REVERSE_LIMIT_DEGREES = -90.0;
 
     public static final Angle forwardSoftLimit = Degrees.of(FORWARD_LIMIT_DEGREES);
     public static final Angle reverseSoftLimit = Degrees.of(REVERSE_LIMIT_DEGREES);
@@ -107,7 +107,7 @@ public final class LauncherConstants {
                   Inches.of(0.5).in(Meters),
                   Inches.of(0.5).in(Meters),
                   Inches.of(18.484119).in(Meters)),
-              new Rotation3d(0, 0, 0));
+              new Rotation3d(0, 0, Math.PI));
     }
 
     static {
@@ -140,7 +140,7 @@ public final class LauncherConstants {
     static {
       leaderConfig.name = "Flywheels";
       leaderConfig.talonCANID = new CANDeviceId(50, "canivore");
-      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(0.85, 3.5);
+      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(30., 3.5);
       leaderConfig.fxConfig.Slot0.kI = 0.0;
       leaderConfig.fxConfig.Slot0.kD = 0.004;
       leaderConfig.fxConfig.Slot0.kS = Util.modeDependentValue(0.15, 2.0);
@@ -154,6 +154,7 @@ public final class LauncherConstants {
       leaderConfig.unitToRotorRatio = gearRatio; // 1.33:1 reduction from motor to flywheel
       leaderConfig.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
       leaderConfig.fxConfig.Voltage.PeakReverseVoltage = 0;
+      leaderConfig.fxConfig.TorqueCurrent.PeakReverseTorqueCurrent = 0;
       leaderConfig.momentOfInertia = flywhMomentOfInertia.times(0.5);
       leaderConfig.useFOC = false; // FOC makes the feedfowrward term units weird
       leaderConfig.tunable = true;
@@ -178,6 +179,7 @@ public final class LauncherConstants {
             new Rotation3d(0, Degrees.of(-90).in(Radians), 0));
 
     public static InterpolatingDoubleTreeMap ballVelocityMap = new InterpolatingDoubleTreeMap();
+    public static InterpolatingDoubleTreeMap RPMVelocityMap = new InterpolatingDoubleTreeMap();
     public static InterpolatingDoubleTreeMap ballVelocityAZMap = new InterpolatingDoubleTreeMap();
 
     public static InterpolatingDoubleTreeMap rpmMap = new InterpolatingDoubleTreeMap();
@@ -192,29 +194,35 @@ public final class LauncherConstants {
 
     static {
       // Distance (m) -> Ball Velocity (ft/s)
-      ballVelocityMap.put(1.0, 20.0);
-      ballVelocityMap.put(1.5, 20.0);
-      ballVelocityMap.put(2.5, 22.0);
-      ballVelocityMap.put(3.2, 24.0);
-      ballVelocityMap.put(4.0, 28.0);
-      ballVelocityMap.put(5.17, 29.0);
-      ballVelocityMap.put(5.4, 30.0);
+      ballVelocityMap.put(2.11, 19.19);
+      ballVelocityMap.put(6.44, 22.07);
+      //   ballVelocityMap.put(1.0, 20.0);
+      //   ballVelocityMap.put(1.5, 20.0);
+      //   ballVelocityMap.put(2.5, 22.0);
+      //   ballVelocityMap.put(3.2, 24.0);
+      //   ballVelocityMap.put(4.0, 28.0);
+      //   ballVelocityMap.put(5.17, 29.0);
+      //   ballVelocityMap.put(5.4, 30.0);
 
-      ballVelocityAZMap.put(1.0, 20.0);
-      ballVelocityAZMap.put(1.5, 20.0);
-      ballVelocityAZMap.put(2.5, 22.0);
-      ballVelocityAZMap.put(3.2, 23.0);
-      ballVelocityAZMap.put(4.0, 26.0);
-      ballVelocityAZMap.put(5.17, 29.0);
-      ballVelocityAZMap.put(5.4, 30.0);
+      RPMVelocityMap.put(2.11, 2713.);
+      RPMVelocityMap.put(6.44, 3500.);
+
+      //   ballVelocityAZMap.put(1.0, 20.0);
+      //   ballVelocityAZMap.put(1.5, 20.0);
+      //   ballVelocityAZMap.put(2.5, 22.0);
+      //   ballVelocityAZMap.put(3.2, 23.0);
+      //   ballVelocityAZMap.put(4.0, 26.0);
+      //   ballVelocityAZMap.put(5.17, 29.0);
+      //   ballVelocityAZMap.put(5.4, 30.0);
     }
 
     static {
       // Ball Velocity (ft/s) -> RPM (rpm)
-      rpmMap.put(30.0, 4500.0);
-      rpmMap.put(25.0, 3500.0);
-      rpmMap.put(23.0, 3200.0);
-      rpmMap.put(20.0, 2750.0);
+      rpmMap.put(17.69, 2500.);
+      rpmMap.put(20.19, 3000.);
+      rpmMap.put(22.07, 3500.);
+      rpmMap.put(24.67, 4000.);
+      rpmMap.put(25.52, 4500.);
     }
 
     public static LoggedTunableMeasure<AngularVelocity> idleVelocity =
@@ -240,6 +248,7 @@ public final class LauncherConstants {
     public static double gearRatio = ((20 / 8.0) * (30.0 / 13.0) * (146.0 / 10.0));
 
     public static final Angle retractedPosition = Degrees.of(0);
+    public static final Angle startingOffset = Degrees.of(0.5);
 
     static {
       config.name = "Hood";

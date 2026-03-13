@@ -29,6 +29,11 @@ public class IntakeExtension
   public IntakeExtension(
       final TalonFXSubsystemConfig config, final IntakeExtensionIO intakeExtensionMotorIO) {
     super(config, new IntakeExtensionInputsAutoLogged(), intakeExtensionMotorIO);
+
+    setDefaultCommand(
+        this.dutyCycleCommand(() -> 0.0)
+            .withName(pb.makeName("DefaultCommand"))
+            .ignoringDisable(true));
   }
 
   /*

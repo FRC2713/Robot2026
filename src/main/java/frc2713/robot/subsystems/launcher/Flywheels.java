@@ -53,7 +53,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
         leaderLauncherMotorIO,
         followerLauncherMotorIO);
     this.fuelTrajectories = new FuelTrajectories();
-    if (Constants.enableOTFFeatures) setDefaultCommand(idleSpeedCommand());
+    if (Constants.enableOTFFeatures) setDefaultCommand(stop());
   }
 
   public Command setVelocity(Supplier<AngularVelocity> desiredVelocity) {
@@ -91,8 +91,8 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
         // AngularVelocity targetVelocity =
         //     RotationsPerSecond.of(surfaceSpeedMps / (wheelRadiusMeters * 2 * Math.PI));
 
-        AngularVelocity targetVelocity =
-            RPM.of(LauncherConstants.Flywheels.rpmMap.get(solution.ballSpeedMetersPerSecond()));
+        AngularVelocity targetVelocity = RPM.of(solution.ballSpeedMetersPerSecond());
+        // RPM.of(LauncherConstants.Flywheels.rpmMap.get(solution.ballSpeedMetersPerSecond()));
         Logger.recordOutput(pb.makePath("OTF", "targetFlywheelVelocity"), targetVelocity);
         return targetVelocity;
       };

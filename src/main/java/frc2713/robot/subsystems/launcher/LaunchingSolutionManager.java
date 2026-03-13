@@ -66,7 +66,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
     }
 
     // 3. Solve for the Launch Vector
-    currentSolution = calculate(robotPose, robotLinVel, LaunchingSolutionManager.currentGoal);
+    currentSolution = calculateStatic(robotPose, robotLinVel, LaunchingSolutionManager.currentGoal);
 
     // 4. Log
     Logger.recordOutput(pb.makePath("used robot pose"), robotPose);
@@ -114,10 +114,66 @@ public class LaunchingSolutionManager extends SubsystemBase {
         KinematicsManager.getInstance()
             .limitPoseToField(new Pose3d(projectedTranslation, projectedRotation));
     Logger.recordOutput(pb.makePath("projected_pose"), projectedPose);
-    return calculate(projectedPose, projectedLinVel, LaunchingSolutionManager.currentGoal);
+    return calculateOTF(projectedPose, projectedLinVel, LaunchingSolutionManager.currentGoal);
   }
 
-  private LaunchSolution calculate(
+  private LaunchSolution calculateStatic(
+      Pose3d robotPose, Translation3d robotVel, Translation3d targetPose) {
+    // A. Relative Position
+    Translation3d rangeVec = targetPose.minus(robotPose.getTranslation());
+    // Use 2D horizontal distance for map lookups (maps are indexed by ground distance)
+    double horizontalDist = rangeVec.toTranslation2d().getNorm();
+
+    // B. Check Range
+    if (horizontalDist > 8.0 || horizontalDist < 0.1) {
+      return new LaunchSolution(new Rotation2d(), 0, new Rotation2d(), horizontalDist, false);
+    }
+
+    // C. Get Ideal Static Launch Params (Ground Relative)
+    double idealSpeed =
+        FeetPerSecond.of(this.currentSpeedMap.get(horizontalDist)).in(MetersPerSecond);
+    double idealPitchRad = Math.toRadians(this.currentHoodMap.get(horizontalDist));
+
+    // D. Construct Ideal Velocity Vector
+    // Normalized horizontal direction to goal
+    Translation3d horizontalDir =
+        new Translation3d(rangeVec.getX(), rangeVec.getY(), 0)
+            .div(rangeVec.toTranslation2d().getNorm());
+
+    // Combine Horizontal and Vertical components
+    Translation3d idealVelocity =
+        horizontalDir
+            .times(idealSpeed * Math.cos(idealPitchRad))
+            .plus(new Translation3d(0, 0, idealSpeed * Math.sin(idealPitchRad)));
+
+    // E. Subtract Robot Velocity (V_muzzle = V_ideal - V_robot)
+    Translation3d neededMuzzleVelocity = idealVelocity.minus(robotVel);
+
+    // F. Extract Parameters from Resulting Vector
+    double newSpeed = neededMuzzleVelocity.getNorm();
+
+    // Vertical Angle (Pitch)
+    double newPitch =
+        Math.atan2(
+            neededMuzzleVelocity.getZ(),
+            Math.hypot(neededMuzzleVelocity.getX(), neededMuzzleVelocity.getY()));
+
+    // Horizontal Angle (Yaw) - this is a field-relative angle, NOT robot-relative.
+    // The conversion to robot-relative happens at the point of use (e.g. in Turret)
+    // so that it always uses the robot's current heading, not a stale or projected one.
+    Rotation2d newYaw =
+        new Rotation2d(Math.atan2(neededMuzzleVelocity.getY(), neededMuzzleVelocity.getX()))
+            .rotateBy(new Rotation2d(Math.PI));
+
+    return new LaunchSolution(
+        newYaw,
+        LauncherConstants.Flywheels.RPMVelocityMap.get(horizontalDist),
+        Rotation2d.fromDegrees(LauncherConstants.Hood.angleMap.get(horizontalDist)),
+        horizontalDist,
+        true);
+  }
+
+  private LaunchSolution calculateOTF(
       Pose3d robotPose, Translation3d robotVel, Translation3d targetPose) {
     // A. Relative Position
     Translation3d rangeVec = targetPose.minus(robotPose.getTranslation());
@@ -173,13 +229,13 @@ public class LaunchingSolutionManager extends SubsystemBase {
             ? AllianceFlipUtil.applyX(FieldConstants.AllianceZone.bottomSideCornerTarget)
             : AllianceFlipUtil.applyX(FieldConstants.AllianceZone.topSideCornerTarget);
     LaunchingSolutionManager.currentHoodMap = LauncherConstants.Hood.angleForAZMap;
-    LaunchingSolutionManager.currentSpeedMap = LauncherConstants.Flywheels.ballVelocityAZMap;
+    LaunchingSolutionManager.currentSpeedMap = LauncherConstants.Flywheels.RPMVelocityMap;
   }
 
   public static void configureForScoring() {
     LaunchingSolutionManager.currentGoal =
         AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint);
     LaunchingSolutionManager.currentHoodMap = LauncherConstants.Hood.angleMap;
-    LaunchingSolutionManager.currentSpeedMap = LauncherConstants.Flywheels.ballVelocityMap;
+    LaunchingSolutionManager.currentSpeedMap = LauncherConstants.Flywheels.RPMVelocityMap;
   }
 }
