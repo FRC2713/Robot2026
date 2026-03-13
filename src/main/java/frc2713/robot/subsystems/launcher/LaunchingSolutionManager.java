@@ -15,6 +15,7 @@ import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.FieldConstants;
+import frc2713.robot.RobotContainer;
 import org.littletonrobotics.junction.Logger;
 
 public class LaunchingSolutionManager extends SubsystemBase {
@@ -237,5 +238,19 @@ public class LaunchingSolutionManager extends SubsystemBase {
         AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint);
     LaunchingSolutionManager.currentHoodMap = LauncherConstants.Hood.angleMap;
     LaunchingSolutionManager.currentSpeedMap = LauncherConstants.Flywheels.RPMVelocityMap;
+  }
+
+  public static Rotation2d storedIntakeRotation = new Rotation2d(0);
+
+  public static void setIntakeRotation() {
+    if (RobotContainer.drive.getPose().getTranslation().getX()
+        < AllianceFlipUtil.applyX(FieldConstants.LinesVertical.allianceZone)) {
+      storedIntakeRotation = new Rotation2d(0);
+    } else if (RobotContainer.drive.getPose().getTranslation().getX()
+        > AllianceFlipUtil.applyX(FieldConstants.LinesVertical.neutralZoneNear)) {
+      storedIntakeRotation = new Rotation2d(Math.PI);
+    } else {
+      storedIntakeRotation = RobotContainer.drive.getRotation();
+    }
   }
 }
