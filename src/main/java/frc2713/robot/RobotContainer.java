@@ -21,6 +21,7 @@ import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.commands.autos.DriveTest;
+import frc2713.robot.commands.autos.Midwars;
 import frc2713.robot.commands.autos.NeutralScoreNeutral;
 import frc2713.robot.commands.autos.NeutralSweepLeftToRight;
 import frc2713.robot.commands.autos.NeutralSweepRightToLeft;
@@ -260,24 +261,124 @@ public class RobotContainer {
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+    configureAutonomousRoutines(autoChooser, false);
 
-    // Set up SysId routines
-    autoChooser.addOption(
-        "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
-    autoChooser.addOption(
-        "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Forward)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Reverse)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    // Configure the button bindings
+    configureButtonBindings();
 
-    autoChooser.addOption("DriveTest", DriveTest.routine(autoFactory));
+    // configure the kinematics calculations
+    configureKinematics();
+
+    // hood.setDefaultCommand(
+    //     hood.autoRetractCommand(drive::getPose, LauncherConstants.Hood.staticHubAngle));
+
+    new Trigger(() -> hood.inRetractionZone(drive::getPose))
+        .whileTrue(hood.retract().repeatedly().withName("Ducking"));
+  }
+
+  /** Use this robot to configure the transforms between subsystems. */
+  private void configureKinematics() {
+    KinematicsManager.getInstance().registerUnpublished(drive, 0, -1);
+    KinematicsManager.getInstance()
+        .register(
+            intakeExtension,
+            IntakeConstants.Extension.MODEL_INDEX,
+            IntakeConstants.Extension.PARENT_INDEX);
+    KinematicsManager.getInstance()
+        .register(
+            dyeRotor,
+            SerializerConstants.DyeRotor.MODEL_INDEX,
+            SerializerConstants.DyeRotor.PARENT_INDEX);
+    KinematicsManager.getInstance()
+        .register(
+            turret, LauncherConstants.Turret.MODEL_INDEX, LauncherConstants.Turret.PARENT_INDEX);
+    KinematicsManager.getInstance()
+        .register(hood, LauncherConstants.Hood.MODEL_INDEX, LauncherConstants.Hood.PARENT_INDEX);
+    KinematicsManager.getInstance()
+        .registerUnpublished(
+            flywheels,
+            LauncherConstants.Flywheels.MODEL_INDEX,
+            LauncherConstants.Flywheels.PARENT_INDEX);
+  }
+
+  /**
+   * Use this method to define your button->command mappings. Buttons can be created by
+   * instantiating a {@link GenericHID} or one of its subclasses ({@link
+   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
+   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
+   */
+  private void configureButtonBindings() {
+    driverControls.configureButtonBindings();
+    devControls.configureButtonBindings();
+    operatorControls.configureButtonBindings();
+
+    // Default commands
+    // Set drive command to accept inputs from both driver and dev controllers
+    DriveCommands.setDefaultDriveCommand(
+        drive,
+        DriveCommands.joystickDrive(
+            drive,
+            () -> driverControls.getLeftY() + devControls.getLeftY(),
+            () -> driverControls.getLeftX() + devControls.getLeftX(),
+            () -> -driverControls.getRightX() + -devControls.getRightX()),
+        "Dual Controller Drive");
+
+    // Comment these out when using dev controller
+    // driverControls.setToNormalDrive();
+  }
+
+  /**
+   * Configure the autonomous chooser. Pass isDeve=true to add development auto routines.
+   *
+   * @param autoChooser
+   * @param isDev pass true if not at a competition. TODO: Make this configurable
+   */
+  private void configureAutonomousRoutines(
+      LoggedDashboardChooser<Command> autoChooser, boolean isDev) {
+
+    if (isDev) {
+      // Set up SysId routines
+      autoChooser.addOption(
+          "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
+      autoChooser.addOption(
+          "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+      autoChooser.addOption(
+          "Drive SysId (Quasistatic Forward)",
+          drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+      autoChooser.addOption(
+          "Drive SysId (Quasistatic Reverse)",
+          drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+      autoChooser.addOption(
+          "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+      autoChooser.addOption(
+          "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+
+      autoChooser.addOption("DriveTest", DriveTest.routine(autoFactory));
+    }
+
+    autoChooser.addDefaultOption(
+        "Midwars",
+        Midwars.routine(
+            autoFactory,
+            drive,
+            intakeExtension,
+            intakeRoller,
+            flywheels,
+            hood,
+            turret,
+            dyeRotor,
+            feeder,
+            () ->
+                GameCommandGroups.Launching.autoOtfShot(
+                    drive,
+                    flywheels,
+                    hood,
+                    turret,
+                    feeder,
+                    dyeRotor,
+                    intakeExtension,
+                    intakeRoller)));
+
     autoChooser.addOption(
         "Trench to Neutral, Launch At Bump",
         RightSideAutoBump.routine(
@@ -412,69 +513,6 @@ public class RobotContainer {
                     dyeRotor,
                     intakeExtension,
                     intakeRoller)));
-
-    // Configure the button bindings
-    configureButtonBindings();
-
-    // configure the kinematics calculations
-    configureKinematics();
-
-    // hood.setDefaultCommand(
-    //     hood.autoRetractCommand(drive::getPose, LauncherConstants.Hood.staticHubAngle));
-
-    new Trigger(() -> hood.inRetractionZone(drive::getPose))
-        .whileTrue(hood.retract().repeatedly().withName("Ducking"));
-  }
-
-  /** Use this robot to configure the transforms between subsystems. */
-  private void configureKinematics() {
-    KinematicsManager.getInstance().registerUnpublished(drive, 0, -1);
-    KinematicsManager.getInstance()
-        .register(
-            intakeExtension,
-            IntakeConstants.Extension.MODEL_INDEX,
-            IntakeConstants.Extension.PARENT_INDEX);
-    KinematicsManager.getInstance()
-        .register(
-            dyeRotor,
-            SerializerConstants.DyeRotor.MODEL_INDEX,
-            SerializerConstants.DyeRotor.PARENT_INDEX);
-    KinematicsManager.getInstance()
-        .register(
-            turret, LauncherConstants.Turret.MODEL_INDEX, LauncherConstants.Turret.PARENT_INDEX);
-    KinematicsManager.getInstance()
-        .register(hood, LauncherConstants.Hood.MODEL_INDEX, LauncherConstants.Hood.PARENT_INDEX);
-    KinematicsManager.getInstance()
-        .registerUnpublished(
-            flywheels,
-            LauncherConstants.Flywheels.MODEL_INDEX,
-            LauncherConstants.Flywheels.PARENT_INDEX);
-  }
-
-  /**
-   * Use this method to define your button->command mappings. Buttons can be created by
-   * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
-   */
-  private void configureButtonBindings() {
-    driverControls.configureButtonBindings();
-    devControls.configureButtonBindings();
-    operatorControls.configureButtonBindings();
-
-    // Default commands
-    // Set drive command to accept inputs from both driver and dev controllers
-    DriveCommands.setDefaultDriveCommand(
-        drive,
-        DriveCommands.joystickDrive(
-            drive,
-            () -> driverControls.getLeftY() + devControls.getLeftY(),
-            () -> driverControls.getLeftX() + devControls.getLeftX(),
-            () -> -driverControls.getRightX() + -devControls.getRightX()),
-        "Dual Controller Drive");
-
-    // Comment these out when using dev controller
-    // driverControls.setToNormalDrive();
   }
 
   /**

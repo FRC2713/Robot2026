@@ -73,6 +73,8 @@ public final class LauncherConstants {
       config.generalControlMode = GeneralControlMode.POSITION;
       config.acceptablePositionError = Degrees.of(3);
 
+      config.fxConfig.Feedback.FeedbackRotorOffset = Degrees.of(0.0).in(Rotations);
+
       config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
@@ -248,11 +250,12 @@ public final class LauncherConstants {
     public static double gearRatio = ((20 / 8.0) * (30.0 / 13.0) * (146.0 / 10.0));
 
     public static final Angle retractedPosition = Degrees.of(0);
-    public static final Angle startingOffset = Degrees.of(0.5);
 
     static {
       config.name = "Hood";
       config.talonCANID = new CANDeviceId(54, "canivore"); // Example CAN ID, replace with actual ID
+
+      config.fxConfig.Feedback.FeedbackRotorOffset = Degrees.of(4.0).in(Rotations);
 
       // PID gains for Motion Magic
       config.fxConfig.Slot0.kP = 600.0;

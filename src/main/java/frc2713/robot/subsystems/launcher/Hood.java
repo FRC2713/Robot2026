@@ -38,8 +38,7 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   }
 
   public Command setAngleCommand(Supplier<Angle> desiredAngle) {
-    return motionMagicSetpointCommand(
-        () -> desiredAngle.get().plus(LauncherConstants.Hood.startingOffset));
+    return motionMagicSetpointCommand(desiredAngle);
   }
 
   public Command retract() {
