@@ -26,6 +26,7 @@ import frc2713.lib.dynamics.MoiUnits;
 import frc2713.lib.io.CanCoderConfig;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig.GeneralControlMode;
+import frc2713.lib.util.BidirectionalInterpolatingDoubleMap;
 import frc2713.lib.util.LoggedTunableBoolean;
 import frc2713.lib.util.LoggedTunableMeasure;
 import frc2713.lib.util.Util;
@@ -179,10 +180,14 @@ public final class LauncherConstants {
             new Rotation3d(0, Degrees.of(-90).in(Radians), 0));
 
     public static InterpolatingDoubleTreeMap ballVelocityMap = new InterpolatingDoubleTreeMap();
-    public static InterpolatingDoubleTreeMap RPMVelocityMap = new InterpolatingDoubleTreeMap();
-    public static InterpolatingDoubleTreeMap ballVelocityAZMap = new InterpolatingDoubleTreeMap();
+    public static InterpolatingDoubleTreeMap rpmVelocityMap = new InterpolatingDoubleTreeMap();
+    public static InterpolatingDoubleTreeMap ballVelocityAZMap =
+        new InterpolatingDoubleTreeMap(); // floor shots may require diff setpoints
+    public static InterpolatingDoubleTreeMap rpmVelocityAZMap =
+        new InterpolatingDoubleTreeMap(); // floor shots may require diff setpoints
 
-    public static InterpolatingDoubleTreeMap rpmMap = new InterpolatingDoubleTreeMap();
+    public static BidirectionalInterpolatingDoubleMap ballToFlywheelMap =
+        new BidirectionalInterpolatingDoubleMap();
 
     public static Distance WHEEL_DIAMETER = Inches.of(4);
     // How many fuel we can launch per second at max firing rate
@@ -204,25 +209,23 @@ public final class LauncherConstants {
       //   ballVelocityMap.put(5.17, 29.0);
       //   ballVelocityMap.put(5.4, 30.0);
 
-      RPMVelocityMap.put(2.11, 2713.);
-      RPMVelocityMap.put(6.44, 3500.);
+      rpmVelocityMap.put(2.11, 2713.);
+      rpmVelocityMap.put(6.44, 3500.);
 
-      //   ballVelocityAZMap.put(1.0, 20.0);
-      //   ballVelocityAZMap.put(1.5, 20.0);
-      //   ballVelocityAZMap.put(2.5, 22.0);
-      //   ballVelocityAZMap.put(3.2, 23.0);
-      //   ballVelocityAZMap.put(4.0, 26.0);
-      //   ballVelocityAZMap.put(5.17, 29.0);
-      //   ballVelocityAZMap.put(5.4, 30.0);
+      ballVelocityAZMap.put(2.11, 19.19);
+      ballVelocityAZMap.put(6.44, 22.07);
+
+      rpmVelocityAZMap.put(2.11, 2713.);
+      rpmVelocityAZMap.put(6.44, 3500.);
     }
 
     static {
       // Ball Velocity (ft/s) -> RPM (rpm)
-      rpmMap.put(17.69, 2500.);
-      rpmMap.put(20.19, 3000.);
-      rpmMap.put(22.07, 3500.);
-      rpmMap.put(24.67, 4000.);
-      rpmMap.put(25.52, 4500.);
+      ballToFlywheelMap.put(17.69, 2500.);
+      ballToFlywheelMap.put(20.19, 3000.);
+      ballToFlywheelMap.put(22.07, 3500.);
+      ballToFlywheelMap.put(24.67, 4000.);
+      ballToFlywheelMap.put(25.52, 4500.);
     }
 
     public static LoggedTunableMeasure<AngularVelocity> idleVelocity =
@@ -296,7 +299,8 @@ public final class LauncherConstants {
     public static int PARENT_INDEX = 3; // turret
 
     public static InterpolatingDoubleTreeMap angleMap = new InterpolatingDoubleTreeMap();
-    public static InterpolatingDoubleTreeMap angleForAZMap = new InterpolatingDoubleTreeMap();
+    public static InterpolatingDoubleTreeMap angleForAZMap =
+        new InterpolatingDoubleTreeMap(); // floor shots may require diff setpoints
 
     static {
       // Distance (m) -> Hood Pitch (Degrees)

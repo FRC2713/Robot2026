@@ -1,5 +1,6 @@
 package frc2713.lib.util;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -110,6 +111,18 @@ class UtilTest {
       AngularVelocity b = RadiansPerSecond.of(3.0);
       AngularVelocity eps = RadiansPerSecond.of(0.1);
       assertFalse(Util.epsilonEquals(a, b, eps));
+    }
+  }
+
+  @Nested
+  class Clamper {
+    @Test
+    void clampWithinRange() {
+      Angle cmd = Degrees.of(0);
+      Angle min = Degrees.of(-90);
+      Angle max = Degrees.of(90);
+      Angle results = Util.clamp(cmd, min, max);
+      assertTrue(Util.epsilonEquals(cmd.in(Radians), results.in(Radians)));
     }
   }
 
