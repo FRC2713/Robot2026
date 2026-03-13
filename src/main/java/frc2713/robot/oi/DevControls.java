@@ -16,7 +16,6 @@ import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.launcher.Flywheels;
 import frc2713.robot.subsystems.launcher.Hood;
 import frc2713.robot.subsystems.launcher.LauncherConstants;
-import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
 import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
@@ -84,20 +83,7 @@ public class DevControls {
                 .ignoringDisable(true));
 
     // POV Precision Driving
-    controller
-        .povLeft()
-        .onTrue(
-            DriveCommands.changeDefaultDriveCommand(
-                drive, DriveCommands.inch(drive, DriveCommands.INCH_SPEED), "Inch Left"))
-        .onFalse(this.setToNormalDriveCmd());
-    controller
-        .povRight()
-        .onTrue(
-            DriveCommands.changeDefaultDriveCommand(
-                drive,
-                DriveCommands.inch(drive, () -> -1 * DriveCommands.INCH_SPEED.getAsDouble()),
-                "Inch Right"))
-        .onFalse(this.setToNormalDriveCmd());
+    controller.povLeft().onTrue(flywheels.stop());
 
     // Test setting drive limits
     // controller
@@ -159,7 +145,12 @@ public class DevControls {
                 feeder.feedWhenReady(flywheels::atTarget),
                 dyeRotor.feedWhenReady(flywheels::atTarget)))
         .onFalse(Commands.parallel(feeder.stop(), dyeRotor.stop(), flywheels.stop()));
-
+    controller
+        .rightBumper()
+        .onTrue(flywheels.setVelocity(LauncherConstants.Flywheels.PIDTest))
+        .onFalse(
+            flywheels.setVelocity(
+                () -> LauncherConstants.Flywheels.PIDTest.get().minus(RPM.of(1000))));
     controller
         .b()
         .whileTrue(
@@ -167,18 +158,18 @@ public class DevControls {
                 drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
         .whileFalse(GameCommandGroups.Launching.stopShooting(drive, feeder, dyeRotor, flywheels));
 
-    controller
-        .x()
-        .whileTrue(
-            DriveCommands.changeDefaultDriveCommand(
-                drive,
-                GameCommandGroups.intakeAlign(
-                    drive, () -> -controller.getLeftY(), () -> -controller.getLeftX()),
-                "Intake Align"))
-        .onFalse(setToNormalDriveCmd())
-        .onTrue(
-            Commands.runOnce(
-                () -> LaunchingSolutionManager.ZoneSelectionHelpers.setIntakeRotation()));
+    // controller
+    //     .x()
+    //     .whileTrue(
+    //         DriveCommands.changeDefaultDriveCommand(
+    //             drive,
+    //             GameCommandGroups.intakeAlign(
+    //                 drive, () -> -controller.getLeftY(), () -> -controller.getLeftX()),
+    //             "Intake Align"))
+    //     .onFalse(setToNormalDriveCmd())
+    //     .onTrue(
+    //         Commands.runOnce(
+    //             () -> LaunchingSolutionManager.ZoneSelectionHelpers.setIntakeRotation()));
     // Serializer control
 
     // A button - index fuel
@@ -218,18 +209,6 @@ public class DevControls {
             GameCommandGroups.Launching.dumbShot(
                 drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
         .onFalse(GameCommandGroups.Launching.stopShooting(drive, feeder, dyeRotor, flywheels));
-
-    controller
-        .rightBumper()
-        .whileTrue(
-            GameCommandGroups.Launching.otfShotHoodProtect(
-                    drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)
-                .withName("OTF Shot"))
-        .onFalse(
-            Commands.parallel(
-                    GameCommandGroups.Launching.stopShootingAndRetractHood(
-                        drive, feeder, dyeRotor, hood, flywheels))
-                .withName("Stop Shot"));
   }
 
   public double getLeftY() {

@@ -1,5 +1,6 @@
 package frc2713.robot.subsystems.launcher;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
@@ -16,7 +17,6 @@ import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
-import frc2713.robot.Constants;
 import frc2713.robot.FieldConstants;
 import frc2713.robot.RobotContainer;
 import java.util.function.Supplier;
@@ -28,13 +28,10 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
 
   public Hood(final TalonFXSubsystemConfig config, final MotorIO launcherMotorIO) {
     super(config, new MotorInputsAutoLogged(), launcherMotorIO);
-    if (Constants.enableOTFFeatures)
-      setDefaultCommand(
-          autoRetractCommand(
-                  RobotContainer.drive::getPose,
-                  () ->
-                      LaunchingSolutionManager.getInstance().getSolution().hoodPitch().getMeasure())
-              .withName("OTF Lock AutoRetract"));
+    // if (Constants.enableOTFFeatures)
+    setDefaultCommand(
+        autoRetractCommand(RobotContainer.drive::getPose, () -> Degrees.of(0))
+            .withName("OTF Lock AutoRetract"));
   }
 
   public Command setAngleCommand(Supplier<Angle> desiredAngle) {
@@ -100,7 +97,7 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   }
 
   @AutoLogOutput public boolean ducking = false;
-  @AutoLogOutput public boolean disableDucking = true;
+  @AutoLogOutput public boolean disableDucking = false;
 
   @Override
   public void periodic() {

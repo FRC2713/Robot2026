@@ -143,10 +143,10 @@ public final class LauncherConstants {
     static {
       leaderConfig.name = "Flywheels";
       leaderConfig.talonCANID = new CANDeviceId(50, "canivore");
-      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(30., 3.5);
+      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(.7, 3.5);
       leaderConfig.fxConfig.Slot0.kI = 0.0;
       leaderConfig.fxConfig.Slot0.kD = 0.004;
-      leaderConfig.fxConfig.Slot0.kS = Util.modeDependentValue(0.15, 2.0);
+      leaderConfig.fxConfig.Slot0.kS = Util.modeDependentValue(0.2, 2.0);
       leaderConfig.fxConfig.Slot0.kV = 0.12 * gearRatio;
       leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimit = 120.0;
       leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
@@ -203,22 +203,21 @@ public final class LauncherConstants {
       // Distance (m) -> Ball Velocity (ft/s)
       ballVelocityMap.put(2.11, 19.19);
       ballVelocityMap.put(6.44, 22.07);
-      //   ballVelocityMap.put(1.0, 20.0);
-      //   ballVelocityMap.put(1.5, 20.0);
-      //   ballVelocityMap.put(2.5, 22.0);
-      //   ballVelocityMap.put(3.2, 24.0);
-      //   ballVelocityMap.put(4.0, 28.0);
-      //   ballVelocityMap.put(5.17, 29.0);
-      //   ballVelocityMap.put(5.4, 30.0);
-
-      rpmVelocityMap.put(2.11, 2713.);
-      rpmVelocityMap.put(6.44, 3500.);
 
       ballVelocityAZMap.put(2.11, 19.19);
       ballVelocityAZMap.put(6.44, 22.07);
 
-      rpmVelocityAZMap.put(2.11, 2713.);
-      rpmVelocityAZMap.put(6.44, 3500.);
+      rpmVelocityMap.put(1.03, 2500.);
+      rpmVelocityMap.put(2.1, 2500.);
+      rpmVelocityMap.put(3.36, 2713.);
+      rpmVelocityMap.put(5.0, 3250.);
+      rpmVelocityMap.put(6.03, 4200.);
+
+      rpmVelocityAZMap.put(1.03, 2500.);
+      rpmVelocityAZMap.put(2.1, 2500.);
+      rpmVelocityAZMap.put(3.36, 2713.);
+      rpmVelocityAZMap.put(5.0, 3250.);
+      rpmVelocityAZMap.put(6.03, 4200.);
     }
 
     static {
@@ -307,18 +306,22 @@ public final class LauncherConstants {
 
     static {
       // Distance (m) -> Hood Pitch (Degrees)
-      angleMap.put(5.486, 28.74);
-      angleMap.put(4.786, 26.0);
-      angleMap.put(4.175, 25.0);
+      angleMap.put(1.03, 5.0);
+      angleMap.put(2.1, 20.0);
+      angleMap.put(3.36, 25.0);
+      angleMap.put(5.0, 27.13);
+      angleMap.put(6.03, 30.0);
     }
     // 5.486 2000 28.74
     // 4.786 1750 26
 
     static {
       // Distance (m) -> Hood Pitch (Degrees)
-      angleForAZMap.put(5.486, 28.74);
-      angleForAZMap.put(4.786, 26.0);
-      angleForAZMap.put(4.175, 25.0);
+      angleForAZMap.put(1.03, 5.0);
+      angleForAZMap.put(2.1, 20.0);
+      angleForAZMap.put(3.36, 25.0);
+      angleForAZMap.put(5.0, 27.13);
+      angleForAZMap.put(6.03, 30.0);
     }
 
     public static LoggedTunableMeasure<Angle> staticTowerAngle =
@@ -338,3 +341,10 @@ public final class LauncherConstants {
   public static LoggedTunableBoolean otfFutureProjectionEnabled =
       new LoggedTunableBoolean("LaunchingSolutionManager/projection_enabled", true);
 }
+
+// dist   ->    hood    -> flywhees
+// 1.03 m ->   5 deg    -> 2500 rpm
+// 6.03 ->     30       -> 4200
+// 3.36 ->     25       -> 2713
+// 2.1 -> 20 -> 2500
+// 5.0 -> 27.13 -> 3250

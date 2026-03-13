@@ -227,6 +227,11 @@ public final class GameCommandGroups {
     public static Command stopUnjam(Feeder feeder) {
       return Commands.parallel(feeder.stop());
     }
+
+    public static Command outtake(
+        IntakeExtension extension, IntakeRoller rollers, DyeRotor dyeRotor) {
+      return Commands.parallel(extension.extendCommand(), rollers.outtake(), dyeRotor.stop());
+    }
   }
 
   public static Command intakeAlign(

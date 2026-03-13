@@ -314,14 +314,15 @@ public class RobotContainer {
 
     // Default commands
     // Set drive command to accept inputs from both driver and dev controllers
-    DriveCommands.setDefaultDriveCommand(
-        drive,
-        DriveCommands.joystickDrive(
-            drive,
-            () -> driverControls.getLeftY() + devControls.getLeftY(),
-            () -> driverControls.getLeftX() + devControls.getLeftX(),
-            () -> -driverControls.getRightX() + -devControls.getRightX()),
-        "Dual Controller Drive");
+    // DriveCommands.setDefaultDriveCommand(
+    //     drive,
+    //     DriveCommands.joystickDrive(
+    //         drive,
+    //         () -> -driverControls.getLeftY() + -devControls.getLeftY(),
+    //         () -> -driverControls.getLeftX() + -devControls.getLeftX(),
+    //         () -> -driverControls.getRightX() + -devControls.getRightX()),
+    //     "Dual Controller Drive");
+    driverControls.setToNormalDrive();
 
     // Comment these out when using dev controller
     // driverControls.setToNormalDrive();
