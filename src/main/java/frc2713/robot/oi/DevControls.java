@@ -176,7 +176,9 @@ public class DevControls {
                     drive, () -> -controller.getLeftY(), () -> -controller.getLeftX()),
                 "Intake Align"))
         .onFalse(setToNormalDriveCmd())
-        .onTrue(Commands.runOnce(() -> LaunchingSolutionManager.ZoneSelectionHelpers.setIntakeRotation()));
+        .onTrue(
+            Commands.runOnce(
+                () -> LaunchingSolutionManager.ZoneSelectionHelpers.setIntakeRotation()));
     // Serializer control
 
     // A button - index fuel

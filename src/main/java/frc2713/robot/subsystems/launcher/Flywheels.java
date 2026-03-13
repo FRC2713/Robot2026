@@ -32,8 +32,6 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
-import com.ctre.phoenix6.configs.FeedbackConfigs;
-
 public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, MotorIO>
     implements ArticulatedComponent {
 
@@ -135,7 +133,8 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
 
     if (solution.isValid()) {
       LinearVelocity targetSpeed =
-          FeetPerSecond.of(LauncherConstants.Flywheels.ballToFlywheelMap.reverseGet(solution.flywheelsRPM()));
+          FeetPerSecond.of(
+              LauncherConstants.Flywheels.ballToFlywheelMap.reverseGet(solution.flywheelsRPM()));
       Logger.recordOutput(super.pb.makePath("launchVelocity"), targetSpeed);
       return targetSpeed;
     }

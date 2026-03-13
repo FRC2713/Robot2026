@@ -41,8 +41,8 @@ public final class LauncherConstants {
     public static Angle staticHubAngle = Degrees.of(0);
 
     // Turret rotation limits
-    public static final double FORWARD_LIMIT_DEGREES = 90.0;
-    public static final double REVERSE_LIMIT_DEGREES = -90.0;
+    public static final double FORWARD_LIMIT_DEGREES = 188.0;
+    public static final double REVERSE_LIMIT_DEGREES = -210.0;
 
     public static final Angle forwardSoftLimit = Degrees.of(FORWARD_LIMIT_DEGREES);
     public static final Angle reverseSoftLimit = Degrees.of(REVERSE_LIMIT_DEGREES);
@@ -74,7 +74,7 @@ public final class LauncherConstants {
       config.generalControlMode = GeneralControlMode.POSITION;
       config.acceptablePositionError = Degrees.of(3);
 
-      config.fxConfig.Feedback.FeedbackRotorOffset = Degrees.of(0.0).in(Rotations);
+      config.fxConfig.Feedback.FeedbackRotorOffset = 0.306152;
 
       config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -258,7 +258,7 @@ public final class LauncherConstants {
       config.name = "Hood";
       config.talonCANID = new CANDeviceId(54, "canivore"); // Example CAN ID, replace with actual ID
 
-      config.fxConfig.Feedback.FeedbackRotorOffset = Degrees.of(4.0).in(Rotations);
+      config.fxConfig.Feedback.FeedbackRotorOffset = -0.121094;
 
       // PID gains for Motion Magic
       config.fxConfig.Slot0.kP = 600.0;
