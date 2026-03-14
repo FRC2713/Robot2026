@@ -51,13 +51,15 @@ public class OperatorControls {
                 .withName("Static LTrench Shot"))
         .onFalse(
             GameCommandGroups.Launching.stopShootingAndRetractHood(
-                drive, feeder, dyeRotor, hood, flywheels).withName("Stop Shooting + Hood Retract"));
+                    drive, feeder, dyeRotor, hood, flywheels)
+                .withName("Stop Shooting + Hood Retract"));
 
     controller
         .rightBumper()
         .onTrue(
             GameCommandGroups.Launching.rightTrenchShot(
-                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller).withName("Static LTrench Shot"))
+                    drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)
+                .withName("Static RTrench Shot"))
         .onFalse(
             GameCommandGroups.Launching.stopShootingAndRetractHood(
                     drive, feeder, dyeRotor, hood, flywheels)
@@ -79,16 +81,19 @@ public class OperatorControls {
     controller
         .b()
         .whileTrue(
-            GameCommandGroups.OperatorOverriderrs.outtake(intakeExtension, intakeRoller, dyeRotor).withName("Outtake"));
+            GameCommandGroups.OperatorOverriderrs.outtake(intakeExtension, intakeRoller, dyeRotor)
+                .withName("Outtake"));
 
     controller
         .y()
         .onTrue(
             GameCommandGroups.Launching.towerShot(
-                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller).withName("Static Tower Shot"))
+                    drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)
+                .withName("Static Tower Shot"))
         .onFalse(
             GameCommandGroups.Launching.stopShootingAndRetractHood(
-                drive, feeder, dyeRotor, hood, flywheels).withName("Stop Shooting + Hood Retract"));
+                    drive, feeder, dyeRotor, hood, flywheels)
+                .withName("Stop Shooting + Hood Retract"));
 
     // disable ducking
     controller.a().onTrue(Commands.run(() -> hood.disableDucking = !hood.disableDucking));

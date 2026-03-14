@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc2713.lib.io.CanCoderIO;
 import frc2713.lib.io.CanCoderIOHardware;
@@ -268,12 +267,6 @@ public class RobotContainer {
 
     // configure the kinematics calculations
     configureKinematics();
-
-    // hood.setDefaultCommand(
-    //     hood.autoRetractCommand(drive::getPose, LauncherConstants.Hood.staticHubAngle));
-
-    new Trigger(() -> hood.inRetractionZone(drive::getPose))
-        .whileTrue(hood.retract().repeatedly().withName("Ducking"));
   }
 
   /** Use this robot to configure the transforms between subsystems. */

@@ -22,6 +22,7 @@ import java.util.function.Supplier;
  * stationary. Goes to Neutral Zone and waits for teleop.
  */
 public class Midwars {
+
   public static AutoRoutine getRoutine(
       AutoFactory factory,
       Drive driveSubsystem,
@@ -51,7 +52,7 @@ public class Midwars {
                 intakeFuelRight.cmd()));
 
     intakeFuelRight
-        .atTranslation("BeginIntaking", 0.2)
+        .atTime("BeginIntaking")
         .onTrue(
             Commands.parallel(
                 Commands.print("[AUTO] Marker-based intake start"),
@@ -69,26 +70,29 @@ public class Midwars {
     moveToLaunchRight
         .done()
         .onTrue(
+            // SequentialCommandGroups inherit the requirements of their elements. So this whole
+            // sequence has the requirements that otfShotSupplier.get(), which is everything.
+            // This means that if one of our subsystems tries to run a command while the
+            // intakeFuelRight2 path is running, the intakeFuelRight2 path will get interuppted,
+            // along with the entire sequence.
+            // That's why we can't use duck during autos or use the event marker to bring out the
+            // intake after otfSupplier has been used.
             Commands.sequence(
-                Commands.print("[AUTO] Starting launch sequence"),
-                Commands.sequence(
-                        Commands.runOnce(driveSubsystem::stop),
-                        otfShotSupplier.get().withTimeout(7),
-                        Commands.parallel(
-                            GameCommandGroups.Launching.stopShooting(
-                                driveSubsystem, feeder, dyeRotor, flywheels),
-                            // Commands.parallel(
-                            //     Commands.run(() -> driveSubsystem.stop()).withTimeout(6),
-                            //     otfShotSupplier.get().withTimeout(6)),
-                            // Commands.parallel(
-                            Commands.print("[AUTO] Stopping launch sequence"),
-                            hood.retract(),
-                            intakeFuelRight2
-                                .cmd()
-                                .handleInterrupt(
-                                    () ->
-                                        System.out.println("[AUTO] debug, path got interuppted"))))
-                    .withName("OTF Shooting")));
+                    Commands.print("[AUTO] Starting launch sequence"),
+                    Commands.runOnce(driveSubsystem::stop),
+                    otfShotSupplier.get().withTimeout(7),
+                    GameCommandGroups.Launching.stopShootingAndRetractHood(
+                            driveSubsystem, feeder, dyeRotor, hood, flywheels)
+                        .withTimeout(0.25),
+                    Commands.print("[AUTO] Going to fuel again"),
+                    Commands.parallel(
+                        Commands.sequence(
+                            Commands.waitSeconds(1),
+                            intakeExtension.extendCommand(),
+                            intakeRoller.intake()),
+                        intakeFuelRight2.cmd()))
+                .handleInterrupt(
+                    () -> System.out.println("[AUTO] IntakeFuelRight2 likely got interuppted")));
 
     intakeFuelRight2
         .done()

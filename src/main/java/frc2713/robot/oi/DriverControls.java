@@ -129,10 +129,13 @@ public class DriverControls {
         .rightBumper()
         .whileTrue(
             GameCommandGroups.Launching.otfShotHoodProtect(
-                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller).withName("OTF Shooting"))
+                    drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)
+                .withName("OTF Shooting"))
         .onFalse(
             Commands.parallel(
-                GameCommandGroups.Launching.stopShooting(drive, feeder, dyeRotor, flywheels)).withName("Stop Shooting"));
+                    GameCommandGroups.Launching.stopShootingAndRetractHood(
+                        drive, feeder, dyeRotor, hood, flywheels))
+                .withName("Stop Shooting"));
 
     // controller
     //     .a()
@@ -147,10 +150,12 @@ public class DriverControls {
         .rightTrigger(.98)
         .whileTrue(
             GameCommandGroups.Launching.dumbShot(
-                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller).withName("Dumb Shooting"))
+                    drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)
+                .withName("Dumb Shooting"))
         .onFalse(
             GameCommandGroups.Launching.stopShootingAndRetractHood(
-                drive, feeder, dyeRotor, hood, flywheels).withName("Stop Shooting + Hood Retract"));
+                    drive, feeder, dyeRotor, hood, flywheels)
+                .withName("Stop Shooting + Hood Retract"));
 
     // controller
   }

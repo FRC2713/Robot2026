@@ -47,7 +47,7 @@ public final class GameCommandGroups {
               feeder.feedWhenReady(flywheels::atTarget),
               dyeRotor.feedWhenReady(flywheels::atTarget),
               extension.maintainFuelPressureCommand())
-          .withName("OTF Shooting");
+          .withName("Auto OTF Shooting");
     }
 
     public static Command otfShotHoodProtect(
