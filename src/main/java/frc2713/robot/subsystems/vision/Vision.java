@@ -3,6 +3,7 @@ package frc2713.robot.subsystems.vision;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc2713.robot.FieldConstants;
 import frc2713.robot.RobotContainer;
 import frc2713.robot.subsystems.vision.VisionConstants.PoseEstimatorErrorStDevs;
 import java.util.Optional;
@@ -21,14 +22,24 @@ public class Vision extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs("Vision", inputs);
 
     if (inputs.applying && DriverStation.isEnabled()) {
+      if (!FieldConstants.FIELD_PLUS_HALF_METER.contains(
+          RobotContainer.drive.getPose().getTranslation())) {
+        inputs.reasoning = "ROBOT OUTSIDE FIELD!! HARD RESET";
+        RobotContainer.drive.setPose(inputs.pose);
+        Logger.recordOutput("Odometry/inFieldPlus", false);
+
+      } else {
+        Logger.recordOutput("Odometry/inFieldPlus", true);
+      }
+
       RobotContainer.drive.addVisionMeasurement(
           inputs.pose,
           inputs.timestamp,
           new PoseEstimatorErrorStDevs(inputs.translationStdDev, inputs.rotationStdDev).toMatrix());
     }
+    Logger.processInputs("Vision", inputs);
   }
 
   public Optional<Pose2d> getPose() {
