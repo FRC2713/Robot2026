@@ -39,16 +39,8 @@ public class Midwars {
     AutoTrajectory intakeFuelRight = routine.trajectory("IntakeFuelRight");
 
     AutoTrajectory moveToLaunchRight = routine.trajectory("MoveToLaunchRight");
+    AutoTrajectory intakeFuelRight2 = routine.trajectory("IntakeFuelRight2");
     AutoTrajectory moveToLaunchRight2 = routine.trajectory("MoveToLaunchRight");
-    AutoTrajectory intakeFuelRight2 = routine.trajectory("IntakeFuelRight");
-
-    intakeFuelRight
-        .atTranslation("BeginIntaking", 0.2)
-        .onTrue(
-            Commands.parallel(
-                Commands.print("[AUTO] Marker-based intake start"),
-                intakeExtension.extendCommand(),
-                intakeRoller.intake()));
 
     routine
         .active()
@@ -59,10 +51,18 @@ public class Midwars {
                 intakeFuelRight.cmd()));
 
     intakeFuelRight
+        .atTranslation("BeginIntaking", 0.2)
+        .onTrue(
+            Commands.parallel(
+                Commands.print("[AUTO] Marker-based intake start"),
+                intakeExtension.extendCommand(),
+                intakeRoller.intake()));
+
+    intakeFuelRight
         .done()
         .onTrue(
             Commands.parallel(
-                Commands.print("[AUTO] Starting intake and collecting fuel"),
+                Commands.print("[AUTO] Moving to launch position"),
                 intakeRoller.intake(),
                 moveToLaunchRight.cmd()));
 
@@ -72,16 +72,22 @@ public class Midwars {
             Commands.sequence(
                 Commands.print("[AUTO] Starting launch sequence"),
                 Commands.sequence(
+                        Commands.runOnce(driveSubsystem::stop),
+                        otfShotSupplier.get().withTimeout(7),
                         Commands.parallel(
-                            Commands.run(() -> driveSubsystem.stop())
-                                .withDeadline(new WaitCommand(6)),
-                            Commands.race(otfShotSupplier.get(), new WaitCommand(6))),
-                        Commands.sequence(
-                            hood.retract().withTimeout(0.1),
-                            Commands.parallel(
-                                intakeFuelRight2.cmd(),
-                                GameCommandGroups.Launching.stopShooting(
-                                    driveSubsystem, feeder, dyeRotor, flywheels))))
+                            GameCommandGroups.Launching.stopShooting(
+                                driveSubsystem, feeder, dyeRotor, flywheels),
+                            // Commands.parallel(
+                            //     Commands.run(() -> driveSubsystem.stop()).withTimeout(6),
+                            //     otfShotSupplier.get().withTimeout(6)),
+                            // Commands.parallel(
+                            Commands.print("[AUTO] Stopping launch sequence"),
+                            hood.retract(),
+                            intakeFuelRight2
+                                .cmd()
+                                .handleInterrupt(
+                                    () ->
+                                        System.out.println("[AUTO] debug, path got interuppted"))))
                     .withName("OTF Shooting")));
 
     intakeFuelRight2
@@ -93,6 +99,14 @@ public class Midwars {
                     intakeExtension.extendCommand(),
                     intakeRoller.intake(),
                     moveToLaunchRight2.cmd())));
+
+    // intakeFuelRight2
+    //     .atTranslation("BeginIntaking", 0.2)
+    //     .onTrue(
+    //         Commands.parallel(
+    //             Commands.print("[AUTO] Marker-based intake start2"),
+    //             intakeExtension.extendCommand(),
+    //             intakeRoller.intake()));
 
     moveToLaunchRight2
         .done()

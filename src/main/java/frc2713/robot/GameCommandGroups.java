@@ -31,7 +31,6 @@ public final class GameCommandGroups {
 
     /** OTF shooting without drive limits. Use for auto routines. */
     public static Command autoOtfShot(
-        Drive drive,
         Flywheels flywheels,
         Hood hood,
         Turret turret,

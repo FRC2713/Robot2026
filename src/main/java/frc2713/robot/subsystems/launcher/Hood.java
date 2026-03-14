@@ -78,7 +78,7 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
           Logger.recordOutput(pb.makePath("AutoRetract", "inRetractionZone"), inRetractionZone);
           ducking = inRetractionZone;
 
-          if (inRetractionZone) {
+          if (inRetractionZone && DriverStation.isTeleop()) {
             return LauncherConstants.Hood.retractedPosition;
           } else {
             return defaultAngleSupplier.get();

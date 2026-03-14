@@ -371,14 +371,7 @@ public class RobotContainer {
             feeder,
             () ->
                 GameCommandGroups.Launching.autoOtfShot(
-                    drive,
-                    flywheels,
-                    hood,
-                    turret,
-                    feeder,
-                    dyeRotor,
-                    intakeExtension,
-                    intakeRoller)));
+                    flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)));
 
     autoChooser.addOption(
         "Trench to Neutral, Launch At Bump",
@@ -394,14 +387,7 @@ public class RobotContainer {
             feeder,
             () ->
                 GameCommandGroups.Launching.autoOtfShot(
-                    drive,
-                    flywheels,
-                    hood,
-                    turret,
-                    feeder,
-                    dyeRotor,
-                    intakeExtension,
-                    intakeRoller)));
+                    flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)));
     autoChooser.addOption(
         "Trench to Neutral, Launch At Trench, Refuel",
         NeutralScoreNeutral.routine(
@@ -416,14 +402,7 @@ public class RobotContainer {
             feeder,
             () ->
                 GameCommandGroups.Launching.autoOtfShot(
-                    drive,
-                    flywheels,
-                    hood,
-                    turret,
-                    feeder,
-                    dyeRotor,
-                    intakeExtension,
-                    intakeRoller)));
+                    flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)));
     autoChooser.addOption(
         "Trench to Neutral, Launch, Then Move To Outpost",
         RightNeutralOutpostStatic.routine(
@@ -438,14 +417,7 @@ public class RobotContainer {
             feeder,
             () ->
                 GameCommandGroups.Launching.autoOtfShot(
-                    drive,
-                    flywheels,
-                    hood,
-                    turret,
-                    feeder,
-                    dyeRotor,
-                    intakeExtension,
-                    intakeRoller)));
+                    flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)));
     autoChooser.addOption(
         "Trench to Neutral, Launch while Moving To Outpost",
         RightNeutralOutpost.routine(
@@ -460,14 +432,7 @@ public class RobotContainer {
             feeder,
             () ->
                 GameCommandGroups.Launching.autoOtfShot(
-                    drive,
-                    flywheels,
-                    hood,
-                    turret,
-                    feeder,
-                    dyeRotor,
-                    intakeExtension,
-                    intakeRoller)));
+                    flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)));
 
     autoChooser.addOption(
         "Trench to Neutral, Sweep Right to Left, Launch",
@@ -483,14 +448,7 @@ public class RobotContainer {
             feeder,
             () ->
                 GameCommandGroups.Launching.autoOtfShot(
-                    drive,
-                    flywheels,
-                    hood,
-                    turret,
-                    feeder,
-                    dyeRotor,
-                    intakeExtension,
-                    intakeRoller)));
+                    flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)));
 
     autoChooser.addOption(
         "Trench to Neutral, Sweep Left to Right, Launch",
@@ -506,14 +464,7 @@ public class RobotContainer {
             feeder,
             () ->
                 GameCommandGroups.Launching.autoOtfShot(
-                    drive,
-                    flywheels,
-                    hood,
-                    turret,
-                    feeder,
-                    dyeRotor,
-                    intakeExtension,
-                    intakeRoller)));
+                    flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)));
   }
 
   /**
