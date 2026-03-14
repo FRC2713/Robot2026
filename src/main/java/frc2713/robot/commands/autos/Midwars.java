@@ -86,10 +86,9 @@ public class Midwars {
                         .withTimeout(0.25),
                     Commands.print("[AUTO] Going to fuel again"),
                     Commands.parallel(
-                        Commands.sequence(
-                            Commands.waitSeconds(1),
-                            intakeExtension.extendCommand(),
-                            intakeRoller.intake()),
+                        // Wait to extend as moving to intake position
+                        Commands.parallel(intakeExtension.extendCommand(), intakeRoller.intake())
+                            .beforeStarting(new WaitCommand(1)),
                         intakeFuelRight2.cmd()))
                 .handleInterrupt(
                     () -> System.out.println("[AUTO] IntakeFuelRight2 likely got interuppted")));

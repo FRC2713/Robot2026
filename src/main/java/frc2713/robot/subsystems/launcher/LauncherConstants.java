@@ -126,11 +126,11 @@ public final class LauncherConstants {
     public static LoggedTunableMeasure<Angle> PIDTestAngleTwo =
         new LoggedTunableMeasure<>("Turret/PIDTestAngleTwo", Degrees.of(-10));
     public static LoggedTunableMeasure<Angle> staticLeftTrench =
-        new LoggedTunableMeasure<>("Turret/Turret Static Trench L", Degrees.of(190));
+        new LoggedTunableMeasure<>("Turret/Turret Static Trench L", Degrees.of(-190));
     public static LoggedTunableMeasure<Angle> staticRightTrench =
-        new LoggedTunableMeasure<>("Turret/Turret Static Trench R", Degrees.of(-190));
+        new LoggedTunableMeasure<>("Turret/Turret Static Trench R", Degrees.of(90));
     public static LoggedTunableMeasure<Angle> staticTowerShot =
-        new LoggedTunableMeasure<>("Turret/Turret Static Tower", Degrees.of(177));
+        new LoggedTunableMeasure<>("Turret/Turret Static Tower", Degrees.of(-177));
   }
 
   public final class Flywheels {
