@@ -80,7 +80,7 @@ public class Midwars {
             Commands.sequence(
                     Commands.print("[AUTO] Starting launch sequence"),
                     Commands.runOnce(driveSubsystem::stop),
-                    otfShotSupplier.get().withTimeout(4),
+                    otfShotSupplier.get().withTimeout(4.3),
                     GameCommandGroups.Launching.stopShootingAndRetractHood(
                             driveSubsystem, feeder, dyeRotor, hood, flywheels)
                         .withTimeout(0.25),

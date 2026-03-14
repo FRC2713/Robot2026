@@ -1,5 +1,6 @@
 package frc2713.robot.oi;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RPM;
 
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -49,14 +50,45 @@ public class OperatorControls {
     controller
         .povUp()
         .onTrue(
-            Commands.runOnce(
-                () -> flywheels.fudgeFactor = flywheels.fudgeFactor.plus(RPM.of(100))));
+            Commands.runOnce(() -> flywheels.fudgeFactor = flywheels.fudgeFactor.plus(RPM.of(100)))
+                .withName("flywheels fudgeFactor up"));
 
     controller
         .povDown()
         .onTrue(
+            Commands.runOnce(() -> flywheels.fudgeFactor = flywheels.fudgeFactor.minus(RPM.of(100)))
+                .withName("flywheels fudgeFactor down"));
+    controller
+        .povRight()
+        .onTrue(
+            Commands.runOnce(() -> turret.fudgeFactor = turret.fudgeFactor.minus(Degrees.of(5)))
+                .withName("turret fudgeFactor minus"));
+
+    controller
+        .povLeft()
+        .onTrue(
+            Commands.runOnce(() -> turret.fudgeFactor = turret.fudgeFactor.plus(Degrees.of(5)))
+                .withName("turret fudgeFactor plus"));
+
+    controller
+        .start()
+        .onTrue(
             Commands.runOnce(
-                () -> flywheels.fudgeFactor = flywheels.fudgeFactor.minus(RPM.of(100))));
+                    () -> {
+                      turret.fudgeFactor = Degrees.of(0.0);
+                      flywheels.fudgeFactor = RPM.of(0.0);
+                    })
+                .withName("fudgeFacor reset"));
+
+    controller
+        .back()
+        .onTrue(
+            Commands.runOnce(
+                    () -> {
+                      turret.fudgeFactor = Degrees.of(0.0);
+                      flywheels.fudgeFactor = RPM.of(0.0);
+                    })
+                .withName("fudgeFacor reset"));
 
     controller
         .leftBumper()

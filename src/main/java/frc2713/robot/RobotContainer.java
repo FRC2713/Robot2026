@@ -70,7 +70,7 @@ public class RobotContainer {
   // Subsystems
   public static Drive drive;
   public static Flywheels flywheels;
-  private static Turret turret;
+  public static Turret turret;
   public static Hood hood;
   private static IntakeRoller intakeRoller;
   public static IntakeExtension intakeExtension;

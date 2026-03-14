@@ -178,6 +178,8 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
         0);
   }
 
+  @AutoLogOutput public Angle fudgeFactor = Degrees.of(0);
+
   /**
    * Supplier that continuously calculates the on-the-fly turret angle. Uses the launch solution if
    * valid, otherwise falls back to aiming at the goal using simple geometry.
@@ -210,7 +212,7 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
         targetAngle = convertToClosestBoundedTurretAngleDegrees(targetAngle, inputs.position);
         Logger.recordOutput(super.pb.makePath("OTF", "solutionIsValid"), solution.isValid());
         Logger.recordOutput(pb.makePath("OTF", "targetAngleDegrees"), targetAngle.in(Degrees));
-        return targetAngle;
+        return targetAngle.plus(fudgeFactor);
       };
 
   public final Supplier<Angle> hubAngleSupplier =

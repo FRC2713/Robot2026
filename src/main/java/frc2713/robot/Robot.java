@@ -7,6 +7,7 @@
 
 package frc2713.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -117,6 +118,10 @@ public class Robot extends LoggedRobot {
 
     if (RobotContainer.flywheels != null) {
       RobotContainer.flywheels.fudgeFactor = RotationsPerSecond.of(0.0);
+    }
+
+    if (RobotContainer.turret != null) {
+      RobotContainer.turret.fudgeFactor = Degrees.of(0.0);
     }
   }
 
