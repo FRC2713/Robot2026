@@ -1,5 +1,7 @@
 package frc2713.robot.oi;
 
+import static edu.wpi.first.units.Units.RPM;
+
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc2713.robot.GameCommandGroups;
 import frc2713.robot.subsystems.drive.Drive;
@@ -43,6 +45,19 @@ public class OperatorControls {
   }
 
   public void configureButtonBindings() {
+
+    controller
+        .povUp()
+        .onTrue(
+            Commands.runOnce(
+                () -> flywheels.fudgeFactor = flywheels.fudgeFactor.plus(RPM.of(100))));
+
+    controller
+        .povDown()
+        .onTrue(
+            Commands.runOnce(
+                () -> flywheels.fudgeFactor = flywheels.fudgeFactor.minus(RPM.of(100))));
+
     controller
         .leftBumper()
         .onTrue(

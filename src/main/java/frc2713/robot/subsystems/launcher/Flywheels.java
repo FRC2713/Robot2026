@@ -30,6 +30,7 @@ import frc2713.robot.Robot;
 import frc2713.robot.subsystems.launcher.LaunchingSolutionManager.LaunchSolution;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, MotorIO>
@@ -76,9 +77,13 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
     return setVelocity(LauncherConstants.Flywheels.idleVelocity);
   }
 
+  @AutoLogOutput public AngularVelocity fudgeFactor = RotationsPerSecond.of(0.0);
+
   public Command otfCommand() {
     return setVelocity(
-        () -> RPM.of(LaunchingSolutionManager.getInstance().getSolution().flywheelsRPM()));
+        () ->
+            RPM.of(LaunchingSolutionManager.getInstance().getSolution().flywheelsRPM())
+                .plus(fudgeFactor));
   }
 
   @Override

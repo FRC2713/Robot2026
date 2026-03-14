@@ -1,6 +1,7 @@
 package frc2713.robot.subsystems.vision;
 
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -93,12 +94,21 @@ public class VisionIOSLAMDunk implements VisionIO {
           return;
         }
 
-        if (inputs.tagCount < 2) {
-          inputs.reasoning = "Valid. Few tags visible";
+        if (inputs.tagCount < 2 && linspeed.gte(MetersPerSecond.of(1))) {
+          inputs.reasoning = "Valid. Few tags visible and fast";
           inputs.rotationStdDev =
-              VisionConstants.POSE_ESTIMATOR_STATE_LOW_TAGS_STDEVS.rotationalStDev();
+              VisionConstants.POSE_ESTIMATOR_STATE_LOW_TAGS_FAST_STDEVS.rotationalStDev();
           inputs.translationStdDev =
-              VisionConstants.POSE_ESTIMATOR_STATE_LOW_TAGS_STDEVS.translationalStDev();
+              VisionConstants.POSE_ESTIMATOR_STATE_LOW_TAGS_FAST_STDEVS.translationalStDev();
+          inputs.applying = true;
+          return;
+        }
+        if (inputs.tagCount < 2) {
+          inputs.reasoning = "Valid. Few tags visible and slow";
+          inputs.rotationStdDev =
+              VisionConstants.POSE_ESTIMATOR_STATE_LOW_TAGS_SLOW_STDEVS.rotationalStDev();
+          inputs.translationStdDev =
+              VisionConstants.POSE_ESTIMATOR_STATE_LOW_TAGS_SLOW_STDEVS.translationalStDev();
           inputs.applying = true;
           return;
         }
