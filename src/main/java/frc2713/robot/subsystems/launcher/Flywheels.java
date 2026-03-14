@@ -25,7 +25,6 @@ import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.MotorFollowerSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.RobotTime;
-import frc2713.robot.Constants;
 import frc2713.robot.Robot;
 import frc2713.robot.subsystems.launcher.LaunchingSolutionManager.LaunchSolution;
 import java.util.function.BooleanSupplier;
@@ -54,7 +53,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
         leaderLauncherMotorIO,
         followerLauncherMotorIO);
     this.fuelTrajectories = new FuelTrajectories();
-    if (Constants.enableOTFFeatures) setDefaultCommand(stop());
+    setDefaultCommand(stop());
   }
 
   public Command setVelocity(Supplier<AngularVelocity> desiredVelocity) {
