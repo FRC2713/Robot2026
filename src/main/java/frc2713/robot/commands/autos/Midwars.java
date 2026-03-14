@@ -41,7 +41,7 @@ public class Midwars {
 
     AutoTrajectory moveToLaunchRight = routine.trajectory("MoveToLaunchRight");
     AutoTrajectory intakeFuelRight2 = routine.trajectory("IntakeFuelRight2");
-    AutoTrajectory moveToLaunchRight2 = routine.trajectory("MoveToLaunchRight");
+    AutoTrajectory moveToLaunchRight2 = routine.trajectory("MoveToLaunchRight2");
 
     routine
         .active()

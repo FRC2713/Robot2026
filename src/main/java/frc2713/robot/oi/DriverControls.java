@@ -99,10 +99,9 @@ public class DriverControls {
         .leftTrigger(0.98)
         .onTrue(
             Commands.parallel(
-                    intakeExtension.extendCommand(),
-                    Commands.parallel(intakeRoller.intake(), dyeRotor.stirFuel()))
+                    intakeExtension.extendCommand(), Commands.parallel(intakeRoller.intake()))
                 .withName("Intaking"))
-        .onFalse(Commands.parallel(intakeRoller.stop(), dyeRotor.stop()).withName("Stop Intake"));
+        .onFalse(Commands.parallel(intakeRoller.stop()).withName("Stop Intake"));
 
     controller
         .leftBumper()

@@ -120,10 +120,8 @@ public class OperatorControls {
 
     controller
         .leftTrigger(0.98)
-        .onTrue(GameCommandGroups.OperatorOverriderrs.stir(dyeRotor, intakeRoller).withName("Stir"))
-        .onFalse(
-            GameCommandGroups.OperatorOverriderrs.stopStir(dyeRotor, intakeRoller)
-                .withName("Stop Stir"));
+        .onTrue(dyeRotor.stirFuel().withName("Stir"))
+        .onFalse(dyeRotor.stop().withName("Stop Stir"));
 
     controller
         .b()
