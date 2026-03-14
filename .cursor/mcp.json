@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "robot-telemetry": {
+      "command": "/Users/tytremblay/Documents/frc/Robot2026/tools/mcp_robot/.venv/bin/python",
+      "args": [
+        "tools/mcp_robot/main.py"
+      ],
+      "cwd": ".",
+      "env": {
+        "ROBOT_MCP_SOURCE": "nt4",
+        "ROBOT_MCP_NT_HOST": "127.0.0.1",
+        "ROBOT_MCP_NT_PORT": "5810"
+      }
+    }
+  }
+}
