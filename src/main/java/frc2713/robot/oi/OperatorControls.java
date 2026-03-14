@@ -51,17 +51,17 @@ public class OperatorControls {
                 .withName("Static LTrench Shot"))
         .onFalse(
             GameCommandGroups.Launching.stopShootingAndRetractHood(
-                drive, feeder, dyeRotor, hood, flywheels));
+                drive, feeder, dyeRotor, hood, flywheels).withName("Stop Shooting + Hood Retract"));
 
     controller
         .rightBumper()
         .onTrue(
             GameCommandGroups.Launching.rightTrenchShot(
-                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
+                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller).withName("Static LTrench Shot"))
         .onFalse(
             GameCommandGroups.Launching.stopShootingAndRetractHood(
                     drive, feeder, dyeRotor, hood, flywheels)
-                .withName("Static R Trench Shot"));
+                .withName("Stop Shooting + Hood Retract"));
 
     controller
         .rightTrigger(0.98)
@@ -79,16 +79,16 @@ public class OperatorControls {
     controller
         .b()
         .whileTrue(
-            GameCommandGroups.OperatorOverriderrs.outtake(intakeExtension, intakeRoller, dyeRotor));
+            GameCommandGroups.OperatorOverriderrs.outtake(intakeExtension, intakeRoller, dyeRotor).withName("Outtake"));
 
     controller
         .y()
         .onTrue(
             GameCommandGroups.Launching.towerShot(
-                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
+                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller).withName("Static Tower Shot"))
         .onFalse(
             GameCommandGroups.Launching.stopShootingAndRetractHood(
-                drive, feeder, dyeRotor, hood, flywheels));
+                drive, feeder, dyeRotor, hood, flywheels).withName("Stop Shooting + Hood Retract"));
 
     // disable ducking
     controller.a().onTrue(Commands.run(() -> hood.disableDucking = !hood.disableDucking));
