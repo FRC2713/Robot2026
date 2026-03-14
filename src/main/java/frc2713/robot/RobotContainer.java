@@ -21,6 +21,7 @@ import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.commands.autos.DriveTest;
+import frc2713.robot.commands.autos.Midwars;
 import frc2713.robot.commands.autos.NeutralScoreNeutral;
 import frc2713.robot.commands.autos.NeutralSweepLeftToRight;
 import frc2713.robot.commands.autos.NeutralSweepRightToLeft;
@@ -260,158 +261,7 @@ public class RobotContainer {
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
-
-    // Set up SysId routines
-    autoChooser.addOption(
-        "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
-    autoChooser.addOption(
-        "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Forward)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Reverse)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-
-    autoChooser.addOption("DriveTest", DriveTest.routine(autoFactory));
-    autoChooser.addOption(
-        "Trench to Neutral, Launch At Bump",
-        RightSideAutoBump.routine(
-            autoFactory,
-            drive,
-            intakeExtension,
-            intakeRoller,
-            flywheels,
-            hood,
-            turret,
-            dyeRotor,
-            feeder,
-            () ->
-                GameCommandGroups.Launching.autoOtfShot(
-                    drive,
-                    flywheels,
-                    hood,
-                    turret,
-                    feeder,
-                    dyeRotor,
-                    intakeExtension,
-                    intakeRoller)));
-    autoChooser.addOption(
-        "Trench to Neutral, Launch At Trench, Refuel",
-        NeutralScoreNeutral.routine(
-            autoFactory,
-            drive,
-            intakeExtension,
-            intakeRoller,
-            flywheels,
-            hood,
-            turret,
-            dyeRotor,
-            feeder,
-            () ->
-                GameCommandGroups.Launching.autoOtfShot(
-                    drive,
-                    flywheels,
-                    hood,
-                    turret,
-                    feeder,
-                    dyeRotor,
-                    intakeExtension,
-                    intakeRoller)));
-    autoChooser.addOption(
-        "Trench to Neutral, Launch, Then Move To Outpost",
-        RightNeutralOutpostStatic.routine(
-            autoFactory,
-            drive,
-            intakeExtension,
-            intakeRoller,
-            flywheels,
-            hood,
-            turret,
-            dyeRotor,
-            feeder,
-            () ->
-                GameCommandGroups.Launching.autoOtfShot(
-                    drive,
-                    flywheels,
-                    hood,
-                    turret,
-                    feeder,
-                    dyeRotor,
-                    intakeExtension,
-                    intakeRoller)));
-    autoChooser.addOption(
-        "Trench to Neutral, Launch while Moving To Outpost",
-        RightNeutralOutpost.routine(
-            autoFactory,
-            drive,
-            intakeExtension,
-            intakeRoller,
-            flywheels,
-            hood,
-            turret,
-            dyeRotor,
-            feeder,
-            () ->
-                GameCommandGroups.Launching.autoOtfShot(
-                    drive,
-                    flywheels,
-                    hood,
-                    turret,
-                    feeder,
-                    dyeRotor,
-                    intakeExtension,
-                    intakeRoller)));
-
-    autoChooser.addOption(
-        "Trench to Neutral, Sweep Right to Left, Launch",
-        NeutralSweepRightToLeft.routine(
-            autoFactory,
-            drive,
-            intakeExtension,
-            intakeRoller,
-            flywheels,
-            hood,
-            turret,
-            dyeRotor,
-            feeder,
-            () ->
-                GameCommandGroups.Launching.autoOtfShot(
-                    drive,
-                    flywheels,
-                    hood,
-                    turret,
-                    feeder,
-                    dyeRotor,
-                    intakeExtension,
-                    intakeRoller)));
-
-    autoChooser.addOption(
-        "Trench to Neutral, Sweep Left to Right, Launch",
-        NeutralSweepLeftToRight.routine(
-            autoFactory,
-            drive,
-            intakeExtension,
-            intakeRoller,
-            flywheels,
-            hood,
-            turret,
-            dyeRotor,
-            feeder,
-            () ->
-                GameCommandGroups.Launching.autoOtfShot(
-                    drive,
-                    flywheels,
-                    hood,
-                    turret,
-                    feeder,
-                    dyeRotor,
-                    intakeExtension,
-                    intakeRoller)));
+    configureAutonomousRoutines(autoChooser, false);
 
     // Configure the button bindings
     configureButtonBindings();
@@ -464,17 +314,157 @@ public class RobotContainer {
 
     // Default commands
     // Set drive command to accept inputs from both driver and dev controllers
-    DriveCommands.setDefaultDriveCommand(
-        drive,
-        DriveCommands.joystickDrive(
-            drive,
-            () -> driverControls.getLeftY() + devControls.getLeftY(),
-            () -> driverControls.getLeftX() + devControls.getLeftX(),
-            () -> -driverControls.getRightX() + -devControls.getRightX()),
-        "Dual Controller Drive");
+    // DriveCommands.setDefaultDriveCommand(
+    //     drive,
+    //     DriveCommands.joystickDrive(
+    //         drive,
+    //         () -> -driverControls.getLeftY() + -devControls.getLeftY(),
+    //         () -> -driverControls.getLeftX() + -devControls.getLeftX(),
+    //         () -> -driverControls.getRightX() + -devControls.getRightX()),
+    //     "Dual Controller Drive");
+    driverControls.setToNormalDrive();
 
     // Comment these out when using dev controller
     // driverControls.setToNormalDrive();
+  }
+
+  /**
+   * Configure the autonomous chooser. Pass isDeve=true to add development auto routines.
+   *
+   * @param autoChooser
+   * @param isDev pass true if not at a competition. TODO: Make this configurable
+   */
+  private void configureAutonomousRoutines(
+      LoggedDashboardChooser<Command> autoChooser, boolean isDev) {
+
+    if (isDev) {
+      // Set up SysId routines
+      autoChooser.addOption(
+          "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
+      autoChooser.addOption(
+          "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+      autoChooser.addOption(
+          "Drive SysId (Quasistatic Forward)",
+          drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+      autoChooser.addOption(
+          "Drive SysId (Quasistatic Reverse)",
+          drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+      autoChooser.addOption(
+          "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+      autoChooser.addOption(
+          "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+
+      autoChooser.addOption("DriveTest", DriveTest.routine(autoFactory));
+    }
+
+    autoChooser.addDefaultOption(
+        "Midwars",
+        Midwars.routine(
+            autoFactory,
+            drive,
+            intakeExtension,
+            intakeRoller,
+            flywheels,
+            hood,
+            turret,
+            dyeRotor,
+            feeder,
+            () ->
+                GameCommandGroups.Launching.autoOtfShot(
+                    flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)));
+
+    autoChooser.addOption(
+        "Trench to Neutral, Launch At Bump",
+        RightSideAutoBump.routine(
+            autoFactory,
+            drive,
+            intakeExtension,
+            intakeRoller,
+            flywheels,
+            hood,
+            turret,
+            dyeRotor,
+            feeder,
+            () ->
+                GameCommandGroups.Launching.autoOtfShot(
+                    flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)));
+    autoChooser.addOption(
+        "Trench to Neutral, Launch At Trench, Refuel",
+        NeutralScoreNeutral.routine(
+            autoFactory,
+            drive,
+            intakeExtension,
+            intakeRoller,
+            flywheels,
+            hood,
+            turret,
+            dyeRotor,
+            feeder,
+            () ->
+                GameCommandGroups.Launching.autoOtfShot(
+                    flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)));
+    autoChooser.addOption(
+        "Trench to Neutral, Launch, Then Move To Outpost",
+        RightNeutralOutpostStatic.routine(
+            autoFactory,
+            drive,
+            intakeExtension,
+            intakeRoller,
+            flywheels,
+            hood,
+            turret,
+            dyeRotor,
+            feeder,
+            () ->
+                GameCommandGroups.Launching.autoOtfShot(
+                    flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)));
+    autoChooser.addOption(
+        "Trench to Neutral, Launch while Moving To Outpost",
+        RightNeutralOutpost.routine(
+            autoFactory,
+            drive,
+            intakeExtension,
+            intakeRoller,
+            flywheels,
+            hood,
+            turret,
+            dyeRotor,
+            feeder,
+            () ->
+                GameCommandGroups.Launching.autoOtfShot(
+                    flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)));
+
+    autoChooser.addOption(
+        "Trench to Neutral, Sweep Right to Left, Launch",
+        NeutralSweepRightToLeft.routine(
+            autoFactory,
+            drive,
+            intakeExtension,
+            intakeRoller,
+            flywheels,
+            hood,
+            turret,
+            dyeRotor,
+            feeder,
+            () ->
+                GameCommandGroups.Launching.autoOtfShot(
+                    flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)));
+
+    autoChooser.addOption(
+        "Trench to Neutral, Sweep Left to Right, Launch",
+        NeutralSweepLeftToRight.routine(
+            autoFactory,
+            drive,
+            intakeExtension,
+            intakeRoller,
+            flywheels,
+            hood,
+            turret,
+            dyeRotor,
+            feeder,
+            () ->
+                GameCommandGroups.Launching.autoOtfShot(
+                    flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)));
   }
 
   /**

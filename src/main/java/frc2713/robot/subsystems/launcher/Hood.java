@@ -1,7 +1,6 @@
 package frc2713.robot.subsystems.launcher;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
@@ -10,7 +9,6 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -19,7 +17,6 @@ import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
-import frc2713.robot.Constants;
 import frc2713.robot.FieldConstants;
 import frc2713.robot.RobotContainer;
 import java.util.function.Supplier;
@@ -31,15 +28,14 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
 
   public Hood(final TalonFXSubsystemConfig config, final MotorIO launcherMotorIO) {
     super(config, new MotorInputsAutoLogged(), launcherMotorIO);
-    if (Constants.enableOTFFeatures)
-      setDefaultCommand(
-          autoRetractCommand(RobotContainer.drive::getPose, otfAngSupplier)
-              .withName("OTF Lock AutoRetract"));
+    // if (Constants.enableOTFFeatures)
+    setDefaultCommand(
+        autoRetractCommand(RobotContainer.drive::getPose, () -> Degrees.of(0))
+            .withName("OTF Lock AutoRetract"));
   }
 
   public Command setAngleCommand(Supplier<Angle> desiredAngle) {
-    return motionMagicSetpointCommand(
-        () -> desiredAngle.get().plus(LauncherConstants.Hood.startingOffset));
+    return motionMagicSetpointCommand(desiredAngle);
   }
 
   public Command retract() {
@@ -55,7 +51,8 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   }
 
   public Command otfCommand() {
-    return setAngleCommand(otfAngSupplier);
+    return setAngleCommand(
+        () -> LaunchingSolutionManager.getInstance().getSolution().hoodPitch().getMeasure());
   }
 
   public Command setTargetPositionToCurrent() {
@@ -81,7 +78,7 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
           Logger.recordOutput(pb.makePath("AutoRetract", "inRetractionZone"), inRetractionZone);
           ducking = inRetractionZone;
 
-          if (inRetractionZone) {
+          if (inRetractionZone && DriverStation.isTeleop()) {
             return LauncherConstants.Hood.retractedPosition;
           } else {
             return defaultAngleSupplier.get();
@@ -100,32 +97,7 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   }
 
   @AutoLogOutput public boolean ducking = false;
-  @AutoLogOutput public boolean disableDucking = true;
-
-  public final Supplier<Angle> otfAngSupplier =
-      () -> {
-        var solution = LaunchingSolutionManager.getInstance().getSolution();
-        Distance toGoal = this.getDistance2d(LaunchingSolutionManager.currentGoal);
-        boolean launchSolutionValid = solution.isValid();
-
-        Angle aimAngle;
-        if (launchSolutionValid) {
-          aimAngle = solution.hoodPitch().getMeasure();
-        } else {
-          // Fallback to distance-based lookup
-          aimAngle = Degrees.of(LauncherConstants.Hood.angleMap.get(toGoal.in(Meters)));
-        }
-
-        Logger.recordOutput(super.pb.makePath("OTF", "solutionIsValid"), launchSolutionValid);
-        Logger.recordOutput(super.pb.makePath("OTF", "distanceToGoal"), toGoal);
-        Logger.recordOutput(super.pb.makePath("OTF", "aimAngleDeg"), aimAngle.in(Degrees));
-        Logger.recordOutput(
-            super.pb.makePath("OTF", "currentAngleDeg"), inputs.position.in(Degrees));
-        Logger.recordOutput(
-            super.pb.makePath("OTF", "lookupAngle"),
-            Degrees.of(LauncherConstants.Hood.angleMap.get(toGoal.in(Meters))));
-        return aimAngle;
-      };
+  @AutoLogOutput public boolean disableDucking = false;
 
   @Override
   public void periodic() {

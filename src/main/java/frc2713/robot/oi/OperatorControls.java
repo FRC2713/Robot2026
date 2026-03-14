@@ -77,6 +77,11 @@ public class OperatorControls {
                 .withName("Stop Stir"));
 
     controller
+        .b()
+        .whileTrue(
+            GameCommandGroups.OperatorOverriderrs.outtake(intakeExtension, intakeRoller, dyeRotor));
+
+    controller
         .y()
         .onTrue(
             GameCommandGroups.Launching.towerShot(

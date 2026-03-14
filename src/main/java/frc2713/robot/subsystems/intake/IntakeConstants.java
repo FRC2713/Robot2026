@@ -222,7 +222,7 @@ public final class IntakeConstants {
     }
 
     public static LoggedTunableMeasure<Distance> extendedPosition =
-        new LoggedTunableMeasure<>(config.name + "/Extended Position", Inches.of(10.5));
+        new LoggedTunableMeasure<>(config.name + "/Extended Position", Inches.of(10.75));
     public static LoggedTunableMeasure<Distance> pidTestPosition =
         new LoggedTunableMeasure<>(config.name + "/PID Test Position", Inches.of(0));
     public static LoggedTunableMeasure<Distance> retractedPosition =

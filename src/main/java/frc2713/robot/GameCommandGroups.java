@@ -14,11 +14,13 @@ import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.launcher.Flywheels;
 import frc2713.robot.subsystems.launcher.Hood;
 import frc2713.robot.subsystems.launcher.LauncherConstants;
+import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
 import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 import frc2713.robot.subsystems.serializer.SerializerConstants;
 import java.util.Optional;
+import java.util.function.DoubleSupplier;
 
 /**
  * A Utility class holding common game actions in the form of command groups that can be shared
@@ -29,7 +31,6 @@ public final class GameCommandGroups {
 
     /** OTF shooting without drive limits. Use for auto routines. */
     public static Command autoOtfShot(
-        Drive drive,
         Flywheels flywheels,
         Hood hood,
         Turret turret,
@@ -225,5 +226,20 @@ public final class GameCommandGroups {
     public static Command stopUnjam(Feeder feeder) {
       return Commands.parallel(feeder.stop());
     }
+
+    public static Command outtake(
+        IntakeExtension extension, IntakeRoller rollers, DyeRotor dyeRotor) {
+      return Commands.parallel(extension.extendCommand(), rollers.outtake(), dyeRotor.stop());
+    }
+  }
+
+  public static Command intakeAlign(
+      Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier) {
+    return DriveCommands.joystickDriveAtAngle(
+            RobotContainer.drive,
+            xSupplier,
+            ySupplier,
+            () -> LaunchingSolutionManager.ZoneSelectionHelpers.storedIntakeRotation)
+        .withName("Drive Intake Align");
   }
 }

@@ -26,6 +26,7 @@ import frc2713.lib.dynamics.MoiUnits;
 import frc2713.lib.io.CanCoderConfig;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig.GeneralControlMode;
+import frc2713.lib.util.BidirectionalInterpolatingDoubleMap;
 import frc2713.lib.util.LoggedTunableBoolean;
 import frc2713.lib.util.LoggedTunableMeasure;
 import frc2713.lib.util.Util;
@@ -40,8 +41,8 @@ public final class LauncherConstants {
     public static Angle staticHubAngle = Degrees.of(0);
 
     // Turret rotation limits
-    public static final double FORWARD_LIMIT_DEGREES = 90.0;
-    public static final double REVERSE_LIMIT_DEGREES = -90.0;
+    public static final double FORWARD_LIMIT_DEGREES = 188.0;
+    public static final double REVERSE_LIMIT_DEGREES = -210.0;
 
     public static final Angle forwardSoftLimit = Degrees.of(FORWARD_LIMIT_DEGREES);
     public static final Angle reverseSoftLimit = Degrees.of(REVERSE_LIMIT_DEGREES);
@@ -72,6 +73,8 @@ public final class LauncherConstants {
       config.tunable = true; // Enable tunable gains for Motion Magic
       config.generalControlMode = GeneralControlMode.POSITION;
       config.acceptablePositionError = Degrees.of(3);
+
+      config.fxConfig.Feedback.FeedbackRotorOffset = 0.306152;
 
       config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -140,10 +143,10 @@ public final class LauncherConstants {
     static {
       leaderConfig.name = "Flywheels";
       leaderConfig.talonCANID = new CANDeviceId(50, "canivore");
-      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(30., 3.5);
+      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(.7, 3.5);
       leaderConfig.fxConfig.Slot0.kI = 0.0;
       leaderConfig.fxConfig.Slot0.kD = 0.004;
-      leaderConfig.fxConfig.Slot0.kS = Util.modeDependentValue(0.15, 2.0);
+      leaderConfig.fxConfig.Slot0.kS = Util.modeDependentValue(0.2, 2.0);
       leaderConfig.fxConfig.Slot0.kV = 0.12 * gearRatio;
       leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimit = 120.0;
       leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
@@ -179,10 +182,14 @@ public final class LauncherConstants {
             new Rotation3d(0, Degrees.of(-90).in(Radians), 0));
 
     public static InterpolatingDoubleTreeMap ballVelocityMap = new InterpolatingDoubleTreeMap();
-    public static InterpolatingDoubleTreeMap RPMVelocityMap = new InterpolatingDoubleTreeMap();
-    public static InterpolatingDoubleTreeMap ballVelocityAZMap = new InterpolatingDoubleTreeMap();
+    public static InterpolatingDoubleTreeMap rpmVelocityMap = new InterpolatingDoubleTreeMap();
+    public static InterpolatingDoubleTreeMap ballVelocityAZMap =
+        new InterpolatingDoubleTreeMap(); // floor shots may require diff setpoints
+    public static InterpolatingDoubleTreeMap rpmVelocityAZMap =
+        new InterpolatingDoubleTreeMap(); // floor shots may require diff setpoints
 
-    public static InterpolatingDoubleTreeMap rpmMap = new InterpolatingDoubleTreeMap();
+    public static BidirectionalInterpolatingDoubleMap ballToFlywheelMap =
+        new BidirectionalInterpolatingDoubleMap();
 
     public static Distance WHEEL_DIAMETER = Inches.of(4);
     // How many fuel we can launch per second at max firing rate
@@ -196,33 +203,30 @@ public final class LauncherConstants {
       // Distance (m) -> Ball Velocity (ft/s)
       ballVelocityMap.put(2.11, 19.19);
       ballVelocityMap.put(6.44, 22.07);
-      //   ballVelocityMap.put(1.0, 20.0);
-      //   ballVelocityMap.put(1.5, 20.0);
-      //   ballVelocityMap.put(2.5, 22.0);
-      //   ballVelocityMap.put(3.2, 24.0);
-      //   ballVelocityMap.put(4.0, 28.0);
-      //   ballVelocityMap.put(5.17, 29.0);
-      //   ballVelocityMap.put(5.4, 30.0);
 
-      RPMVelocityMap.put(2.11, 2713.);
-      RPMVelocityMap.put(6.44, 3500.);
+      ballVelocityAZMap.put(2.11, 19.19);
+      ballVelocityAZMap.put(6.44, 22.07);
 
-      //   ballVelocityAZMap.put(1.0, 20.0);
-      //   ballVelocityAZMap.put(1.5, 20.0);
-      //   ballVelocityAZMap.put(2.5, 22.0);
-      //   ballVelocityAZMap.put(3.2, 23.0);
-      //   ballVelocityAZMap.put(4.0, 26.0);
-      //   ballVelocityAZMap.put(5.17, 29.0);
-      //   ballVelocityAZMap.put(5.4, 30.0);
+      rpmVelocityMap.put(1.03, 2500.);
+      rpmVelocityMap.put(2.1, 2500.);
+      rpmVelocityMap.put(3.36, 2713.);
+      rpmVelocityMap.put(5.0, 3250.);
+      rpmVelocityMap.put(6.03, 4200.);
+
+      rpmVelocityAZMap.put(1.03, 2500.);
+      rpmVelocityAZMap.put(2.1, 2500.);
+      rpmVelocityAZMap.put(3.36, 2713.);
+      rpmVelocityAZMap.put(5.0, 3250.);
+      rpmVelocityAZMap.put(6.03, 4200.);
     }
 
     static {
       // Ball Velocity (ft/s) -> RPM (rpm)
-      rpmMap.put(17.69, 2500.);
-      rpmMap.put(20.19, 3000.);
-      rpmMap.put(22.07, 3500.);
-      rpmMap.put(24.67, 4000.);
-      rpmMap.put(25.52, 4500.);
+      ballToFlywheelMap.put(17.69, 2500.);
+      ballToFlywheelMap.put(20.19, 3000.);
+      ballToFlywheelMap.put(22.07, 3500.);
+      ballToFlywheelMap.put(24.67, 4000.);
+      ballToFlywheelMap.put(25.52, 4500.);
     }
 
     public static LoggedTunableMeasure<AngularVelocity> idleVelocity =
@@ -248,11 +252,12 @@ public final class LauncherConstants {
     public static double gearRatio = ((20 / 8.0) * (30.0 / 13.0) * (146.0 / 10.0));
 
     public static final Angle retractedPosition = Degrees.of(0);
-    public static final Angle startingOffset = Degrees.of(0.5);
 
     static {
       config.name = "Hood";
       config.talonCANID = new CANDeviceId(54, "canivore"); // Example CAN ID, replace with actual ID
+
+      config.fxConfig.Feedback.FeedbackRotorOffset = -0.121094;
 
       // PID gains for Motion Magic
       config.fxConfig.Slot0.kP = 600.0;
@@ -296,22 +301,27 @@ public final class LauncherConstants {
     public static int PARENT_INDEX = 3; // turret
 
     public static InterpolatingDoubleTreeMap angleMap = new InterpolatingDoubleTreeMap();
-    public static InterpolatingDoubleTreeMap angleForAZMap = new InterpolatingDoubleTreeMap();
+    public static InterpolatingDoubleTreeMap angleForAZMap =
+        new InterpolatingDoubleTreeMap(); // floor shots may require diff setpoints
 
     static {
       // Distance (m) -> Hood Pitch (Degrees)
-      angleMap.put(5.486, 28.74);
-      angleMap.put(4.786, 26.0);
-      angleMap.put(4.175, 25.0);
+      angleMap.put(1.03, 5.0);
+      angleMap.put(2.1, 20.0);
+      angleMap.put(3.36, 25.0);
+      angleMap.put(5.0, 27.13);
+      angleMap.put(6.03, 30.0);
     }
     // 5.486 2000 28.74
     // 4.786 1750 26
 
     static {
       // Distance (m) -> Hood Pitch (Degrees)
-      angleForAZMap.put(5.486, 28.74);
-      angleForAZMap.put(4.786, 26.0);
-      angleForAZMap.put(4.175, 25.0);
+      angleForAZMap.put(1.03, 5.0);
+      angleForAZMap.put(2.1, 20.0);
+      angleForAZMap.put(3.36, 25.0);
+      angleForAZMap.put(5.0, 27.13);
+      angleForAZMap.put(6.03, 30.0);
     }
 
     public static LoggedTunableMeasure<Angle> staticTowerAngle =
@@ -331,3 +341,10 @@ public final class LauncherConstants {
   public static LoggedTunableBoolean otfFutureProjectionEnabled =
       new LoggedTunableBoolean("LaunchingSolutionManager/projection_enabled", true);
 }
+
+// dist   ->    hood    -> flywhees
+// 1.03 m ->   5 deg    -> 2500 rpm
+// 6.03 ->     30       -> 4200
+// 3.36 ->     25       -> 2713
+// 2.1 -> 20 -> 2500
+// 5.0 -> 27.13 -> 3250

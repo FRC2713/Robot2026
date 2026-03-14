@@ -12,6 +12,7 @@ import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.launcher.Flywheels;
 import frc2713.robot.subsystems.launcher.Hood;
+import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
 import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
@@ -101,7 +102,7 @@ public class DriverControls {
                     intakeExtension.extendCommand(),
                     Commands.parallel(intakeRoller.intake(), dyeRotor.stirFuel()))
                 .withName("Intaking"))
-        .onFalse(Commands.parallel(intakeRoller.stop().withName("Stop Intake"), dyeRotor.stop()));
+        .onFalse(Commands.parallel(intakeRoller.stop(), dyeRotor.stop()).withName("Stop Intake"));
 
     controller
         .leftBumper()
@@ -109,6 +110,19 @@ public class DriverControls {
             Commands.parallel(intakeExtension.retractCommand(), intakeRoller.intake())
                 .withName("Retract Intake"))
         .onFalse(intakeRoller.stop().withName("Stop Intake"));
+    // intake align
+    controller
+        .a()
+        .whileTrue(
+            DriveCommands.changeDefaultDriveCommand(
+                drive,
+                GameCommandGroups.intakeAlign(
+                    drive, () -> -controller.getLeftY(), () -> -controller.getLeftX()),
+                "Intake Align"))
+        .onFalse(setToNormalDriveCmd())
+        .onTrue(
+            Commands.runOnce(
+                () -> LaunchingSolutionManager.ZoneSelectionHelpers.setIntakeRotation()));
 
     // shoot otf
     controller
