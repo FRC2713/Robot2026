@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.RPM;
 
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc2713.robot.GameCommandGroups;
+import frc2713.robot.RobotContainer;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
@@ -142,5 +143,16 @@ public class OperatorControls {
 
     // disable ducking
     controller.a().onTrue(Commands.run(() -> hood.disableDucking = !hood.disableDucking));
+
+    controller
+        .x()
+        .whileTrue(
+            Commands.run(
+                () -> {
+                  var visionPose = RobotContainer.vision.getPose();
+                  if (visionPose.isPresent()) {
+                    RobotContainer.drive.setPose(visionPose.get());
+                  }
+                }));
   }
 }

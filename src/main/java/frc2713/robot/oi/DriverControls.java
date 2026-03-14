@@ -98,8 +98,7 @@ public class DriverControls {
     controller
         .leftTrigger(0.98)
         .onTrue(
-            Commands.parallel(
-                    intakeExtension.extendCommand(), Commands.parallel(intakeRoller.intake()))
+            Commands.parallel(intakeExtension.extendCommand(), intakeRoller.intake())
                 .withName("Intaking"))
         .onFalse(Commands.parallel(intakeRoller.stop()).withName("Stop Intake"));
 

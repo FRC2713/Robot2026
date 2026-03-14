@@ -21,6 +21,7 @@ import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.commands.autos.DriveTest;
 import frc2713.robot.commands.autos.Midwars;
+import frc2713.robot.commands.autos.MidwarsFlipped;
 import frc2713.robot.commands.autos.NeutralScoreNeutral;
 import frc2713.robot.commands.autos.NeutralSweepLeftToRight;
 import frc2713.robot.commands.autos.NeutralSweepRightToLeft;
@@ -353,6 +354,22 @@ public class RobotContainer {
     autoChooser.addDefaultOption(
         "Midwars",
         Midwars.routine(
+            autoFactory,
+            drive,
+            intakeExtension,
+            intakeRoller,
+            flywheels,
+            hood,
+            turret,
+            dyeRotor,
+            feeder,
+            () ->
+                GameCommandGroups.Launching.autoOtfShot(
+                    flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)));
+
+    autoChooser.addDefaultOption(
+        "MidwarsFlipped",
+        MidwarsFlipped.getRoutine(
             autoFactory,
             drive,
             intakeExtension,

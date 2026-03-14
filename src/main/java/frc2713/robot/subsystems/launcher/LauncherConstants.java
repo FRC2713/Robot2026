@@ -234,11 +234,11 @@ public final class LauncherConstants {
     public static LoggedTunableMeasure<AngularVelocity> PIDTest =
         new LoggedTunableMeasure<>("Flywheels/PIDTest", RPM.of(4000));
     public static LoggedTunableMeasure<AngularVelocity> staticRightLeftTrench =
-        new LoggedTunableMeasure<>("Flywheels/Flywheels Static Trench", RPM.of(3150));
+        new LoggedTunableMeasure<>("Flywheels/Flywheels Static Trench", RPM.of(2850));
     public static LoggedTunableMeasure<AngularVelocity> staticHubVelocity =
         new LoggedTunableMeasure<>("Flywheels/Flywheels Static Hub", RotationsPerSecond.of(20));
     public static LoggedTunableMeasure<AngularVelocity> staticTowerVelocity =
-        new LoggedTunableMeasure<AngularVelocity>("Flywheels/Flywheels Static Tower", RPM.of(3000));
+        new LoggedTunableMeasure<AngularVelocity>("Flywheels/Flywheels Static Tower", RPM.of(2713));
   }
 
   public final class Hood {
