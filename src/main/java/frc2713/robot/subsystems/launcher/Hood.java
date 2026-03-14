@@ -29,7 +29,7 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
     super(config, new MotorInputsAutoLogged(), launcherMotorIO);
     // if (Constants.enableOTFFeatures)
     setDefaultCommand(
-        autoRetractCommand(RobotContainer.drive::getPose, () -> Degrees.of(0))
+        autoRetractCommand(RobotContainer.drive::getPose, () -> LauncherConstants.Hood.retractedPosition)
             .withName("OTF Lock AutoRetract"));
   }
 
