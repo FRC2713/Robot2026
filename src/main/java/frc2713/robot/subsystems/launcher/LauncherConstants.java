@@ -251,7 +251,7 @@ public final class LauncherConstants {
     // 8t pinion to 20t gear, 13t gear to  30t gear, 10t gear to 146 sector gear
     public static double gearRatio = ((20 / 8.0) * (30.0 / 13.0) * (146.0 / 10.0));
 
-    public static final Angle retractedPosition = Degrees.of(0);
+    public static final Angle retractedPosition = Degrees.of(0.5);
 
     static {
       config.name = "Hood";
