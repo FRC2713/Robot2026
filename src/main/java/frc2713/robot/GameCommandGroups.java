@@ -38,15 +38,24 @@ public final class GameCommandGroups {
         DyeRotor dyeRotor,
         IntakeExtension extension,
         IntakeRoller intakeRoller) {
-      return Commands.parallel(
-              flywheels.otfCommand(),
-              hood.otfCommand(),
-              turret.otfCommand(),
-              intakeRoller.intake(),
-              flywheels.simulateLaunchFuelCommand(flywheels::atTarget),
-              feeder.feedWhenReady(flywheels::atTarget),
-              dyeRotor.feedWhenReady(flywheels::atTarget),
-              extension.maintainFuelPressureCommand())
+      return Commands.either(
+              Commands.none(),
+              Commands.parallel(
+                  flywheels.otfCommand(),
+                  hood.otfCommand(),
+                  turret.otfCommand(),
+                  intakeRoller.intake(),
+                  flywheels.simulateLaunchFuelCommand(flywheels::atTarget),
+                  feeder.feedWhenReady(flywheels::atTarget),
+                  dyeRotor.feedWhenReady(flywheels::atTarget),
+                  extension.maintainFuelPressureCommand()),
+              () -> {
+                var inNeutral =
+                    FieldConstants.NeutralZone.region.contains(
+                        RobotContainer.drive.getPose().getTranslation());
+                System.out.println("Auto in neutral: " + inNeutral);
+                return inNeutral;
+              })
           .withName("Auto OTF Shooting");
     }
 

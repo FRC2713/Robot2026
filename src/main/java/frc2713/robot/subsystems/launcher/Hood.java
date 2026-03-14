@@ -1,6 +1,5 @@
 package frc2713.robot.subsystems.launcher;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
@@ -29,7 +28,8 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
     super(config, new MotorInputsAutoLogged(), launcherMotorIO);
     // if (Constants.enableOTFFeatures)
     setDefaultCommand(
-        autoRetractCommand(RobotContainer.drive::getPose, () -> LauncherConstants.Hood.retractedPosition)
+        autoRetractCommand(
+                RobotContainer.drive::getPose, () -> LauncherConstants.Hood.retractedPosition)
             .withName("OTF Lock AutoRetract"));
   }
 
