@@ -83,8 +83,7 @@ public final class LauncherConstants {
       config.fxConfig.Slot0.kP = Util.modeDependentValue(80.0, 80.0);
       config.fxConfig.Slot0.kI = 0.0;
       config.fxConfig.Slot0.kD = Util.modeDependentValue(0.7, 16.0);
-      config.fxConfig.Slot0.kS =
-          Util.modeDependentValue(0.3, 0.15); // static friction compensation
+      config.fxConfig.Slot0.kS = Util.modeDependentValue(0.3, 0.15); // static friction compensation
       config.fxConfig.Slot0.kV = Util.modeDependentValue(2.9, 0.12); // velocity feedforward
       config.fxConfig.Slot0.kA = Util.modeDependentValue(0.0, 0.01); // acceleration feedforward
 

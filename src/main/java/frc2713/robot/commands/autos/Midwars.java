@@ -65,6 +65,7 @@ public class Midwars {
             Commands.parallel(
                 Commands.print("[AUTO] Moving to launch position"),
                 intakeRoller.intake(),
+                flywheels.otfCommand(),
                 moveToLaunchRight.cmd()));
 
     moveToLaunchRight
@@ -87,8 +88,7 @@ public class Midwars {
                     Commands.print("[AUTO] Going to fuel again"),
                     Commands.parallel(
                         // Wait to extend as moving to intake position
-                        Commands.parallel(intakeExtension.extendCommand(), intakeRoller.intake())
-                            .beforeStarting(new WaitCommand(0.6)),
+                        Commands.parallel(intakeExtension.extendCommand(), intakeRoller.intake()),
                         intakeFuelRight2.cmd()))
                 .handleInterrupt(
                     () -> System.out.println("[AUTO] IntakeFuelRight2 likely got interuppted")));
@@ -97,8 +97,9 @@ public class Midwars {
         .done()
         .onTrue(
             Commands.sequence(
-                Commands.print("[AUTO] Going to fuel again"),
+                Commands.print("[AUTO] Going to launch again"),
                 Commands.parallel(
+                    flywheels.otfCommand(),
                     intakeExtension.extendCommand(),
                     intakeRoller.intake(),
                     moveToLaunchRight2.cmd())));
@@ -119,8 +120,8 @@ public class Midwars {
                 Commands.sequence(
                         Commands.parallel(
                             Commands.run(() -> driveSubsystem.stop())
-                                .withDeadline(new WaitCommand(4)),
-                            Commands.race(otfShotSupplier.get(), new WaitCommand(4))),
+                                .withDeadline(new WaitCommand(9)),
+                            Commands.race(otfShotSupplier.get(), new WaitCommand(9))),
                         Commands.sequence(
                             hood.retract().withTimeout(0.1),
                             Commands.parallel(

@@ -73,6 +73,8 @@ public final class IntakeConstants {
       leaderConfig.fxConfig.CurrentLimits.SupplyCurrentLimit = 70.0;
       leaderConfig.fxConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
+      leaderConfig.fxConfig.OpenLoopRamps.VoltageOpenLoopRampPeriod = 0.05;
+
       followerConfig.name = "Intake Rollers Follower";
       followerConfig.talonCANID = new CANDeviceId(43); // Example CAN ID, replace with actual ID
       followerConfig.unitToRotorRatio =

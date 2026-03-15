@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc2713.lib.io.ArticulatedComponent;
@@ -58,6 +59,11 @@ public class DyeRotor extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   public Command feedWhenReady(BooleanSupplier isReady) {
     return Commands.sequence(Commands.waitUntil(isReady), indexFuel());
   }
+
+    public Command feedWhenReady(BooleanSupplier isReady, Time timout) {
+    return Commands.sequence(Commands.waitUntil(isReady).withTimeout(timout), indexFuel());
+  }
+
 
   public Command outtakeFuel() {
     return setVelocity(() -> SerializerConstants.DyeRotor.outdexingSpeed);
