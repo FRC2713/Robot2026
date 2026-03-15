@@ -88,8 +88,8 @@ public final class LauncherConstants {
       config.fxConfig.Slot0.kA = Util.modeDependentValue(0.0, 0.01); // acceleration feedforward
 
       // Motion Magic parameters
-      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 20.0; // rotations per second
-      config.fxConfig.MotionMagic.MotionMagicAcceleration = 50.0; // rotations per second^2
+      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 20.0 / 2; // rotations per second
+      config.fxConfig.MotionMagic.MotionMagicAcceleration = 50.0 / 2; // rotations per second^2
       config.fxConfig.MotionMagic.MotionMagicJerk = 0.; // limit jerk for smooth motion
 
       // Gear ratio: motor rotations per turret rotation = GEAR_1/GEAR_0 = 120/60 = 2.0
