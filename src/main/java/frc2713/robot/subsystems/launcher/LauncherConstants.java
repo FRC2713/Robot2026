@@ -246,7 +246,7 @@ public final class LauncherConstants {
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
 
     public static final Angle minAngle = Degrees.of(0);
-    public static final Angle maxAngle = Degrees.of(10);
+    public static final Angle maxAngle = Degrees.of(30);
 
     // 8t pinion to 20t gear, 13t gear to  30t gear, 10t gear to 146 sector gear
     public static double gearRatio = ((20 / 8.0) * (30.0 / 13.0) * (146.0 / 10.0));
@@ -257,7 +257,7 @@ public final class LauncherConstants {
       config.name = "Hood";
       config.talonCANID = new CANDeviceId(54, "canivore"); // Example CAN ID, replace with actual ID
 
-      config.fxConfig.Feedback.FeedbackRotorOffset = -0.121094 + 0.215332;
+      config.fxConfig.Feedback.FeedbackRotorOffset = -0.121094 + 0.215332 - 0.439453;
 
       // PID gains for Motion Magic
       config.fxConfig.Slot0.kP = 600.0;
