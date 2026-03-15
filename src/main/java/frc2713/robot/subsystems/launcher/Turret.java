@@ -52,7 +52,7 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
       final CanCoderInputsAutoLogged cancoderInputs,
       final CanCoderIO cancoderIO) {
     super(config, new MotorInputsAutoLogged(), turretMotorIO, cancoderInputs, cancoderIO);
-    // setDefaultCommand(otfCommand());
+    setDefaultCommand(otfCommand());
   }
 
   @AutoLogOutput

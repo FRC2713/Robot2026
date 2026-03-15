@@ -80,18 +80,18 @@ public final class LauncherConstants {
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
       // PID gains for Motion Magic
-      config.fxConfig.Slot0.kP = Util.modeDependentValue(550.0, 80.0);
+      config.fxConfig.Slot0.kP = Util.modeDependentValue(80.0, 80.0);
       config.fxConfig.Slot0.kI = 0.0;
-      config.fxConfig.Slot0.kD = Util.modeDependentValue(8.0, 16.0);
+      config.fxConfig.Slot0.kD = Util.modeDependentValue(0.7, 16.0);
       config.fxConfig.Slot0.kS =
-          Util.modeDependentValue(0.23, 0.15); // static friction compensation
-      config.fxConfig.Slot0.kV = Util.modeDependentValue(0.0, 0.12); // velocity feedforward
+          Util.modeDependentValue(0.3, 0.15); // static friction compensation
+      config.fxConfig.Slot0.kV = Util.modeDependentValue(2.9, 0.12); // velocity feedforward
       config.fxConfig.Slot0.kA = Util.modeDependentValue(0.0, 0.01); // acceleration feedforward
 
       // Motion Magic parameters
       config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 20.0; // rotations per second
-      config.fxConfig.MotionMagic.MotionMagicAcceleration = 10.0; // rotations per second^2
-      config.fxConfig.MotionMagic.MotionMagicJerk = 100; // limit jerk for smooth motion
+      config.fxConfig.MotionMagic.MotionMagicAcceleration = 50.0; // rotations per second^2
+      config.fxConfig.MotionMagic.MotionMagicJerk = 0.; // limit jerk for smooth motion
 
       // Gear ratio: motor rotations per turret rotation = GEAR_1/GEAR_0 = 120/60 = 2.0
       config.unitToRotorRatio = motorToTurretGearRatio;
