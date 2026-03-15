@@ -42,7 +42,7 @@ public final class LauncherConstants {
 
     // Turret rotation limits
     public static final double FORWARD_LIMIT_DEGREES = 188.0;
-    public static final double REVERSE_LIMIT_DEGREES = -210.0;
+    public static final double REVERSE_LIMIT_DEGREES = -180.0;
 
     public static final Angle forwardSoftLimit = Degrees.of(FORWARD_LIMIT_DEGREES);
     public static final Angle reverseSoftLimit = Degrees.of(REVERSE_LIMIT_DEGREES);
@@ -126,11 +126,11 @@ public final class LauncherConstants {
     public static LoggedTunableMeasure<Angle> PIDTestAngleTwo =
         new LoggedTunableMeasure<>("Turret/PIDTestAngleTwo", Degrees.of(-10));
     public static LoggedTunableMeasure<Angle> staticLeftTrench =
-        new LoggedTunableMeasure<>("Turret/Turret Static Trench L", Degrees.of(10));
+        new LoggedTunableMeasure<>("Turret/Turret Static Trench L", Degrees.of(-190));
     public static LoggedTunableMeasure<Angle> staticRightTrench =
-        new LoggedTunableMeasure<>("Turret/Turret Static Trench R", Degrees.of(-10));
+        new LoggedTunableMeasure<>("Turret/Turret Static Trench R", Degrees.of(190));
     public static LoggedTunableMeasure<Angle> staticTowerShot =
-        new LoggedTunableMeasure<>("Turret/Turret Static Tower", Degrees.of(3));
+        new LoggedTunableMeasure<>("Turret/Turret Static Tower", Degrees.of(-177));
   }
 
   public final class Flywheels {
@@ -234,11 +234,11 @@ public final class LauncherConstants {
     public static LoggedTunableMeasure<AngularVelocity> PIDTest =
         new LoggedTunableMeasure<>("Flywheels/PIDTest", RPM.of(4000));
     public static LoggedTunableMeasure<AngularVelocity> staticRightLeftTrench =
-        new LoggedTunableMeasure<>("Flywheels/Flywheels Static Trench", RPM.of(3150));
+        new LoggedTunableMeasure<>("Flywheels/Flywheels Static Trench", RPM.of(2850));
     public static LoggedTunableMeasure<AngularVelocity> staticHubVelocity =
         new LoggedTunableMeasure<>("Flywheels/Flywheels Static Hub", RotationsPerSecond.of(20));
     public static LoggedTunableMeasure<AngularVelocity> staticTowerVelocity =
-        new LoggedTunableMeasure<AngularVelocity>("Flywheels/Flywheels Static Tower", RPM.of(3000));
+        new LoggedTunableMeasure<AngularVelocity>("Flywheels/Flywheels Static Tower", RPM.of(2713));
   }
 
   public final class Hood {
@@ -251,13 +251,13 @@ public final class LauncherConstants {
     // 8t pinion to 20t gear, 13t gear to  30t gear, 10t gear to 146 sector gear
     public static double gearRatio = ((20 / 8.0) * (30.0 / 13.0) * (146.0 / 10.0));
 
-    public static final Angle retractedPosition = Degrees.of(0);
+    public static final Angle retractedPosition = Degrees.of(0.5);
 
     static {
       config.name = "Hood";
       config.talonCANID = new CANDeviceId(54, "canivore"); // Example CAN ID, replace with actual ID
 
-      config.fxConfig.Feedback.FeedbackRotorOffset = -0.121094;
+      config.fxConfig.Feedback.FeedbackRotorOffset = -0.121094 + 0.215332 - 0.439453;
 
       // PID gains for Motion Magic
       config.fxConfig.Slot0.kP = 600.0;

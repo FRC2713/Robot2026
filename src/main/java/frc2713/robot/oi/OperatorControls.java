@@ -1,7 +1,11 @@
 package frc2713.robot.oi;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.RPM;
+
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc2713.robot.GameCommandGroups;
+import frc2713.robot.RobotContainer;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
@@ -43,6 +47,50 @@ public class OperatorControls {
   }
 
   public void configureButtonBindings() {
+
+    controller
+        .povUp()
+        .onTrue(
+            Commands.runOnce(() -> flywheels.fudgeFactor = flywheels.fudgeFactor.plus(RPM.of(250)))
+                .withName("flywheels fudgeFactor up"));
+
+    controller
+        .povDown()
+        .onTrue(
+            Commands.runOnce(() -> flywheels.fudgeFactor = flywheels.fudgeFactor.minus(RPM.of(250)))
+                .withName("flywheels fudgeFactor down"));
+    controller
+        .povRight()
+        .onTrue(
+            Commands.runOnce(() -> turret.fudgeFactor = turret.fudgeFactor.minus(Degrees.of(5)))
+                .withName("turret fudgeFactor minus"));
+
+    controller
+        .povLeft()
+        .onTrue(
+            Commands.runOnce(() -> turret.fudgeFactor = turret.fudgeFactor.plus(Degrees.of(5)))
+                .withName("turret fudgeFactor plus"));
+
+    controller
+        .start()
+        .onTrue(
+            Commands.runOnce(
+                    () -> {
+                      turret.fudgeFactor = Degrees.of(0.0);
+                      flywheels.fudgeFactor = RPM.of(0.0);
+                    })
+                .withName("fudgeFacor reset"));
+
+    controller
+        .back()
+        .onTrue(
+            Commands.runOnce(
+                    () -> {
+                      turret.fudgeFactor = Degrees.of(0.0);
+                      flywheels.fudgeFactor = RPM.of(0.0);
+                    })
+                .withName("fudgeFacor reset"));
+
     controller
         .leftBumper()
         .onTrue(
@@ -51,17 +99,19 @@ public class OperatorControls {
                 .withName("Static LTrench Shot"))
         .onFalse(
             GameCommandGroups.Launching.stopShootingAndRetractHood(
-                drive, feeder, dyeRotor, hood, flywheels));
+                    drive, feeder, dyeRotor, hood, flywheels)
+                .withName("Stop Shooting + Hood Retract"));
 
     controller
         .rightBumper()
         .onTrue(
             GameCommandGroups.Launching.rightTrenchShot(
-                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
+                    drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)
+                .withName("Static RTrench Shot"))
         .onFalse(
             GameCommandGroups.Launching.stopShootingAndRetractHood(
                     drive, feeder, dyeRotor, hood, flywheels)
-                .withName("Static R Trench Shot"));
+                .withName("Stop Shooting + Hood Retract"));
 
     controller
         .rightTrigger(0.98)
@@ -71,26 +121,39 @@ public class OperatorControls {
 
     controller
         .leftTrigger(0.98)
-        .onTrue(GameCommandGroups.OperatorOverriderrs.stir(dyeRotor, intakeRoller).withName("Stir"))
-        .onFalse(
-            GameCommandGroups.OperatorOverriderrs.stopStir(dyeRotor, intakeRoller)
-                .withName("Stop Stir"));
+        .onTrue(dyeRotor.stirFuel().withName("Stir"))
+        .onFalse(dyeRotor.stop().withName("Stop Stir"));
 
     controller
         .b()
         .whileTrue(
-            GameCommandGroups.OperatorOverriderrs.outtake(intakeExtension, intakeRoller, dyeRotor));
+            GameCommandGroups.OperatorOverriderrs.outtake(intakeExtension, intakeRoller, dyeRotor)
+                .withName("Outtake"));
 
     controller
         .y()
         .onTrue(
             GameCommandGroups.Launching.towerShot(
-                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
+                    drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)
+                .withName("Static Tower Shot"))
         .onFalse(
             GameCommandGroups.Launching.stopShootingAndRetractHood(
-                drive, feeder, dyeRotor, hood, flywheels));
+                    drive, feeder, dyeRotor, hood, flywheels)
+                .withName("Stop Shooting + Hood Retract"));
 
     // disable ducking
     controller.a().onTrue(Commands.run(() -> hood.disableDucking = !hood.disableDucking));
+
+    controller
+        .x()
+        .whileTrue(
+            Commands.run(
+                () -> {
+                  System.out.println("HARD RESET VISION!");
+                  var visionPose = RobotContainer.vision.getPose();
+                  if (visionPose.isPresent()) {
+                    RobotContainer.drive.setPose(visionPose.get());
+                  }
+                }));
   }
 }

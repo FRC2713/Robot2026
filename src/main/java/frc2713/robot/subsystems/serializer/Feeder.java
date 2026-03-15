@@ -16,6 +16,7 @@ public class Feeder extends MotorSubsystem<MotorInputsAutoLogged, MotorIO> {
 
   public Feeder(final TalonFXSubsystemConfig config, final MotorIO feederMotorIO) {
     super(config, new MotorInputsAutoLogged(), feederMotorIO);
+    setDefaultCommand(stop());
   }
 
   public Command setVelocity(Supplier<AngularVelocity> desiredVelocity) {

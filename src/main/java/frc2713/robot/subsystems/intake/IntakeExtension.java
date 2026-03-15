@@ -114,12 +114,16 @@ public class IntakeExtension
    * @see LauncherConstants.launchRateVolumeInchesCubedPerSecond
    */
   public Command maintainFuelPressureCommand() {
+    return maintainFuelPressureCommand(0.5);
+  }
+
+  public Command maintainFuelPressureCommand(double scaling) {
     double volumeLostPerSecond = LauncherConstants.Flywheels.launchRateVolumeInchesCubedPerSecond;
     Logger.recordOutput(pb.makePath("volumeLostPerSecond (in^3)"), volumeLostPerSecond);
     Logger.recordOutput(
         pb.makePath("volumePerInch (in^3)"), IntakeConstants.Extension.volumePerInch);
     LinearVelocity velocityToMaintain =
-        InchesPerSecond.of(volumeLostPerSecond / IntakeConstants.Extension.volumePerInch / 2.0)
+        InchesPerSecond.of(volumeLostPerSecond / IntakeConstants.Extension.volumePerInch * scaling)
             .times(IntakeConstants.Extension.fuelPressureScalingFactor.get());
     return setDistanceCommand(IntakeConstants.Extension.retractedPosition, () -> velocityToMaintain)
         .withName("Maintain Fuel Pressure");

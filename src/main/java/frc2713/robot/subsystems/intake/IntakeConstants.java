@@ -123,8 +123,8 @@ public final class IntakeConstants {
     public static final Supplier<MotionMagicConfigs> motionMagicGains =
         () ->
             new MotionMagicConfigs()
-                .withMotionMagicCruiseVelocity(RotationsPerSecond.of(10)) // target crusing vel rps
-                .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(20.0))
+                .withMotionMagicCruiseVelocity(RotationsPerSecond.of(300)) // target crusing vel rps
+                .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(1000.0))
                 .withMotionMagicJerk(0);
 
     static {
@@ -222,7 +222,7 @@ public final class IntakeConstants {
     }
 
     public static LoggedTunableMeasure<Distance> extendedPosition =
-        new LoggedTunableMeasure<>(config.name + "/Extended Position", Inches.of(10.75));
+        new LoggedTunableMeasure<>(config.name + "/Extended Position", Inches.of(11.5));
     public static LoggedTunableMeasure<Distance> pidTestPosition =
         new LoggedTunableMeasure<>(config.name + "/PID Test Position", Inches.of(0));
     public static LoggedTunableMeasure<Distance> retractedPosition =

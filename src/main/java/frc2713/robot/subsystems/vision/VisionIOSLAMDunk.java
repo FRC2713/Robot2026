@@ -1,6 +1,8 @@
 package frc2713.robot.subsystems.vision;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -12,6 +14,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import frc2713.robot.RobotContainer;
 import org.littletonrobotics.junction.Logger;
@@ -77,28 +80,49 @@ public class VisionIOSLAMDunk implements VisionIO {
           return;
         }
 
-        if ((inputs
-                .pose
-                .getTranslation()
-                .getDistance(RobotContainer.drive.getPose().getTranslation())
-            > VisionConstants.MAX_POSE_JUMP.in(Meters))) {
-          inputs.reasoning = "Jump protection";
-          inputs.applying = false;
-          return;
-        }
-
         if (Math.abs(inputs.pose3d.getTranslation().getZ()) > 0.1) {
           inputs.applying = false;
           inputs.reasoning = "Off ground Z > 0.1m";
           return;
         }
 
-        if (inputs.tagCount < 2) {
-          inputs.reasoning = "Valid. Few tags visible";
-          inputs.rotationStdDev =
-              VisionConstants.POSE_ESTIMATOR_STATE_LOW_TAGS_STDEVS.rotationalStDev();
+        double poseDelta =
+            inputs
+                .pose
+                .getTranslation()
+                .getDistance(RobotContainer.drive.getPose().getTranslation());
+
+        if ((poseDelta > VisionConstants.MAX_POSE_JUMP.in(Meters)) && DriverStation.isTeleop()) {
+
+          double normalizezdDistance = poseDelta / VisionConstants.MAX_POSE_JUMP.in(Meters);
+          Logger.recordOutput("Odometry/normalizezdDistance", normalizezdDistance);
+          double scaleFactor = Math.pow(normalizezdDistance, 2);
+          Logger.recordOutput("Odometry/scaleFactor", scaleFactor);
+
           inputs.translationStdDev =
-              VisionConstants.POSE_ESTIMATOR_STATE_LOW_TAGS_STDEVS.translationalStDev();
+              VisionConstants.POSE_ESTIMATOR_STATE_STDEVS.translationalStDev().times(scaleFactor);
+          inputs.rotationStdDev = Degrees.of(99999);
+
+          inputs.reasoning = "Jump protection";
+          inputs.applying = true;
+          return;
+        }
+
+        if (inputs.tagCount < 2 && linspeed.gte(MetersPerSecond.of(1))) {
+          inputs.reasoning = "Valid. Few tags visible and fast";
+          inputs.rotationStdDev =
+              VisionConstants.POSE_ESTIMATOR_STATE_LOW_TAGS_FAST_STDEVS.rotationalStDev();
+          inputs.translationStdDev =
+              VisionConstants.POSE_ESTIMATOR_STATE_LOW_TAGS_FAST_STDEVS.translationalStDev();
+          inputs.applying = true;
+          return;
+        }
+        if (inputs.tagCount < 2) {
+          inputs.reasoning = "Valid. Few tags visible and slow";
+          inputs.rotationStdDev =
+              VisionConstants.POSE_ESTIMATOR_STATE_LOW_TAGS_SLOW_STDEVS.rotationalStDev();
+          inputs.translationStdDev =
+              VisionConstants.POSE_ESTIMATOR_STATE_LOW_TAGS_SLOW_STDEVS.translationalStDev();
           inputs.applying = true;
           return;
         }
