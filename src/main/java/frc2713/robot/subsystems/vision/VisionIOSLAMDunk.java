@@ -16,6 +16,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import frc2713.robot.FieldConstants;
 import frc2713.robot.RobotContainer;
 import org.littletonrobotics.junction.Logger;
 
@@ -76,6 +77,12 @@ public class VisionIOSLAMDunk implements VisionIO {
         }
         if (inputs.latency.compareTo(VisionConstants.LATENCY_THRESHOLD.get()) > 0) {
           inputs.reasoning = "Latency above threshold";
+          inputs.applying = false;
+          return;
+        }
+        
+        if (FieldConstants.FIELD_PLUS_METER.contains(inputs.pose.getTranslation()) && DriverStation.isTeleop()) {
+          inputs.reasoning = "Vision outside field";
           inputs.applying = false;
           return;
         }
