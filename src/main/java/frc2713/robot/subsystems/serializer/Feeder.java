@@ -37,9 +37,11 @@ public class Feeder extends MotorSubsystem<MotorInputsAutoLogged, MotorIO> {
     //             ? SerializerConstants.Feeder.shootingSpeed.get()
     //             : RotationsPerSecond.of(0));
   }
-    public Command feedWhenReady(BooleanSupplier isReady, Time timeout) {
+
+  public Command feedWhenReady(BooleanSupplier isReady, Time timeout) {
     return Commands.sequence(
-        Commands.waitUntil(isReady).withTimeout(timeout), setVelocity(SerializerConstants.Feeder.shootingSpeed));
+        Commands.waitUntil(isReady).withTimeout(timeout),
+        setVelocity(SerializerConstants.Feeder.shootingSpeed));
   }
 
   public Command stop() {

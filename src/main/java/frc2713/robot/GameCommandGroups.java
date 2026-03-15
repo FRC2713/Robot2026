@@ -46,9 +46,12 @@ public final class GameCommandGroups {
                   hood.otfCommand(),
                   turret.otfCommand(),
                   intakeRoller.intake(),
-                  flywheels.simulateLaunchFuelCommand(() -> flywheels.atTarget() && hood.atTarget()),
-                  feeder.feedWhenReady(() -> flywheels.atTarget() && hood.atTarget(), Seconds.of(0.8)),
-                  dyeRotor.feedWhenReady(() -> flywheels.atTarget() && hood.atTarget(), Seconds.of(0.8)),
+                  flywheels.simulateLaunchFuelCommand(
+                      () -> flywheels.atTarget() && hood.atTarget()),
+                  feeder.feedWhenReady(
+                      () -> flywheels.atTarget() && hood.atTarget(), Seconds.of(0.8)),
+                  dyeRotor.feedWhenReady(
+                      () -> flywheels.atTarget() && hood.atTarget(), Seconds.of(0.8)),
                   extension.maintainFuelPressureCommand(1).beforeStarting(Commands.waitSeconds(1))),
               () -> {
                 var inNeutral =

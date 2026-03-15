@@ -60,10 +60,9 @@ public class DyeRotor extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
     return Commands.sequence(Commands.waitUntil(isReady), indexFuel());
   }
 
-    public Command feedWhenReady(BooleanSupplier isReady, Time timout) {
+  public Command feedWhenReady(BooleanSupplier isReady, Time timout) {
     return Commands.sequence(Commands.waitUntil(isReady).withTimeout(timout), indexFuel());
   }
-
 
   public Command outtakeFuel() {
     return setVelocity(() -> SerializerConstants.DyeRotor.outdexingSpeed);
