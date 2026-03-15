@@ -120,7 +120,7 @@ public class DevControls {
     // Hood Controls
     controller.povUp().onTrue(hood.setAngleCommand(() -> Degrees.of(25)));
 
-    controller.povDown().onTrue(hood.setAngleCommand(() -> Degrees.of(0)));
+    controller.povDown().onTrue(hood.setAngleCommand(() -> Degrees.of(0.5)));
 
     // controller
     //     .leftBumper()
