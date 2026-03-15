@@ -16,7 +16,6 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
-import frc2713.robot.FieldConstants;
 import frc2713.robot.RobotContainer;
 import org.littletonrobotics.junction.Logger;
 
