@@ -1,5 +1,6 @@
 package frc2713.robot.oi;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RPM;
 
@@ -9,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc2713.robot.GameCommandGroups;
+import frc2713.robot.RobotContainer;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
@@ -179,10 +181,18 @@ public class DevControls {
     // B button - index fuel
     // controller.b().whileTrue(feeder.feedShooter()).onFalse(feeder.stop());
 
+    // controller
+    //     .x()
+    //     .onTrue(flywheels.velocitySetpointCommand(LauncherConstants.Flywheels.PIDTest))
+    //     .onFalse(flywheels.velocitySetpointCommand(() -> RPM.of(0)));
+
     controller
         .x()
-        .onTrue(flywheels.velocitySetpointCommand(LauncherConstants.Flywheels.PIDTest))
-        .onFalse(flywheels.velocitySetpointCommand(() -> RPM.of(0)));
+        .onTrue(Commands.runOnce(() -> RobotContainer.drive.changeDriveCurrentLimits(Amps.of(70))));
+
+    controller
+        .y()
+        .onTrue(Commands.runOnce(() -> RobotContainer.drive.changeDriveCurrentLimits(Amps.of(80))));
 
     // controller
     //     .x()
@@ -193,15 +203,15 @@ public class DevControls {
     controller.povDown().onTrue(hood.setAngleCommand(() -> Degrees.of(0)));
 
     // Y button - index fuel in parallel (same effect since it's the same command)
-    controller
-        .y()
-        .whileTrue(
-            Commands.sequence(
-                flywheels.setVelocityUntilTarget(
-                    LauncherConstants.Flywheels
-                        .PIDTest), // Spin up flywheels to a test launch velocity
-                Commands.parallel(dyeRotor.indexFuel(), feeder.feedShooter())))
-        .onFalse(Commands.parallel(dyeRotor.stop(), feeder.stop(), flywheels.stop()));
+    // controller
+    //     .y()
+    //     .whileTrue(
+    //         Commands.sequence(
+    //             flywheels.setVelocityUntilTarget(
+    //                 LauncherConstants.Flywheels
+    //                     .PIDTest), // Spin up flywheels to a test launch velocity
+    //             Commands.parallel(dyeRotor.indexFuel(), feeder.feedShooter())))
+    //     .onFalse(Commands.parallel(dyeRotor.stop(), feeder.stop(), flywheels.stop()));
 
     // Shoot when flywheels are ready
     controller

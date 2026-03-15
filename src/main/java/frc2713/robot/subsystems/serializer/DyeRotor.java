@@ -27,6 +27,8 @@ public class DyeRotor extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
 
   public DyeRotor(final TalonFXSubsystemConfig config, final MotorIO indexerMotorIO) {
     super(config, new MotorInputsAutoLogged(), indexerMotorIO);
+
+    setDefaultCommand(setVelocity(() -> RPM.of(0)));
   }
 
   public Command setVelocity(Supplier<AngularVelocity> desiredVelocity) {
