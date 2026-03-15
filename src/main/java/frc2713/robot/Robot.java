@@ -7,6 +7,7 @@
 
 package frc2713.robot;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
@@ -155,6 +156,8 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
+
+    RobotContainer.drive.changeDriveCurrentLimits(Amps.of(70));
   }
 
   /** This function is called periodically during operator control. */
