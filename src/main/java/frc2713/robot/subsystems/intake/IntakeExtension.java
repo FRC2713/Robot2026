@@ -114,10 +114,10 @@ public class IntakeExtension
    * @see LauncherConstants.launchRateVolumeInchesCubedPerSecond
    */
   public Command maintainFuelPressureCommand() {
- return maintainFuelPressureCommand(0.5);
+    return maintainFuelPressureCommand(0.5);
   }
 
-    public Command maintainFuelPressureCommand(double scaling) {
+  public Command maintainFuelPressureCommand(double scaling) {
     double volumeLostPerSecond = LauncherConstants.Flywheels.launchRateVolumeInchesCubedPerSecond;
     Logger.recordOutput(pb.makePath("volumeLostPerSecond (in^3)"), volumeLostPerSecond);
     Logger.recordOutput(
