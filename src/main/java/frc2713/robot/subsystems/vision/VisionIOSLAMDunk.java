@@ -96,7 +96,7 @@ public class VisionIOSLAMDunk implements VisionIO {
 
           double normalizezdDistance = poseDelta / VisionConstants.MAX_POSE_JUMP.in(Meters);
           Logger.recordOutput("Odometry/normalizezdDistance", normalizezdDistance);
-          double scaleFactor = 1.0 + Math.pow(normalizezdDistance, 2);
+          double scaleFactor = Math.pow(normalizezdDistance, 2);
           Logger.recordOutput("Odometry/scaleFactor", scaleFactor);
 
           inputs.translationStdDev =

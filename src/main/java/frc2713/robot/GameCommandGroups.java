@@ -7,6 +7,7 @@ import static edu.wpi.first.units.Units.FeetPerSecondPerSecond;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
@@ -98,7 +99,8 @@ public final class GameCommandGroups {
               flywheels.simulateLaunchFuelCommand(flywheels::atTarget),
               feeder.feedWhenReady(flywheels::atTarget),
               dyeRotor.dynamicFeedWhenReady(flywheels::atTarget),
-              extension.maintainFuelPressureCommand())
+             extension.maintainFuelPressureCommand(1).beforeStarting(Commands.waitSeconds(1))
+             )
           .withName("OTF Shooting");
     }
 

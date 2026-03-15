@@ -88,7 +88,7 @@ public class Midwars {
                     Commands.parallel(
                         // Wait to extend as moving to intake position
                         Commands.parallel(intakeExtension.extendCommand(), intakeRoller.intake())
-                            .beforeStarting(new WaitCommand(1)),
+                            .beforeStarting(new WaitCommand(0.6)),
                         intakeFuelRight2.cmd()))
                 .handleInterrupt(
                     () -> System.out.println("[AUTO] IntakeFuelRight2 likely got interuppted")));
