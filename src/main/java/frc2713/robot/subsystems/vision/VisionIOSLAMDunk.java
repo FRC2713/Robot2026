@@ -80,12 +80,13 @@ public class VisionIOSLAMDunk implements VisionIO {
           inputs.applying = false;
           return;
         }
-        
-        if (FieldConstants.FIELD_PLUS_METER.contains(inputs.pose.getTranslation()) && DriverStation.isTeleop()) {
-          inputs.reasoning = "Vision outside field";
-          inputs.applying = false;
-          return;
-        }
+
+        // if (!FieldConstants.FIELD_PLUS_METER.contains(inputs.pose.getTranslation())
+        //     && DriverStation.isTeleop()) {
+        //   inputs.reasoning = "Vision outside field";
+        //   inputs.applying = false;
+        //   return;
+        // }
 
         if (Math.abs(inputs.pose3d.getTranslation().getZ()) > 0.1) {
           inputs.applying = false;
