@@ -41,8 +41,8 @@ public final class LauncherConstants {
     public static Angle staticHubAngle = Degrees.of(0);
 
     // Turret rotation limits
-    public static final double FORWARD_LIMIT_DEGREES = 181.0;
-    public static final double REVERSE_LIMIT_DEGREES = -180.0;
+    public static final double FORWARD_LIMIT_DEGREES = 60.0;
+    public static final double REVERSE_LIMIT_DEGREES = -60.0;
 
     public static final Angle forwardSoftLimit = Degrees.of(FORWARD_LIMIT_DEGREES);
     public static final Angle reverseSoftLimit = Degrees.of(REVERSE_LIMIT_DEGREES);
@@ -74,7 +74,7 @@ public final class LauncherConstants {
       config.generalControlMode = GeneralControlMode.POSITION;
       config.acceptablePositionError = Degrees.of(3);
 
-      config.fxConfig.Feedback.FeedbackRotorOffset = 0.0;
+      config.fxConfig.Feedback.FeedbackRotorOffset = 0.175781 ;
 
       config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
