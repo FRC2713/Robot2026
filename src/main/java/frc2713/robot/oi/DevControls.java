@@ -131,32 +131,33 @@ public class DevControls {
 
     // Turret Controls
 
-    // controller.a().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleOne));
+    controller.a().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleOne));
 
-    // controller.b().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleTwo));
+    controller.b().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleTwo));
 
-    controller
-        .a()
-        .onTrue(
-            Commands.parallel(
-                // turret.otfCommand(),
-                hood.setAngleCommand(LauncherConstants.Hood.staticHubAngle),
-                flywheels.setVelocity(LauncherConstants.Flywheels.PIDTest),
-                feeder.feedWhenReady(flywheels::atTarget),
-                dyeRotor.feedWhenReady(flywheels::atTarget)))
-        .onFalse(Commands.parallel(feeder.stop(), dyeRotor.stop(), flywheels.stop()));
+    // controller
+    //     .a()
+    //     .onTrue(
+    //         Commands.parallel(
+    //             // turret.otfCommand(),
+    //             hood.setAngleCommand(LauncherConstants.Hood.staticHubAngle),
+    //             flywheels.setVelocity(LauncherConstants.Flywheels.PIDTest),
+    //             feeder.feedWhenReady(flywheels::atTarget),
+    //             dyeRotor.feedWhenReady(flywheels::atTarget)))
+    //     .onFalse(Commands.parallel(feeder.stop(), dyeRotor.stop(), flywheels.stop()));
     controller
         .rightBumper()
         .onTrue(flywheels.setVelocity(LauncherConstants.Flywheels.PIDTest))
         .onFalse(
             flywheels.setVelocity(
                 () -> LauncherConstants.Flywheels.PIDTest.get().minus(RPM.of(1000))));
-    controller
-        .b()
-        .whileTrue(
-            GameCommandGroups.Launching.otfShotHoodProtect(
-                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
-        .whileFalse(GameCommandGroups.Launching.stopShooting(drive, feeder, dyeRotor, flywheels));
+    // controller
+    //     .b()
+    //     .whileTrue(
+    //         GameCommandGroups.Launching.otfShotHoodProtect(
+    //             drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
+    //     .whileFalse(GameCommandGroups.Launching.stopShooting(drive, feeder, dyeRotor,
+    // flywheels));
 
     // controller
     //     .x()

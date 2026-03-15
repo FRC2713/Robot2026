@@ -51,13 +51,13 @@ public class OperatorControls {
     controller
         .povUp()
         .onTrue(
-            Commands.runOnce(() -> flywheels.fudgeFactor = flywheels.fudgeFactor.plus(RPM.of(100)))
+            Commands.runOnce(() -> flywheels.fudgeFactor = flywheels.fudgeFactor.plus(RPM.of(250)))
                 .withName("flywheels fudgeFactor up"));
 
     controller
         .povDown()
         .onTrue(
-            Commands.runOnce(() -> flywheels.fudgeFactor = flywheels.fudgeFactor.minus(RPM.of(100)))
+            Commands.runOnce(() -> flywheels.fudgeFactor = flywheels.fudgeFactor.minus(RPM.of(250)))
                 .withName("flywheels fudgeFactor down"));
     controller
         .povRight()
@@ -149,6 +149,7 @@ public class OperatorControls {
         .whileTrue(
             Commands.run(
                 () -> {
+                  System.out.println("HARD RESET VISION!");
                   var visionPose = RobotContainer.vision.getPose();
                   if (visionPose.isPresent()) {
                     RobotContainer.drive.setPose(visionPose.get());
