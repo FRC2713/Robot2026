@@ -125,8 +125,11 @@ public final class IntakeConstants {
     public static final Supplier<MotionMagicConfigs> motionMagicGains =
         () ->
             new MotionMagicConfigs()
-                .withMotionMagicCruiseVelocity(RotationsPerSecond.of(300)) // target crusing vel rps
-                .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(1000.0))
+                .withMotionMagicCruiseVelocity(
+                    RotationsPerSecond.of(
+                        Util.modeDependentValue(300, 30))) // target crusing vel rps
+                .withMotionMagicAcceleration(
+                    RotationsPerSecondPerSecond.of(Util.modeDependentValue(1000, 10)))
                 .withMotionMagicJerk(0);
 
     static {
