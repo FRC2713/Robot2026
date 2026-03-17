@@ -94,13 +94,20 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
     Angle finalPosition = current.plus(diff);
 
     // Check if final position is within limits, if not, try the other way around
-    if (finalPosition.gt(LauncherConstants.Turret.forwardSoftLimit)) {
-      finalPosition = finalPosition.minus(Rotations.of(1));
-    } else if (finalPosition.lt(LauncherConstants.Turret.reverseSoftLimit)) {
-      finalPosition = finalPosition.plus(Rotations.of(1));
+    if (finalPosition.lt(forwardSoftLimit) && finalPosition.gt(reverseSoftLimit)) {
+      return finalPosition;
     }
 
-    return finalPosition;
+    Angle alternatePosition =
+        finalPosition.gt(forwardSoftLimit)
+            ? finalPosition.minus(Rotations.of(1))
+            : finalPosition.plus(Rotations.of(1));
+
+    if (alternatePosition.lt(forwardSoftLimit) && alternatePosition.gt(reverseSoftLimit)) {
+      return alternatePosition;
+    }
+
+    return current;
   }
 
   /** Input should be robot relative (i.e. encoder-reported angle) */
