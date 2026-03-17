@@ -9,6 +9,7 @@ package frc2713.robot.subsystems.drive;
 
 import com.ctre.phoenix6.configs.Slot0Configs;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.Current;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface ModuleIO {
@@ -53,4 +54,7 @@ public interface ModuleIO {
 
   /** Set the turn motor PID gains. */
   public default void setTurnGains(Slot0Configs gains) {}
+
+  /** Set the drive motor current */
+  public default void changeDriveCurrentLimits(Current driveLimit) {}
 }

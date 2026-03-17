@@ -15,15 +15,16 @@ import frc2713.robot.subsystems.launcher.Hood;
 import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
+import frc2713.robot.util.AutoUtil;
 import java.util.function.Supplier;
 
 /**
  * Starts at right trench. collects from Neutral Zone once. Goes back to right trench. Shots while
  * stationary. Goes to Neutral Zone and waits for teleop.
  */
-public class Midwars {
+public class MidwarsFlipped {
 
-  public static AutoRoutine getRoutine(
+  public static Command getRoutine(
       AutoFactory factory,
       Drive driveSubsystem,
       IntakeExtension intakeExtension,
@@ -35,13 +36,16 @@ public class Midwars {
       //   Launcher intakeAndShooter,
       Feeder feeder,
       Supplier<Command> otfShotSupplier) {
-    AutoRoutine routine = factory.newRoutine("Midwars");
+    AutoRoutine routine = factory.newRoutine("MidwarsFlipped");
 
-    AutoTrajectory intakeFuelRight = routine.trajectory("IntakeFuelRight");
-
-    AutoTrajectory moveToLaunchRight = routine.trajectory("MoveToLaunchRight");
-    AutoTrajectory intakeFuelRight2 = routine.trajectory("IntakeFuelRight2");
-    AutoTrajectory moveToLaunchRight2 = routine.trajectory("MoveToLaunchRight2");
+    AutoTrajectory intakeFuelRight =
+        AutoUtil.flipHorizontal(routine.trajectory("IntakeFuelRight"), routine);
+    AutoTrajectory moveToLaunchRight =
+        AutoUtil.flipHorizontal(routine.trajectory("MoveToLaunchRight"), routine);
+    AutoTrajectory intakeFuelRight2 =
+        AutoUtil.flipHorizontal(routine.trajectory("IntakeFuelRight2"), routine);
+    AutoTrajectory moveToLaunchRight2 =
+        AutoUtil.flipHorizontal(routine.trajectory("MoveToLaunchRight2"), routine);
 
     routine
         .active()
@@ -65,7 +69,6 @@ public class Midwars {
             Commands.parallel(
                 Commands.print("[AUTO] Moving to launch position"),
                 intakeRoller.intake(),
-                flywheels.otfCommand(),
                 moveToLaunchRight.cmd()));
 
     moveToLaunchRight
@@ -81,14 +84,15 @@ public class Midwars {
             Commands.sequence(
                     Commands.print("[AUTO] Starting launch sequence"),
                     Commands.runOnce(driveSubsystem::stop),
-                    otfShotSupplier.get().withTimeout(5),
+                    otfShotSupplier.get().withTimeout(4.3),
                     GameCommandGroups.Launching.stopShootingAndRetractHood(
                             driveSubsystem, feeder, dyeRotor, hood, flywheels)
                         .withTimeout(0.25),
                     Commands.print("[AUTO] Going to fuel again"),
                     Commands.parallel(
                         // Wait to extend as moving to intake position
-                        Commands.parallel(intakeExtension.extendCommand(), intakeRoller.intake()),
+                        Commands.parallel(intakeExtension.extendCommand(), intakeRoller.intake())
+                            .beforeStarting(new WaitCommand(1)),
                         intakeFuelRight2.cmd()))
                 .handleInterrupt(
                     () -> System.out.println("[AUTO] IntakeFuelRight2 likely got interuppted")));
@@ -97,9 +101,8 @@ public class Midwars {
         .done()
         .onTrue(
             Commands.sequence(
-                Commands.print("[AUTO] Going to launch again"),
+                Commands.print("[AUTO] Going to fuel again"),
                 Commands.parallel(
-                    flywheels.otfCommand(),
                     intakeExtension.extendCommand(),
                     intakeRoller.intake(),
                     moveToLaunchRight2.cmd())));
@@ -120,8 +123,8 @@ public class Midwars {
                 Commands.sequence(
                         Commands.parallel(
                             Commands.run(() -> driveSubsystem.stop())
-                                .withDeadline(new WaitCommand(9)),
-                            Commands.race(otfShotSupplier.get(), new WaitCommand(9))),
+                                .withDeadline(new WaitCommand(4)),
+                            Commands.race(otfShotSupplier.get(), new WaitCommand(4))),
                         Commands.sequence(
                             hood.retract().withTimeout(0.1),
                             Commands.parallel(
@@ -129,31 +132,6 @@ public class Midwars {
                                     driveSubsystem, feeder, dyeRotor, flywheels),
                                 Commands.run(() -> driveSubsystem.stop()))))
                     .withName("OTF Shooting")));
-    return routine;
-  }
-
-  public static Command routine(
-      AutoFactory factory,
-      Drive driveSubsystem,
-      IntakeExtension intakeExtension,
-      IntakeRoller intakeRoller,
-      Flywheels flywheels,
-      Hood hood,
-      Turret turret,
-      DyeRotor dyeRotor,
-      Feeder feeder,
-      Supplier<Command> otfShotSupplier) {
-    return Midwars.getRoutine(
-            factory,
-            driveSubsystem,
-            intakeExtension,
-            intakeRoller,
-            flywheels,
-            hood,
-            turret,
-            dyeRotor,
-            feeder,
-            otfShotSupplier)
-        .cmd();
+    return routine.cmd();
   }
 }

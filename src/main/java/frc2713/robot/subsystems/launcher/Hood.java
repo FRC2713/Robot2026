@@ -1,6 +1,5 @@
 package frc2713.robot.subsystems.launcher;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
@@ -21,7 +20,6 @@ import frc2713.robot.FieldConstants;
 import frc2713.robot.RobotContainer;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
 
 public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
     implements ArticulatedComponent {
@@ -30,7 +28,8 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
     super(config, new MotorInputsAutoLogged(), launcherMotorIO);
     // if (Constants.enableOTFFeatures)
     setDefaultCommand(
-        autoRetractCommand(RobotContainer.drive::getPose, () -> Degrees.of(0))
+        autoRetractCommand(
+                RobotContainer.drive::getPose, () -> LauncherConstants.Hood.retractedPosition)
             .withName("OTF Lock AutoRetract"));
   }
 
@@ -71,14 +70,9 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
       Supplier<Pose2d> poseSupplier, Supplier<Angle> defaultAngleSupplier) {
     return setAngleCommand(
         () -> {
-          Pose2d currentPose = poseSupplier.get();
-          boolean inRetractionZone =
-              FieldConstants.HoodRetractionZones.isInRetractionZone(currentPose);
+          this.ducking = this.inRetractionZone(poseSupplier);
 
-          Logger.recordOutput(pb.makePath("AutoRetract", "inRetractionZone"), inRetractionZone);
-          ducking = inRetractionZone;
-
-          if (inRetractionZone && DriverStation.isTeleop()) {
+          if (this.ducking && DriverStation.isTeleop()) {
             return LauncherConstants.Hood.retractedPosition;
           } else {
             return defaultAngleSupplier.get();

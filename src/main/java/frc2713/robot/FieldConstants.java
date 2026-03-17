@@ -32,6 +32,30 @@ public class FieldConstants {
   public static final double fieldLength = AprilTagLayoutType.OFFICIAL.getLayout().getFieldLength();
   public static final double fieldWidth = AprilTagLayoutType.OFFICIAL.getLayout().getFieldWidth();
 
+  public static final RectangleFieldRegion FIELD =
+      new RectangleFieldRegion(
+          0, // minX: one robot length before opening
+          fieldLength, // minY: start after bump area
+          0, // maxX: at the hub center (trench opening)
+          fieldWidth // maxY: extend to full width
+          );
+
+  public static final RectangleFieldRegion FIELD_PLUS_HALF_METER =
+      new RectangleFieldRegion(
+          -.5, // minX: one robot length before opening
+          fieldLength + .5, // minY: start after bump area
+          -.5, // maxX: at the hub center (trench opening)
+          fieldWidth + .5 // maxY: extend to full width
+          );
+
+  public static final RectangleFieldRegion FIELD_PLUS_METER =
+      new RectangleFieldRegion(
+          -1, // minX: one robot length before opening
+          fieldLength + 1, // minY: start after bump area
+          -1, // maxX: at the hub center (trench opening)
+          fieldWidth + 1 // maxY: extend to full width
+          );
+
   /**
    * Officially defined and relevant vertical lines found on the field (defined by X-axis offset)
    */
@@ -596,6 +620,8 @@ public class FieldConstants {
       Logger.recordOutput(
           "Field/HoodRetractionZones/RedRightDuckExit",
           RED_RIGHT_DUCK_EXIT_ZONE.getBoundaryPoses());
+      Logger.recordOutput("Field/FIELD_PLUS_HALF", FIELD_PLUS_HALF_METER.getBoundaryPoses());
+      Logger.recordOutput("Field/FIELD_PLUS_ONE", FIELD_PLUS_METER.getBoundaryPoses());
     }
   }
 

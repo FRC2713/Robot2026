@@ -98,11 +98,9 @@ public class DriverControls {
     controller
         .leftTrigger(0.98)
         .onTrue(
-            Commands.parallel(
-                    intakeExtension.extendCommand(),
-                    Commands.parallel(intakeRoller.intake(), dyeRotor.stirFuel()))
+            Commands.parallel(intakeExtension.extendCommand(), intakeRoller.intake())
                 .withName("Intaking"))
-        .onFalse(Commands.parallel(intakeRoller.stop(), dyeRotor.stop()).withName("Stop Intake"));
+        .onFalse(Commands.parallel(intakeRoller.stop()).withName("Stop Intake"));
 
     controller
         .leftBumper()
@@ -118,7 +116,7 @@ public class DriverControls {
                 drive,
                 GameCommandGroups.intakeAlign(
                     drive, () -> -controller.getLeftY(), () -> -controller.getLeftX()),
-                "Intake Align"))
+                "Drive with Intake Align"))
         .onFalse(setToNormalDriveCmd())
         .onTrue(
             Commands.runOnce(
@@ -129,10 +127,13 @@ public class DriverControls {
         .rightBumper()
         .whileTrue(
             GameCommandGroups.Launching.otfShotHoodProtect(
-                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
+                    drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)
+                .withName("OTF Shooting"))
         .onFalse(
             Commands.parallel(
-                GameCommandGroups.Launching.stopShooting(drive, feeder, dyeRotor, flywheels)));
+                    GameCommandGroups.Launching.stopShootingAndRetractHood(
+                        drive, feeder, dyeRotor, hood, flywheels))
+                .withName("Stop Shooting"));
 
     // controller
     //     .a()
@@ -147,10 +148,12 @@ public class DriverControls {
         .rightTrigger(.98)
         .whileTrue(
             GameCommandGroups.Launching.dumbShot(
-                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
+                    drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)
+                .withName("Dumb Shooting"))
         .onFalse(
             GameCommandGroups.Launching.stopShootingAndRetractHood(
-                drive, feeder, dyeRotor, hood, flywheels));
+                    drive, feeder, dyeRotor, hood, flywheels)
+                .withName("Stop Shooting + Hood Retract"));
 
     // controller
   }

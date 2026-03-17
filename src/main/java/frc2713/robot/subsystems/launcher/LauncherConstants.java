@@ -41,8 +41,8 @@ public final class LauncherConstants {
     public static Angle staticHubAngle = Degrees.of(0);
 
     // Turret rotation limits
-    public static final double FORWARD_LIMIT_DEGREES = 188.0;
-    public static final double REVERSE_LIMIT_DEGREES = -210.0;
+    public static final double FORWARD_LIMIT_DEGREES = 60.0;
+    public static final double REVERSE_LIMIT_DEGREES = -60.0;
 
     public static final Angle forwardSoftLimit = Degrees.of(FORWARD_LIMIT_DEGREES);
     public static final Angle reverseSoftLimit = Degrees.of(REVERSE_LIMIT_DEGREES);
@@ -74,24 +74,23 @@ public final class LauncherConstants {
       config.generalControlMode = GeneralControlMode.POSITION;
       config.acceptablePositionError = Degrees.of(3);
 
-      config.fxConfig.Feedback.FeedbackRotorOffset = 0.306152;
+      config.fxConfig.Feedback.FeedbackRotorOffset = 0.175781;
 
       config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
       // PID gains for Motion Magic
-      config.fxConfig.Slot0.kP = Util.modeDependentValue(550.0, 80.0);
+      config.fxConfig.Slot0.kP = Util.modeDependentValue(80.0, 80.0);
       config.fxConfig.Slot0.kI = 0.0;
-      config.fxConfig.Slot0.kD = Util.modeDependentValue(8.0, 16.0);
-      config.fxConfig.Slot0.kS =
-          Util.modeDependentValue(0.23, 0.15); // static friction compensation
-      config.fxConfig.Slot0.kV = Util.modeDependentValue(0.0, 0.12); // velocity feedforward
+      config.fxConfig.Slot0.kD = Util.modeDependentValue(0.7, 16.0);
+      config.fxConfig.Slot0.kS = Util.modeDependentValue(0.3, 0.15); // static friction compensation
+      config.fxConfig.Slot0.kV = Util.modeDependentValue(2.9, 0.12); // velocity feedforward
       config.fxConfig.Slot0.kA = Util.modeDependentValue(0.0, 0.01); // acceleration feedforward
 
       // Motion Magic parameters
-      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 20.0; // rotations per second
-      config.fxConfig.MotionMagic.MotionMagicAcceleration = 10.0; // rotations per second^2
-      config.fxConfig.MotionMagic.MotionMagicJerk = 100; // limit jerk for smooth motion
+      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 20.0 / 2; // rotations per second
+      config.fxConfig.MotionMagic.MotionMagicAcceleration = 50.0 / 2; // rotations per second^2
+      config.fxConfig.MotionMagic.MotionMagicJerk = 0.; // limit jerk for smooth motion
 
       // Gear ratio: motor rotations per turret rotation = GEAR_1/GEAR_0 = 120/60 = 2.0
       config.unitToRotorRatio = motorToTurretGearRatio;
@@ -110,7 +109,7 @@ public final class LauncherConstants {
                   Inches.of(0.5).in(Meters),
                   Inches.of(0.5).in(Meters),
                   Inches.of(18.484119).in(Meters)),
-              new Rotation3d(0, 0, Math.PI));
+              new Rotation3d(0, 0, 0));
     }
 
     static {
@@ -126,11 +125,11 @@ public final class LauncherConstants {
     public static LoggedTunableMeasure<Angle> PIDTestAngleTwo =
         new LoggedTunableMeasure<>("Turret/PIDTestAngleTwo", Degrees.of(-10));
     public static LoggedTunableMeasure<Angle> staticLeftTrench =
-        new LoggedTunableMeasure<>("Turret/Turret Static Trench L", Degrees.of(10));
+        new LoggedTunableMeasure<>("Turret/Turret Static Trench L", Degrees.of(-190));
     public static LoggedTunableMeasure<Angle> staticRightTrench =
-        new LoggedTunableMeasure<>("Turret/Turret Static Trench R", Degrees.of(-10));
+        new LoggedTunableMeasure<>("Turret/Turret Static Trench R", Degrees.of(190));
     public static LoggedTunableMeasure<Angle> staticTowerShot =
-        new LoggedTunableMeasure<>("Turret/Turret Static Tower", Degrees.of(3));
+        new LoggedTunableMeasure<>("Turret/Turret Static Tower", Degrees.of(-177));
   }
 
   public final class Flywheels {
@@ -234,11 +233,11 @@ public final class LauncherConstants {
     public static LoggedTunableMeasure<AngularVelocity> PIDTest =
         new LoggedTunableMeasure<>("Flywheels/PIDTest", RPM.of(4000));
     public static LoggedTunableMeasure<AngularVelocity> staticRightLeftTrench =
-        new LoggedTunableMeasure<>("Flywheels/Flywheels Static Trench", RPM.of(3150));
+        new LoggedTunableMeasure<>("Flywheels/Flywheels Static Trench", RPM.of(2850));
     public static LoggedTunableMeasure<AngularVelocity> staticHubVelocity =
         new LoggedTunableMeasure<>("Flywheels/Flywheels Static Hub", RotationsPerSecond.of(20));
     public static LoggedTunableMeasure<AngularVelocity> staticTowerVelocity =
-        new LoggedTunableMeasure<AngularVelocity>("Flywheels/Flywheels Static Tower", RPM.of(3000));
+        new LoggedTunableMeasure<AngularVelocity>("Flywheels/Flywheels Static Tower", RPM.of(2713));
   }
 
   public final class Hood {
@@ -251,13 +250,13 @@ public final class LauncherConstants {
     // 8t pinion to 20t gear, 13t gear to  30t gear, 10t gear to 146 sector gear
     public static double gearRatio = ((20 / 8.0) * (30.0 / 13.0) * (146.0 / 10.0));
 
-    public static final Angle retractedPosition = Degrees.of(0);
+    public static final Angle retractedPosition = Degrees.of(0.5);
 
     static {
       config.name = "Hood";
       config.talonCANID = new CANDeviceId(54, "canivore"); // Example CAN ID, replace with actual ID
 
-      config.fxConfig.Feedback.FeedbackRotorOffset = -0.121094;
+      config.fxConfig.Feedback.FeedbackRotorOffset = -0.121094 + 0.215332 - 0.439453;
 
       // PID gains for Motion Magic
       config.fxConfig.Slot0.kP = 600.0;

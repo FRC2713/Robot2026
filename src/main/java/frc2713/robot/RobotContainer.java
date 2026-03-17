@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc2713.lib.io.CanCoderIO;
 import frc2713.lib.io.CanCoderIOHardware;
@@ -22,6 +21,7 @@ import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.commands.autos.DriveTest;
 import frc2713.robot.commands.autos.Midwars;
+import frc2713.robot.commands.autos.MidwarsFlipped;
 import frc2713.robot.commands.autos.NeutralScoreNeutral;
 import frc2713.robot.commands.autos.NeutralSweepLeftToRight;
 import frc2713.robot.commands.autos.NeutralSweepRightToLeft;
@@ -70,8 +70,8 @@ public class RobotContainer {
 
   // Subsystems
   public static Drive drive;
-  private static Flywheels flywheels;
-  private static Turret turret;
+  public static Flywheels flywheels;
+  public static Turret turret;
   public static Hood hood;
   private static IntakeRoller intakeRoller;
   public static IntakeExtension intakeExtension;
@@ -268,12 +268,6 @@ public class RobotContainer {
 
     // configure the kinematics calculations
     configureKinematics();
-
-    // hood.setDefaultCommand(
-    //     hood.autoRetractCommand(drive::getPose, LauncherConstants.Hood.staticHubAngle));
-
-    new Trigger(() -> hood.inRetractionZone(drive::getPose))
-        .whileTrue(hood.retract().repeatedly().withName("Ducking"));
   }
 
   /** Use this robot to configure the transforms between subsystems. */
@@ -360,6 +354,22 @@ public class RobotContainer {
     autoChooser.addDefaultOption(
         "Midwars",
         Midwars.routine(
+            autoFactory,
+            drive,
+            intakeExtension,
+            intakeRoller,
+            flywheels,
+            hood,
+            turret,
+            dyeRotor,
+            feeder,
+            () ->
+                GameCommandGroups.Launching.autoOtfShot(
+                    flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)));
+
+    autoChooser.addDefaultOption(
+        "MidwarsFlipped",
+        MidwarsFlipped.getRoutine(
             autoFactory,
             drive,
             intakeExtension,
