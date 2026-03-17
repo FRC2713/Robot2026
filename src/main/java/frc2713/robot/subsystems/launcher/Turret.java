@@ -107,13 +107,8 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
       return alternatePosition;
     }
 
-    // If still not found, go to the closest limit
-    if (Math.abs(normalizedTarget.minus(forwardSoftLimit).in(Degrees))
-        < Math.abs(normalizedTarget.minus(reverseSoftLimit).in(Degrees))) {
-      return forwardSoftLimit;
-    } else {
-      return reverseSoftLimit;
-    }
+    // If still not found, clamp the desired angle to the limits
+    return Util.clamp(desiredAngle, reverseSoftLimit, forwardSoftLimit);
   }
 
   /** Input should be robot relative (i.e. encoder-reported angle) */
