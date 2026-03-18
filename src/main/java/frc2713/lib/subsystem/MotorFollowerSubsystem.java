@@ -1,5 +1,6 @@
 package frc2713.lib.subsystem;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
@@ -9,6 +10,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc2713.lib.energy.EnergyManagement;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig.GeneralControlMode;
@@ -80,6 +82,17 @@ public class MotorFollowerSubsystem<MI extends MotorInputsAutoLogged, IO extends
     Logger.recordOutput(
         pb.makePath("Measurements", "followerAppliedVolts"), followerInputs.appliedVolts.in(Volts));
     Logger.recordOutput(pb.makePath("Measurements", "closedLoopError"), inputs.closedLoopError);
+  }
+
+  @Override
+  protected void reportEnergyToMonitor() {
+    EnergyManagement.EnergyMonitor.report(
+        getName(), "Leader", inputs.appliedVolts.in(Volts), inputs.currentSupplyAmps.in(Amps));
+    EnergyManagement.EnergyMonitor.report(
+        getName(),
+        "Follower",
+        followerInputs.appliedVolts.in(Volts),
+        followerInputs.currentSupplyAmps.in(Amps));
   }
 
   // Getters
