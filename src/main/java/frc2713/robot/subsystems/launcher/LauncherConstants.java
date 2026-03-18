@@ -137,14 +137,14 @@ public final class LauncherConstants {
     public static TalonFXSubsystemConfig leaderConfig = new TalonFXSubsystemConfig();
     public static TalonFXSubsystemConfig followerConfig = new TalonFXSubsystemConfig();
     public static MomentOfInertia flywhMomentOfInertia = MoiUnits.PoundSquareInches.of(10.410164);
-    public static double gearRatio = 24.0 / 18.0; // 1.33:1 reduction from motor to flywheel
+    public static double gearRatio = 21.0 / 21.0; // 1.33:1 reduction from motor to flywheel
 
     static {
       leaderConfig.name = "Flywheels";
       leaderConfig.talonCANID = new CANDeviceId(50, "canivore");
-      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(.7, 3.5);
+      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(.5, 3.5);
       leaderConfig.fxConfig.Slot0.kI = 0.0;
-      leaderConfig.fxConfig.Slot0.kD = 0.004;
+      leaderConfig.fxConfig.Slot0.kD = 0.00;
       leaderConfig.fxConfig.Slot0.kS = Util.modeDependentValue(0.2, 2.0);
       leaderConfig.fxConfig.Slot0.kV = 0.12 * gearRatio;
       leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimit = 120.0;
@@ -208,9 +208,9 @@ public final class LauncherConstants {
 
       rpmVelocityMap.put(1.03, 2500.);
       rpmVelocityMap.put(2.1, 2500.);
-      rpmVelocityMap.put(3.36, 2713.);
-      rpmVelocityMap.put(5.0, 3250.);
-      rpmVelocityMap.put(6.03, 4200.);
+      rpmVelocityMap.put(3.36, 3500.);
+      rpmVelocityMap.put(5.0, 4000.);
+      rpmVelocityMap.put(6.03, 5000.);
 
       rpmVelocityAZMap.put(1.03, 2500.);
       rpmVelocityAZMap.put(2.1, 2500.);
