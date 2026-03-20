@@ -29,8 +29,10 @@ import frc2713.lib.subsystem.TalonFXSubsystemConfig.GeneralControlMode;
 import frc2713.lib.util.BidirectionalInterpolatingDoubleMap;
 import frc2713.lib.util.LoggedTunableBoolean;
 import frc2713.lib.util.LoggedTunableMeasure;
+import frc2713.lib.util.LoggedTunableNumber;
 import frc2713.lib.util.Util;
 import frc2713.robot.GamePieceConstants;
+import frc2713.robot.util.LaunchTofTable;
 
 public final class LauncherConstants {
 
@@ -180,14 +182,11 @@ public final class LauncherConstants {
             new Translation3d(Inches.of(-5).in(Meters), 0, Inches.of(2).in(Meters)),
             new Rotation3d(0, Degrees.of(-90).in(Radians), 0));
 
-    public static InterpolatingDoubleTreeMap ballVelocityMap = new InterpolatingDoubleTreeMap();
-    public static InterpolatingDoubleTreeMap rpmVelocityMap = new InterpolatingDoubleTreeMap();
-    public static InterpolatingDoubleTreeMap ballVelocityAZMap =
-        new InterpolatingDoubleTreeMap(); // floor shots may require diff setpoints
-    public static InterpolatingDoubleTreeMap rpmVelocityAZMap =
+    public static InterpolatingDoubleTreeMap distanceToRpmMap = new InterpolatingDoubleTreeMap();
+    public static InterpolatingDoubleTreeMap distanceToRpmAzMap =
         new InterpolatingDoubleTreeMap(); // floor shots may require diff setpoints
 
-    public static BidirectionalInterpolatingDoubleMap ballToFlywheelMap =
+    public static BidirectionalInterpolatingDoubleMap velocityToRpmBiDiMap =
         new BidirectionalInterpolatingDoubleMap();
 
     public static Distance WHEEL_DIAMETER = Inches.of(4);
@@ -199,33 +198,26 @@ public final class LauncherConstants {
         launchRateFuelPerSecond * GamePieceConstants.Fuel.volumeInchesCubed;
 
     static {
-      // Distance (m) -> Ball Velocity (ft/s)
-      ballVelocityMap.put(2.11, 19.19);
-      ballVelocityMap.put(6.44, 22.07);
+      distanceToRpmMap.put(1.03, 2500.);
+      distanceToRpmMap.put(2.1, 2500.);
+      distanceToRpmMap.put(3.36, 2713.);
+      distanceToRpmMap.put(5.0, 3250.);
+      distanceToRpmMap.put(6.03, 4200.);
 
-      ballVelocityAZMap.put(2.11, 19.19);
-      ballVelocityAZMap.put(6.44, 22.07);
-
-      rpmVelocityMap.put(1.03, 2500.);
-      rpmVelocityMap.put(2.1, 2500.);
-      rpmVelocityMap.put(3.36, 3500.);
-      rpmVelocityMap.put(5.0, 4000.);
-      rpmVelocityMap.put(6.03, 5000.);
-
-      rpmVelocityAZMap.put(1.03, 2500.);
-      rpmVelocityAZMap.put(2.1, 2500.);
-      rpmVelocityAZMap.put(3.36, 2713.);
-      rpmVelocityAZMap.put(5.0, 3250.);
-      rpmVelocityAZMap.put(6.03, 4200.);
+      distanceToRpmAzMap.put(1.03, 2500.);
+      distanceToRpmAzMap.put(2.1, 2500.);
+      distanceToRpmAzMap.put(3.36, 2713.);
+      distanceToRpmAzMap.put(5.0, 3250.);
+      distanceToRpmAzMap.put(6.03, 4200.);
     }
 
     static {
       // Ball Velocity (ft/s) -> RPM (rpm)
-      ballToFlywheelMap.put(17.69, 2500.);
-      ballToFlywheelMap.put(20.19, 3000.);
-      ballToFlywheelMap.put(22.07, 3500.);
-      ballToFlywheelMap.put(24.67, 4000.);
-      ballToFlywheelMap.put(25.52, 4500.);
+      velocityToRpmBiDiMap.put(17.69, 2500.);
+      velocityToRpmBiDiMap.put(20.19, 3000.);
+      velocityToRpmBiDiMap.put(22.07, 3500.);
+      velocityToRpmBiDiMap.put(24.67, 4000.);
+      velocityToRpmBiDiMap.put(25.52, 4500.);
     }
 
     public static LoggedTunableMeasure<AngularVelocity> idleVelocity =
@@ -238,6 +230,13 @@ public final class LauncherConstants {
         new LoggedTunableMeasure<>("Flywheels/Flywheels Static Hub", RotationsPerSecond.of(20));
     public static LoggedTunableMeasure<AngularVelocity> staticTowerVelocity =
         new LoggedTunableMeasure<AngularVelocity>("Flywheels/Flywheels Static Tower", RPM.of(2713));
+    /**
+     * Nominal muzzle speed (m/s) from flywheel mechanism RPM using {@link #WHEEL_DIAMETER} as
+     * contact radius and {@link #rpmToMuzzleVelocityScale}.
+     */
+    public static double muzzleVelocityMetersPerSecond(double flywheelRpm) {
+      return velocityToRpmBiDiMap.reverseGet(flywheelRpm);
+    }
   }
 
   public final class Hood {
@@ -299,28 +298,33 @@ public final class LauncherConstants {
     public static int MODEL_INDEX = 4;
     public static int PARENT_INDEX = 3; // turret
 
-    public static InterpolatingDoubleTreeMap angleMap = new InterpolatingDoubleTreeMap();
-    public static InterpolatingDoubleTreeMap angleForAZMap =
+    public static InterpolatingDoubleTreeMap distanceToAngleMap = new InterpolatingDoubleTreeMap();
+    public static InterpolatingDoubleTreeMap distanceToAngleAzMap =
         new InterpolatingDoubleTreeMap(); // floor shots may require diff setpoints
 
-    static {
-      // Distance (m) -> Hood Pitch (Degrees)
-      angleMap.put(1.03, 5.0);
-      angleMap.put(2.1, 20.0);
-      angleMap.put(3.36, 25.0);
-      angleMap.put(5.0, 27.13);
-      angleMap.put(6.03, 30.0);
-    }
-    // 5.486 2000 28.74
-    // 4.786 1750 26
+    public static InterpolatingDoubleTreeMap hoodAngleToReleaseAngleMap =
+        new InterpolatingDoubleTreeMap();
 
     static {
       // Distance (m) -> Hood Pitch (Degrees)
-      angleForAZMap.put(1.03, 5.0);
-      angleForAZMap.put(2.1, 20.0);
-      angleForAZMap.put(3.36, 25.0);
-      angleForAZMap.put(5.0, 27.13);
-      angleForAZMap.put(6.03, 30.0);
+      distanceToAngleMap.put(1.03, 5.0);
+      distanceToAngleMap.put(2.1, 20.0);
+      distanceToAngleMap.put(3.36, 25.0);
+      distanceToAngleMap.put(5.0, 27.13);
+      distanceToAngleMap.put(6.03, 30.0);
+
+      // Distance (m) -> Hood Pitch (Degrees)
+      distanceToAngleAzMap.put(1.03, 5.0);
+      distanceToAngleAzMap.put(2.1, 20.0);
+      distanceToAngleAzMap.put(3.36, 25.0);
+      distanceToAngleAzMap.put(5.0, 27.13);
+      distanceToAngleAzMap.put(6.03, 30.0);
+
+      // Hood angle (deg) to release angle (deg)
+      hoodAngleToReleaseAngleMap.put(0., 15.);
+
+      hoodAngleToReleaseAngleMap.put(15., 30.);
+      hoodAngleToReleaseAngleMap.put(30., 45.);
     }
 
     public static LoggedTunableMeasure<Angle> staticTowerAngle =
@@ -329,7 +333,77 @@ public final class LauncherConstants {
         new LoggedTunableMeasure<Angle>("Hood/Hood Static Trench", Degrees.of(25));
     public static LoggedTunableMeasure<Angle> staticHubAngle =
         new LoggedTunableMeasure<Angle>("Hood/Hood Static Hub", Degrees.of(25));
+
+    public static double exitAngleRadiansFromHoodDegrees(double degrees) {
+      return Degrees.of(hoodAngleToReleaseAngleMap.get(degrees)).in(Radians);
+    }
   }
+
+  /** Muzzle height above carpet used when generating drag-aware ToF lookup tables. */
+  public static final double tofSeedMuzzleHeightMeters = Inches.of(22).in(Meters);
+
+  public static InterpolatingDoubleTreeMap tofMap = new InterpolatingDoubleTreeMap();
+  public static InterpolatingDoubleTreeMap tofMapAZ = new InterpolatingDoubleTreeMap();
+
+  static {
+    LaunchTofTable.seedScoringTofMap(
+        tofMap, Flywheels.distanceToRpmMap, Hood.distanceToAngleMap, tofSeedMuzzleHeightMeters);
+    LaunchTofTable.seedAllianceZoneTofMap(
+        tofMapAZ,
+        Flywheels.distanceToRpmAzMap,
+        Hood.distanceToAngleAzMap,
+        tofSeedMuzzleHeightMeters);
+  }
+
+  /**
+   * How {@link frc2713.robot.subsystems.launcher.LaunchingSolutionManager} picks a firing solution.
+   * {@link LaunchSolverMode#VECTOR_APPROX} and {@link LaunchSolverMode#ITOF} are specific
+   * strategies.)
+   */
+  public enum LaunchSolverMode {
+    /** {@code calculateStatic} */
+    STATIC,
+    /**
+     * Match the static ideal ground-frame launch vector by solving for muzzle RPM/hood from the
+     * resultant velocity after subtracting chassis motion (first-order vector approximation).
+     */
+    VECTOR_APPROX,
+    /** {@code calculateITOF} — iterative time-of-flight while moving */
+    ITOF;
+
+    /**
+     * Maps dashboard / {@link LoggedTunableNumber} value (0, 1, 2) to a mode. Unknown values clamp
+     * to {@link #STATIC}.
+     */
+    public static LaunchSolverMode fromDashboard(double value) {
+      int v = (int) Math.round(value);
+      return switch (v) {
+        case 1 -> VECTOR_APPROX;
+        case 2 -> ITOF;
+        default -> STATIC;
+      };
+    }
+  }
+
+  /**
+   * Tuning: 0 = {@link LaunchSolverMode#STATIC}, 1 = {@link LaunchSolverMode#VECTOR_APPROX}, 2 =
+   * {@link LaunchSolverMode#ITOF}. Use {@link #getLaunchSolverMode()}.
+   */
+  public static final LoggedTunableNumber launchSolverModeTunable =
+      new LoggedTunableNumber("LaunchingSolutionManager/solver_mode", 3.0);
+
+  public static LaunchSolverMode getLaunchSolverMode() {
+    return LaunchSolverMode.fromDashboard(launchSolverModeTunable.get());
+  }
+
+  public static final LoggedTunableMeasure<Time> itofConvergenceSeconds =
+      new LoggedTunableMeasure<>("LaunchingSolutionManager/itof_convergence_s", Seconds.of(0.002));
+  public static final LoggedTunableNumber itofMaxIterations =
+      new LoggedTunableNumber("LaunchingSolutionManager/itof_max_iterations", 12.0);
+  public static final LoggedTunableMeasure<Time> itofTofMin =
+      new LoggedTunableMeasure<>("LaunchingSolutionManager/itof_tof_min", Seconds.of(0.05));
+  public static final LoggedTunableMeasure<Time> itofTofMax =
+      new LoggedTunableMeasure<>("LaunchingSolutionManager/itof_tof_max", Seconds.of(4.0));
 
   public static LoggedTunableMeasure<Time> otfLinearProjectionSeconds =
       new LoggedTunableMeasure<Time>(
