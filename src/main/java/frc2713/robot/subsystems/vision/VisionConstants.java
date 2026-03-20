@@ -19,7 +19,7 @@ import edu.wpi.first.units.measure.Time;
 import frc2713.lib.util.LoggedTunableMeasure;
 
 public class VisionConstants {
-  public static Distance MAX_POSE_JUMP = Meters.of(2);
+  public static Distance MAX_POSE_JUMP = Meters.of(1);
   public static LinearVelocity MAX_LINEAR_SPEED =
       MetersPerSecond.of(0.02); // TODO: reasoning based on linear speed
   public static AngularVelocity MAX_ANGULAR_SPEED =
@@ -43,7 +43,7 @@ public class VisionConstants {
   // on other sensors (e.g., gyro/odometry) for heading, since vision rotation
   // data is considered too unreliable/noisy for this robot.
   public static PoseEstimatorErrorStDevs POSE_ESTIMATOR_STATE_STDEVS =
-      new PoseEstimatorErrorStDevs(Meters.of(0.03), Degrees.of(999));
+      new PoseEstimatorErrorStDevs(Meters.of(0.01), Degrees.of(5));
 
   public static PoseEstimatorErrorStDevs POSE_ESTIMATOR_STATE_LOW_TAGS_FAST_STDEVS =
       new PoseEstimatorErrorStDevs(Meters.of(0.8), Degrees.of(99999));

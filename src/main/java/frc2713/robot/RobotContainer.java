@@ -19,6 +19,7 @@ import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.commands.DriveCommands;
+import frc2713.robot.commands.autos.Demo;
 import frc2713.robot.commands.autos.DriveTest;
 import frc2713.robot.commands.autos.Midwars;
 import frc2713.robot.commands.autos.MidwarsFlipped;
@@ -34,16 +35,13 @@ import frc2713.robot.oi.DriverControls;
 import frc2713.robot.oi.OperatorControls;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.drive.GyroIO;
-import frc2713.robot.subsystems.drive.GyroIOPigeon2;
 import frc2713.robot.subsystems.drive.ModuleIO;
 import frc2713.robot.subsystems.drive.ModuleIOSim;
-import frc2713.robot.subsystems.drive.ModuleIOTalonFX;
 import frc2713.robot.subsystems.intake.IntakeConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.intake.intakeExtensionIO.IntakeExtensionIO;
 import frc2713.robot.subsystems.intake.intakeExtensionIO.IntakeExtensionIOSim;
-import frc2713.robot.subsystems.intake.intakeExtensionIO.IntakeExtensionIOTalonFX;
 import frc2713.robot.subsystems.launcher.Flywheels;
 import frc2713.robot.subsystems.launcher.Hood;
 import frc2713.robot.subsystems.launcher.LauncherConstants;
@@ -105,11 +103,11 @@ public class RobotContainer {
 
         drive =
             new Drive(
-                new GyroIOPigeon2(),
-                new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                new ModuleIOTalonFX(TunerConstants.FrontRight),
-                new ModuleIOTalonFX(TunerConstants.BackLeft),
-                new ModuleIOTalonFX(TunerConstants.BackRight));
+                new GyroIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {});
         flywheels =
             new Flywheels(
                 LauncherConstants.Flywheels.leaderConfig,
@@ -128,15 +126,12 @@ public class RobotContainer {
 
         intakeRoller =
             new IntakeRoller(
-                IntakeConstants.Roller.leaderConfig,
-                IntakeConstants.Roller.followerConfig,
-                new TalonFXIO(IntakeConstants.Roller.leaderConfig),
-                new TalonFXIO(IntakeConstants.Roller.followerConfig));
-
+                new TalonFXSubsystemConfig(),
+                new TalonFXSubsystemConfig(),
+                new MotorIO() {},
+                new MotorIO() {});
         intakeExtension =
-            new IntakeExtension(
-                IntakeConstants.Extension.config,
-                new IntakeExtensionIOTalonFX(IntakeConstants.Extension.differentialConfig));
+            new IntakeExtension(new TalonFXSubsystemConfig(), new IntakeExtensionIO() {});
 
         dyeRotor =
             new DyeRotor(
@@ -382,6 +377,8 @@ public class RobotContainer {
             () ->
                 GameCommandGroups.Launching.autoOtfShot(
                     flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)));
+
+    autoChooser.addOption("DemoMode", Demo.demo());
 
     autoChooser.addOption(
         "Trench to Neutral, Launch At Bump",
