@@ -43,8 +43,8 @@ public final class LauncherConstants {
     public static Angle staticHubAngle = Degrees.of(0);
 
     // Turret rotation limits
-    public static final double FORWARD_LIMIT_DEGREES = 60.0;
-    public static final double REVERSE_LIMIT_DEGREES = -60.0;
+    public static final double FORWARD_LIMIT_DEGREES = 200.0;
+    public static final double REVERSE_LIMIT_DEGREES = -200.0;
 
     public static final Angle forwardSoftLimit = Degrees.of(FORWARD_LIMIT_DEGREES);
     public static final Angle reverseSoftLimit = Degrees.of(REVERSE_LIMIT_DEGREES);
@@ -213,11 +213,11 @@ public final class LauncherConstants {
 
     static {
       // Ball Velocity (ft/s) -> RPM (rpm)
-      velocityToRpmBiDiMap.put(17.69, 2500.);
-      velocityToRpmBiDiMap.put(20.19, 3000.);
-      velocityToRpmBiDiMap.put(22.07, 3500.);
-      velocityToRpmBiDiMap.put(24.67, 4000.);
-      velocityToRpmBiDiMap.put(25.52, 4500.);
+      velocityToRpmBiDiMap.put(20., 2500.);
+      velocityToRpmBiDiMap.put(25., 3000.);
+      velocityToRpmBiDiMap.put(28., 3500.);
+      velocityToRpmBiDiMap.put(30., 4000.);
+      velocityToRpmBiDiMap.put(35., 4500.);
     }
 
     public static LoggedTunableMeasure<AngularVelocity> idleVelocity =
@@ -322,9 +322,8 @@ public final class LauncherConstants {
 
       // Hood angle (deg) to release angle (deg)
       hoodAngleToReleaseAngleMap.put(0., 15.);
-
-      hoodAngleToReleaseAngleMap.put(15., 30.);
-      hoodAngleToReleaseAngleMap.put(30., 45.);
+      hoodAngleToReleaseAngleMap.put(15., 35.);
+      hoodAngleToReleaseAngleMap.put(30., 50.);
     }
 
     public static LoggedTunableMeasure<Angle> staticTowerAngle =
@@ -358,7 +357,7 @@ public final class LauncherConstants {
   /**
    * How {@link frc2713.robot.subsystems.launcher.LaunchingSolutionManager} picks a firing solution.
    * {@link LaunchSolverMode#VECTOR_APPROX} and {@link LaunchSolverMode#ITOF} are specific
-   * strategies.)
+   * strategies.
    */
   public enum LaunchSolverMode {
     /** {@code calculateStatic} */
@@ -370,30 +369,6 @@ public final class LauncherConstants {
     VECTOR_APPROX,
     /** {@code calculateITOF} — iterative time-of-flight while moving */
     ITOF;
-
-    /**
-     * Maps dashboard / {@link LoggedTunableNumber} value (0, 1, 2) to a mode. Unknown values clamp
-     * to {@link #STATIC}.
-     */
-    public static LaunchSolverMode fromDashboard(double value) {
-      int v = (int) Math.round(value);
-      return switch (v) {
-        case 1 -> VECTOR_APPROX;
-        case 2 -> ITOF;
-        default -> STATIC;
-      };
-    }
-  }
-
-  /**
-   * Tuning: 0 = {@link LaunchSolverMode#STATIC}, 1 = {@link LaunchSolverMode#VECTOR_APPROX}, 2 =
-   * {@link LaunchSolverMode#ITOF}. Use {@link #getLaunchSolverMode()}.
-   */
-  public static final LoggedTunableNumber launchSolverModeTunable =
-      new LoggedTunableNumber("LaunchingSolutionManager/solver_mode", 3.0);
-
-  public static LaunchSolverMode getLaunchSolverMode() {
-    return LaunchSolverMode.fromDashboard(launchSolverModeTunable.get());
   }
 
   public static final LoggedTunableMeasure<Time> itofConvergenceSeconds =

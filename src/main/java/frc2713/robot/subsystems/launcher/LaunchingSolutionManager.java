@@ -9,6 +9,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.logging.PeriodicTimingLogger;
@@ -56,11 +58,20 @@ public class LaunchingSolutionManager extends SubsystemBase {
   /** Warm start for iterative ToF (seconds). */
   private double lastItofTofSeconds = -1.0;
 
+  private final SendableChooser<LauncherConstants.LaunchSolverMode> launchSolverModeChooser =
+      new SendableChooser<>();
+
   public LaunchingSolutionManager() {
     if (instance != null) {
       throw new IllegalStateException("LaunchingSolutionManager already initialized!");
     }
     instance = this;
+
+    launchSolverModeChooser.addOption("Static (LUT)", LauncherConstants.LaunchSolverMode.STATIC);
+    launchSolverModeChooser.addOption(
+        "Vector approx", LauncherConstants.LaunchSolverMode.VECTOR_APPROX);
+    launchSolverModeChooser.setDefaultOption("IToF", LauncherConstants.LaunchSolverMode.ITOF);
+    SmartDashboard.putData("Launch Solver Mode", launchSolverModeChooser);
   }
 
   public static LaunchingSolutionManager getInstance() {
@@ -98,7 +109,10 @@ public class LaunchingSolutionManager extends SubsystemBase {
     
 
     // 3. Solve for the Launch Vector
-    LauncherConstants.LaunchSolverMode solverMode = LauncherConstants.getLaunchSolverMode();
+    LauncherConstants.LaunchSolverMode solverMode = launchSolverModeChooser.getSelected();
+    if (solverMode == null) {
+      solverMode = LauncherConstants.LaunchSolverMode.STATIC;
+    }
     currentSolution =
         switch (solverMode) {
           case VECTOR_APPROX -> calculateVectorApprox(
@@ -137,9 +151,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
     // Get Horizontal Angle (Yaw) This is a field-relative angle, NOT robot-relative.
     // The conversion to robot-relative happens at the point of use (e.g. in Turret)
     // so that it always uses the robot's current heading, not a stale or projected one.
-    Rotation2d newYaw =
-        new Rotation2d(Math.atan2(horizontalDir.getY(), horizontalDir.getX()))
-            .rotateBy(new Rotation2d(Math.PI));
+    Rotation2d newYaw = new Rotation2d(Math.atan2(horizontalDir.getY(), horizontalDir.getX()));
 
     return new LaunchSolution(
         newYaw,
@@ -360,8 +372,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
     }
 
     Rotation2d newYaw =
-        new Rotation2d(Math.atan2(neededMuzzleVelocity.getY(), neededMuzzleVelocity.getX()))
-            .rotateBy(new Rotation2d(Math.PI));
+        new Rotation2d(Math.atan2(neededMuzzleVelocity.getY(), neededMuzzleVelocity.getX()));
 
     return new LaunchSolution(
         newYaw, rpmSetpoint, Rotation2d.fromDegrees(hoodDeg), horizontalDist, true);
