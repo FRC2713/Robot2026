@@ -137,7 +137,9 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   public LinearVelocity getOnTheFlyLaunchVelocity(LaunchSolution solution) {
 
     if (solution.isValid()) {
-      LinearVelocity targetSpeed = FeetPerSecond.of(LauncherConstants.Flywheels.velocityToRpmBiDiMap.reverseGet(solution.flywheelsRPM()));
+      LinearVelocity targetSpeed =
+          FeetPerSecond.of(
+              LauncherConstants.Flywheels.velocityToRpmBiDiMap.reverseGet(solution.flywheelsRPM()));
       Logger.recordOutput(super.pb.makePath("launchVelocity"), targetSpeed);
       return targetSpeed;
     }
