@@ -15,7 +15,6 @@ import com.ctre.phoenix6.sim.ChassisReference;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
@@ -26,13 +25,11 @@ import frc2713.lib.dynamics.MoiUnits;
 import frc2713.lib.io.CanCoderConfig;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig.GeneralControlMode;
-import frc2713.lib.util.BidirectionalInterpolatingDoubleMap;
 import frc2713.lib.util.LoggedTunableBoolean;
 import frc2713.lib.util.LoggedTunableMeasure;
 import frc2713.lib.util.LoggedTunableNumber;
 import frc2713.lib.util.Util;
 import frc2713.robot.GamePieceConstants;
-import frc2713.robot.util.LaunchTofTable;
 
 public final class LauncherConstants {
 
@@ -182,13 +179,6 @@ public final class LauncherConstants {
             new Translation3d(Inches.of(-5).in(Meters), 0, Inches.of(2).in(Meters)),
             new Rotation3d(0, Degrees.of(-90).in(Radians), 0));
 
-    public static InterpolatingDoubleTreeMap distanceToRpmMap = new InterpolatingDoubleTreeMap();
-    public static InterpolatingDoubleTreeMap distanceToRpmAzMap =
-        new InterpolatingDoubleTreeMap(); // floor shots may require diff setpoints
-
-    public static BidirectionalInterpolatingDoubleMap velocityToRpmBiDiMap =
-        new BidirectionalInterpolatingDoubleMap();
-
     public static Distance WHEEL_DIAMETER = Inches.of(4);
     // How many fuel we can launch per second at max firing rate
     public static double launchRateFuelPerSecond = 9.0;
@@ -196,32 +186,6 @@ public final class LauncherConstants {
     // the volume of fuel we're launching per second at max firing rate
     public static double launchRateVolumeInchesCubedPerSecond =
         launchRateFuelPerSecond * GamePieceConstants.Fuel.volumeInchesCubed;
-
-    static {
-      distanceToRpmMap.put(1.03, 1800.);
-      distanceToRpmMap.put(1.75, 2000.);
-      distanceToRpmMap.put(2.1, 2100.);
-      distanceToRpmMap.put(3.36, 2200.);
-      distanceToRpmMap.put(4.5, 2300.);
-      distanceToRpmMap.put(5.0, 2500.);
-      distanceToRpmMap.put(6.03, 3200.);
-
-      distanceToRpmAzMap.put(1.03, 2500.);
-      distanceToRpmAzMap.put(2.1, 2500.);
-      distanceToRpmAzMap.put(3.36, 2713.);
-      distanceToRpmAzMap.put(5.0, 3250.);
-      distanceToRpmAzMap.put(6.03, 4200.);
-    }
-
-    static {
-      // Ball Velocity (ft/s) -> RPM (rpm)
-      velocityToRpmBiDiMap.put(16., 1800.);
-      velocityToRpmBiDiMap.put(20., 2000.);
-      velocityToRpmBiDiMap.put(25., 3000.);
-      velocityToRpmBiDiMap.put(28., 3500.);
-      velocityToRpmBiDiMap.put(30., 4000.);
-      velocityToRpmBiDiMap.put(35., 4500.);
-    }
 
     public static LoggedTunableMeasure<AngularVelocity> idleVelocity =
         new LoggedTunableMeasure<>("Flywheels/Idle Velocity", RPM.of(300));
@@ -233,13 +197,6 @@ public final class LauncherConstants {
         new LoggedTunableMeasure<>("Flywheels/Flywheels Static Hub", RotationsPerSecond.of(20));
     public static LoggedTunableMeasure<AngularVelocity> staticTowerVelocity =
         new LoggedTunableMeasure<AngularVelocity>("Flywheels/Flywheels Static Tower", RPM.of(2713));
-    /**
-     * Nominal muzzle speed (m/s) from flywheel mechanism RPM using {@link #WHEEL_DIAMETER} as
-     * contact radius and {@link #rpmToMuzzleVelocityScale}.
-     */
-    public static double muzzleVelocityMetersPerSecond(double flywheelRpm) {
-      return velocityToRpmBiDiMap.reverseGet(flywheelRpm);
-    }
   }
 
   public final class Hood {
@@ -301,60 +258,12 @@ public final class LauncherConstants {
     public static int MODEL_INDEX = 4;
     public static int PARENT_INDEX = 3; // turret
 
-    public static InterpolatingDoubleTreeMap distanceToAngleMap = new InterpolatingDoubleTreeMap();
-    public static InterpolatingDoubleTreeMap distanceToAngleAzMap =
-        new InterpolatingDoubleTreeMap(); // floor shots may require diff setpoints
-
-    public static InterpolatingDoubleTreeMap hoodAngleToReleaseAngleMap =
-        new InterpolatingDoubleTreeMap();
-
-    static {
-      // Distance (m) -> Hood Pitch (Degrees)
-      distanceToAngleMap.put(1.03, 5.0);
-      distanceToAngleMap.put(2.1, 20.0);
-      distanceToAngleMap.put(3.36, 25.0);
-      distanceToAngleMap.put(5.0, 27.13);
-      distanceToAngleMap.put(6.03, 30.0);
-
-      // Distance (m) -> Hood Pitch (Degrees)
-      distanceToAngleAzMap.put(1.03, 5.0);
-      distanceToAngleAzMap.put(2.1, 20.0);
-      distanceToAngleAzMap.put(3.36, 25.0);
-      distanceToAngleAzMap.put(5.0, 27.13);
-      distanceToAngleAzMap.put(6.03, 30.0);
-
-      // Hood angle (deg) to release angle (deg)
-      hoodAngleToReleaseAngleMap.put(0., 15.);
-      hoodAngleToReleaseAngleMap.put(15., 35.);
-      hoodAngleToReleaseAngleMap.put(30., 50.);
-    }
-
     public static LoggedTunableMeasure<Angle> staticTowerAngle =
         new LoggedTunableMeasure<Angle>("Hood/Hood Static Tower", Degrees.of(25));
     public static LoggedTunableMeasure<Angle> staticRightLeftTrenchAngle =
         new LoggedTunableMeasure<Angle>("Hood/Hood Static Trench", Degrees.of(25));
     public static LoggedTunableMeasure<Angle> staticHubAngle =
         new LoggedTunableMeasure<Angle>("Hood/Hood Static Hub", Degrees.of(25));
-
-    public static double exitAngleRadiansFromHoodDegrees(double degrees) {
-      return Degrees.of(hoodAngleToReleaseAngleMap.get(degrees)).in(Radians);
-    }
-  }
-
-  /** Muzzle height above carpet used when generating drag-aware ToF lookup tables. */
-  public static final double tofSeedMuzzleHeightMeters = Inches.of(22).in(Meters);
-
-  public static InterpolatingDoubleTreeMap tofMap = new InterpolatingDoubleTreeMap();
-  public static InterpolatingDoubleTreeMap tofMapAZ = new InterpolatingDoubleTreeMap();
-
-  static {
-    LaunchTofTable.seedScoringTofMap(
-        tofMap, Flywheels.distanceToRpmMap, Hood.distanceToAngleMap, tofSeedMuzzleHeightMeters);
-    LaunchTofTable.seedAllianceZoneTofMap(
-        tofMapAZ,
-        Flywheels.distanceToRpmAzMap,
-        Hood.distanceToAngleAzMap,
-        tofSeedMuzzleHeightMeters);
   }
 
   /**
@@ -392,10 +301,3 @@ public final class LauncherConstants {
   public static LoggedTunableBoolean otfFutureProjectionEnabled =
       new LoggedTunableBoolean("LaunchingSolutionManager/projection_enabled", true);
 }
-
-// dist   ->    hood    -> flywhees
-// 1.03 m ->   5 deg    -> 2500 rpm
-// 6.03 ->     30       -> 4200
-// 3.36 ->     25       -> 2713
-// 2.1 -> 20 -> 2500
-// 5.0 -> 27.13 -> 3250
