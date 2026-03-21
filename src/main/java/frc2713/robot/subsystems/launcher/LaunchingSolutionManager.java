@@ -33,7 +33,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
    * and iteration data under {@code LaunchingSolutionManager/itof debug/...}.
    */
   public static final LoggedTunableBoolean itofDebug =
-      new LoggedTunableBoolean("LaunchingSolutionManager/itof_debug", false);
+      new LoggedTunableBoolean("LaunchingSolutionManager/itof_debug", true);
 
   // --- Data Structures ---
   public static record LaunchSolution(
@@ -181,6 +181,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
     // C. LUT + kinematics → ideal field-frame launch vector
     double rpmSetpoint = LaunchingSolutionManager.currentRPMMap.get(horizontalDist);
     double idealSpeed = LauncherConstants.Flywheels.muzzleVelocityMetersPerSecond(rpmSetpoint);
+    Logger.recordOutput(pb.makePath("ideal ball speed"), idealSpeed);
     double idealPitchRad =
         LauncherConstants.Hood.exitAngleRadiansFromHoodDegrees(
             LaunchingSolutionManager.currentHoodMap.get(horizontalDist));
