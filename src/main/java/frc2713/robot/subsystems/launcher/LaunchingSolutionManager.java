@@ -33,7 +33,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
    * and iteration data under {@code LaunchingSolutionManager/itof debug/...}.
    */
   public static final LoggedTunableBoolean itofDebug =
-      new LoggedTunableBoolean("LaunchingSolutionManager/itof_debug", true);
+      new LoggedTunableBoolean("LaunchingSolutionManager/itof_debug", false);
 
   // --- Data Structures ---
   public static record LaunchSolution(
@@ -50,10 +50,10 @@ public class LaunchingSolutionManager extends SubsystemBase {
 
   public static Translation3d currentGoal = FieldConstants.Hub.topCenterPoint;
   private static InterpolatingDoubleTreeMap currentHoodMap =
-      LauncherConstants.Hood.distanceToAngleMap; // use for dist -> hood angle
+      LaunchingLookupMaps.distanceToAngleMap; // use for dist -> hood angle
   private static InterpolatingDoubleTreeMap currentRPMMap =
-      LauncherConstants.Flywheels.distanceToRpmMap; // use for dist -> flywheel rpm
-  private static InterpolatingDoubleTreeMap currentTofMap = LauncherConstants.tofMap;
+      LaunchingLookupMaps.distanceToRpmMap; // use for dist -> flywheel rpm
+  private static InterpolatingDoubleTreeMap currentTofMap = LaunchingLookupMaps.tofMap;
 
   /** Warm start for iterative ToF (seconds). */
   private double lastItofTofSeconds = -1.0;
@@ -180,10 +180,10 @@ public class LaunchingSolutionManager extends SubsystemBase {
 
     // C. LUT + kinematics → ideal field-frame launch vector
     double rpmSetpoint = LaunchingSolutionManager.currentRPMMap.get(horizontalDist);
-    double idealSpeed = LauncherConstants.Flywheels.muzzleVelocityMetersPerSecond(rpmSetpoint);
+    double idealSpeed = LaunchingLookupMaps.muzzleVelocityMetersPerSecond(rpmSetpoint);
     Logger.recordOutput(pb.makePath("ideal ball speed"), idealSpeed);
     double idealPitchRad =
-        LauncherConstants.Hood.exitAngleRadiansFromHoodDegrees(
+        LaunchingLookupMaps.exitAngleRadiansFromHoodDegrees(
             LaunchingSolutionManager.currentHoodMap.get(horizontalDist));
 
     // D. Construct Ideal Velocity Vector
@@ -203,7 +203,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
 
     // F. Extract Parameters from Resulting Vector
     double newBallSpeed = neededMuzzleVelocity.getNorm();
-    double newLauncherSpeed = LauncherConstants.Flywheels.velocityToRpmBiDiMap.get(newBallSpeed);
+    double newLauncherSpeed = LaunchingLookupMaps.velocityToRpmBiDiMap.get(newBallSpeed);
 
     // Vertical Angle (Pitch)
     double newPitch =
@@ -223,7 +223,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
 
   /**
    * Iterative time-of-flight: self-consistent t where drag-aware ToF from {@link
-   * LauncherConstants#tofMap} matches projected horizontal range while the robot translates at
+   * LaunchingLookupMaps#tofMap} matches projected horizontal range while the robot translates at
    * constant velocity.
    */
   private LaunchSolution calculateITOF(
@@ -349,8 +349,8 @@ public class LaunchingSolutionManager extends SubsystemBase {
 
     double rpmSetpoint = LaunchingSolutionManager.currentRPMMap.get(horizontalDist);
     double hoodDeg = LaunchingSolutionManager.currentHoodMap.get(horizontalDist);
-    double idealBallSpeed = LauncherConstants.Flywheels.muzzleVelocityMetersPerSecond(rpmSetpoint);
-    double idealPitchRad = LauncherConstants.Hood.exitAngleRadiansFromHoodDegrees(hoodDeg);
+    double idealBallSpeed = LaunchingLookupMaps.muzzleVelocityMetersPerSecond(rpmSetpoint);
+    double idealPitchRad = LaunchingLookupMaps.exitAngleRadiansFromHoodDegrees(hoodDeg);
 
     Translation3d horizontalDir = new Translation3d(rel.getX(), rel.getY(), 0).div(horizontalDist);
 
@@ -404,17 +404,17 @@ public class LaunchingSolutionManager extends SubsystemBase {
           robotPose.getTranslation().getY() < FieldConstants.LinesHorizontal.center
               ? AllianceFlipUtil.applyX(FieldConstants.AllianceZone.bottomSideCornerTarget)
               : AllianceFlipUtil.applyX(FieldConstants.AllianceZone.topSideCornerTarget);
-      LaunchingSolutionManager.currentHoodMap = LauncherConstants.Hood.distanceToAngleAzMap;
-      LaunchingSolutionManager.currentRPMMap = LauncherConstants.Flywheels.distanceToRpmAzMap;
-      LaunchingSolutionManager.currentTofMap = LauncherConstants.tofMapAZ;
+      LaunchingSolutionManager.currentHoodMap = LaunchingLookupMaps.distanceToAngleAzMap;
+      LaunchingSolutionManager.currentRPMMap = LaunchingLookupMaps.distanceToRpmAzMap;
+      LaunchingSolutionManager.currentTofMap = LaunchingLookupMaps.tofMapAZ;
     }
 
     public static void configureForScoring() {
       LaunchingSolutionManager.currentGoal =
           AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint);
-      LaunchingSolutionManager.currentHoodMap = LauncherConstants.Hood.distanceToAngleMap;
-      LaunchingSolutionManager.currentRPMMap = LauncherConstants.Flywheels.distanceToRpmMap;
-      LaunchingSolutionManager.currentTofMap = LauncherConstants.tofMap;
+      LaunchingSolutionManager.currentHoodMap = LaunchingLookupMaps.distanceToAngleMap;
+      LaunchingSolutionManager.currentRPMMap = LaunchingLookupMaps.distanceToRpmMap;
+      LaunchingSolutionManager.currentTofMap = LaunchingLookupMaps.tofMap;
     }
 
     public static Rotation2d storedIntakeRotation = new Rotation2d(0);

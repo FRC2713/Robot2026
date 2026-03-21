@@ -11,6 +11,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import frc2713.robot.FieldConstants;
 import frc2713.robot.GamePieceConstants;
 import frc2713.robot.subsystems.launcher.LauncherConstants;
+import frc2713.robot.subsystems.launcher.LaunchingLookupMaps;
+
 import java.util.ArrayList;
 import java.util.Locale;
 import org.littletonrobotics.junction.Logger;
@@ -77,8 +79,8 @@ public final class LaunchTofTable {
     double hubZ = FieldConstants.Hub.topCenterPoint.getZ();
     double rpm = rpmMap.get(horizontalDistanceM);
     double hoodDeg = hoodMap.get(horizontalDistanceM);
-    double v = LauncherConstants.Flywheels.muzzleVelocityMetersPerSecond(rpm);
-    double theta = LauncherConstants.Hood.exitAngleRadiansFromHoodDegrees(hoodDeg);
+    double v = LaunchingLookupMaps.muzzleVelocityMetersPerSecond(rpm);
+    double theta = LaunchingLookupMaps.exitAngleRadiansFromHoodDegrees(hoodDeg);
     double cosT = Math.cos(theta);
     if (cosT < 0.05 || v < 1e-3) {
       logSeedTrajectorySkippedGeometry(horizontalDistanceM);
