@@ -1,6 +1,7 @@
 package frc2713.robot.subsystems.serializer;
 
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Time;
@@ -29,8 +30,7 @@ public class Feeder extends MotorSubsystem<MotorInputsAutoLogged, MotorIO> {
   }
 
   public Command feedWhenReady(BooleanSupplier isReady) {
-    return Commands.sequence(
-        Commands.waitUntil(isReady), setVelocity(SerializerConstants.Feeder.shootingSpeed));
+    return feedWhenReady(isReady, Seconds.of(Double.POSITIVE_INFINITY));
     // return setVelocity(
     //     () ->
     //         isReady.getAsBoolean()
