@@ -372,7 +372,7 @@ public class RobotContainer {
             turret,
             dyeRotor,
             feeder));
-    
+
     autoChooser.addOption("DemoMode", Demo.demo());
   }
 

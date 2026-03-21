@@ -3,6 +3,7 @@ package frc2713.robot.subsystems.serializer;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -59,7 +60,7 @@ public class DyeRotor extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   }
 
   public Command feedWhenReady(BooleanSupplier isReady) {
-    return Commands.sequence(Commands.waitUntil(isReady), indexFuel());
+    return feedWhenReady(isReady, Seconds.of(Double.POSITIVE_INFINITY));
   }
 
   public Command feedWhenReady(BooleanSupplier isReady, Time timout) {
