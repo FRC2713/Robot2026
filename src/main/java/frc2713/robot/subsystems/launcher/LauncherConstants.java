@@ -16,6 +16,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
@@ -43,8 +44,8 @@ public final class LauncherConstants {
     public static Angle staticHubAngle = Degrees.of(0);
 
     // Turret rotation limits
-    public static final double FORWARD_LIMIT_DEGREES = 200.0;
-    public static final double REVERSE_LIMIT_DEGREES = -200.0;
+    public static final double FORWARD_LIMIT_DEGREES = 60.0;
+    public static final double REVERSE_LIMIT_DEGREES = -60.0;
 
     public static final Angle forwardSoftLimit = Degrees.of(FORWARD_LIMIT_DEGREES);
     public static final Angle reverseSoftLimit = Degrees.of(REVERSE_LIMIT_DEGREES);
@@ -213,11 +214,15 @@ public final class LauncherConstants {
 
     static {
       // Ball Velocity (ft/s) -> RPM (rpm)
-      velocityToRpmBiDiMap.put(20., 2500.);
-      velocityToRpmBiDiMap.put(25., 3000.);
-      velocityToRpmBiDiMap.put(28., 3500.);
-      velocityToRpmBiDiMap.put(30., 4000.);
-      velocityToRpmBiDiMap.put(35., 4500.);
+      velocityToRpmBiDiMap.put(Units.metersToFeet(9.608085967), 2000.);
+      velocityToRpmBiDiMap.put(Units.metersToFeet(16.61984484), 3000.);
+      velocityToRpmBiDiMap.put(Units.metersToFeet(16.42816322), 3500.);
+      velocityToRpmBiDiMap.put(Units.metersToFeet(16.71308465), 3750.);
+      velocityToRpmBiDiMap.put(Units.metersToFeet(17.3678662), 4000.);
+      velocityToRpmBiDiMap.put(Units.metersToFeet(19.11502655), 4250.);
+      velocityToRpmBiDiMap.put(Units.metersToFeet(18.57518632), 4500.);
+      velocityToRpmBiDiMap.put(Units.metersToFeet(20.51208537), 5000.);
+
     }
 
     public static LoggedTunableMeasure<AngularVelocity> idleVelocity =
