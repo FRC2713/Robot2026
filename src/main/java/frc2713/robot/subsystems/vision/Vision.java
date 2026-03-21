@@ -1,6 +1,10 @@
 package frc2713.robot.subsystems.vision;
 
+import choreo.auto.AutoTrajectory;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc2713.robot.RobotContainer;
 import frc2713.robot.subsystems.vision.VisionConstants.PoseEstimatorErrorStDevs;
@@ -28,6 +32,20 @@ public class Vision extends SubsystemBase {
           new PoseEstimatorErrorStDevs(inputs.translationStdDev, inputs.rotationStdDev).toMatrix());
     }
     Logger.processInputs("Vision", inputs);
+  }
+
+  public void setGyroAngle(Angle angle) {
+    io.setGyroAngle(angle);
+  }
+
+  public Command setGyroAngleCmd(Angle angle) {
+    return Commands.runOnce(() -> setGyroAngle(angle));
+  }
+
+  // Overload to set gyro angle from trajectory's initial pose
+  public Command setGyroAngleCmd(AutoTrajectory traj) {
+    return Commands.runOnce(
+        () -> setGyroAngle(traj.getInitialPose().get().getRotation().getMeasure()));
   }
 
   public Optional<Pose2d> getPose() {

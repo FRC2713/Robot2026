@@ -1,5 +1,7 @@
 package frc2713.robot.oi;
 
+import static edu.wpi.first.units.Units.Degrees;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -16,6 +18,7 @@ import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
 import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
+import frc2713.robot.subsystems.vision.Vision;
 
 public class DriverControls {
   private final CommandVader4Controller controller = new CommandVader4Controller(0);
@@ -28,6 +31,7 @@ public class DriverControls {
   private final IntakeExtension intakeExtension;
   private final DyeRotor dyeRotor;
   private final Feeder feeder;
+  private final Vision vision;
 
   public DriverControls(
       Drive drive,
@@ -37,7 +41,8 @@ public class DriverControls {
       IntakeRoller intakeRollers,
       IntakeExtension intakeExtension,
       DyeRotor dyeRotor,
-      Feeder feeder) {
+      Feeder feeder,
+      Vision vision) {
     this.drive = drive;
     this.flywheels = flywheels;
     this.turret = turret;
@@ -46,6 +51,7 @@ public class DriverControls {
     this.intakeExtension = intakeExtension;
     this.dyeRotor = dyeRotor;
     this.feeder = feeder;
+    this.vision = vision;
   }
 
   public void configureButtonBindings() {
@@ -56,6 +62,7 @@ public class DriverControls {
         .onTrue(
             Commands.parallel(
                 this.setToNormalDriveCmd(),
+                vision.setGyroAngleCmd(Degrees.of(0)).ignoringDisable(true),
                 Commands.runOnce(
                         () ->
                             drive.setPose(
@@ -70,6 +77,7 @@ public class DriverControls {
         .onTrue(
             Commands.parallel(
                     this.setToNormalDriveCmd(),
+                    vision.setGyroAngleCmd(Degrees.of(180)).ignoringDisable(true),
                     Commands.runOnce(
                         () ->
                             drive.setPose(
