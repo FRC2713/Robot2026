@@ -88,12 +88,14 @@ public class FieldConstants {
     public static final double rightBumpStart = Hub.nearRightCorner.getY();
     public static final double rightBumpEnd = rightBumpStart - Units.inchesToMeters(73.0);
     public static final double rightTrenchOpenStart = rightBumpEnd - Units.inchesToMeters(12.0);
+    public static final double rightTrenchCenter = rightBumpStart - Units.inchesToMeters(6.0);
     public static final double rightTrenchOpenEnd = 0;
 
     // Left of hub (LeftBump.width used inline to avoid circular init with LeftBump class)
     public static final double leftBumpEnd = Hub.nearLeftCorner.getY();
     public static final double leftBumpStart = leftBumpEnd + Units.inchesToMeters(73.0);
     public static final double leftTrenchOpenEnd = leftBumpStart + Units.inchesToMeters(12.0);
+    public static final double leftTrenchCenter = leftBumpStart + Units.inchesToMeters(6.0);
     public static final double leftTrenchOpenStart = fieldWidth;
   }
 
@@ -298,7 +300,12 @@ public class FieldConstants {
 
     public static final RectangleFieldRegion oppRegion =
         new RectangleFieldRegion(oppFarRightCorner, oppNearLeftCorner);
-  }
+
+    //Trench protection zone for intakeAlign
+public static final Translation2d leftTrenchRailsAlliance = new Translation2d(LinesHorizontal.leftTrenchCenter, Units.inchesToMeters(6.0));
+public static final Translation2d leftTrenchRailsNeutral = new Translation2d(LinesHorizontal.leftTrenchCenter, Units.inchesToMeters(12.0));
+
+}
 
   public static class RightTrench {
 
@@ -344,6 +351,12 @@ public class FieldConstants {
 
     public static final RectangleFieldRegion oppRegion =
         new RectangleFieldRegion(oppFarRightCorner, oppNearLeftCorner);
+
+          //Trench protection zone for intakeAlign
+    // public static final double rightTrenchRailsAlliance = new Translation2d(LinesHorizontal.rightTrenchCenter, Units.inchesToMeters(6.0)).getY();
+    // public static final double rightTrenchRailsNeutral = new Translation2d(LinesHorizontal.rightTrenchCenter, Units.inchesToMeters(6.0)).getY();
+public static final Translation2d rightTrenchRailsAlliance = new Translation2d(LinesHorizontal.leftTrenchCenter, Units.inchesToMeters(6.0));
+public static final Translation2d rightTrenchRailsNeutral = new Translation2d(LinesHorizontal.leftTrenchCenter, Units.inchesToMeters(12.0));
   }
 
   /** Tower related constants */

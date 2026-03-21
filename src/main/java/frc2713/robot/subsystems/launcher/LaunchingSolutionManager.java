@@ -6,13 +6,16 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.FieldConstants;
+import frc2713.robot.Robot;
 import frc2713.robot.RobotContainer;
 import org.littletonrobotics.junction.Logger;
 
@@ -218,6 +221,15 @@ public class LaunchingSolutionManager extends SubsystemBase {
       } else {
         storedIntakeRotation = RobotContainer.drive.getRotation();
       }
+    }
+
+    public static void trenchProtection() {
+    Translation2d storedTarget = FieldConstants.LeftTrench.leftTrenchRailsAlliance;
+    Translation2d robotpose = RobotContainer.drive.getPose().getTranslation();
+    // If the robot is within 10 inches of the trench rails, set the target to the stored target to prevent oscillation
+     if(robotpose.getDistance(storedTarget) < Units.inchesToMeters(10.0)){
+
+     }
     }
   }
 }
