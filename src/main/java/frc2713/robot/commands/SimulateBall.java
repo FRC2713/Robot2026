@@ -11,6 +11,7 @@ import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc2713.lib.util.RobotTime;
+import frc2713.robot.subsystems.launcher.LaunchingLookupMaps;
 import frc2713.robot.util.BallTrajectorySim.Ball;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -18,7 +19,7 @@ import org.littletonrobotics.junction.Logger;
 public class SimulateBall extends Command {
   Mass ballMass = Pounds.of(0.5);
   Distance ballRadius = Inches.of(5.91 / 2); // 37 mm
-  Ball ball = new Ball(ballMass, ballRadius, 0.47, 0.2); // mass(kg), radius
+  Ball ball = new Ball(ballMass, ballRadius, 0.3, 1.5); // mass(kg), radius
   Supplier<Translation3d> initialPosSupplier = () -> new Translation3d();
   Supplier<Translation3d> initialVelSupplier = () -> new Translation3d();
   Supplier<AngularVelocity> initialAngularVelSupplier = () -> RotationsPerSecond.of(0.0);
