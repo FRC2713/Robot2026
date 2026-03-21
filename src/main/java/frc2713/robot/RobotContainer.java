@@ -19,6 +19,7 @@ import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.commands.DriveCommands;
+import frc2713.robot.commands.autos.Demo;
 import frc2713.robot.commands.autos.DriveTest;
 import frc2713.robot.commands.autos.Midwars;
 import frc2713.robot.generated.TunerConstants;
@@ -371,6 +372,8 @@ public class RobotContainer {
             turret,
             dyeRotor,
             feeder));
+    
+    autoChooser.addOption("DemoMode", Demo.demo());
   }
 
   /**
