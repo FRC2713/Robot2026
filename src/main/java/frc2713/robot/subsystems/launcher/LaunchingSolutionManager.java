@@ -64,25 +64,27 @@ public class LaunchingSolutionManager extends SubsystemBase {
       Pose3d robotPose = KinematicsManager.getInstance().getGlobalPose(0);
       Translation3d robotLinVel = KinematicsManager.getInstance().getGlobalLinearVelocity(0);
 
-    // 2. Select goal
-    if (FieldConstants.NeutralZone.region.contains(robotPose.getTranslation().toTranslation2d())) {
-      ZoneSelectionHelpers.configureForFeeding(robotPose.toPose2d());
-      Logger.recordOutput(pb.makePath("shot selection"), "Feeding");
-    } else {
-      ZoneSelectionHelpers.configureForScoring();
-      Logger.recordOutput(pb.makePath("shot selection"), "Scoring");
+      // 2. Select goal
+      if (FieldConstants.NeutralZone.region.contains(
+          robotPose.getTranslation().toTranslation2d())) {
+        ZoneSelectionHelpers.configureForFeeding(robotPose.toPose2d());
+        Logger.recordOutput(pb.makePath("shot selection"), "Feeding");
+      } else {
+        ZoneSelectionHelpers.configureForScoring();
+        Logger.recordOutput(pb.makePath("shot selection"), "Scoring");
+      }
+
+      // 3. Solve for the Launch Vector
+      currentSolution =
+          calculateStatic(robotPose, robotLinVel, LaunchingSolutionManager.currentGoal);
+
+      // 4. Log
+      Logger.recordOutput(pb.makePath("used robot pose"), robotPose);
+      Logger.recordOutput(pb.makePath("used robot lin vel"), robotLinVel);
+      Logger.recordOutput(pb.makePath("current goal"), LaunchingSolutionManager.currentGoal);
+      Logger.recordOutput(pb.makePath("current solution"), currentSolution);
     }
-
-    // 3. Solve for the Launch Vector
-    currentSolution = calculateStatic(robotPose, robotLinVel, LaunchingSolutionManager.currentGoal);
-
-    // 4. Log
-    Logger.recordOutput(pb.makePath("used robot pose"), robotPose);
-    Logger.recordOutput(pb.makePath("used robot lin vel"), robotLinVel);
-    Logger.recordOutput(pb.makePath("current goal"), LaunchingSolutionManager.currentGoal);
-    Logger.recordOutput(pb.makePath("current solution"), currentSolution);
   }
-}
 
   public LaunchSolution getSolution() {
     return currentSolution;

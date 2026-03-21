@@ -2,7 +2,6 @@ package frc2713.robot.subsystems.vision;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc2713.robot.FieldConstants;
 import frc2713.lib.logging.PeriodicTimingLogger;
 import frc2713.lib.logging.TimeLogged;
 import frc2713.robot.RobotContainer;
@@ -23,19 +22,19 @@ public class Vision extends SubsystemBase {
   @Override
   @TimeLogged("Performance/SubsystemPeriodic/Vision")
   public void periodic() {
-        try (var ignored = PeriodicTimingLogger.time(this)) {
+    try (var ignored = PeriodicTimingLogger.time(this)) {
 
-    io.updateInputs(inputs);
+      io.updateInputs(inputs);
 
-    if (inputs.applying) {
-      RobotContainer.drive.addVisionMeasurement(
-          inputs.pose,
-          inputs.timestamp,
-          new PoseEstimatorErrorStDevs(inputs.translationStdDev, inputs.rotationStdDev).toMatrix());
+      if (inputs.applying) {
+        RobotContainer.drive.addVisionMeasurement(
+            inputs.pose,
+            inputs.timestamp,
+            new PoseEstimatorErrorStDevs(inputs.translationStdDev, inputs.rotationStdDev)
+                .toMatrix());
+      }
+      Logger.processInputs("Vision", inputs);
     }
-    Logger.processInputs("Vision", inputs);
-
-  }
   }
 
   public Optional<Pose2d> getPose() {

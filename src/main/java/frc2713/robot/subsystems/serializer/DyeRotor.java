@@ -13,10 +13,10 @@ import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc2713.lib.io.ArticulatedComponent;
-import frc2713.lib.logging.PeriodicTimingLogger;
-import frc2713.lib.logging.TimeLogged;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
+import frc2713.lib.logging.PeriodicTimingLogger;
+import frc2713.lib.logging.TimeLogged;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
@@ -41,7 +41,7 @@ public class DyeRotor extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
     return setVelocity(SerializerConstants.DyeRotor.indexingSpeed);
   }
 
-  @AutoLogOutput
+  @AutoLogOutput(key = "Dye Rotor/DynamicIndexSpeed")
   public AngularVelocity dynamicIndexSpeed() {
     return RPM.of(
         SerializerConstants.DyeRotor.otfSpeeds.get(

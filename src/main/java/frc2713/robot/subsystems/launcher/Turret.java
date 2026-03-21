@@ -23,10 +23,10 @@ import frc2713.lib.geometry.GeometryUtil;
 import frc2713.lib.io.ArticulatedComponent;
 import frc2713.lib.io.CanCoderIO;
 import frc2713.lib.io.CanCoderInputsAutoLogged;
-import frc2713.lib.logging.PeriodicTimingLogger;
-import frc2713.lib.logging.TimeLogged;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
+import frc2713.lib.logging.PeriodicTimingLogger;
+import frc2713.lib.logging.TimeLogged;
 import frc2713.lib.subsystem.MotorCancoderSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.CrtSolver;
@@ -258,15 +258,15 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
     try (var ignored = PeriodicTimingLogger.time(this)) {
       super.periodic();
 
-    if (!initialized) {
-      initialize();
-    }
+      if (!initialized) {
+        initialize();
+      }
 
-    // Log the goal pose for visualization
-    Pose3d goalPose = new Pose3d(LaunchingSolutionManager.currentGoal, new Rotation3d());
-    Logger.recordOutput(pb.makePath("goalVector"), new Pose3d[] {this.getGlobalPose(), goalPose});
+      // Log the goal pose for visualization
+      Pose3d goalPose = new Pose3d(LaunchingSolutionManager.currentGoal, new Rotation3d());
+      Logger.recordOutput(pb.makePath("goalVector"), new Pose3d[] {this.getGlobalPose(), goalPose});
+    }
   }
-}
 
   @Override
   public Transform3d getTransform3d() {
