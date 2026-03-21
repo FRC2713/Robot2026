@@ -42,15 +42,18 @@ public class VisionConstants {
   // effectively ignores the rotation component of vision measurements and relies
   // on other sensors (e.g., gyro/odometry) for heading, since vision rotation
   // data is considered too unreliable/noisy for this robot.
-  public static PoseEstimatorErrorStDevs POSE_ESTIMATOR_STATE_STDEVS =
+  public static final PoseEstimatorErrorStDevs POSE_ESTIMATOR_STATE_STDEVS =
       new PoseEstimatorErrorStDevs(Meters.of(0.01), Degrees.of(5));
 
-  public static PoseEstimatorErrorStDevs POSE_ESTIMATOR_STATE_LOW_TAGS_FAST_STDEVS =
+  public static final PoseEstimatorErrorStDevs POSE_ESTIMATOR_STATE_LOW_TAGS_FAST_STDEVS =
       new PoseEstimatorErrorStDevs(Meters.of(0.8), Degrees.of(99999));
 
-  public static PoseEstimatorErrorStDevs POSE_ESTIMATOR_STATE_LOW_TAGS_SLOW_STDEVS =
+  public static final PoseEstimatorErrorStDevs POSE_ESTIMATOR_STATE_LOW_TAGS_SLOW_STDEVS =
       new PoseEstimatorErrorStDevs(Meters.of(0.3), Degrees.of(99999));
 
-  public static LoggedTunableMeasure<Time> LATENCY_THRESHOLD =
+  public static final LoggedTunableMeasure<Time> LATENCY_THRESHOLD =
       new LoggedTunableMeasure<Time>("Vision/latencyThreshold", Seconds.of(0.2));
+
+  public static final String SLAMDUNK_IP = "10.27.13.201";
+  public static final String SUPERCAP_IPC_ADDRESS = "tcp://" + SLAMDUNK_IP + ":5809";
 }

@@ -33,4 +33,6 @@ public interface VisionIO {
   }
 
   public default void updateInputs(VisionInputs inputs) {}
+
+  public default void setGyroAngle(Angle angle) {}
 }

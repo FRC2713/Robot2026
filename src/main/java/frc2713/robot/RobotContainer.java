@@ -252,7 +252,15 @@ public class RobotContainer {
     // Set up controllers
     driverControls =
         new DriverControls(
-            drive, flywheels, turret, hood, intakeRoller, intakeExtension, dyeRotor, feeder);
+            drive,
+            flywheels,
+            turret,
+            hood,
+            intakeRoller,
+            intakeExtension,
+            dyeRotor,
+            feeder,
+            vision);
     devControls =
         new DevControls(
             drive, flywheels, turret, hood, intakeRoller, intakeExtension, dyeRotor, feeder);
