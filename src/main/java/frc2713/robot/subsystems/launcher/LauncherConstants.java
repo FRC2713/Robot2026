@@ -16,7 +16,6 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
@@ -199,11 +198,13 @@ public final class LauncherConstants {
         launchRateFuelPerSecond * GamePieceConstants.Fuel.volumeInchesCubed;
 
     static {
-      distanceToRpmMap.put(1.03, 2500.);
-      distanceToRpmMap.put(2.1, 2500.);
-      distanceToRpmMap.put(3.36, 2713.);
-      distanceToRpmMap.put(5.0, 3250.);
-      distanceToRpmMap.put(6.03, 4200.);
+      distanceToRpmMap.put(1.03, 1800.);
+      distanceToRpmMap.put(1.75, 2000.);
+      distanceToRpmMap.put(2.1, 2100.);
+      distanceToRpmMap.put(3.36, 2200.);
+      distanceToRpmMap.put(4.5, 2300.);
+      distanceToRpmMap.put(5.0, 2500.);
+      distanceToRpmMap.put(6.03, 3200.);
 
       distanceToRpmAzMap.put(1.03, 2500.);
       distanceToRpmAzMap.put(2.1, 2500.);
@@ -214,15 +215,12 @@ public final class LauncherConstants {
 
     static {
       // Ball Velocity (ft/s) -> RPM (rpm)
-      velocityToRpmBiDiMap.put(Units.metersToFeet(9.608085967), 2000.);
-      velocityToRpmBiDiMap.put(Units.metersToFeet(16.61984484), 3000.);
-      velocityToRpmBiDiMap.put(Units.metersToFeet(16.42816322), 3500.);
-      velocityToRpmBiDiMap.put(Units.metersToFeet(16.71308465), 3750.);
-      velocityToRpmBiDiMap.put(Units.metersToFeet(17.3678662), 4000.);
-      velocityToRpmBiDiMap.put(Units.metersToFeet(19.11502655), 4250.);
-      velocityToRpmBiDiMap.put(Units.metersToFeet(18.57518632), 4500.);
-      velocityToRpmBiDiMap.put(Units.metersToFeet(20.51208537), 5000.);
-
+      velocityToRpmBiDiMap.put(16., 1800.);
+      velocityToRpmBiDiMap.put(20., 2000.);
+      velocityToRpmBiDiMap.put(25., 3000.);
+      velocityToRpmBiDiMap.put(28., 3500.);
+      velocityToRpmBiDiMap.put(30., 4000.);
+      velocityToRpmBiDiMap.put(35., 4500.);
     }
 
     public static LoggedTunableMeasure<AngularVelocity> idleVelocity =

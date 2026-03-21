@@ -101,8 +101,8 @@ public final class GameCommandGroups {
               intakeRoller.intake(),
               flywheels.simulateLaunchFuelCommand(flywheels::atTarget),
               feeder.feedWhenReady(flywheels::atTarget),
-              dyeRotor.dynamicFeedWhenReady(flywheels::atTarget),
-              extension.maintainFuelPressureCommand(1).beforeStarting(Commands.waitSeconds(1)))
+              dyeRotor.dynamicFeedWhenReady(flywheels::atTarget))
+          // extension.maintainFuelPressureCommand(1).beforeStarting(Commands.waitSeconds(1)))
           .withName("OTF Shooting");
     }
 
