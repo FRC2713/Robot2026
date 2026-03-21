@@ -358,7 +358,7 @@ public class RobotContainer {
             dyeRotor,
             feeder));
 
-    autoChooser.addDefaultOption(
+    autoChooser.addOption(
         "MidwarsFlipped",
         Midwars.getRoutine(
             autoFactory,
