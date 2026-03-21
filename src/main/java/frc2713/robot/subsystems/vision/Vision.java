@@ -1,7 +1,6 @@
 package frc2713.robot.subsystems.vision;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc2713.robot.FieldConstants;
 import frc2713.lib.logging.PeriodicTimingLogger;
@@ -28,17 +27,7 @@ public class Vision extends SubsystemBase {
 
     io.updateInputs(inputs);
 
-    if (inputs.applying && DriverStation.isEnabled()) {
-      if (!FieldConstants.FIELD_PLUS_HALF_METER.contains(
-          RobotContainer.drive.getPose().getTranslation())) {
-        inputs.reasoning = "ROBOT OUTSIDE FIELD!! HARD RESET";
-        RobotContainer.drive.setPose(inputs.pose);
-        Logger.recordOutput("Odometry/inFieldPlus", false);
-
-      } else {
-        Logger.recordOutput("Odometry/inFieldPlus", true);
-      }
-
+    if (inputs.applying) {
       RobotContainer.drive.addVisionMeasurement(
           inputs.pose,
           inputs.timestamp,

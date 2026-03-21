@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc2713.lib.util.LoggedTunableGains;
 import frc2713.robot.subsystems.drive.Drive;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -49,6 +50,13 @@ public class DriveCommands {
   private static final double WHEEL_RADIUS_MAX_VELOCITY = 1.25; // Rad/Sec
   private static final double WHEEL_RADIUS_RAMP_RATE = 0.25; // Rad/Sec^2
   public static final DoubleSupplier INCH_SPEED = () -> 0.1;
+  public static final LoggedTunableGains DRIVE_HEADING_CONTROLLER_GAINS =
+      new LoggedTunableGains(
+          "Drive/HeadingController",
+          ANGLE_KP,
+          0.0,
+          ANGLE_KD,
+          new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
 
   private DriveCommands() {}
 
@@ -140,11 +148,7 @@ public class DriveCommands {
 
     // Create PID controller
     ProfiledPIDController angleController =
-        new ProfiledPIDController(
-            ANGLE_KP,
-            0.0,
-            ANGLE_KD,
-            new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
+        DRIVE_HEADING_CONTROLLER_GAINS.createProfiledPIDController();
     angleController.enableContinuousInput(-Math.PI, Math.PI);
 
     // Construct command
