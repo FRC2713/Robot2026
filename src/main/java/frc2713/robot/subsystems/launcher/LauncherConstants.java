@@ -27,7 +27,8 @@ import frc2713.lib.dynamics.MoiUnits;
 import frc2713.lib.io.CanCoderConfig;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig.GeneralControlMode;
-import frc2713.lib.util.BidirectionalInterpolatingDoubleMap;
+import frc2713.lib.util.LoggedTunableBidirectionalDoubleMap;
+import frc2713.lib.util.LoggedTunableDoubleMap;
 import frc2713.lib.util.LoggedTunableBoolean;
 import frc2713.lib.util.LoggedTunableMeasure;
 import frc2713.lib.util.LoggedTunableNumber;
@@ -183,12 +184,12 @@ public final class LauncherConstants {
             new Translation3d(Inches.of(-5).in(Meters), 0, Inches.of(2).in(Meters)),
             new Rotation3d(0, Degrees.of(-90).in(Radians), 0));
 
-    public static InterpolatingDoubleTreeMap distanceToRpmMap = new InterpolatingDoubleTreeMap();
-    public static InterpolatingDoubleTreeMap distanceToRpmAzMap =
-        new InterpolatingDoubleTreeMap(); // floor shots may require diff setpoints
+    public static LoggedTunableDoubleMap distanceToRpmMap = new LoggedTunableDoubleMap("Flywheels/distanceToRpmMap");
+    public static LoggedTunableDoubleMap distanceToRpmAzMap =
+        new LoggedTunableDoubleMap("Flywheels/distanceToRpmAzMap"); // floor shots may require diff setpoints
 
-    public static BidirectionalInterpolatingDoubleMap velocityToRpmBiDiMap =
-        new BidirectionalInterpolatingDoubleMap();
+    public static LoggedTunableBidirectionalDoubleMap velocityToRpmBiDiMap =
+        new LoggedTunableBidirectionalDoubleMap("Flywheels/velocityToRpmBiDiMap");
 
     public static Distance WHEEL_DIAMETER = Inches.of(4);
     // How many fuel we can launch per second at max firing rate
@@ -199,30 +200,37 @@ public final class LauncherConstants {
         launchRateFuelPerSecond * GamePieceConstants.Fuel.volumeInchesCubed;
 
     static {
-      distanceToRpmMap.put(1.03, 2500.);
-      distanceToRpmMap.put(2.1, 2500.);
-      distanceToRpmMap.put(3.36, 2713.);
-      distanceToRpmMap.put(5.0, 3250.);
-      distanceToRpmMap.put(6.03, 4200.);
+      distanceToRpmMap.initDefault(new double[][] {
+          {1.03, 2500.},
+          {2.1,  2500.},
+          {3.36, 2713.},
+          {5.0,  3250.},
+          {6.03, 4200.}
+      });
 
-      distanceToRpmAzMap.put(1.03, 2500.);
-      distanceToRpmAzMap.put(2.1, 2500.);
-      distanceToRpmAzMap.put(3.36, 2713.);
-      distanceToRpmAzMap.put(5.0, 3250.);
-      distanceToRpmAzMap.put(6.03, 4200.);
+      distanceToRpmAzMap.initDefault(new double[][] {
+          {1.03, 2500.},
+          {2.1,  2500.},
+          {3.36, 2713.},
+          {5.0,  3250.},
+          {6.03, 4200.}
+      });
     }
 
     static {
       // Ball Velocity (ft/s) -> RPM (rpm)
-      velocityToRpmBiDiMap.put(Units.metersToFeet(9.608085967), 2000.);
-      velocityToRpmBiDiMap.put(Units.metersToFeet(16.61984484), 3000.);
-      velocityToRpmBiDiMap.put(Units.metersToFeet(16.42816322), 3500.);
-      velocityToRpmBiDiMap.put(Units.metersToFeet(16.71308465), 3750.);
-      velocityToRpmBiDiMap.put(Units.metersToFeet(17.3678662), 4000.);
-      velocityToRpmBiDiMap.put(Units.metersToFeet(19.11502655), 4250.);
-      velocityToRpmBiDiMap.put(Units.metersToFeet(18.57518632), 4500.);
-      velocityToRpmBiDiMap.put(Units.metersToFeet(20.51208537), 5000.);
-
+      velocityToRpmBiDiMap.setDashboardMultipliers(Units.metersToFeet(1.0), 1.0);
+      velocityToRpmBiDiMap.initDefault(
+          new double[][] {
+            {Units.metersToFeet(9.608085967), 2000.},
+            {Units.metersToFeet(16.61984484), 3000.},
+            {Units.metersToFeet(16.42816322), 3500.},
+            {Units.metersToFeet(16.71308465), 3750.},
+            {Units.metersToFeet(17.3678662), 4000.},
+            {Units.metersToFeet(19.11502655), 4250.},
+            {Units.metersToFeet(18.57518632), 4500.},
+            {Units.metersToFeet(20.51208537), 5000.}
+          });
     }
 
     public static LoggedTunableMeasure<AngularVelocity> idleVelocity =
