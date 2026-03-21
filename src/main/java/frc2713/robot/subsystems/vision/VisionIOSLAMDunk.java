@@ -1,5 +1,6 @@
 package frc2713.robot.subsystems.vision;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -23,7 +24,7 @@ public class VisionIOSLAMDunk implements VisionIO {
   private NetworkTable table;
   private DoubleArraySubscriber sub;
   private double lastTimestamp = -1;
-  private static final LoggedTunableNumber k = new LoggedTunableNumber("Vision/k", 3);
+  private static final LoggedTunableNumber k = new LoggedTunableNumber("Vision/k", 2);
   private static final Transform3d SLAMDUNK_TRANSFORM =
       new Transform3d(new Translation3d(), new Rotation3d(0, 0, Math.PI / 2));
 
@@ -51,8 +52,10 @@ public class VisionIOSLAMDunk implements VisionIO {
     if (poseArray.length > 0) {
       double t = poseArray[0];
 
-      if (lastTimestamp != t && poseArray.length > 8) {
+      if (lastTimestamp != t && poseArray.length > 10) {
         inputs.tagCount = (int) poseArray[8];
+        inputs.subgraphError = poseArray[9];
+        inputs.avgTagSize = poseArray[10];
         inputs.timestamp = t;
         double latency = Timer.getFPGATimestamp() - t;
         inputs.latency = Seconds.of(latency);
@@ -94,6 +97,15 @@ public class VisionIOSLAMDunk implements VisionIO {
           }
         }
 
+        Logger.recordOutput(
+            "Vision/distanceTag9",
+            FieldConstants.AprilTagLayoutType.OFFICIAL
+                .getLayout()
+                .getTagPose(9)
+                .get()
+                .getTranslation()
+                .getDistance(inputs.pose3d.getTranslation()));
+
         if (!FieldConstants.FIELD_PLUS_HALF_METER.contains(inputs.pose.getTranslation())) {
           inputs.reasoning = "Vision outside field";
           inputs.applying = false;
@@ -106,13 +118,14 @@ public class VisionIOSLAMDunk implements VisionIO {
           return;
         }
 
-        double poseDelta =
-            inputs
-                .pose
-                .getTranslation()
-                .getDistance(RobotContainer.drive.getPose().getTranslation());
-
-        double distScaleFactor = Math.exp(poseDelta * k.get());
+        // double poseDelta =
+        //     inputs
+        //         .pose
+        //         .getTranslation()
+        //         .getDistance(RobotContainer.drive.getPose().getTranslation());
+        double roughDist = 74.7 * Math.pow(inputs.avgTagSize, -0.396);
+        Logger.recordOutput("Vision/roughDist", roughDist);
+        double distScaleFactor = Math.pow(roughDist, k.get());
         Logger.recordOutput("Vision/distanceScaleFactor", distScaleFactor);
         double countScaleFactor = 1 / Math.max(1, Math.pow(inputs.tagCount, 2));
         Logger.recordOutput("Vision/countScaleFactor", countScaleFactor);
@@ -122,11 +135,11 @@ public class VisionIOSLAMDunk implements VisionIO {
                 .translationalStDev()
                 .times(distScaleFactor)
                 .times(countScaleFactor);
-        inputs.rotationStdDev =
-            VisionConstants.POSE_ESTIMATOR_STATE_STDEVS
-                .rotationalStDev()
-                .times(distScaleFactor)
-                .times(countScaleFactor);
+        inputs.rotationStdDev = Degrees.of(999);
+        // VisionConstants.POSE_ESTIMATOR_STATE_STDEVS
+        //     .rotationalStDev()
+        //     .times(distScaleFactor)
+        //     .times(countScaleFactor);
 
         inputs.reasoning = "Valid pose.";
         inputs.applying = true;
@@ -134,7 +147,7 @@ public class VisionIOSLAMDunk implements VisionIO {
       }
     }
 
-    if (poseArray.length <= 8) {
+    if (poseArray.length <= 10) {
       inputs.reasoning = "No pose data available";
     } else {
       inputs.reasoning = "Stale timestamp";

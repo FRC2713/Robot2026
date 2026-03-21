@@ -28,6 +28,8 @@ public interface VisionIO {
     public Distance translationStdDev =
         VisionConstants.POSE_ESTIMATOR_STATE_STDEVS.translationalStDev();
     public Angle rotationStdDev = VisionConstants.POSE_ESTIMATOR_STATE_STDEVS.rotationalStDev();
+    public double subgraphError;
+    public double avgTagSize;
   }
 
   public default void updateInputs(VisionInputs inputs) {}
