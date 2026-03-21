@@ -113,12 +113,6 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically when disabled. */
   @Override
   public void disabledPeriodic() {
-    // Reset pose to vision pose if available whilst disabled
-    var visionPose = RobotContainer.vision.getPose();
-    if (visionPose.isPresent()) {
-      RobotContainer.drive.setPose(visionPose.get());
-    }
-
     LaunchingSolutionManager.currentGoal =
         AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint);
 

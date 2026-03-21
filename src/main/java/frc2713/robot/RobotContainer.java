@@ -19,6 +19,7 @@ import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.commands.DriveCommands;
+import frc2713.robot.commands.autos.Demo;
 import frc2713.robot.commands.autos.DriveTest;
 import frc2713.robot.commands.autos.Midwars;
 import frc2713.robot.commands.autos.MidwarsFlipped;
@@ -382,6 +383,8 @@ public class RobotContainer {
             () ->
                 GameCommandGroups.Launching.autoOtfShot(
                     flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)));
+
+    autoChooser.addOption("DemoMode", Demo.demo());
 
     autoChooser.addOption(
         "Trench to Neutral, Launch At Bump",
