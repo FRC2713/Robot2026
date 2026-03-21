@@ -189,7 +189,15 @@ public class VisionIOSLAMDunk implements VisionIO {
 
                 if (success) {
                   byte[] reply = superCapSocket.recv(0);
-                  gyroAlert.set(reply == null); // alert if no reply received
+                  String replyStr = reply != null ? new String(reply) : "null";
+                  System.out.println("Received reply from SuperCap: " + replyStr);
+                  if (reply == null || !replyStr.equals("OK")) {
+                    gyroAlert.set(true);
+                    System.err.println("Unexpected reply from SuperCap: " + replyStr);
+                    Logger.recordOutput("Vision/SuperCapReplyError", replyStr);
+                  } else {
+                    gyroAlert.set(false);
+                  }
                 } else {
                   gyroAlert.set(true);
                 }
