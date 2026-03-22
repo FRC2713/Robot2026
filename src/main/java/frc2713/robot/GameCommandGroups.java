@@ -98,32 +98,10 @@ public final class GameCommandGroups {
               flywheels.otfCommand(),
               hood.otfCommand(),
               turret.otfCommand(),
-              intakeRoller.intake(),
               flywheels.simulateLaunchFuelCommand(flywheels::atTarget),
               feeder.feedWhenReady(flywheels::atTarget),
               dyeRotor.dynamicFeedWhenReady(flywheels::atTarget))
-          // extension.maintainFuelPressureCommand(1).beforeStarting(Commands.waitSeconds(1)))
           .withName("OTF Shooting");
-    }
-
-    public static Command dumbShot(
-        Drive drive,
-        Flywheels flywheels,
-        Hood hood,
-        Turret turret,
-        Feeder feeder,
-        DyeRotor dyeRotor,
-        IntakeExtension extension,
-        IntakeRoller rollers) {
-      return Commands.parallel(
-          flywheels.setVelocity(LauncherConstants.Flywheels.staticTowerVelocity),
-          // hood.dumbCommand(),
-          // turret.setAngle(() -> Degrees.of(0.0)),
-          feeder.feedWhenReady(() -> flywheels.atTarget()),
-          dyeRotor.feedWhenReady(() -> flywheels.atTarget())
-          // extension.maintainFuelPressureCommand(),
-          // rollers.voltageCommand(IntakeConstants.Roller.intakeVoltageDesired)
-          );
     }
 
     public static Command towerShot(
@@ -140,9 +118,7 @@ public final class GameCommandGroups {
           hood.setAngleCommand(LauncherConstants.Hood.staticTowerAngle),
           turret.setAngle(LauncherConstants.Turret.staticTowerShot),
           feeder.feedWhenReady(() -> flywheels.atTarget()),
-          dyeRotor.feedWhenReady(() -> flywheels.atTarget()),
-          extension.maintainFuelPressureCommand(),
-          rollers.intake());
+          dyeRotor.feedWhenReady(() -> flywheels.atTarget()));
     }
 
     public static Command leftTrenchShot(
@@ -159,9 +135,7 @@ public final class GameCommandGroups {
           hood.setAngleCommand(LauncherConstants.Hood.staticRightLeftTrenchAngle),
           turret.setAngle(LauncherConstants.Turret.staticLeftTrench),
           feeder.feedWhenReady(() -> flywheels.atTarget()),
-          dyeRotor.feedWhenReady(() -> flywheels.atTarget()),
-          extension.maintainFuelPressureCommand(),
-          rollers.intake());
+          dyeRotor.feedWhenReady(() -> flywheels.atTarget()));
     }
 
     public static Command rightTrenchShot(
@@ -178,30 +152,7 @@ public final class GameCommandGroups {
           hood.setAngleCommand(LauncherConstants.Hood.staticRightLeftTrenchAngle),
           turret.setAngle(LauncherConstants.Turret.staticRightTrench),
           feeder.feedWhenReady(() -> flywheels.atTarget()),
-          dyeRotor.feedWhenReady(() -> flywheels.atTarget()),
-          extension.maintainFuelPressureCommand(),
-          rollers.intake());
-    }
-
-    /** Hub shooting command. */
-    public static Command hubShot(
-        Drive drive,
-        Flywheels flywheels,
-        Hood hood,
-        Turret turret,
-        Feeder feeder,
-        DyeRotor dyeRotor) {
-      return Commands.parallel(
-              flywheels.hubCommand(),
-              hood.hubCommand(),
-              turret.hubCommand(drive::getPose),
-              flywheels.simulateLaunchFuelCommand(
-                  () -> flywheels.atTarget() && hood.atTarget() && turret.atTarget()),
-              feeder.feedWhenReady(
-                  () -> flywheels.atTarget() && hood.atTarget() && turret.atTarget()),
-              dyeRotor.feedWhenReady(
-                  () -> flywheels.atTarget() && hood.atTarget() && turret.atTarget()))
-          .withName("Hub Shooting");
+          dyeRotor.feedWhenReady(() -> flywheels.atTarget()));
     }
 
     /** Stop shooting and clear drive limits. */

@@ -9,7 +9,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc2713.robot.GameCommandGroups;
 import frc2713.robot.RobotContainer;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
@@ -214,12 +213,6 @@ public class DevControls {
     //     .onFalse(Commands.parallel(dyeRotor.stop(), feeder.stop(), flywheels.stop()));
 
     // Shoot when flywheels are ready
-    controller
-        .rightTrigger(.98)
-        .whileTrue(
-            GameCommandGroups.Launching.dumbShot(
-                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
-        .onFalse(GameCommandGroups.Launching.stopShooting(drive, feeder, dyeRotor, flywheels));
   }
 
   public double getLeftY() {

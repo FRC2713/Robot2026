@@ -11,7 +11,6 @@ import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc2713.lib.util.RobotTime;
-import frc2713.robot.subsystems.launcher.LaunchingLookupMaps;
 import frc2713.robot.util.BallTrajectorySim.Ball;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;

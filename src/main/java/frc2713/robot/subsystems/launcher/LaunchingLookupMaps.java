@@ -41,21 +41,22 @@ public final class LaunchingLookupMaps {
 
   static {
     // Distance to hub center (m) -> RPM (rpm)
-    distanceToRpmMap.put(1.03, 1800.);
-    distanceToRpmMap.put(1.75, 2000.);
-    distanceToRpmMap.put(2.1, 2100.);
-    distanceToRpmMap.put(3.36, 2200.);
-    distanceToRpmMap.put(4.5, 2300.);
-    distanceToRpmMap.put(5.0, 2500.);
-    distanceToRpmMap.put(6.03, 3200.);
+    distanceToRpmMap.put(1.03, 2400.);
+    distanceToRpmMap.put(1.75, 2666.66);
+    distanceToRpmMap.put(2.1, 2800.);
+    distanceToRpmMap.put(3.36, 2933.);
+    distanceToRpmMap.put(4.5, 3066.);
+    distanceToRpmMap.put(5.0, 3333.);
+    distanceToRpmMap.put(6.03, 4266.);
 
     // Distance to az Corner (m) -> RPM (rpm)
-    distanceToRpmAzMap.put(1.03, 1800.);
-    distanceToRpmAzMap.put(1.75, 2000.);
-    distanceToRpmAzMap.put(2.1, 2100.);
-    distanceToRpmAzMap.put(3.36, 2200.);
-    distanceToRpmAzMap.put(4.5, 2300.);
-    distanceToRpmAzMap.put(5.0, 2500.);
+    distanceToRpmAzMap.put(1.03, 2400.);
+    distanceToRpmAzMap.put(1.75, 2666.66);
+    distanceToRpmAzMap.put(2.1, 2800.);
+    distanceToRpmAzMap.put(3.36, 2933.);
+    distanceToRpmAzMap.put(4.5, 3066.);
+    distanceToRpmAzMap.put(5.0, 3333.);
+    distanceToRpmAzMap.put(6.03, 4266.);
 
     // Ball Velocity (ft/s) <-> RPM (rpm)
     velocityToRpmBiDiMap.put(16.0, 1800.);

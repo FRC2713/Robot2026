@@ -40,8 +40,8 @@ public final class LauncherConstants {
     public static Angle staticHubAngle = Degrees.of(0);
 
     // Turret rotation limits
-    public static final double FORWARD_LIMIT_DEGREES = 180.0;
-    public static final double REVERSE_LIMIT_DEGREES = -180.0;
+    public static final double FORWARD_LIMIT_DEGREES = 185.0;
+    public static final double REVERSE_LIMIT_DEGREES = -209.0;
 
     public static final Angle forwardSoftLimit = Degrees.of(FORWARD_LIMIT_DEGREES);
     public static final Angle reverseSoftLimit = Degrees.of(REVERSE_LIMIT_DEGREES);
@@ -73,7 +73,7 @@ public final class LauncherConstants {
       config.generalControlMode = GeneralControlMode.POSITION;
       config.acceptablePositionError = Degrees.of(3);
 
-      config.fxConfig.Feedback.FeedbackRotorOffset = 0.175781;
+      config.fxConfig.Feedback.FeedbackRotorOffset = 0.297363;
 
       config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -128,7 +128,7 @@ public final class LauncherConstants {
     public static LoggedTunableMeasure<Angle> staticRightTrench =
         new LoggedTunableMeasure<>("Turret/Turret Static Trench R", Degrees.of(190));
     public static LoggedTunableMeasure<Angle> staticTowerShot =
-        new LoggedTunableMeasure<>("Turret/Turret Static Tower", Degrees.of(-177));
+        new LoggedTunableMeasure<>("Turret/Turret Static Tower", Degrees.of(-180));
   }
 
   public final class Flywheels {
@@ -136,14 +136,14 @@ public final class LauncherConstants {
     public static TalonFXSubsystemConfig leaderConfig = new TalonFXSubsystemConfig();
     public static TalonFXSubsystemConfig followerConfig = new TalonFXSubsystemConfig();
     public static MomentOfInertia flywhMomentOfInertia = MoiUnits.PoundSquareInches.of(10.410164);
-    public static double gearRatio = 24.0 / 18.0; // 1.33:1 reduction from motor to flywheel
+    public static double gearRatio = 21.0 / 21.0; // 1.33:1 reduction from motor to flywheel
 
     static {
       leaderConfig.name = "Flywheels";
       leaderConfig.talonCANID = new CANDeviceId(50, "canivore");
-      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(.7, 3.5);
+      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(.6, 3.5);
       leaderConfig.fxConfig.Slot0.kI = 0.0;
-      leaderConfig.fxConfig.Slot0.kD = 0.004;
+      leaderConfig.fxConfig.Slot0.kD = 0.000;
       leaderConfig.fxConfig.Slot0.kS = Util.modeDependentValue(0.2, 2.0);
       leaderConfig.fxConfig.Slot0.kV = 0.12 * gearRatio;
       leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimit = 120.0;
@@ -194,7 +194,7 @@ public final class LauncherConstants {
     public static LoggedTunableMeasure<AngularVelocity> staticRightLeftTrench =
         new LoggedTunableMeasure<>("Flywheels/Flywheels Static Trench", RPM.of(2850));
     public static LoggedTunableMeasure<AngularVelocity> staticHubVelocity =
-        new LoggedTunableMeasure<>("Flywheels/Flywheels Static Hub", RotationsPerSecond.of(20));
+        new LoggedTunableMeasure<>("Flywheels/Flywheels Static Hub", RotationsPerSecond.of(25));
     public static LoggedTunableMeasure<AngularVelocity> staticTowerVelocity =
         new LoggedTunableMeasure<AngularVelocity>("Flywheels/Flywheels Static Tower", RPM.of(2713));
   }
@@ -215,7 +215,7 @@ public final class LauncherConstants {
       config.name = "Hood";
       config.talonCANID = new CANDeviceId(54, "canivore"); // Example CAN ID, replace with actual ID
 
-      config.fxConfig.Feedback.FeedbackRotorOffset = -0.121094 + 0.215332 - 0.439453;
+      config.fxConfig.Feedback.FeedbackRotorOffset = 0.452148;
 
       // PID gains for Motion Magic
       config.fxConfig.Slot0.kP = 600.0;
@@ -259,7 +259,7 @@ public final class LauncherConstants {
     public static int PARENT_INDEX = 3; // turret
 
     public static LoggedTunableMeasure<Angle> staticTowerAngle =
-        new LoggedTunableMeasure<Angle>("Hood/Hood Static Tower", Degrees.of(25));
+        new LoggedTunableMeasure<Angle>("Hood/Hood Static Tower", Degrees.of(20));
     public static LoggedTunableMeasure<Angle> staticRightLeftTrenchAngle =
         new LoggedTunableMeasure<Angle>("Hood/Hood Static Trench", Degrees.of(25));
     public static LoggedTunableMeasure<Angle> staticHubAngle =

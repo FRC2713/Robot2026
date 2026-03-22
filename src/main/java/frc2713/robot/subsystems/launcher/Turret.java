@@ -8,7 +8,6 @@ import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.forward
 import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.reverseSoftLimit;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -235,10 +234,6 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
 
   public Command otfCommand() {
     return setAngle(otfAngleSupplier);
-  }
-
-  public Command hubCommand(Supplier<Pose2d> robotPose) {
-    return setAngle(() -> Util.fieldToRobotRelative(hubAngleSupplier.get(), robotPose.get()));
   }
 
   @Override
