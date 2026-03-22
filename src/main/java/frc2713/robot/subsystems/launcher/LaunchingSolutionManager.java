@@ -26,6 +26,8 @@ import org.littletonrobotics.junction.Logger;
 public class LaunchingSolutionManager extends SubsystemBase {
   private static LaunchingSolutionManager instance;
 
+  private static Rotation2d PI = new Rotation2d(Math.PI);
+
   AdvantageScopePathBuilder pb = new AdvantageScopePathBuilder("LaunchingSolutionManager");
 
   /**
@@ -151,7 +153,8 @@ public class LaunchingSolutionManager extends SubsystemBase {
     // Get Horizontal Angle (Yaw) This is a field-relative angle, NOT robot-relative.
     // The conversion to robot-relative happens at the point of use (e.g. in Turret)
     // so that it always uses the robot's current heading, not a stale or projected one.
-    Rotation2d newYaw = new Rotation2d(Math.atan2(horizontalDir.getY(), horizontalDir.getX()));
+    Rotation2d newYaw =
+        new Rotation2d(Math.atan2(horizontalDir.getY(), horizontalDir.getX())).rotateBy(PI);
 
     return new LaunchSolution(
         newYaw,
@@ -215,7 +218,8 @@ public class LaunchingSolutionManager extends SubsystemBase {
     // The conversion to robot-relative happens at the point of use (e.g. in Turret)
     // so that it always uses the robot's current heading, not a stale or projected one.
     Rotation2d newYaw =
-        new Rotation2d(Math.atan2(neededMuzzleVelocity.getY(), neededMuzzleVelocity.getX()));
+        new Rotation2d(Math.atan2(neededMuzzleVelocity.getY(), neededMuzzleVelocity.getX()))
+            .rotateBy(PI);
 
     return new LaunchSolution(
         newYaw, newLauncherSpeed, new Rotation2d(newPitch), horizontalDist, true);
@@ -373,7 +377,8 @@ public class LaunchingSolutionManager extends SubsystemBase {
     }
 
     Rotation2d newYaw =
-        new Rotation2d(Math.atan2(neededMuzzleVelocity.getY(), neededMuzzleVelocity.getX()));
+        new Rotation2d(Math.atan2(neededMuzzleVelocity.getY(), neededMuzzleVelocity.getX()))
+            .rotateBy(PI);
 
     return new LaunchSolution(
         newYaw, rpmSetpoint, Rotation2d.fromDegrees(hoodDeg), horizontalDist, true);

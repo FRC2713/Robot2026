@@ -48,7 +48,7 @@ public final class IntakeConstants {
     public static TalonFXSubsystemConfig followerConfig = new TalonFXSubsystemConfig();
 
     public static final double gearRatio =
-        24.0 / 12.0; // 12 tooth pinion to 24 tooth gear for 0.5 reduction
+        40.0 / 11.0; // 12 tooth pinion to 24 tooth gear for 0.5 reduction
     public static final MomentOfInertia rollersMomentOfInertia =
         MoiUnits.PoundSquareInches.of(0.295439).times(2); // Low MOI for fast-spinning rollers
 
@@ -60,7 +60,8 @@ public final class IntakeConstants {
       leaderConfig.momentOfInertia = rollersMomentOfInertia.times(0.5);
       leaderConfig.useFOC = true;
       leaderConfig.motor = DCMotor.getKrakenX44Foc(1);
-      leaderConfig.simOrientation = ChassisReference.CounterClockwise_Positive;
+      leaderConfig.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+      leaderConfig.simOrientation = ChassisReference.Clockwise_Positive;
       leaderConfig.tunable = true;
 
       leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(0.75, 3.5);
@@ -227,13 +228,14 @@ public final class IntakeConstants {
     }
 
     public static LoggedTunableMeasure<Distance> extendedPosition =
-        new LoggedTunableMeasure<>(config.name + "/Extended Position", Inches.of(11.5));
+        new LoggedTunableMeasure<>(config.name + "/Extended Position", Inches.of(11.0));
     public static LoggedTunableMeasure<Distance> pidTestPosition =
         new LoggedTunableMeasure<>(config.name + "/PID Test Position", Inches.of(0));
     public static LoggedTunableMeasure<Distance> retractedPosition =
         new LoggedTunableMeasure<>(config.name + "/Retracted Position", Inches.of(0));
     public static final LoggedTunableMeasure<LinearVelocity> retractCruiseVelocity =
-        new LoggedTunableMeasure<>(config.name + "/Retract Cruise Velocity", InchesPerSecond.of(4));
+        new LoggedTunableMeasure<>(
+            config.name + "/Retract Cruise Velocity", InchesPerSecond.of(10));
     public static final LoggedTunableNumber fuelPressureScalingFactor =
         new LoggedTunableNumber(config.name + "/Fuel Pressure Scaling", 1.1);
 

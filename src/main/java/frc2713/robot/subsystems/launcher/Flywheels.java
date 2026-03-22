@@ -70,10 +70,6 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
     return setVelocity(() -> RotationsPerSecond.of(0));
   }
 
-  public Command hubCommand() {
-    return setVelocity(LauncherConstants.Flywheels.staticHubVelocity);
-  }
-
   public Command idleSpeedCommand() {
     return setVelocity(LauncherConstants.Flywheels.idleVelocity);
   }
