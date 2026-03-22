@@ -26,7 +26,7 @@ import org.littletonrobotics.junction.Logger;
 public class LaunchingSolutionManager extends SubsystemBase {
   private static LaunchingSolutionManager instance;
 
-  private static Rotation2d PI = new Rotation2d(Math.PI);
+  private static Rotation2d manualOffset = new Rotation2d(LauncherConstants.Turret.manualOffset);
 
   AdvantageScopePathBuilder pb = new AdvantageScopePathBuilder("LaunchingSolutionManager");
 
@@ -154,7 +154,8 @@ public class LaunchingSolutionManager extends SubsystemBase {
     // The conversion to robot-relative happens at the point of use (e.g. in Turret)
     // so that it always uses the robot's current heading, not a stale or projected one.
     Rotation2d newYaw =
-        new Rotation2d(Math.atan2(horizontalDir.getY(), horizontalDir.getX())).rotateBy(PI);
+        new Rotation2d(Math.atan2(horizontalDir.getY(), horizontalDir.getX()))
+            .rotateBy(manualOffset);
 
     return new LaunchSolution(
         newYaw,
@@ -219,7 +220,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
     // so that it always uses the robot's current heading, not a stale or projected one.
     Rotation2d newYaw =
         new Rotation2d(Math.atan2(neededMuzzleVelocity.getY(), neededMuzzleVelocity.getX()))
-            .rotateBy(PI);
+            .rotateBy(manualOffset);
 
     return new LaunchSolution(
         newYaw, newLauncherSpeed, new Rotation2d(newPitch), horizontalDist, true);
@@ -378,7 +379,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
 
     Rotation2d newYaw =
         new Rotation2d(Math.atan2(neededMuzzleVelocity.getY(), neededMuzzleVelocity.getX()))
-            .rotateBy(PI);
+            .rotateBy(manualOffset);
 
     return new LaunchSolution(
         newYaw, rpmSetpoint, Rotation2d.fromDegrees(hoodDeg), horizontalDist, true);

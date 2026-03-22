@@ -38,10 +38,11 @@ public final class LauncherConstants {
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
     public static CanCoderConfig canCoderConfig = new CanCoderConfig();
     public static Angle staticHubAngle = Degrees.of(0);
+    public static Angle manualOffset = Radians.of(0);
 
     // Turret rotation limits
-    public static final double FORWARD_LIMIT_DEGREES = 185.0;
-    public static final double REVERSE_LIMIT_DEGREES = -209.0;
+    public static final double FORWARD_LIMIT_DEGREES = 60;
+    public static final double REVERSE_LIMIT_DEGREES = -60.0;
 
     public static final Angle forwardSoftLimit = Degrees.of(FORWARD_LIMIT_DEGREES);
     public static final Angle reverseSoftLimit = Degrees.of(REVERSE_LIMIT_DEGREES);
@@ -108,7 +109,7 @@ public final class LauncherConstants {
                   Inches.of(0.5).in(Meters),
                   Inches.of(0.5).in(Meters),
                   Inches.of(18.484119).in(Meters)),
-              new Rotation3d(0, 0, Math.PI));
+              new Rotation3d(0, 0, manualOffset.in(Radians)));
     }
 
     static {
@@ -128,7 +129,7 @@ public final class LauncherConstants {
     public static LoggedTunableMeasure<Angle> staticRightTrench =
         new LoggedTunableMeasure<>("Turret/Turret Static Trench R", Degrees.of(190));
     public static LoggedTunableMeasure<Angle> staticTowerShot =
-        new LoggedTunableMeasure<>("Turret/Turret Static Tower", Degrees.of(-180));
+        new LoggedTunableMeasure<>("Turret/Turret Static Tower", Degrees.of(0.0));
   }
 
   public final class Flywheels {
@@ -141,23 +142,23 @@ public final class LauncherConstants {
     static {
       leaderConfig.name = "Flywheels";
       leaderConfig.talonCANID = new CANDeviceId(50, "canivore");
-      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(.6, 3.5);
+      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(400.0, 3.5);
       leaderConfig.fxConfig.Slot0.kI = 0.0;
-      leaderConfig.fxConfig.Slot0.kD = 0.000;
-      leaderConfig.fxConfig.Slot0.kS = Util.modeDependentValue(0.2, 2.0);
-      leaderConfig.fxConfig.Slot0.kV = 0.12 * gearRatio;
-      leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimit = 120.0;
+      leaderConfig.fxConfig.Slot0.kD = 0.00;
+      leaderConfig.fxConfig.Slot0.kS = Util.modeDependentValue(2.0, 2.0);
+      leaderConfig.fxConfig.Slot0.kV = 0.0 * gearRatio;
+      leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimit = 180.0;
       leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-      leaderConfig.fxConfig.CurrentLimits.SupplyCurrentLimit = 70.0;
+      leaderConfig.fxConfig.CurrentLimits.SupplyCurrentLimit = 50.0;
       leaderConfig.fxConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
       leaderConfig.simOrientation = ChassisReference.CounterClockwise_Positive;
-
       leaderConfig.unitToRotorRatio = gearRatio; // 1.33:1 reduction from motor to flywheel
       leaderConfig.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
       leaderConfig.fxConfig.Voltage.PeakReverseVoltage = 0;
       leaderConfig.fxConfig.TorqueCurrent.PeakReverseTorqueCurrent = 0;
+      leaderConfig.fxConfig.TorqueCurrent.PeakReverseTorqueCurrent = 0;
       leaderConfig.momentOfInertia = flywhMomentOfInertia.times(0.5);
-      leaderConfig.useFOC = false; // FOC makes the feedfowrward term units weird
+      leaderConfig.useFOC = true;
       leaderConfig.tunable = true;
       leaderConfig.fxConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
       leaderConfig.generalControlMode = GeneralControlMode.VELOCITY;
@@ -196,7 +197,7 @@ public final class LauncherConstants {
     public static LoggedTunableMeasure<AngularVelocity> staticHubVelocity =
         new LoggedTunableMeasure<>("Flywheels/Flywheels Static Hub", RotationsPerSecond.of(25));
     public static LoggedTunableMeasure<AngularVelocity> staticTowerVelocity =
-        new LoggedTunableMeasure<AngularVelocity>("Flywheels/Flywheels Static Tower", RPM.of(2200));
+        new LoggedTunableMeasure<AngularVelocity>("Flywheels/Flywheels Static Tower", RPM.of(2400));
   }
 
   public final class Hood {
@@ -215,13 +216,13 @@ public final class LauncherConstants {
       config.name = "Hood";
       config.talonCANID = new CANDeviceId(54, "canivore"); // Example CAN ID, replace with actual ID
 
-      config.fxConfig.Feedback.FeedbackRotorOffset = 0.452148;
+      config.fxConfig.Feedback.FeedbackRotorOffset = -0.452637;
 
       // PID gains for Motion Magic
-      config.fxConfig.Slot0.kP = 600.0;
-      config.fxConfig.Slot0.kI = 254.0;
-      config.fxConfig.Slot0.kD = 30.0;
-      config.fxConfig.Slot0.kS = 5.0; // static friction compensation
+      config.fxConfig.Slot0.kP = 400.0;
+      config.fxConfig.Slot0.kI = 0.0;
+      config.fxConfig.Slot0.kD = 4.0;
+      config.fxConfig.Slot0.kS = 1.0; // static friction compensation
       config.fxConfig.Slot0.kV = 0.092 * gearRatio; // velocity feedforward
       config.fxConfig.Slot0.kA = 0.0;
 
