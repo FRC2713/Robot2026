@@ -128,8 +128,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   public LinearVelocity getLaunchVelocity() {
     Distance toGoal = this.getDistance2d(LaunchingSolutionManager.currentGoal);
     double rpm = LaunchingLookupMaps.distanceToRpmMap.get(toGoal.in(Meters));
-    LinearVelocity vel =
-        MetersPerSecond.of(LaunchingLookupMaps.muzzleVelocityMetersPerSecond(rpm));
+    LinearVelocity vel = MetersPerSecond.of(LaunchingLookupMaps.muzzleVelocityMetersPerSecond(rpm));
     Logger.recordOutput(pb.makePath("launchVelocity"), vel);
     return vel;
   }
