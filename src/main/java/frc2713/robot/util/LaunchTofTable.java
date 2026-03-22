@@ -12,7 +12,6 @@ import frc2713.robot.FieldConstants;
 import frc2713.robot.GamePieceConstants;
 import frc2713.robot.subsystems.launcher.LauncherConstants;
 import frc2713.robot.subsystems.launcher.LaunchingLookupMaps;
-
 import java.util.ArrayList;
 import java.util.Locale;
 import org.littletonrobotics.junction.Logger;
