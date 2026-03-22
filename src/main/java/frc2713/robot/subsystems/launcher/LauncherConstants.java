@@ -196,7 +196,7 @@ public final class LauncherConstants {
     public static LoggedTunableMeasure<AngularVelocity> staticHubVelocity =
         new LoggedTunableMeasure<>("Flywheels/Flywheels Static Hub", RotationsPerSecond.of(25));
     public static LoggedTunableMeasure<AngularVelocity> staticTowerVelocity =
-        new LoggedTunableMeasure<AngularVelocity>("Flywheels/Flywheels Static Tower", RPM.of(2713));
+        new LoggedTunableMeasure<AngularVelocity>("Flywheels/Flywheels Static Tower", RPM.of(2200));
   }
 
   public final class Hood {
