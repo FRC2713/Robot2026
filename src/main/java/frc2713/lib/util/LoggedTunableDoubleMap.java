@@ -8,9 +8,8 @@ import edu.wpi.first.networktables.StringPublisher;
 import frc2713.robot.Constants;
 
 /**
- * A tunable version of InterpolatingDoubleTreeMap. It reads key-value pairs from
- * NetworkTables (SmartDashboard compatible) and actively updates its internal map when in tuning
- * mode.
+ * A tunable version of InterpolatingDoubleTreeMap. It reads key-value pairs from NetworkTables
+ * (SmartDashboard compatible) and actively updates its internal map when in tuning mode.
  */
 public class LoggedTunableDoubleMap extends InterpolatingDoubleTreeMap {
   private static final String TABLE_KEY = "Tuning/Maps/";
@@ -34,10 +33,13 @@ public class LoggedTunableDoubleMap extends InterpolatingDoubleTreeMap {
   }
 
   /**
-   * Set multipliers for the Dashboard string values to convert back to the native units used by the map.
+   * Set multipliers for the Dashboard string values to convert back to the native units used by the
+   * map.
    *
-   * @param keyMultiplier Multiply the dashboard key by this value when parsing from Dashboard/String. Divide the map key by this when writing to the Dashboard.
-   * @param valueMultiplier Multiply the dashboard value by this value when parsing from Dashboard/String. Divide the map value by this when writing to the Dashboard.
+   * @param keyMultiplier Multiply the dashboard key by this value when parsing from
+   *     Dashboard/String. Divide the map key by this when writing to the Dashboard.
+   * @param valueMultiplier Multiply the dashboard value by this value when parsing from
+   *     Dashboard/String. Divide the map value by this when writing to the Dashboard.
    */
   public void setDashboardMultipliers(double keyMultiplier, double valueMultiplier) {
     this.keyMultiplier = keyMultiplier;
@@ -59,7 +61,11 @@ public class LoggedTunableDoubleMap extends InterpolatingDoubleTreeMap {
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < keys.length; i++) {
       super.put(keys[i], values[i]);
-      sb.append("{").append(keys[i] / keyMultiplier).append(", ").append(values[i] / valueMultiplier).append("}");
+      sb.append("{")
+          .append(keys[i] / keyMultiplier)
+          .append(", ")
+          .append(values[i] / valueMultiplier)
+          .append("}");
       if (i < keys.length - 1) {
         sb.append(", ");
       }

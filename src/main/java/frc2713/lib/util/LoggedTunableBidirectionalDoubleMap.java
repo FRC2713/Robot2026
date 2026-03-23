@@ -1,9 +1,9 @@
 package frc2713.lib.util;
 
-import edu.wpi.first.networktables.StringEntry;
-import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StringEntry;
+import edu.wpi.first.networktables.StringPublisher;
 import frc2713.robot.Constants;
 
 /**
@@ -33,11 +33,13 @@ public class LoggedTunableBidirectionalDoubleMap extends BidirectionalInterpolat
   }
 
   /**
-   * Set multipliers for the Dashboard string values to convert back to the native units used by the map.
-   * Useful to show meters on dashboard, but use feet in the Map interpolation.
+   * Set multipliers for the Dashboard string values to convert back to the native units used by the
+   * map. Useful to show meters on dashboard, but use feet in the Map interpolation.
    *
-   * @param keyMultiplier Multiply the dashboard key by this value when parsing from Dashboard/String. Divide the map key by this when writing to the Dashboard.
-   * @param valueMultiplier Multiply the dashboard value by this value when parsing from Dashboard/String. Divide the map value by this when writing to the Dashboard.
+   * @param keyMultiplier Multiply the dashboard key by this value when parsing from
+   *     Dashboard/String. Divide the map key by this when writing to the Dashboard.
+   * @param valueMultiplier Multiply the dashboard value by this value when parsing from
+   *     Dashboard/String. Divide the map value by this when writing to the Dashboard.
    */
   public void setDashboardMultipliers(double keyMultiplier, double valueMultiplier) {
     this.keyMultiplier = keyMultiplier;
@@ -59,7 +61,11 @@ public class LoggedTunableBidirectionalDoubleMap extends BidirectionalInterpolat
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < keys.length; i++) {
       super.put(keys[i], values[i]);
-      sb.append("{").append(keys[i] / keyMultiplier).append(", ").append(values[i] / valueMultiplier).append("}");
+      sb.append("{")
+          .append(keys[i] / keyMultiplier)
+          .append(", ")
+          .append(values[i] / valueMultiplier)
+          .append("}");
       if (i < keys.length - 1) {
         sb.append(", ");
       }
@@ -102,13 +108,13 @@ public class LoggedTunableBidirectionalDoubleMap extends BidirectionalInterpolat
       try {
         // Parse strings like "{1.0, 10.0}, {2.0, 20.0}"
         String[] pairs = currentString.split("},\\s*\\{");
-        
+
         super.clear();
         for (String pair : pairs) {
           // Remove all leftover curly braces and spaces
           String cleaned = pair.replaceAll("[{}\\s]", "");
           if (cleaned.isEmpty()) continue;
-          
+
           String[] split = cleaned.split(",");
           if (split.length == 2) {
             double key = Double.parseDouble(split[0]) * keyMultiplier;
