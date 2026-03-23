@@ -108,31 +108,31 @@ public class LaunchingSolutionManager extends SubsystemBase {
       Logger.recordOutput(pb.makePath("used robot lin vel"), robotLinVel);
       Logger.recordOutput(pb.makePath("current goal"), LaunchingSolutionManager.currentGoal);
       Logger.recordOutput(pb.makePath("current solution"), currentSolution);
-    
 
-    // 3. Solve for the Launch Vector
-    LauncherConstants.LaunchSolverMode solverMode = launchSolverModeChooser.getSelected();
-    if (solverMode == null) {
-      solverMode = LauncherConstants.LaunchSolverMode.STATIC;
+      // 3. Solve for the Launch Vector
+      LauncherConstants.LaunchSolverMode solverMode = launchSolverModeChooser.getSelected();
+      if (solverMode == null) {
+        solverMode = LauncherConstants.LaunchSolverMode.STATIC;
+      }
+      currentSolution =
+          switch (solverMode) {
+            case VECTOR_APPROX -> calculateVectorApprox(
+                robotPose, robotLinVel, LaunchingSolutionManager.currentGoal);
+            case ITOF -> calculateITOF(
+                robotPose, robotLinVel, LaunchingSolutionManager.currentGoal);
+            case STATIC -> calculateStatic(
+                robotPose, robotLinVel, LaunchingSolutionManager.currentGoal);
+          };
+
+      Logger.recordOutput(pb.makePath("solver mode"), solverMode.name());
+
+      // 4. Log
+      Logger.recordOutput(pb.makePath("used robot pose"), robotPose);
+      Logger.recordOutput(pb.makePath("used robot lin vel"), robotLinVel);
+      Logger.recordOutput(pb.makePath("current goal"), LaunchingSolutionManager.currentGoal);
+      Logger.recordOutput(pb.makePath("current solution"), currentSolution);
     }
-    currentSolution =
-        switch (solverMode) {
-          case VECTOR_APPROX -> calculateVectorApprox(
-              robotPose, robotLinVel, LaunchingSolutionManager.currentGoal);
-          case ITOF -> calculateITOF(robotPose, robotLinVel, LaunchingSolutionManager.currentGoal);
-          case STATIC -> calculateStatic(
-              robotPose, robotLinVel, LaunchingSolutionManager.currentGoal);
-        };
-
-    Logger.recordOutput(pb.makePath("solver mode"), solverMode.name());
-
-    // 4. Log
-    Logger.recordOutput(pb.makePath("used robot pose"), robotPose);
-    Logger.recordOutput(pb.makePath("used robot lin vel"), robotLinVel);
-    Logger.recordOutput(pb.makePath("current goal"), LaunchingSolutionManager.currentGoal);
-    Logger.recordOutput(pb.makePath("current solution"), currentSolution);
   }
-}
 
   public LaunchSolution getSolution() {
     return currentSolution;
