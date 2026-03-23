@@ -1,7 +1,10 @@
 package frc2713.robot.oi;
 
-import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
+import static edu.wpi.first.units.Units.FeetPerSecond;
+import static edu.wpi.first.units.Units.FeetPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RPM;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -9,8 +12,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc2713.robot.GameCommandGroups;
-import frc2713.robot.RobotContainer;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
@@ -21,6 +22,7 @@ import frc2713.robot.subsystems.launcher.LauncherConstants;
 import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
+import java.util.Optional;
 
 @SuppressWarnings("unused")
 public class DevControls {
@@ -88,16 +90,16 @@ public class DevControls {
     controller.povLeft().onTrue(flywheels.stop());
 
     // Test setting drive limits
-    // controller
-    //     .x()
-    //     .onTrue(
-    //         DriveCommands.setDriveLimits(
-    //             drive,
-    //             Optional.of(FeetPerSecond.of(2.0)),
-    //             Optional.of(FeetPerSecondPerSecond.of(12.0)),
-    //             Optional.of(DegreesPerSecond.of(90.0)),
-    //             Optional.of(DegreesPerSecondPerSecond.of(360.0))))
-    //     .onFalse(DriveCommands.clearDriveLimits(drive));
+    controller
+        .a()
+        .onTrue(
+            DriveCommands.setDriveLimits(
+                drive,
+                Optional.of(FeetPerSecond.of(1.0)),
+                Optional.of(FeetPerSecondPerSecond.of(12.0)),
+                Optional.of(DegreesPerSecond.of(90.0)),
+                Optional.of(DegreesPerSecondPerSecond.of(360.0))));
+    controller.b().onTrue(DriveCommands.clearDriveLimits(drive));
 
     // Intake Controls
 
@@ -133,9 +135,9 @@ public class DevControls {
 
     // Turret Controls
 
-    controller.a().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleOne));
+    // controller.a().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleOne));
 
-    controller.b().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleTwo));
+    // controller.b().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleTwo));
 
     // controller
     //     .a()
@@ -186,13 +188,15 @@ public class DevControls {
     //     .onTrue(flywheels.velocitySetpointCommand(LauncherConstants.Flywheels.PIDTest))
     //     .onFalse(flywheels.velocitySetpointCommand(() -> RPM.of(0)));
 
-    controller
-        .x()
-        .onTrue(Commands.runOnce(() -> RobotContainer.drive.changeDriveCurrentLimits(Amps.of(70))));
+    // controller
+    //     .x()
+    //     .onTrue(Commands.runOnce(() ->
+    // RobotContainer.drive.changeDriveCurrentLimits(Amps.of(70))));
 
-    controller
-        .y()
-        .onTrue(Commands.runOnce(() -> RobotContainer.drive.changeDriveCurrentLimits(Amps.of(80))));
+    // controller
+    //     .y()
+    //     .onTrue(Commands.runOnce(() ->
+    // RobotContainer.drive.changeDriveCurrentLimits(Amps.of(80))));
 
     // controller
     //     .x()
@@ -214,12 +218,6 @@ public class DevControls {
     //     .onFalse(Commands.parallel(dyeRotor.stop(), feeder.stop(), flywheels.stop()));
 
     // Shoot when flywheels are ready
-    controller
-        .rightTrigger(.98)
-        .whileTrue(
-            GameCommandGroups.Launching.dumbShot(
-                drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller))
-        .onFalse(GameCommandGroups.Launching.stopShooting(drive, feeder, dyeRotor, flywheels));
   }
 
   public double getLeftY() {

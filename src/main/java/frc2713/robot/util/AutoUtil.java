@@ -8,6 +8,15 @@ import frc2713.robot.FieldConstants;
 import java.util.ArrayList;
 
 public class AutoUtil {
+
+  public static AutoTrajectory flipHorizontalIf(
+      boolean doFlip, AutoTrajectory trajectory, AutoRoutine routine) {
+    if (doFlip) {
+      return flipHorizontal(trajectory, routine);
+    } else {
+      return trajectory;
+    }
+  }
   /**
    * Returns this trajectory, mirrored across the HORIZONTAL field midline.
    *

@@ -8,7 +8,6 @@ import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.forward
 import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.reverseSoftLimit;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -25,6 +24,8 @@ import frc2713.lib.io.CanCoderIO;
 import frc2713.lib.io.CanCoderInputsAutoLogged;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
+import frc2713.lib.logging.PeriodicTimingLogger;
+import frc2713.lib.logging.TimeLogged;
 import frc2713.lib.subsystem.MotorCancoderSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.CrtSolver;
@@ -52,7 +53,7 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
       final CanCoderInputsAutoLogged cancoderInputs,
       final CanCoderIO cancoderIO) {
     super(config, new MotorInputsAutoLogged(), turretMotorIO, cancoderInputs, cancoderIO);
-    setDefaultCommand(otfCommand());
+    // setDefaultCommand(otfCommand());
   }
 
   @AutoLogOutput
@@ -237,10 +238,6 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
     return setAngle(otfAngleSupplier);
   }
 
-  public Command hubCommand(Supplier<Pose2d> robotPose) {
-    return setAngle(() -> Util.fieldToRobotRelative(hubAngleSupplier.get(), robotPose.get()));
-  }
-
   @Override
   public void initialize() {
 
@@ -251,16 +248,19 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
   }
 
   @Override
+  @TimeLogged("Performance/SubsystemPeriodic/Turret")
   public void periodic() {
-    super.periodic();
+    try (var ignored = PeriodicTimingLogger.time(this)) {
+      super.periodic();
 
-    if (!initialized) {
-      initialize();
+      if (!initialized) {
+        initialize();
+      }
+
+      // Log the goal pose for visualization
+      Pose3d goalPose = new Pose3d(LaunchingSolutionManager.currentGoal, new Rotation3d());
+      Logger.recordOutput(pb.makePath("goalVector"), new Pose3d[] {this.getGlobalPose(), goalPose});
     }
-
-    // Log the goal pose for visualization
-    Pose3d goalPose = new Pose3d(LaunchingSolutionManager.currentGoal, new Rotation3d());
-    Logger.recordOutput(pb.makePath("goalVector"), new Pose3d[] {this.getGlobalPose(), goalPose});
   }
 
   @Override

@@ -93,25 +93,8 @@ public class OperatorControls {
 
     controller
         .leftBumper()
-        .onTrue(
-            GameCommandGroups.Launching.leftTrenchShot(
-                    drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)
-                .withName("Static LTrench Shot"))
-        .onFalse(
-            GameCommandGroups.Launching.stopShootingAndRetractHood(
-                    drive, feeder, dyeRotor, hood, flywheels)
-                .withName("Stop Shooting + Hood Retract"));
-
-    controller
-        .rightBumper()
-        .onTrue(
-            GameCommandGroups.Launching.rightTrenchShot(
-                    drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)
-                .withName("Static RTrench Shot"))
-        .onFalse(
-            GameCommandGroups.Launching.stopShootingAndRetractHood(
-                    drive, feeder, dyeRotor, hood, flywheels)
-                .withName("Stop Shooting + Hood Retract"));
+        .onTrue(intakeExtension.retractCommand())
+        .onFalse(intakeExtension.extendCommand());
 
     controller
         .rightTrigger(0.98)

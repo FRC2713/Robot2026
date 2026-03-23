@@ -18,6 +18,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import frc2713.lib.energy.EnergyManagement;
 import org.littletonrobotics.junction.Logger;
 
 public class Module {
@@ -57,6 +58,10 @@ public class Module {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Drive/Module" + Integer.toString(index), inputs);
+    EnergyManagement.EnergyMonitor.report(
+        "Drive", "Module" + index + "_Drive", inputs.driveAppliedVolts, inputs.driveCurrentAmps);
+    EnergyManagement.EnergyMonitor.report(
+        "Drive", "Module" + index + "_Turn", inputs.turnAppliedVolts, inputs.turnCurrentAmps);
 
     // Calculate positions for odometry
     int sampleCount = inputs.odometryTimestamps.length; // All signals are sampled together

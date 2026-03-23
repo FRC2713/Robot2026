@@ -13,6 +13,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc2713.lib.io.AdvantageScopePathBuilder;
+import frc2713.lib.logging.PeriodicTimingLogger;
+import frc2713.lib.logging.TimeLogged;
 import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.lib.util.LoggedTunableBoolean;
@@ -23,6 +25,8 @@ import org.littletonrobotics.junction.Logger;
 
 public class LaunchingSolutionManager extends SubsystemBase {
   private static LaunchingSolutionManager instance;
+
+  private static Rotation2d manualOffset = new Rotation2d(LauncherConstants.Turret.manualOffset);
 
   AdvantageScopePathBuilder pb = new AdvantageScopePathBuilder("LaunchingSolutionManager");
 
@@ -48,10 +52,10 @@ public class LaunchingSolutionManager extends SubsystemBase {
 
   public static Translation3d currentGoal = FieldConstants.Hub.topCenterPoint;
   private static InterpolatingDoubleTreeMap currentHoodMap =
-      LauncherConstants.Hood.distanceToAngleMap; // use for dist -> hood angle
+      LaunchingLookupMaps.distanceToAngleMap; // use for dist -> hood angle
   private static InterpolatingDoubleTreeMap currentRPMMap =
-      LauncherConstants.Flywheels.distanceToRpmMap; // use for dist -> flywheel rpm
-  private static InterpolatingDoubleTreeMap currentTofMap = LauncherConstants.tofMap;
+      LaunchingLookupMaps.distanceToRpmMap; // use for dist -> flywheel rpm
+  private static InterpolatingDoubleTreeMap currentTofMap = LaunchingLookupMaps.tofMap;
 
   /** Warm start for iterative ToF (seconds). */
   private double lastItofTofSeconds = -1.0;
@@ -78,41 +82,56 @@ public class LaunchingSolutionManager extends SubsystemBase {
   }
 
   @Override
+  @TimeLogged("Performance/SubsystemPeriodic/LaunchingSolutionManager")
   public void periodic() {
-    // 1. Get Robot State (ID 0 = Chassis)
-    Pose3d robotPose = KinematicsManager.getInstance().getGlobalPose(0);
-    Translation3d robotLinVel = KinematicsManager.getInstance().getGlobalLinearVelocity(0);
+    try (var ignored = PeriodicTimingLogger.time(this)) {
+      // 1. Get Robot State (ID 0 = Chassis)
+      Pose3d robotPose = KinematicsManager.getInstance().getGlobalPose(0);
+      Translation3d robotLinVel = KinematicsManager.getInstance().getGlobalLinearVelocity(0);
 
-    // 2. Select goal
-    if (FieldConstants.NeutralZone.region.contains(robotPose.getTranslation().toTranslation2d())) {
-      ZoneSelectionHelpers.configureForFeeding(robotPose.toPose2d());
-      Logger.recordOutput(pb.makePath("shot selection"), "Feeding");
-    } else {
-      ZoneSelectionHelpers.configureForScoring();
-      Logger.recordOutput(pb.makePath("shot selection"), "Scoring");
+      // 2. Select goal
+      if (FieldConstants.NeutralZone.region.contains(
+          robotPose.getTranslation().toTranslation2d())) {
+        ZoneSelectionHelpers.configureForFeeding(robotPose.toPose2d());
+        Logger.recordOutput(pb.makePath("shot selection"), "Feeding");
+      } else {
+        ZoneSelectionHelpers.configureForScoring();
+        Logger.recordOutput(pb.makePath("shot selection"), "Scoring");
+      }
+
+      // 3. Solve for the Launch Vector
+      currentSolution =
+          calculateStatic(robotPose, robotLinVel, LaunchingSolutionManager.currentGoal);
+
+      // 4. Log
+      Logger.recordOutput(pb.makePath("used robot pose"), robotPose);
+      Logger.recordOutput(pb.makePath("used robot lin vel"), robotLinVel);
+      Logger.recordOutput(pb.makePath("current goal"), LaunchingSolutionManager.currentGoal);
+      Logger.recordOutput(pb.makePath("current solution"), currentSolution);
+
+      // 3. Solve for the Launch Vector
+      LauncherConstants.LaunchSolverMode solverMode = launchSolverModeChooser.getSelected();
+      if (solverMode == null) {
+        solverMode = LauncherConstants.LaunchSolverMode.STATIC;
+      }
+      currentSolution =
+          switch (solverMode) {
+            case VECTOR_APPROX -> calculateVectorApprox(
+                robotPose, robotLinVel, LaunchingSolutionManager.currentGoal);
+            case ITOF -> calculateITOF(
+                robotPose, robotLinVel, LaunchingSolutionManager.currentGoal);
+            case STATIC -> calculateStatic(
+                robotPose, robotLinVel, LaunchingSolutionManager.currentGoal);
+          };
+
+      Logger.recordOutput(pb.makePath("solver mode"), solverMode.name());
+
+      // 4. Log
+      Logger.recordOutput(pb.makePath("used robot pose"), robotPose);
+      Logger.recordOutput(pb.makePath("used robot lin vel"), robotLinVel);
+      Logger.recordOutput(pb.makePath("current goal"), LaunchingSolutionManager.currentGoal);
+      Logger.recordOutput(pb.makePath("current solution"), currentSolution);
     }
-
-    // 3. Solve for the Launch Vector
-    LauncherConstants.LaunchSolverMode solverMode = launchSolverModeChooser.getSelected();
-    if (solverMode == null) {
-      solverMode = LauncherConstants.LaunchSolverMode.STATIC;
-    }
-    currentSolution =
-        switch (solverMode) {
-          case VECTOR_APPROX -> calculateVectorApprox(
-              robotPose, robotLinVel, LaunchingSolutionManager.currentGoal);
-          case ITOF -> calculateITOF(robotPose, robotLinVel, LaunchingSolutionManager.currentGoal);
-          case STATIC -> calculateStatic(
-              robotPose, robotLinVel, LaunchingSolutionManager.currentGoal);
-        };
-
-    Logger.recordOutput(pb.makePath("solver mode"), solverMode.name());
-
-    // 4. Log
-    Logger.recordOutput(pb.makePath("used robot pose"), robotPose);
-    Logger.recordOutput(pb.makePath("used robot lin vel"), robotLinVel);
-    Logger.recordOutput(pb.makePath("current goal"), LaunchingSolutionManager.currentGoal);
-    Logger.recordOutput(pb.makePath("current solution"), currentSolution);
   }
 
   public LaunchSolution getSolution() {
@@ -134,7 +153,9 @@ public class LaunchingSolutionManager extends SubsystemBase {
     // Get Horizontal Angle (Yaw) This is a field-relative angle, NOT robot-relative.
     // The conversion to robot-relative happens at the point of use (e.g. in Turret)
     // so that it always uses the robot's current heading, not a stale or projected one.
-    Rotation2d newYaw = new Rotation2d(Math.atan2(horizontalDir.getY(), horizontalDir.getX()));
+    Rotation2d newYaw =
+        new Rotation2d(Math.atan2(horizontalDir.getY(), horizontalDir.getX()))
+            .rotateBy(manualOffset);
 
     return new LaunchSolution(
         newYaw,
@@ -163,9 +184,10 @@ public class LaunchingSolutionManager extends SubsystemBase {
 
     // C. LUT + kinematics → ideal field-frame launch vector
     double rpmSetpoint = LaunchingSolutionManager.currentRPMMap.get(horizontalDist);
-    double idealSpeed = LauncherConstants.Flywheels.muzzleVelocityMetersPerSecond(rpmSetpoint);
+    double idealSpeed = LaunchingLookupMaps.muzzleVelocityMetersPerSecond(rpmSetpoint);
+    Logger.recordOutput(pb.makePath("ideal ball speed"), idealSpeed);
     double idealPitchRad =
-        LauncherConstants.Hood.exitAngleRadiansFromHoodDegrees(
+        LaunchingLookupMaps.exitAngleRadiansFromHoodDegrees(
             LaunchingSolutionManager.currentHoodMap.get(horizontalDist));
 
     // D. Construct Ideal Velocity Vector
@@ -185,7 +207,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
 
     // F. Extract Parameters from Resulting Vector
     double newBallSpeed = neededMuzzleVelocity.getNorm();
-    double newLauncherSpeed = LauncherConstants.Flywheels.velocityToRpmBiDiMap.get(newBallSpeed);
+    double newLauncherSpeed = LaunchingLookupMaps.velocityToRpmBiDiMap.get(newBallSpeed);
 
     // Vertical Angle (Pitch)
     double newPitch =
@@ -197,7 +219,8 @@ public class LaunchingSolutionManager extends SubsystemBase {
     // The conversion to robot-relative happens at the point of use (e.g. in Turret)
     // so that it always uses the robot's current heading, not a stale or projected one.
     Rotation2d newYaw =
-        new Rotation2d(Math.atan2(neededMuzzleVelocity.getY(), neededMuzzleVelocity.getX()));
+        new Rotation2d(Math.atan2(neededMuzzleVelocity.getY(), neededMuzzleVelocity.getX()))
+            .rotateBy(manualOffset);
 
     return new LaunchSolution(
         newYaw, newLauncherSpeed, new Rotation2d(newPitch), horizontalDist, true);
@@ -205,7 +228,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
 
   /**
    * Iterative time-of-flight: self-consistent t where drag-aware ToF from {@link
-   * LauncherConstants#tofMap} matches projected horizontal range while the robot translates at
+   * LaunchingLookupMaps#tofMap} matches projected horizontal range while the robot translates at
    * constant velocity.
    */
   private LaunchSolution calculateITOF(
@@ -331,8 +354,8 @@ public class LaunchingSolutionManager extends SubsystemBase {
 
     double rpmSetpoint = LaunchingSolutionManager.currentRPMMap.get(horizontalDist);
     double hoodDeg = LaunchingSolutionManager.currentHoodMap.get(horizontalDist);
-    double idealBallSpeed = LauncherConstants.Flywheels.muzzleVelocityMetersPerSecond(rpmSetpoint);
-    double idealPitchRad = LauncherConstants.Hood.exitAngleRadiansFromHoodDegrees(hoodDeg);
+    double idealBallSpeed = LaunchingLookupMaps.muzzleVelocityMetersPerSecond(rpmSetpoint);
+    double idealPitchRad = LaunchingLookupMaps.exitAngleRadiansFromHoodDegrees(hoodDeg);
 
     Translation3d horizontalDir = new Translation3d(rel.getX(), rel.getY(), 0).div(horizontalDist);
 
@@ -355,7 +378,8 @@ public class LaunchingSolutionManager extends SubsystemBase {
     }
 
     Rotation2d newYaw =
-        new Rotation2d(Math.atan2(neededMuzzleVelocity.getY(), neededMuzzleVelocity.getX()));
+        new Rotation2d(Math.atan2(neededMuzzleVelocity.getY(), neededMuzzleVelocity.getX()))
+            .rotateBy(manualOffset);
 
     return new LaunchSolution(
         newYaw, rpmSetpoint, Rotation2d.fromDegrees(hoodDeg), horizontalDist, true);
@@ -386,17 +410,17 @@ public class LaunchingSolutionManager extends SubsystemBase {
           robotPose.getTranslation().getY() < FieldConstants.LinesHorizontal.center
               ? AllianceFlipUtil.applyX(FieldConstants.AllianceZone.bottomSideCornerTarget)
               : AllianceFlipUtil.applyX(FieldConstants.AllianceZone.topSideCornerTarget);
-      LaunchingSolutionManager.currentHoodMap = LauncherConstants.Hood.distanceToAngleAzMap;
-      LaunchingSolutionManager.currentRPMMap = LauncherConstants.Flywheels.distanceToRpmAzMap;
-      LaunchingSolutionManager.currentTofMap = LauncherConstants.tofMapAZ;
+      LaunchingSolutionManager.currentHoodMap = LaunchingLookupMaps.distanceToAngleAzMap;
+      LaunchingSolutionManager.currentRPMMap = LaunchingLookupMaps.distanceToRpmAzMap;
+      LaunchingSolutionManager.currentTofMap = LaunchingLookupMaps.tofMapAZ;
     }
 
     public static void configureForScoring() {
       LaunchingSolutionManager.currentGoal =
           AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint);
-      LaunchingSolutionManager.currentHoodMap = LauncherConstants.Hood.distanceToAngleMap;
-      LaunchingSolutionManager.currentRPMMap = LauncherConstants.Flywheels.distanceToRpmMap;
-      LaunchingSolutionManager.currentTofMap = LauncherConstants.tofMap;
+      LaunchingSolutionManager.currentHoodMap = LaunchingLookupMaps.distanceToAngleMap;
+      LaunchingSolutionManager.currentRPMMap = LaunchingLookupMaps.distanceToRpmMap;
+      LaunchingSolutionManager.currentTofMap = LaunchingLookupMaps.tofMap;
     }
 
     public static Rotation2d storedIntakeRotation = new Rotation2d(0);
