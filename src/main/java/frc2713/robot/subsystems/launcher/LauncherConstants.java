@@ -38,11 +38,11 @@ public final class LauncherConstants {
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
     public static CanCoderConfig canCoderConfig = new CanCoderConfig();
     public static Angle staticHubAngle = Degrees.of(0);
-    public static Angle manualOffset = Radians.of(0);
+    public static Angle manualOffset = Radians.of(Math.PI);
 
     // Turret rotation limits
-    public static final double FORWARD_LIMIT_DEGREES = 60;
-    public static final double REVERSE_LIMIT_DEGREES = -60.0;
+    public static final double FORWARD_LIMIT_DEGREES = 190;
+    public static final double REVERSE_LIMIT_DEGREES = -200.0;
 
     public static final Angle forwardSoftLimit = Degrees.of(FORWARD_LIMIT_DEGREES);
     public static final Angle reverseSoftLimit = Degrees.of(REVERSE_LIMIT_DEGREES);
@@ -81,10 +81,10 @@ public final class LauncherConstants {
       // PID gains for Motion Magic
       config.fxConfig.Slot0.kP = Util.modeDependentValue(80.0, 80.0);
       config.fxConfig.Slot0.kI = 0.0;
-      config.fxConfig.Slot0.kD = Util.modeDependentValue(0.7, 16.0);
-      config.fxConfig.Slot0.kS = Util.modeDependentValue(0.3, 0.15); // static friction compensation
-      config.fxConfig.Slot0.kV = Util.modeDependentValue(2.9, 0.12); // velocity feedforward
-      config.fxConfig.Slot0.kA = Util.modeDependentValue(0.0, 0.01); // acceleration feedforward
+      config.fxConfig.Slot0.kD = Util.modeDependentValue(0.7, 0.7);
+      config.fxConfig.Slot0.kS = Util.modeDependentValue(0.3, 0.3); // static friction compensation
+      config.fxConfig.Slot0.kV = Util.modeDependentValue(2.9, 2.9); // velocity feedforward
+      config.fxConfig.Slot0.kA = Util.modeDependentValue(0.0, 0.0); // acceleration feedforward
 
       // Motion Magic parameters
       config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 20.0 / 2; // rotations per second

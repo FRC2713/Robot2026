@@ -9,7 +9,6 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import frc2713.lib.util.BidirectionalInterpolatingDoubleMap;
 import frc2713.lib.util.LoggedTunableNumber;
 import frc2713.robot.subsystems.launcher.LauncherConstants.Flywheels;
-import frc2713.robot.util.LaunchTofTable;
 
 public final class LaunchingLookupMaps {
 
@@ -29,7 +28,7 @@ public final class LaunchingLookupMaps {
   public static BidirectionalInterpolatingDoubleMap velocityToRpmBiDiMap =
       new BidirectionalInterpolatingDoubleMap();
   /** Hood Angle (deg) -> Release Angle (deg) */
-  public static InterpolatingDoubleTreeMap hoodAngleToReleaseAngleMap =
+  public static InterpolatingDoubleTreeMap rpmToReleaseAngleAdjustmentMap =
       new InterpolatingDoubleTreeMap();
 
   /** Distance to hub (m) -> Time of flight (s) */
@@ -81,18 +80,33 @@ public final class LaunchingLookupMaps {
     distanceToAngleAzMap.put(6.03, 30.0);
 
     // Hood angle (deg) -> release angle (deg)
-    hoodAngleToReleaseAngleMap.put(0., 15.);
-    hoodAngleToReleaseAngleMap.put(15., 35.);
-    hoodAngleToReleaseAngleMap.put(30., 50.);
+    rpmToReleaseAngleAdjustmentMap.put(2000., 5.0);
+    rpmToReleaseAngleAdjustmentMap.put(3000., 5.);
+    rpmToReleaseAngleAdjustmentMap.put(3500., 10.);
+    rpmToReleaseAngleAdjustmentMap.put(4000., 12.5);
+    rpmToReleaseAngleAdjustmentMap.put(4500., 15.);
+    rpmToReleaseAngleAdjustmentMap.put(5000., 15.);
 
-    LaunchTofTable.seedScoringTofMap(
-        tofMap, distanceToRpmMap, distanceToAngleMap, tofSeedMuzzleHeightMeters);
-    LaunchTofTable.seedAllianceZoneTofMap(
-        tofMapAZ, distanceToRpmAzMap, distanceToAngleAzMap, tofSeedMuzzleHeightMeters);
+    tofMap.put(1.03, 1.);
+    tofMap.put(1.75, 1.75);
+    tofMap.put(2.1, 2.1);
+    tofMap.put(3.36, 3.36);
+    tofMap.put(4.5, 4.5);
+    tofMap.put(5.0, 5.0);
+    tofMap.put(6.03, 6.03);
+
+    tofMapAZ.put(1.03, 1.);
+    tofMapAZ.put(1.75, 1.75);
+    tofMapAZ.put(2.1, 2.1);
+    tofMapAZ.put(3.36, 3.36);
+    tofMapAZ.put(4.5, 4.5);
+    tofMapAZ.put(5.0, 5.0);
+    tofMapAZ.put(6.03, 6.03);
+
   }
 
   public static double exitAngleRadiansFromHoodDegrees(double degrees) {
-    return Degrees.of(hoodAngleToReleaseAngleMap.get(degrees)).in(Radians);
+    return Degrees.of(rpmToReleaseAngleAdjustmentMap.get(degrees)).in(Radians);
   }
 
   /**
