@@ -70,10 +70,6 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
     return setVelocity(() -> RotationsPerSecond.of(0));
   }
 
-  public Command hubCommand() {
-    return setVelocity(LauncherConstants.Flywheels.staticHubVelocity);
-  }
-
   public Command idleSpeedCommand() {
     return setVelocity(LauncherConstants.Flywheels.idleVelocity);
   }
@@ -132,8 +128,8 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
 
   public LinearVelocity getLaunchVelocity() {
     Distance toGoal = this.getDistance2d(LaunchingSolutionManager.currentGoal);
-    LinearVelocity vel =
-        FeetPerSecond.of(LauncherConstants.Flywheels.ballVelocityMap.get(toGoal.in(Meters)));
+    double rpm = LaunchingLookupMaps.distanceToRpmMap.get(toGoal.in(Meters));
+    LinearVelocity vel = MetersPerSecond.of(LaunchingLookupMaps.muzzleVelocityMetersPerSecond(rpm));
     Logger.recordOutput(pb.makePath("launchVelocity"), vel);
     return vel;
   }
@@ -143,11 +139,11 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
     if (solution.isValid()) {
       LinearVelocity targetSpeed =
           FeetPerSecond.of(
-              LauncherConstants.Flywheels.ballToFlywheelMap.reverseGet(solution.flywheelsRPM()));
+              LaunchingLookupMaps.velocityToRpmBiDiMap.reverseGet(solution.flywheelsRPM()));
       Logger.recordOutput(super.pb.makePath("launchVelocity"), targetSpeed);
       return targetSpeed;
     }
-    return FeetPerSecond.of(0);
+    return MetersPerSecond.of(0);
   }
 
   public Translation3d getLaunchVector(LaunchSolution solution) {
