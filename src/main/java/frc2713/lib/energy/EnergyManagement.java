@@ -104,15 +104,25 @@ public class EnergyManagement {
         MotorEnergyState m = e.getValue();
         bySubsystem
             .computeIfAbsent(subsystemName, k -> new AggregatedState())
-            .add(m.powerW, m.totalEnergyJ, m.totalEnergyDrawJ, m.totalEnergyRegeneratedJ,
-                m.peakPowerW, m.peakCurrentA);
+            .add(
+                m.powerW,
+                m.totalEnergyJ,
+                m.totalEnergyDrawJ,
+                m.totalEnergyRegeneratedJ,
+                m.peakPowerW,
+                m.peakCurrentA);
       }
 
       // Robot-wide aggregation (sum of all subsystems)
       AggregatedState robot = new AggregatedState();
       for (AggregatedState sub : bySubsystem.values()) {
-        robot.add(sub.powerW, sub.totalEnergyJ, sub.totalEnergyDrawJ, sub.totalEnergyRegeneratedJ,
-            sub.peakPowerW, sub.peakCurrentA);
+        robot.add(
+            sub.powerW,
+            sub.totalEnergyJ,
+            sub.totalEnergyDrawJ,
+            sub.totalEnergyRegeneratedJ,
+            sub.peakPowerW,
+            sub.peakCurrentA);
       }
 
       // Log per-subsystem totals
@@ -130,7 +140,8 @@ public class EnergyManagement {
       Logger.recordOutput(pb.makePath("PowerW"), a.powerW, Watts);
       Logger.recordOutput(pb.makePath("TotalEnergyJ"), a.totalEnergyJ, Joules);
       Logger.recordOutput(pb.makePath("TotalEnergyDrawJ"), a.totalEnergyDrawJ, Joules);
-      Logger.recordOutput(pb.makePath("TotalEnergyRegeneratedJ"), a.totalEnergyRegeneratedJ, Joules);
+      Logger.recordOutput(
+          pb.makePath("TotalEnergyRegeneratedJ"), a.totalEnergyRegeneratedJ, Joules);
       Logger.recordOutput(pb.makePath("PeakPowerW"), a.peakPowerW, Watts);
       Logger.recordOutput(pb.makePath("PeakCurrentA"), a.peakCurrentA, Amps);
     }
