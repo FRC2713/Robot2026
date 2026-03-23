@@ -1,14 +1,20 @@
 package frc2713.robot.subsystems.launcher;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Time;
 import frc2713.lib.util.BidirectionalInterpolatingDoubleMap;
 import frc2713.lib.util.LoggedTunableNumber;
-import frc2713.robot.subsystems.launcher.LauncherConstants.Flywheels;
 
 public final class LaunchingLookupMaps {
 
@@ -104,16 +110,45 @@ public final class LaunchingLookupMaps {
     tofMapAZ.put(6.329, 1.52);
   }
 
-  public static double exitAngleRadiansFromHoodDegrees(double degrees) {
-    return Degrees.of(rpmToReleaseAngleAdjustmentMap.get(degrees)).in(Radians);
+  public static AngularVelocity getVelocityFromDistance(Distance dist, boolean isHub) {
+    if (isHub) {
+      return RPM.of(distanceToRpmMap.get(dist.in(Meters)));
+    }
+    return RPM.of(distanceToRpmAzMap.get(dist.in(Meters)));
   }
 
-  /**
-   * Nominal muzzle speed (m/s) from flywheel mechanism RPM using {@link Flywheels#WHEEL_DIAMETER}
-   * as contact radius and {@link #rpmToMuzzleVelocityScale}.
-   */
-  public static double muzzleVelocityMetersPerSecond(double flywheelRpm) {
-    return velocityToRpmBiDiMap.reverseGet(flywheelRpm);
+  public static AngularVelocity getFlywheelVelocityFromBallVelocity(LinearVelocity ballVelocity) {
+    return RPM.of(velocityToRpmBiDiMap.get(ballVelocity.in(FeetPerSecond)));
+  }
+
+  public static LinearVelocity getBallVelocityFromFlywheelVelocity(
+      AngularVelocity flywheelVelocity) {
+    return FeetPerSecond.of(velocityToRpmBiDiMap.reverseGet(flywheelVelocity.in(RPM)));
+  }
+
+  public static Angle getHoodAngleFromDistance(Distance horizontalDistance, boolean isHub) {
+    if (isHub) {
+      return Degrees.of(distanceToAngleMap.get(horizontalDistance.in(Meters)));
+    }
+    return Degrees.of(distanceToAngleAzMap.get(horizontalDistance.in(Meters)));
+  }
+
+  public static Angle getReleaseAngleAdjustmentFromFlywheelVelocity(
+      AngularVelocity flywheelVelocity) {
+    return Degrees.of(rpmToReleaseAngleAdjustmentMap.get(flywheelVelocity.in(RPM)));
+  }
+
+  public static Angle getReleaseAngleFromDistanceAndFlywheelVelocity(
+      Distance horizontalDistance, AngularVelocity flywheelVelocity, boolean isHub) {
+    return getHoodAngleFromDistance(horizontalDistance, isHub)
+        .plus(getReleaseAngleAdjustmentFromFlywheelVelocity(flywheelVelocity));
+  }
+
+  public static Time getTimeOfFlight(Distance horizontalDistance, boolean isHub) {
+    if (isHub) {
+      return Seconds.of(tofMap.get(horizontalDistance.in(Meters)));
+    }
+    return Seconds.of(tofMapAZ.get(horizontalDistance.in(Meters)));
   }
 
   public static LoggedTunableNumber tuningMagnus = new LoggedTunableNumber("Tuning Magnus", 0.5);
