@@ -1,24 +1,26 @@
 package frc2713.robot.subsystems.launcher;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.FeetPerSecond;
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.InchesPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc2713.lib.field.CircularFieldRegion;
+import frc2713.lib.geometry.GeometryUtil;
 import frc2713.lib.io.ArticulatedComponent;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
@@ -105,6 +107,12 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
         fuelTrajectories.update(dt);
         this.lastUpdateTime = now;
         Logger.recordOutput(pb.makePath("fuel_trajectories"), fuelTrajectories.getPositions());
+        Logger.recordOutput(
+            pb.makePath("fuel_trajectories_completed_tof_s"),
+            fuelTrajectories.getCompletedFlightTimesSeconds());
+        Logger.recordOutput(
+            pb.makePath("fuel_trajectories_completed_hits"),
+            fuelTrajectories.getCompletedTargetHits());
       }
     }
   }
@@ -116,22 +124,7 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
 
   @Override
   public Translation3d getRelativeLinearVelocity() {
-    return new Translation3d(0, 0, 0);
-  }
-
-  public LinearVelocity getSurfaceSpeed() {
-    AngularVelocity wheelSpeed = getLeaderCurrentVelocity();
-    Distance wheelDiameter = Inches.of(4);
-    Distance wheelCircumference = wheelDiameter.times(Math.PI);
-    return InchesPerSecond.of(wheelSpeed.in(RotationsPerSecond) * wheelCircumference.in(Inches));
-  }
-
-  public LinearVelocity getLaunchVelocity() {
-    Distance toGoal = this.getDistance2d(LaunchingSolutionManager.currentGoal);
-    double rpm = LaunchingLookupMaps.distanceToRpmMap.get(toGoal.in(Meters));
-    LinearVelocity vel = MetersPerSecond.of(LaunchingLookupMaps.muzzleVelocityMetersPerSecond(rpm));
-    Logger.recordOutput(pb.makePath("launchVelocity"), vel);
-    return vel;
+    return GeometryUtil.Constants.Translation_3d.ZERO;
   }
 
   public LinearVelocity getOnTheFlyLaunchVelocity(LaunchSolution solution) {
@@ -156,11 +149,16 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
     // Define the launch speed relative to the flywheel (Forward X)
     Translation3d flywheelVelRel =
         new Translation3d(getOnTheFlyLaunchVelocity(solution).in(MetersPerSecond), 0, 0);
+    double releaseAngleAdjustRad =
+        Degrees.of(LaunchingLookupMaps.rpmToReleaseAngleAdjustmentMap.get(solution.flywheelsRPM()))
+            .in(Radians);
+    Translation3d adjustedFlywheelVelRel =
+        flywheelVelRel.rotateBy(new Rotation3d(releaseAngleAdjustRad, 0, 0));
 
     // C. Rotate Muzzle Velocity to Global Frame
     // We use the Global Rotation of the flywheels (which includes Drive, Turret, Hood)
     Rotation3d launcherFacing = this.getGlobalPose().getRotation();
-    Translation3d launchVelGlobal = flywheelVelRel.rotateBy(launcherFacing);
+    Translation3d launchVelGlobal = adjustedFlywheelVelRel.rotateBy(launcherFacing);
 
     // D. Combine: V_ball = V_robot + V_shot
     return structureVel.plus(launchVelGlobal);
@@ -175,6 +173,10 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
   }
 
   public void simulateLaunchFuel(LaunchSolution solution) {
+    simulateLaunchFuel(solution, getDefaultFuelTarget());
+  }
+
+  public void simulateLaunchFuel(LaunchSolution solution, CircularFieldRegion targetRegion) {
     Time now = RobotTime.getTimestamp();
     // Enforce max fire rate by checking time since last launch. If we haven't waited long enough,
     // skip this launch.
@@ -185,7 +187,26 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
       this.fuelTrajectories.launch(
           this.getGlobalPose().getTranslation(),
           getLaunchVector(solution),
-          RotationsPerSecond.of(0));
+          RotationsPerSecond.of(0),
+          targetRegion);
     }
+  }
+
+  public void simulateLaunchFuel(
+      LaunchSolution solution, Translation3d targetCenter, double targetRadiusMeters) {
+    simulateLaunchFuel(
+        solution,
+        new CircularFieldRegion(
+            new Translation2d(targetCenter.getX(), targetCenter.getY()),
+            targetRadiusMeters,
+            targetCenter.getZ()));
+  }
+
+  private CircularFieldRegion getDefaultFuelTarget() {
+    Translation3d goal = LaunchingSolutionManager.currentGoal;
+    return new CircularFieldRegion(
+        new Translation2d(goal.getX(), goal.getY()),
+        LaunchingSolutionManager.targetRadius.in(Meters),
+        goal.getZ());
   }
 }

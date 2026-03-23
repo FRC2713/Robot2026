@@ -87,22 +87,21 @@ public final class LaunchingLookupMaps {
     rpmToReleaseAngleAdjustmentMap.put(4500., 15.);
     rpmToReleaseAngleAdjustmentMap.put(5000., 15.);
 
-    tofMap.put(1.03, 1.);
-    tofMap.put(1.75, 1.75);
-    tofMap.put(2.1, 2.1);
-    tofMap.put(3.36, 3.36);
-    tofMap.put(4.5, 4.5);
-    tofMap.put(5.0, 5.0);
-    tofMap.put(6.03, 6.03);
+    tofMap.put(0.974, 1.14);
+    tofMap.put(1.443, 1.18);
+    tofMap.put(2.905, 1.2);
+    tofMap.put(3.345, 1.2);
+    tofMap.put(3.945, 1.22);
+    tofMap.put(5.422, 1.38);
+    tofMap.put(6.329, 1.52);
 
-    tofMapAZ.put(1.03, 1.);
-    tofMapAZ.put(1.75, 1.75);
-    tofMapAZ.put(2.1, 2.1);
-    tofMapAZ.put(3.36, 3.36);
-    tofMapAZ.put(4.5, 4.5);
-    tofMapAZ.put(5.0, 5.0);
-    tofMapAZ.put(6.03, 6.03);
-
+    tofMapAZ.put(0.974, 1.14);
+    tofMapAZ.put(1.443, 1.18);
+    tofMapAZ.put(2.905, 1.2);
+    tofMapAZ.put(3.345, 1.2);
+    tofMapAZ.put(3.945, 1.22);
+    tofMapAZ.put(5.422, 1.38);
+    tofMapAZ.put(6.329, 1.52);
   }
 
   public static double exitAngleRadiansFromHoodDegrees(double degrees) {
