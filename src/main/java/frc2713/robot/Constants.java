@@ -23,7 +23,12 @@ public final class Constants {
   public static final boolean enableOTFFeatures = false; // currentMode == Mode.SIM;
 
   public static final CANDeviceId launcherMotorDeviceId = new CANDeviceId(2);
+
+  // Set this to true to enable tunable numbers for all subsystems
   public static boolean tuningMode = true;
+
+  // Set this to true to log performance data for each subsystem
+  public static boolean logPerformanceData = true;
 
   public static enum Mode {
     /** Running on a real robot. */

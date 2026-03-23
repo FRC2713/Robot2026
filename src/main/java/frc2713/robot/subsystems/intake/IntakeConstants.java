@@ -61,7 +61,6 @@ public final class IntakeConstants {
       leaderConfig.useFOC = true;
       leaderConfig.motor = DCMotor.getKrakenX44Foc(1);
       leaderConfig.simOrientation = ChassisReference.CounterClockwise_Positive;
-      leaderConfig.tunable = true;
 
       leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(0.75, 3.5);
       leaderConfig.fxConfig.Slot0.kI = 0.0;
@@ -155,7 +154,6 @@ public final class IntakeConstants {
       config.momentOfInertia =
           MoiUnits.PoundSquareInches.of(
               movingMass.in(Pounds) * Math.pow(sprocketPitchDiameter.in(Inches) / 2.0, 2));
-      config.tunable = true;
 
       config.generalControlMode = GeneralControlMode.POSITION;
       TalonFXSubsystemConfig.setLinearAcceptableError(
@@ -178,7 +176,6 @@ public final class IntakeConstants {
       differentialConfig.motorAlignment = MotorAlignmentValue.Opposed;
       differentialConfig.closedLoopRate = 200.0;
       differentialConfig.followerUsesCommonLeaderConfigs = true;
-      differentialConfig.tunable = true;
 
       // Leader initial configs
       differentialConfig.leaderConfig =
