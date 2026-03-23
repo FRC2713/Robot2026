@@ -9,6 +9,7 @@ import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.io.ArticulatedComponent;
 import frc2713.lib.logging.PeriodicTimingLogger;
 import frc2713.lib.logging.TimeLogged;
+import frc2713.robot.Constants;
 import frc2713.robot.FieldConstants;
 import frc2713.robot.subsystems.drive.Drive;
 import java.util.*;
@@ -119,8 +120,10 @@ public class KinematicsManager extends SubsystemBase {
       if (mechanismPosesBuffer.length > 0) {
         Logger.recordOutput(pb.makePath("mechanismPoses"), mechanismPosesBuffer);
       }
-      Logger.recordOutput(pb.makePath("localPoses"), localPoses);
-      Logger.recordOutput(pb.makePath("globalPoses"), globalPoses);
+      if (Constants.tuningMode) {
+        Logger.recordOutput(pb.makePath("localPoses"), localPoses);
+        Logger.recordOutput(pb.makePath("globalPoses"), globalPoses);
+      }
     }
   }
 

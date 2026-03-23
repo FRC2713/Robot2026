@@ -156,7 +156,6 @@ public final class IntakeConstants {
       config.momentOfInertia =
           MoiUnits.PoundSquareInches.of(
               movingMass.in(Pounds) * Math.pow(sprocketPitchDiameter.in(Inches) / 2.0, 2));
-      config.tunable = true;
 
       config.generalControlMode = GeneralControlMode.POSITION;
       TalonFXSubsystemConfig.setLinearAcceptableError(
@@ -179,7 +178,6 @@ public final class IntakeConstants {
       differentialConfig.motorAlignment = MotorAlignmentValue.Opposed;
       differentialConfig.closedLoopRate = 200.0;
       differentialConfig.followerUsesCommonLeaderConfigs = true;
-      differentialConfig.tunable = true;
 
       // Leader initial configs
       differentialConfig.leaderConfig =

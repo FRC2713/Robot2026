@@ -17,6 +17,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import frc2713.lib.drivers.CANDeviceId;
+import frc2713.robot.Constants;
 
 public class TalonFXSubsystemConfig {
 
@@ -26,7 +27,7 @@ public class TalonFXSubsystemConfig {
   public DCMotor motor = DCMotor.getKrakenX60(1);
   public ChassisReference simOrientation = ChassisReference.Clockwise_Positive;
   // Marks Slot0 and MotionMagic as live-tunable
-  public boolean tunable = false;
+  public boolean tunable = Constants.tuningMode;
   public boolean useFOC = true;
 
   // Ratio of rotor to units for this talon.  rotor * by this ratio should

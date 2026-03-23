@@ -70,7 +70,6 @@ public final class LauncherConstants {
     static {
       config.name = "Turret";
       config.talonCANID = new CANDeviceId(52, "canivore");
-      config.tunable = true; // Enable tunable gains for Motion Magic
       config.generalControlMode = GeneralControlMode.POSITION;
       config.acceptablePositionError = Degrees.of(3);
 
@@ -159,7 +158,6 @@ public final class LauncherConstants {
       leaderConfig.fxConfig.TorqueCurrent.PeakReverseTorqueCurrent = 0;
       leaderConfig.momentOfInertia = flywhMomentOfInertia.times(0.5);
       leaderConfig.useFOC = true;
-      leaderConfig.tunable = true;
       leaderConfig.fxConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
       leaderConfig.generalControlMode = GeneralControlMode.VELOCITY;
       leaderConfig.acceptableVelocityError = RPM.of(100);
@@ -226,7 +224,6 @@ public final class LauncherConstants {
       config.fxConfig.Slot0.kV = 0.092 * gearRatio; // velocity feedforward
       config.fxConfig.Slot0.kA = 0.0;
 
-      config.tunable = true;
       config.generalControlMode = GeneralControlMode.POSITION;
       config.acceptablePositionError = Degrees.of(2);
 

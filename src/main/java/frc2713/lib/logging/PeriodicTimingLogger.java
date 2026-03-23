@@ -1,5 +1,6 @@
 package frc2713.lib.logging;
 
+import frc2713.robot.Constants;
 import java.lang.reflect.Method;
 import org.littletonrobotics.junction.Logger;
 
@@ -24,6 +25,9 @@ public final class PeriodicTimingLogger {
    * method is not annotated with {@link TimeLogged}.
    */
   public static TimingScope time(Object instance) {
+    if (!Constants.logPerformanceData) {
+      return NOOP_SCOPE;
+    }
     TimerMetadata metadata = METADATA_CACHE.get(instance.getClass());
     if (!metadata.enabled) {
       return NOOP_SCOPE;
