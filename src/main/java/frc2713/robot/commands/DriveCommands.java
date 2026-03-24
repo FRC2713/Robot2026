@@ -204,9 +204,12 @@ public class DriveCommands {
   public static Command driveOneMeter(Drive drive, double xOffset) {
     PIDController xcontroller =
         DriveConstants.AutoConstants.positionTrajectoryController.createPIDController();
-
     return Commands.sequence(
-        Commands.runOnce(() -> target = drive.getPose().getX() + xOffset),
+        Commands.runOnce(
+            () -> {
+              target = drive.getPose().getX() + xOffset;
+              Logger.recordOutput("set targetpose", target);
+            }),
         Commands.run(
             () -> {
               if (Constants.tuningMode) {

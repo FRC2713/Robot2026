@@ -46,13 +46,11 @@ public final class LaunchingLookupMaps {
 
   static {
     // Distance to hub center (m) -> RPM (rpm)
-    distanceToRpmMap.put(1.03, 2400.);
-    distanceToRpmMap.put(1.75, 2666.66);
-    distanceToRpmMap.put(2.1, 2800.);
-    distanceToRpmMap.put(3.36, 2933.);
-    distanceToRpmMap.put(4.5, 3066.);
-    distanceToRpmMap.put(5.0, 3333.);
-    distanceToRpmMap.put(6.03, 4266.);
+    distanceToRpmMap.put(1.03, 2500.);
+    distanceToRpmMap.put(2.1, 2500.);
+    distanceToRpmMap.put(3.36, 3500.);
+    distanceToRpmMap.put(5.0, 4000.);
+    distanceToRpmMap.put(6.03, 5000.);
 
     // Distance to az Corner (m) -> RPM (rpm)
     distanceToRpmAzMap.put(1.03, 2400.);
@@ -64,12 +62,12 @@ public final class LaunchingLookupMaps {
     distanceToRpmAzMap.put(6.03, 4266.);
 
     // Ball Velocity (ft/s) <-> RPM (rpm)
-    velocityToRpmBiDiMap.put(16.0, 1800.);
-    velocityToRpmBiDiMap.put(19.2, 2000.);
-    velocityToRpmBiDiMap.put(25.7, 3000.);
-    velocityToRpmBiDiMap.put(28.9, 3500.);
-    velocityToRpmBiDiMap.put(30.3, 4000.);
-    velocityToRpmBiDiMap.put(35.3, 4500.);
+
+    velocityToRpmBiDiMap.put(17.69, 2500.);
+    velocityToRpmBiDiMap.put(20.19, 3000.);
+    velocityToRpmBiDiMap.put(22.07, 3500.);
+    velocityToRpmBiDiMap.put(24.67, 4000.);
+    velocityToRpmBiDiMap.put(25.52, 4500.);
 
     // Distance to hub center (m) -> Hood Pitch (Degrees)
     distanceToAngleMap.put(1.03, 5.0);
@@ -93,6 +91,7 @@ public final class LaunchingLookupMaps {
     rpmToReleaseAngleAdjustmentMap.put(4500., 15.);
     rpmToReleaseAngleAdjustmentMap.put(5000., 15.);
 
+    /** Distance to hub (m) -> Time of flight (s) */
     tofMap.put(0.974, 1.14);
     tofMap.put(1.443, 1.18);
     tofMap.put(2.905, 1.2);
