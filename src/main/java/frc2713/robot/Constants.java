@@ -32,6 +32,9 @@ public final class Constants {
   // Set this to true to log performance data for each subsystem
   public static boolean logPerformanceData = true;
 
+  // Set this to true to log custom power consumption data
+  public static boolean logPowerData = true;
+
   public static enum Mode {
     /** Running on a real robot. */
     REAL,
