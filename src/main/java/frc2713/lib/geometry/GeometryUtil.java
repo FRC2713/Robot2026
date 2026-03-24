@@ -3,6 +3,7 @@ package frc2713.lib.geometry;
 import static edu.wpi.first.units.Units.Degrees;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -15,6 +16,10 @@ public class GeometryUtil {
   }
 
   public static class Constants {
+    public static class Pose_2d {
+      public static Pose2d ZERO = new Pose2d();
+    }
+
     public static class Translation_3d {
       public static Translation3d ZERO = new Translation3d();
     }
@@ -25,6 +30,7 @@ public class GeometryUtil {
     }
 
     public static class Rotation_3d {
+      public static Rotation3d ZERO = new Rotation3d();
       public static Rotation3d PI_Z = new Rotation3d(0, 0, Math.PI);
       public static Rotation3d PI_Y = new Rotation3d(0, Math.PI, 0);
       public static Rotation3d PI_X = new Rotation3d(Math.PI, 0, 0);

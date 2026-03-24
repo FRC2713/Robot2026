@@ -1,11 +1,14 @@
 package frc2713.robot.subsystems.vision;
 
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Radian;
+
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc2713.lib.logging.PeriodicTimingLogger;
 import frc2713.lib.logging.TimeLogged;
 import frc2713.robot.RobotContainer;
-import frc2713.robot.subsystems.vision.VisionConstants.PoseEstimatorErrorStDevs;
 import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
@@ -30,8 +33,10 @@ public class Vision extends SubsystemBase {
         RobotContainer.drive.addVisionMeasurement(
             inputs.pose,
             inputs.timestamp,
-            new PoseEstimatorErrorStDevs(inputs.translationStdDev, inputs.rotationStdDev)
-                .toMatrix());
+            VecBuilder.fill(
+                inputs.translationStdDev.in(Meters),
+                inputs.translationStdDev.in(Meters),
+                inputs.rotationStdDev.in(Radian)));
       }
       Logger.processInputs("Vision", inputs);
     }
