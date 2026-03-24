@@ -30,6 +30,7 @@ import frc2713.lib.subsystem.MotorCancoderSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.CrtSolver;
 import frc2713.lib.util.Util;
+import frc2713.robot.Robot;
 import frc2713.robot.RobotContainer;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -72,7 +73,8 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
                 e1,
                 e2,
                 LauncherConstants.Turret.pinionGearTeeth,
-                LauncherConstants.Turret.spurGear1Teeth)
+                LauncherConstants.Turret.spurGear1Teeth,
+                LauncherConstants.Turret.modInverseEncoder1Encoder2)
             .div(LauncherConstants.Turret.motorToTurretGearRatio);
 
     Logger.recordOutput(this.pb.makePath("calculated_angle"), turretAngle);
@@ -258,8 +260,10 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
       }
 
       // Log the goal pose for visualization
-      Pose3d goalPose = new Pose3d(LaunchingSolutionManager.currentGoal, new Rotation3d());
-      Logger.recordOutput(pb.makePath("goalVector"), new Pose3d[] {this.getGlobalPose(), goalPose});
+      if (Robot.isSimulation()) {
+        Pose3d goalPose = new Pose3d(LaunchingSolutionManager.currentGoal, new Rotation3d());
+        Logger.recordOutput(pb.makePath("goalVector"), new Pose3d[] {this.getGlobalPose(), goalPose});
+      }
     }
   }
 

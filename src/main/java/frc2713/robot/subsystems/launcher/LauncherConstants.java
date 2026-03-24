@@ -25,6 +25,7 @@ import frc2713.lib.dynamics.MoiUnits;
 import frc2713.lib.io.CanCoderConfig;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig.GeneralControlMode;
+import frc2713.lib.util.CrtSolver;
 import frc2713.lib.util.LoggedTunableBoolean;
 import frc2713.lib.util.LoggedTunableMeasure;
 import frc2713.lib.util.LoggedTunableNumber;
@@ -66,6 +67,9 @@ public final class LauncherConstants {
     // Gear ratio from encoder rotations to turret rotations (encoder is after the first stage
     // reduction)
     public static final double encoderToTurretGearRatio = sprocketGearTeeth / sprocketPinionTeeth;
+
+    public static final int modInverseEncoder1Encoder2 =
+        CrtSolver.modInverse(pinionGearTeeth, spurGear1Teeth);
 
     static {
       config.name = "Turret";

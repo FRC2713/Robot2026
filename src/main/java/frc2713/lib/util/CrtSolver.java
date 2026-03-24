@@ -6,6 +6,16 @@ import edu.wpi.first.units.measure.Angle;
 
 public class CrtSolver {
 
+  public static Angle calculateAbsoluteMotorTurns(
+      Angle encoder1Rotations,
+      Angle encoder2Rotations,
+      int encoder1GearTeeth,
+      int encoder2GearTeeth) {
+    int modularInverse = modInverse(encoder1GearTeeth, encoder2GearTeeth);
+    return calculateAbsoluteMotorTurns(
+        encoder1Rotations, encoder2Rotations, encoder1GearTeeth, encoder2GearTeeth, modularInverse);
+  }
+
   /**
    * Calculates the absolute continuous turns of the turret motor.
    *
@@ -17,13 +27,13 @@ public class CrtSolver {
       Angle encoder1Rotations,
       Angle encoder2Rotations,
       int encoder1GearTeeth,
-      int encoder2GearTeeth) {
+      int encoder2GearTeeth,
+      int modularInverse) {
     double normalizedEncoder1Rotations =
         encoder1Rotations.in(Rotations) % 1.0; // Normalize to [0.0, 1.0)
     double normalizedEncoder2Rotations =
         encoder2Rotations.in(Rotations) % 1.0; // Normalize to [0.0, 1.0)
 
-    int modularInverse = modInverse(encoder1GearTeeth, encoder2GearTeeth);
     // Calculate the difference scaled by the gear ratios
     double diff =
         (encoder2GearTeeth * normalizedEncoder2Rotations)

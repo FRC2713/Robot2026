@@ -14,7 +14,9 @@ import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Timer;
+import frc2713.lib.util.CachedPow;
 import frc2713.lib.util.LoggedTunableNumber;
+import frc2713.lib.util.MathUtil;
 import frc2713.robot.FieldConstants;
 import frc2713.robot.RobotContainer;
 import org.littletonrobotics.junction.Logger;
@@ -24,9 +26,12 @@ public class VisionIOSLAMDunk implements VisionIO {
   private NetworkTable table;
   private DoubleArraySubscriber sub;
   private double lastTimestamp = -1;
-  private static final LoggedTunableNumber k = new LoggedTunableNumber("Vision/k", 2);
+  private static final LoggedTunableNumber k =
+      new LoggedTunableNumber("Vision/k", 2); // gets cast to int
   private static final Transform3d SLAMDUNK_TRANSFORM =
       new Transform3d(new Translation3d(), new Rotation3d(0, 0, Math.PI / 2));
+
+  private CachedPow powN396 = new CachedPow(-0.396);
 
   public VisionIOSLAMDunk() {
     inst = NetworkTableInstance.getDefault();
@@ -123,11 +128,11 @@ public class VisionIOSLAMDunk implements VisionIO {
         //         .pose
         //         .getTranslation()
         //         .getDistance(RobotContainer.drive.getPose().getTranslation());
-        double roughDist = 74.7 * Math.pow(inputs.avgTagSize, -0.396);
+        double roughDist = 74.7 * powN396.get(inputs.avgTagSize);
         Logger.recordOutput("Vision/roughDist", roughDist);
-        double distScaleFactor = Math.pow(roughDist, k.get());
+        double distScaleFactor = MathUtil.powDouble(roughDist, (int) k.get());
         Logger.recordOutput("Vision/distanceScaleFactor", distScaleFactor);
-        double countScaleFactor = 1 / Math.max(1, Math.pow(inputs.tagCount, 2));
+        double countScaleFactor = 1 / Math.max(1, MathUtil.sq(inputs.tagCount));
         Logger.recordOutput("Vision/countScaleFactor", countScaleFactor);
 
         inputs.translationStdDev =
