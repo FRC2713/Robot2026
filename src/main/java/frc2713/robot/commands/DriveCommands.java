@@ -10,6 +10,7 @@ package frc2713.robot.commands;
 import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -29,7 +30,9 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc2713.lib.util.LoggedTunableGains;
+import frc2713.robot.Constants;
 import frc2713.robot.subsystems.drive.Drive;
+import frc2713.robot.subsystems.drive.DriveConstants;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
@@ -41,14 +44,16 @@ import org.littletonrobotics.junction.Logger;
 
 public class DriveCommands {
   private static final double DEADBAND = 0.02;
-  private static final double ANGLE_KP = 5.0;
-  private static final double ANGLE_KD = 0.4;
-  private static final double ANGLE_MAX_VELOCITY = 8.0;
-  private static final double ANGLE_MAX_ACCELERATION = 20.0;
+  private static final double ANGLE_KP = 6.5;
+  private static final double ANGLE_KD = 0.2;
+  private static final double ANGLE_MAX_VELOCITY = 10.0;
+  private static final double ANGLE_MAX_ACCELERATION = 700.0;
   private static final double FF_START_DELAY = 2.0; // Secs
   private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
   private static final double WHEEL_RADIUS_MAX_VELOCITY = 1.25; // Rad/Sec
   private static final double WHEEL_RADIUS_RAMP_RATE = 0.25; // Rad/Sec^2
+  public static double target = 0.0;
+
   public static final DoubleSupplier INCH_SPEED = () -> 0.1;
   public static final LoggedTunableGains DRIVE_HEADING_CONTROLLER_GAINS =
       new LoggedTunableGains(
@@ -154,6 +159,17 @@ public class DriveCommands {
     // Construct command
     return Commands.run(
             () -> {
+              if (Constants.tuningMode) {
+                angleController.setP(DRIVE_HEADING_CONTROLLER_GAINS.getP().get());
+                angleController.setI(DRIVE_HEADING_CONTROLLER_GAINS.getI().get());
+                angleController.setD(DRIVE_HEADING_CONTROLLER_GAINS.getD().get());
+
+                angleController.setConstraints(
+                    new TrapezoidProfile.Constraints(
+                        DRIVE_HEADING_CONTROLLER_GAINS.getMotionMagicCruiseVelocity().get(),
+                        DRIVE_HEADING_CONTROLLER_GAINS.getMotionMagicAcceleration().get()));
+              }
+
               // Get linear velocity
               Translation2d linearVelocity =
                   getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
@@ -183,6 +199,43 @@ public class DriveCommands {
 
         // Reset PID controller when command starts
         .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
+  }
+
+  public static Command driveOneMeter(Drive drive, double xOffset) {
+    PIDController xcontroller =
+        DriveConstants.AutoConstants.positionTrajectoryController.createPIDController();
+
+    return Commands.sequence(
+        Commands.runOnce(() -> target = drive.getPose().getX() + xOffset),
+        Commands.run(
+            () -> {
+              if (Constants.tuningMode) {
+                xcontroller.setP(
+                    DriveConstants.AutoConstants.positionTrajectoryController.getP().get());
+                xcontroller.setI(
+                    DriveConstants.AutoConstants.positionTrajectoryController.getI().get());
+                xcontroller.setD(
+                    DriveConstants.AutoConstants.positionTrajectoryController.getD().get());
+              }
+
+              // Calculate angular speed
+              double vx = xcontroller.calculate(drive.getPose().getX(), target);
+
+              // Convert to field relative speeds & send command
+              boolean isFlipped =
+                  DriverStation.getAlliance().isPresent()
+                      && DriverStation.getAlliance().get() == Alliance.Red;
+
+              ChassisSpeeds speeds = new ChassisSpeeds(isFlipped ? -vx : vx, 0, 0);
+
+              drive.runVelocity(
+                  ChassisSpeeds.fromFieldRelativeSpeeds(
+                      speeds,
+                      isFlipped
+                          ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                          : drive.getRotation()));
+            },
+            drive));
   }
 
   /**

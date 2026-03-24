@@ -1,6 +1,5 @@
 package frc2713.robot.oi;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.FeetPerSecond;
@@ -101,6 +100,26 @@ public class DevControls {
                 Optional.of(DegreesPerSecondPerSecond.of(360.0))));
     controller.b().onTrue(DriveCommands.clearDriveLimits(drive));
 
+    controller
+        .povLeft()
+        .onTrue(
+            DriveCommands.joystickDriveAtAngle(
+                    drive, () -> 0, () -> 0, () -> Rotation2d.fromDegrees(180))
+                .withName("Drive Intake Align"));
+
+    controller
+        .povRight()
+        .onTrue(
+            DriveCommands.joystickDriveAtAngle(
+                    drive, () -> 0, () -> 0, () -> Rotation2d.fromDegrees(0))
+                .withName("Drive Intake Align"));
+
+    controller.povUp().onTrue(DriveCommands.driveOneMeter(drive, 1).withName("Drive Intake Align"));
+
+    controller
+        .povDown()
+        .onTrue(DriveCommands.driveOneMeter(drive, -1).withName("Drive Intake Align"));
+
     // Intake Controls
 
     controller
@@ -122,9 +141,9 @@ public class DevControls {
         .onFalse(intakeRoller.stop().withName("Stop Intake"));
 
     // Hood Controls
-    controller.povUp().onTrue(hood.setAngleCommand(() -> Degrees.of(25)));
+    // controller.povUp().onTrue(hood.setAngleCommand(() -> Degrees.of(25)));
 
-    controller.povDown().onTrue(hood.setAngleCommand(() -> Degrees.of(0.5)));
+    // controller.povDown().onTrue(hood.setAngleCommand(() -> Degrees.of(0.5)));
 
     // controller
     //     .leftBumper()
@@ -203,8 +222,8 @@ public class DevControls {
     //     .onTrue(flywheels.dutyCycleCommand(() -> 1.0))
     //     .onFalse(flywheels.dutyCycleCommand(() -> 0.0));
 
-    controller.povUp().onTrue(hood.setAngleCommand(() -> Degrees.of(25)));
-    controller.povDown().onTrue(hood.setAngleCommand(() -> Degrees.of(0)));
+    // controller.povUp().onTrue(hood.setAngleCommand(() -> Degrees.of(25)));
+    // controller.povDown().onTrue(hood.setAngleCommand(() -> Degrees.of(0)));
 
     // Y button - index fuel in parallel (same effect since it's the same command)
     // controller

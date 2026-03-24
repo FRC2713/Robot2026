@@ -30,7 +30,7 @@ public final class Constants {
   public static boolean tuningMode = true;
 
   // Set this to true to log performance data for each subsystem
-  public static boolean logPerformanceData = true;
+  public static boolean logPerformanceData = false;
 
   public static enum Mode {
     /** Running on a real robot. */
