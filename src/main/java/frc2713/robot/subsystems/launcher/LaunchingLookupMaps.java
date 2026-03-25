@@ -47,10 +47,10 @@ public final class LaunchingLookupMaps {
   static {
     // Distance to hub center (m) -> RPM (rpm)
     distanceToRpmMap.put(1.03, 2500.);
-    distanceToRpmMap.put(2.1, 2500.);
-    distanceToRpmMap.put(3.36, 3500.);
-    distanceToRpmMap.put(5.0, 4000.);
-    distanceToRpmMap.put(6.03, 5000.);
+    distanceToRpmMap.put(2.1, 2600.);
+    distanceToRpmMap.put(3.36, 2800.);
+    distanceToRpmMap.put(5.0, 3100.);
+    distanceToRpmMap.put(6.03, 3550.);
 
     // Distance to az Corner (m) -> RPM (rpm)
     distanceToRpmAzMap.put(1.03, 2400.);
@@ -72,8 +72,8 @@ public final class LaunchingLookupMaps {
     // Distance to hub center (m) -> Hood Pitch (Degrees)
     distanceToAngleMap.put(1.03, 5.0);
     distanceToAngleMap.put(2.1, 20.0);
-    distanceToAngleMap.put(3.36, 25.0);
-    distanceToAngleMap.put(5.0, 27.13);
+    distanceToAngleMap.put(3.36, 26.0);
+    distanceToAngleMap.put(5.0, 30.0);
     distanceToAngleMap.put(6.03, 30.0);
 
     // Distance to AZ corner (m) -> Hood Pitch (Degrees)

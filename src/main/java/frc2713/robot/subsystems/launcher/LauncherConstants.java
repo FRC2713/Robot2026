@@ -143,18 +143,17 @@ public final class LauncherConstants {
       leaderConfig.talonCANID = new CANDeviceId(50, "canivore");
       leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(400.0, 3.5);
       leaderConfig.fxConfig.Slot0.kI = 0.0;
-      leaderConfig.fxConfig.Slot0.kD = 0.00;
+      leaderConfig.fxConfig.Slot0.kD = 0.0;
       leaderConfig.fxConfig.Slot0.kS = Util.modeDependentValue(2.0, 2.0);
       leaderConfig.fxConfig.Slot0.kV = 0.0 * gearRatio;
       leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimit = 180.0;
       leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-      leaderConfig.fxConfig.CurrentLimits.SupplyCurrentLimit = 50.0;
+      leaderConfig.fxConfig.CurrentLimits.SupplyCurrentLimit = 80.0;
       leaderConfig.fxConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
       leaderConfig.simOrientation = ChassisReference.CounterClockwise_Positive;
-      leaderConfig.unitToRotorRatio = gearRatio; // 1.33:1 reduction from motor to flywheel
+      leaderConfig.unitToRotorRatio = gearRatio;
       leaderConfig.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
       leaderConfig.fxConfig.Voltage.PeakReverseVoltage = 0;
-      leaderConfig.fxConfig.TorqueCurrent.PeakReverseTorqueCurrent = 0;
       leaderConfig.fxConfig.TorqueCurrent.PeakReverseTorqueCurrent = 0;
       leaderConfig.momentOfInertia = flywhMomentOfInertia.times(0.5);
       leaderConfig.useFOC = true;
@@ -164,7 +163,7 @@ public final class LauncherConstants {
 
       followerConfig.name = "Flywheels Follower";
       followerConfig.talonCANID = new CANDeviceId(51, "canivore");
-      followerConfig.unitToRotorRatio = gearRatio; // 1.33:1 reduction from motor to flywheel
+      followerConfig.unitToRotorRatio = gearRatio;
       followerConfig.momentOfInertia = flywhMomentOfInertia.times(0.5);
       followerConfig.useFOC = false;
       followerConfig.fxConfig.CurrentLimits = leaderConfig.fxConfig.CurrentLimits;
@@ -214,7 +213,7 @@ public final class LauncherConstants {
       config.name = "Hood";
       config.talonCANID = new CANDeviceId(54, "canivore"); // Example CAN ID, replace with actual ID
 
-      config.fxConfig.Feedback.FeedbackRotorOffset = -0.452637;
+      config.fxConfig.Feedback.FeedbackRotorOffset = 0.45218;
 
       // PID gains for Motion Magic
       config.fxConfig.Slot0.kP = 400.0;

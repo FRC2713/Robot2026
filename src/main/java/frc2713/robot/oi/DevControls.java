@@ -1,9 +1,5 @@
 package frc2713.robot.oi;
 
-import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
-import static edu.wpi.first.units.Units.FeetPerSecond;
-import static edu.wpi.first.units.Units.FeetPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RPM;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -21,7 +17,6 @@ import frc2713.robot.subsystems.launcher.LauncherConstants;
 import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
-import java.util.Optional;
 
 @SuppressWarnings("unused")
 public class DevControls {
@@ -89,15 +84,15 @@ public class DevControls {
     controller.povLeft().onTrue(flywheels.stop());
 
     // Test setting drive limits
-    controller
-        .a()
-        .onTrue(
-            DriveCommands.setDriveLimits(
-                drive,
-                Optional.of(FeetPerSecond.of(1.0)),
-                Optional.of(FeetPerSecondPerSecond.of(12.0)),
-                Optional.of(DegreesPerSecond.of(90.0)),
-                Optional.of(DegreesPerSecondPerSecond.of(360.0))));
+    // controller
+    //     .a()
+    //     .onTrue(
+    //         DriveCommands.setDriveLimits(
+    //             drive,
+    //             Optional.of(FeetPerSecond.of(1.0)),
+    //             Optional.of(FeetPerSecondPerSecond.of(12.0)),
+    //             Optional.of(DegreesPerSecond.of(90.0)),
+    //             Optional.of(DegreesPerSecondPerSecond.of(360.0))));
     controller.b().onTrue(DriveCommands.clearDriveLimits(drive));
 
     controller
@@ -158,16 +153,16 @@ public class DevControls {
 
     // controller.b().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleTwo));
 
-    // controller
-    //     .a()
-    //     .onTrue(
-    //         Commands.parallel(
-    //             // turret.otfCommand(),
-    //             hood.setAngleCommand(LauncherConstants.Hood.staticHubAngle),
-    //             flywheels.setVelocity(LauncherConstants.Flywheels.PIDTest),
-    //             feeder.feedWhenReady(flywheels::atTarget),
-    //             dyeRotor.feedWhenReady(flywheels::atTarget)))
-    //     .onFalse(Commands.parallel(feeder.stop(), dyeRotor.stop(), flywheels.stop()));
+    controller
+        .a()
+        .onTrue(
+            Commands.parallel(
+                // turret.otfCommand(),
+                hood.setAngleCommand(LauncherConstants.Hood.staticHubAngle),
+                flywheels.setVelocity(LauncherConstants.Flywheels.PIDTest),
+                feeder.feedWhenReady(flywheels::atTarget),
+                dyeRotor.feedWhenReady(flywheels::atTarget)))
+        .onFalse(Commands.parallel(feeder.stop(), dyeRotor.stop(), flywheels.stop()));
     controller
         .rightBumper()
         .onTrue(flywheels.setVelocity(LauncherConstants.Flywheels.PIDTest))
