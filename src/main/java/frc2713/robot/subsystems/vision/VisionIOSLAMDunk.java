@@ -185,7 +185,12 @@ public class VisionIOSLAMDunk implements VisionIO {
               try {
 
                 superCapSocket.sendMore("reset_gyro");
-                boolean success = superCapSocket.send(String.valueOf(angle.in(Degrees)));
+                boolean success =
+                    superCapSocket.send(
+                        String.valueOf(
+                            angle
+                                .minus(SLAMDUNK_TRANSFORM.getRotation().getMeasureZ())
+                                .in(Degrees)));
 
                 if (success) {
                   byte[] reply = superCapSocket.recv(0);
