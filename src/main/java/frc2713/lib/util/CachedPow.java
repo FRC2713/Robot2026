@@ -5,18 +5,18 @@ import java.util.HashMap;
 public final class CachedPow {
 
   private final double exp;
-  private final double resolution;
+  private final double bucketSize;
   private final HashMap<Long, Double> cache;
 
   /**
    * every bit helps(?)
    *
    * @param exp the fixed fractional exponent
-   * @param resolution defines b
+   * @param bucketSize defines how floating point entries are stored in cache
    */
-  public CachedPow(double exp, double resolution) {
+  public CachedPow(double exp, double bucketSize) {
     this.exp = exp;
-    this.resolution = resolution;
+    this.bucketSize = bucketSize;
     this.cache = new HashMap<>();
   }
 
@@ -25,8 +25,8 @@ public final class CachedPow {
   }
 
   public double get(double input) {
-    // This effectively buckets together similar values for the cache
-    long key = (long) (input / resolution);
+    // This buckets together similar values for the cache
+    long key = (long) (input / bucketSize);
 
     // Cache lookup - O(1) with hash maps
     Double cachedResult = cache.get(key);

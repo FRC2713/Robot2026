@@ -13,6 +13,10 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.Timer;
 import frc2713.lib.util.CachedPow;
 import frc2713.lib.util.LoggedTunableNumber;
@@ -20,23 +24,42 @@ import frc2713.lib.util.MathUtil;
 import frc2713.robot.FieldConstants;
 import frc2713.robot.RobotContainer;
 import org.littletonrobotics.junction.Logger;
+import org.zeromq.SocketType;
+import org.zeromq.ZContext;
+import org.zeromq.ZMQ;
 
 public class VisionIOSLAMDunk implements VisionIO {
   private NetworkTableInstance inst;
   private NetworkTable table;
   private DoubleArraySubscriber sub;
   private double lastTimestamp = -1;
+
   private static final LoggedTunableNumber k =
       new LoggedTunableNumber("Vision/k", 2); // gets cast to int
+  private CachedPow powN396 = new CachedPow(-0.396);
+  
   private static final Transform3d SLAMDUNK_TRANSFORM =
       new Transform3d(new Translation3d(), new Rotation3d(0, 0, Math.PI / 2));
 
-  private CachedPow powN396 = new CachedPow(-0.396);
+  private final Time WARN_AFTER_NO_UPDATES_FOR = Seconds.of(4);
+  private final Alert slamdunkAlert =
+      new Alert("No SLAMDunk! updates for >" + WARN_AFTER_NO_UPDATES_FOR, AlertType.kWarning);
+  private final Alert gyroAlert =
+      new Alert("Failed to send gyro update to SuperCap", AlertType.kError);
+
+  private final ZContext supercapContext;
+  private final ZMQ.Socket superCapSocket;
 
   public VisionIOSLAMDunk() {
     inst = NetworkTableInstance.getDefault();
     table = inst.getTable("slamdunk");
     sub = table.getDoubleArrayTopic("pose_robot").subscribe(new double[0]);
+
+    supercapContext = new ZContext();
+    superCapSocket = supercapContext.createSocket(SocketType.REQ);
+    superCapSocket.setSendTimeOut(500); // timeout for sending gyro updates
+    superCapSocket.setReceiveTimeOut(500); // timeout for receiving replies
+    superCapSocket.connect(VisionConstants.SUPERCAP_IPC_ADDRESS);
   }
 
   @Override
@@ -47,11 +70,11 @@ public class VisionIOSLAMDunk implements VisionIO {
     // Reset pose to zero, leave pose3d as last state for visualization
     inputs.pose = new Pose2d();
 
-    var linspeed = RobotContainer.drive.getSpeed();
-    var angspeed = RobotContainer.drive.getAngularSpeed();
-    Logger.recordOutput("SLAMDunk/SpeedLinear", linspeed);
-    Logger.recordOutput("SLAMDunk/SpeedAngular", angspeed);
-    Logger.recordOutput("SLAMDunk/tFPGA", Timer.getFPGATimestamp());
+    if (Timer.getFPGATimestamp() - lastTimestamp > WARN_AFTER_NO_UPDATES_FOR.in(Seconds)) {
+      slamdunkAlert.set(true);
+    } else {
+      slamdunkAlert.set(false);
+    }
 
     var poseArray = sub.get();
     if (poseArray.length > 0) {
@@ -153,11 +176,48 @@ public class VisionIOSLAMDunk implements VisionIO {
     }
 
     if (poseArray.length <= 10) {
-      inputs.reasoning = "No pose data available";
+      inputs.reasoning = "Invalid pose data.";
     } else {
       inputs.reasoning = "Stale timestamp";
     }
     inputs.applying = false;
     return;
+  }
+
+  @Override
+  public void setGyroAngle(Angle angle) {
+    new Thread(
+            () -> {
+              try {
+
+                superCapSocket.sendMore("reset_gyro");
+                boolean success =
+                    superCapSocket.send(
+                        String.valueOf(
+                            angle
+                                .minus(SLAMDUNK_TRANSFORM.getRotation().getMeasureZ())
+                                .in(Degrees)));
+
+                if (success) {
+                  byte[] reply = superCapSocket.recv(0);
+                  String replyStr = reply != null ? new String(reply) : "null";
+                  System.out.println("Received reply from SuperCap: " + replyStr);
+                  if (reply == null || !replyStr.equals("OK")) {
+                    gyroAlert.set(true);
+                    System.err.println("Unexpected reply from SuperCap: " + replyStr);
+                    Logger.recordOutput("Vision/SuperCapReplyError", replyStr);
+                  } else {
+                    gyroAlert.set(false);
+                  }
+                } else {
+                  gyroAlert.set(true);
+                }
+              } catch (Exception e) {
+                gyroAlert.set(true);
+                System.err.println("Error sending gyro update to SuperCap: " + e.getMessage());
+                Logger.recordOutput("Vision/ZmqError", e.getMessage());
+              }
+            })
+        .start();
   }
 }
