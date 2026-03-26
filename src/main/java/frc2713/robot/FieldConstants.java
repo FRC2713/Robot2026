@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
+import frc2713.lib.field.CircularFieldRegion;
 import frc2713.lib.field.RectangleFieldRegion;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -126,6 +127,12 @@ public class FieldConstants {
 
     public static final Translation3d bottomSideCornerTarget = new Translation3d(1.5, 1.0, 0.0);
     public static final Translation3d topSideCornerTarget = new Translation3d(1.5, 7.0, 0.0);
+    public static final CircularFieldRegion bottomPassingTarget =
+        new CircularFieldRegion(
+            new Translation2d(bottomSideCornerTarget.getX(), bottomSideCornerTarget.getY()), 2);
+    public static final CircularFieldRegion topPassingTarget =
+        new CircularFieldRegion(
+            new Translation2d(topSideCornerTarget.getX(), topSideCornerTarget.getY()), 2);
   }
 
   /** Hub related constants */
@@ -186,6 +193,12 @@ public class FieldConstants {
 
     public static final RectangleFieldRegion region =
         new RectangleFieldRegion(nearRightCorner, farLeftCorner);
+
+    public static final CircularFieldRegion target =
+        new CircularFieldRegion(
+            new Translation2d(topCenterPoint.getX(), topCenterPoint.getY()),
+            innerWidth / 2,
+            topCenterPoint.getZ());
   }
 
   /** Left Bump related constants */

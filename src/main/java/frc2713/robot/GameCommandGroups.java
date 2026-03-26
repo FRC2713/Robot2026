@@ -75,7 +75,7 @@ public final class GameCommandGroups {
       return Commands.either(
           Commands.none(),
           otfShot(drive, flywheels, hood, turret, feeder, dyeRotor, extension, intakeRoller),
-          () -> hood.inRetractionZone(() -> drive.getPose()));
+          () -> hood.inRetractionZone(() -> drive.getPose())).withName("OTF Shooting w Hood Protect");
     }
 
     /** OTF shooting with drive limits. Use for driver/operator triggers. */
@@ -100,7 +100,7 @@ public final class GameCommandGroups {
               turret.otfCommand(),
               flywheels.simulateLaunchFuelCommand(flywheels::atTarget),
               feeder.feedWhenReady(flywheels::atTarget),
-              dyeRotor.dynamicFeedWhenReady(flywheels::atTarget))
+              dyeRotor.indexFuel()) // used to be dynamic but we slowed it way down
           .withName("OTF Shooting");
     }
 

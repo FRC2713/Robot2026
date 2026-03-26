@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Translation2d;
  * frc2713.robot.FieldConstants}.
  */
 public class RectangleFieldRegion extends frc2713.lib.geometry.Rectangle2d implements FieldRegion {
+  private final double zMeters;
 
   /**
    * Constructs an axis-aligned rectangular field region from two diagonally opposite corners.
@@ -22,7 +23,20 @@ public class RectangleFieldRegion extends frc2713.lib.geometry.Rectangle2d imple
    * @param corner2 Second corner (diagonal from corner1), in meters
    */
   public RectangleFieldRegion(Translation2d corner1, Translation2d corner2) {
+    this(corner1, corner2, 0.0);
+  }
+
+  /**
+   * Constructs an axis-aligned rectangular field region from two diagonally opposite corners at a
+   * specific z-height.
+   *
+   * @param corner1 First corner of the rectangle, in meters
+   * @param corner2 Second corner (diagonal from corner1), in meters
+   * @param zMeters Plane height for this region, in meters
+   */
+  public RectangleFieldRegion(Translation2d corner1, Translation2d corner2, double zMeters) {
     super(corner1, corner2);
+    this.zMeters = zMeters;
   }
 
   /**
@@ -34,7 +48,21 @@ public class RectangleFieldRegion extends frc2713.lib.geometry.Rectangle2d imple
    * @param yWidth Height along the local y-axis (before rotation), in meters
    */
   public RectangleFieldRegion(Pose2d center, double xWidth, double yWidth) {
+    this(center, xWidth, yWidth, 0.0);
+  }
+
+  /**
+   * Constructs a rectangular field region from its center pose and dimensions at a specific
+   * z-height.
+   *
+   * @param center Center position and rotation of the rectangle, in meters and radians
+   * @param xWidth Width along the local x-axis (before rotation), in meters
+   * @param yWidth Height along the local y-axis (before rotation), in meters
+   * @param zMeters Plane height for this region, in meters
+   */
+  public RectangleFieldRegion(Pose2d center, double xWidth, double yWidth, double zMeters) {
     super(center, xWidth, yWidth);
+    this.zMeters = zMeters;
   }
 
   /**
@@ -46,7 +74,26 @@ public class RectangleFieldRegion extends frc2713.lib.geometry.Rectangle2d imple
    * @param maxY Maximum Y coordinate (meters)
    */
   public RectangleFieldRegion(double minX, double maxX, double minY, double maxY) {
+    this(minX, maxX, minY, maxY, 0.0);
+  }
+
+  /**
+   * Constructs a rectangular field region from min/max X and Y bounds at a specific z-height.
+   *
+   * @param minX Minimum X coordinate (meters)
+   * @param maxX Maximum X coordinate (meters)
+   * @param minY Minimum Y coordinate (meters)
+   * @param maxY Maximum Y coordinate (meters)
+   * @param zMeters Plane height for this region, in meters
+   */
+  public RectangleFieldRegion(double minX, double maxX, double minY, double maxY, double zMeters) {
     super(new Translation2d(minX, minY), new Translation2d(maxX, maxY));
+    this.zMeters = zMeters;
+  }
+
+  @Override
+  public double getZMeters() {
+    return zMeters;
   }
 
   @Override

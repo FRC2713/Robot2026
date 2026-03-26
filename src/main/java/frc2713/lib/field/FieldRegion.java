@@ -74,6 +74,16 @@ public interface FieldRegion {
     return new Trigger(() -> intersects(rectangleSupplier.get()));
   }
 
+  /**
+   * Returns the Z-height for this region in meters.
+   *
+   * <p>Field regions are generally 2D; implementations can override this to provide a non-zero
+   * height for 3D use cases (for example, trajectory target planes).
+   */
+  default double getZMeters() {
+    return 0.0;
+  }
+
   // ========== VISUALIZATION METHODS ==========
 
   /**
