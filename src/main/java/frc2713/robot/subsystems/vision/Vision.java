@@ -16,7 +16,7 @@ public class Vision extends SubsystemBase {
   private final VisionIO io;
   private final VisionInputsAutoLogged inputs;
 
-  private final Field2d loggedPoseOnField = new Field2d();
+  private final Field2d loggedPoseOnField = new Field2d(); // for elastic layout
 
   public Vision(VisionIO io) {
     this.io = io;

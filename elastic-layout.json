@@ -26,7 +26,7 @@
             }
           },
           {
-            "title": "Our Hub Active?",
+            "title": "Is Our Hub Active?",
             "x": 640.0,
             "y": 128.0,
             "width": 256.0,
@@ -89,29 +89,24 @@
             "y": 128.0,
             "width": 256.0,
             "height": 128.0,
-            "type": "Text Display",
+            "type": "Large Text Display",
             "properties": {
               "topic": "/AdvantageKit/RealOutputs/matchData/currentMatchPhase",
               "period": 0.06,
-              "data_type": "string",
-              "show_submit_button": false
+              "data_type": "string"
             }
           },
           {
-            "title": "We Won Auto!",
+            "title": "Did We Win Auto?",
             "x": 0.0,
             "y": 0.0,
             "width": 256.0,
             "height": 128.0,
-            "type": "Boolean Box",
+            "type": "Large Text Display",
             "properties": {
-              "topic": "/AdvantageKit/RealOutputs/matchData/autoWinnerIsUs",
+              "topic": "/AdvantageKit/RealOutputs/matchData/autoWinnerInfo",
               "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
+              "data_type": "boolean"
             }
           },
           {
@@ -124,14 +119,15 @@
             "properties": {
               "topic": "/SmartDashboard/Vision/robot_on_field",
               "period": 0.06,
-              "field_game": "Reefscape",
+              "field_game": "Rebuilt",
               "robot_width": 0.85,
               "robot_length": 0.85,
               "show_other_objects": true,
               "show_trajectories": true,
               "field_rotation": -90.0,
-              "robot_color": 4294198070,
-              "trajectory_color": 4294967295
+              "robot_color": 4278255360,
+              "trajectory_color": 4294967295,
+              "show_robot_outside_widget": false
             }
           }
         ]

@@ -8,7 +8,7 @@ import org.littletonrobotics.junction.Logger;
 public class ShiftManager {
 
   private static String autoWinner = "";
-  private static boolean autoWinnerIsUs = false;
+  private static String autoWinnerInfo = "Unknown";
   private static String autoWinnerColor = "#000000";
   private static String allianceAbbrev = "";
   private static String allianceColor = "#000000";
@@ -170,7 +170,7 @@ public class ShiftManager {
             autoWinner.equals("R") ? "#FF0000" : autoWinner.equals("B") ? "#0000FF" : "#000000";
       }
 
-      autoWinnerIsUs = autoWinner.equals(allianceAbbrev);
+      autoWinnerInfo = autoWinner.equals(allianceAbbrev) ? "YES" : "NO";
     }
 
     isAuto = DriverStation.isAutonomous();
@@ -192,7 +192,7 @@ public class ShiftManager {
     //     "matchData/FirstActive",
     //     autoWinner.equals("R") ? "0000FF" : autoWinner.equals("B") ? "FF0000" : "000000");
     // Logger.recordOutput("matchData/autoWinnerColor", autoWinnerColor);
-    Logger.recordOutput("matchData/autoWinnerIsUs", autoWinnerIsUs);
+    Logger.recordOutput("matchData/autoWinnerInfo", autoWinnerInfo);
     Logger.recordOutput(
         "matchData/currentActivationPeriod", getTimeLeftInActivationPeriod(matchTime));
     Logger.recordOutput(
