@@ -1,23 +1,23 @@
 package frc2713.lib.util;
 
+import java.util.HashMap;
+
 public final class CachedPow {
 
   private final double exp;
-  private double lastInput;
-  private double lastResult;
-  private final double threshold;
-  private boolean hasValue;
+  private final double resolution;
+  private final HashMap<Long, Double> cache;
 
   /**
    * every bit helps(?)
    *
    * @param exp the fixed fractional exponent
-   * @param threshold only recompute if input changes by more than this amount
+   * @param resolution defines b
    */
-  public CachedPow(double exp, double threshold) {
+  public CachedPow(double exp, double resolution) {
     this.exp = exp;
-    this.threshold = threshold;
-    this.hasValue = false;
+    this.resolution = resolution;
+    this.cache = new HashMap<>();
   }
 
   public CachedPow(double exp) {
@@ -25,15 +25,23 @@ public final class CachedPow {
   }
 
   public double get(double input) {
-    if (!hasValue || Math.abs(input - lastInput) > threshold) {
-      lastInput = input;
-      lastResult = Math.pow(input, exp);
-      hasValue = true;
+    // This effectively buckets together similar values for the cache
+    long key = (long) (input / resolution);
+
+    // Cache lookup - O(1) with hash maps
+    Double cachedResult = cache.get(key);
+    if (cachedResult != null) {
+      return cachedResult;
     }
-    return lastResult;
+
+    // Cache miss - compute new value
+    double result = Math.pow(input, exp);
+    cache.put(key, result);
+
+    return result;
   }
 
   public void reset() {
-    hasValue = false;
+    cache.clear();
   }
 }
