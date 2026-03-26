@@ -1,5 +1,9 @@
 package frc2713.robot.subsystems.launcher;
 
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.MathUtil;
@@ -9,6 +13,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -24,6 +30,11 @@ import java.util.Arrays;
 import org.littletonrobotics.junction.Logger;
 
 public class LaunchingSolutionManager extends SubsystemBase {
+  public enum LaunchingAction {
+    PASSING,
+    SCORING
+  };
+
   private static LaunchingSolutionManager instance;
 
   private static Rotation2d manualOffset = new Rotation2d(LauncherConstants.Turret.manualOffset);
@@ -53,7 +64,10 @@ public class LaunchingSolutionManager extends SubsystemBase {
   private LaunchSolution currentSolution =
       new LaunchSolution(new Rotation2d(), 0, new Rotation2d(), 0, false);
 
-  public static Translation3d currentGoal = FieldConstants.Hub.topCenterPoint;
+  public static Translation3d currentGoal = FieldConstants.Hub.target.getCenter3d();
+  public static Distance targetRadius = Meters.of(FieldConstants.Hub.target.getRadiusMeters());
+  public static LaunchingAction currentAction = LaunchingAction.SCORING;
+
   private static InterpolatingDoubleTreeMap currentHoodMap =
       LaunchingLookupMaps.distanceToAngleMap; // use for dist -> hood angle
   private static InterpolatingDoubleTreeMap currentRPMMap =
@@ -177,14 +191,14 @@ public class LaunchingSolutionManager extends SubsystemBase {
 
     // C. LUT + kinematics → ideal field-frame launch vector
     double rpmSetpoint = LaunchingSolutionManager.currentRPMMap.get(horizontalDist);
-    double idealSpeed = LaunchingLookupMaps.muzzleVelocityMetersPerSecond(rpmSetpoint);
+    double idealSpeed = LaunchingLookupMaps.velocityToRpmBiDiMap.reverseGet(rpmSetpoint);
 
     if (dbg) {
       Logger.recordOutput(pb.makePath("ideal ball speed"), idealSpeed);
     }
 
     double idealPitchRad =
-        LaunchingLookupMaps.exitAngleRadiansFromHoodDegrees(
+        LaunchingLookupMaps.distanceToAngleMap.get(
             LaunchingSolutionManager.currentHoodMap.get(horizontalDist));
 
     // D. Construct Ideal Velocity Vector
@@ -351,8 +365,15 @@ public class LaunchingSolutionManager extends SubsystemBase {
 
     double rpmSetpoint = LaunchingSolutionManager.currentRPMMap.get(horizontalDist);
     double hoodDeg = LaunchingSolutionManager.currentHoodMap.get(horizontalDist);
-    double idealBallSpeed = LaunchingLookupMaps.muzzleVelocityMetersPerSecond(rpmSetpoint);
-    double idealPitchRad = LaunchingLookupMaps.exitAngleRadiansFromHoodDegrees(hoodDeg);
+    LinearVelocity ballVelocityMeasure =
+        LaunchingLookupMaps.getBallVelocityFromFlywheelVelocity(RPM.of(rpmSetpoint));
+    double idealBallSpeed = ballVelocityMeasure.in(MetersPerSecond);
+    double idealPitchRad =
+        LaunchingLookupMaps.getReleaseAngleFromDistanceAndFlywheelVelocity(
+                Meters.of(horizontalDist),
+                RPM.of(rpmSetpoint),
+                LaunchingSolutionManager.currentAction == LaunchingAction.SCORING)
+            .in(Radians);
 
     Translation3d horizontalDir = new Translation3d(rel.getX(), rel.getY(), 0).div(horizontalDist);
 
@@ -403,21 +424,35 @@ public class LaunchingSolutionManager extends SubsystemBase {
   public class ZoneSelectionHelpers {
 
     public static void configureForFeeding(Pose2d robotPose) {
-      LaunchingSolutionManager.currentGoal =
-          robotPose.getTranslation().getY() < FieldConstants.LinesHorizontal.center
-              ? AllianceFlipUtil.applyX(FieldConstants.AllianceZone.bottomSideCornerTarget)
-              : AllianceFlipUtil.applyX(FieldConstants.AllianceZone.topSideCornerTarget);
+      boolean bottom = robotPose.getTranslation().getY() < FieldConstants.LinesHorizontal.center;
+
+      if (bottom) {
+
+        LaunchingSolutionManager.currentGoal =
+            AllianceFlipUtil.applyX(FieldConstants.AllianceZone.bottomPassingTarget.getCenter3d());
+
+        LaunchingSolutionManager.targetRadius =
+            Meters.of(FieldConstants.AllianceZone.bottomPassingTarget.getRadiusMeters());
+      } else {
+        LaunchingSolutionManager.currentGoal =
+            AllianceFlipUtil.applyX(FieldConstants.AllianceZone.topPassingTarget.getCenter3d());
+
+        LaunchingSolutionManager.targetRadius =
+            Meters.of(FieldConstants.AllianceZone.topPassingTarget.getRadiusMeters());
+      }
       LaunchingSolutionManager.currentHoodMap = LaunchingLookupMaps.distanceToAngleAzMap;
       LaunchingSolutionManager.currentRPMMap = LaunchingLookupMaps.distanceToRpmAzMap;
       LaunchingSolutionManager.currentTofMap = LaunchingLookupMaps.tofMapAZ;
+      LaunchingSolutionManager.currentAction = LaunchingAction.PASSING;
     }
 
     public static void configureForScoring() {
       LaunchingSolutionManager.currentGoal =
-          AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint);
+          AllianceFlipUtil.apply(FieldConstants.Hub.target.getCenter3d());
       LaunchingSolutionManager.currentHoodMap = LaunchingLookupMaps.distanceToAngleMap;
       LaunchingSolutionManager.currentRPMMap = LaunchingLookupMaps.distanceToRpmMap;
       LaunchingSolutionManager.currentTofMap = LaunchingLookupMaps.tofMap;
+      LaunchingSolutionManager.currentAction = LaunchingAction.SCORING;
     }
 
     public static Rotation2d storedIntakeRotation = new Rotation2d(0);

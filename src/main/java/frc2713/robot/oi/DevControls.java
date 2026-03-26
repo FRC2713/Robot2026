@@ -1,10 +1,5 @@
 package frc2713.robot.oi;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
-import static edu.wpi.first.units.Units.FeetPerSecond;
-import static edu.wpi.first.units.Units.FeetPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RPM;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -22,7 +17,6 @@ import frc2713.robot.subsystems.launcher.LauncherConstants;
 import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
-import java.util.Optional;
 
 @SuppressWarnings("unused")
 public class DevControls {
@@ -90,16 +84,36 @@ public class DevControls {
     controller.povLeft().onTrue(flywheels.stop());
 
     // Test setting drive limits
-    controller
-        .a()
-        .onTrue(
-            DriveCommands.setDriveLimits(
-                drive,
-                Optional.of(FeetPerSecond.of(1.0)),
-                Optional.of(FeetPerSecondPerSecond.of(12.0)),
-                Optional.of(DegreesPerSecond.of(90.0)),
-                Optional.of(DegreesPerSecondPerSecond.of(360.0))));
+    // controller
+    //     .a()
+    //     .onTrue(
+    //         DriveCommands.setDriveLimits(
+    //             drive,
+    //             Optional.of(FeetPerSecond.of(1.0)),
+    //             Optional.of(FeetPerSecondPerSecond.of(12.0)),
+    //             Optional.of(DegreesPerSecond.of(90.0)),
+    //             Optional.of(DegreesPerSecondPerSecond.of(360.0))));
     controller.b().onTrue(DriveCommands.clearDriveLimits(drive));
+
+    controller
+        .povLeft()
+        .onTrue(
+            DriveCommands.joystickDriveAtAngle(
+                    drive, () -> 0, () -> 0, () -> Rotation2d.fromDegrees(180))
+                .withName("Drive Intake Align"));
+
+    controller
+        .povRight()
+        .onTrue(
+            DriveCommands.joystickDriveAtAngle(
+                    drive, () -> 0, () -> 0, () -> Rotation2d.fromDegrees(0))
+                .withName("Drive Intake Align"));
+
+    controller.povUp().onTrue(DriveCommands.driveOneMeter(drive, 1).withName("Drive Intake Align"));
+
+    controller
+        .povDown()
+        .onTrue(DriveCommands.driveOneMeter(drive, -1).withName("Drive Intake Align"));
 
     // Intake Controls
 
@@ -122,9 +136,9 @@ public class DevControls {
         .onFalse(intakeRoller.stop().withName("Stop Intake"));
 
     // Hood Controls
-    controller.povUp().onTrue(hood.setAngleCommand(() -> Degrees.of(25)));
+    // controller.povUp().onTrue(hood.setAngleCommand(() -> Degrees.of(25)));
 
-    controller.povDown().onTrue(hood.setAngleCommand(() -> Degrees.of(0.5)));
+    // controller.povDown().onTrue(hood.setAngleCommand(() -> Degrees.of(0.5)));
 
     // controller
     //     .leftBumper()
@@ -139,16 +153,16 @@ public class DevControls {
 
     // controller.b().whileTrue(turret.setAngleStopAtBounds(LauncherConstants.Turret.PIDTestAngleTwo));
 
-    // controller
-    //     .a()
-    //     .onTrue(
-    //         Commands.parallel(
-    //             // turret.otfCommand(),
-    //             hood.setAngleCommand(LauncherConstants.Hood.staticHubAngle),
-    //             flywheels.setVelocity(LauncherConstants.Flywheels.PIDTest),
-    //             feeder.feedWhenReady(flywheels::atTarget),
-    //             dyeRotor.feedWhenReady(flywheels::atTarget)))
-    //     .onFalse(Commands.parallel(feeder.stop(), dyeRotor.stop(), flywheels.stop()));
+    controller
+        .a()
+        .onTrue(
+            Commands.parallel(
+                // turret.otfCommand(),
+                hood.setAngleCommand(LauncherConstants.Hood.staticHubAngle),
+                flywheels.setVelocity(LauncherConstants.Flywheels.PIDTest),
+                feeder.feedWhenReady(flywheels::atTarget),
+                dyeRotor.feedWhenReady(flywheels::atTarget)))
+        .onFalse(Commands.parallel(feeder.stop(), dyeRotor.stop(), flywheels.stop()));
     controller
         .rightBumper()
         .onTrue(flywheels.setVelocity(LauncherConstants.Flywheels.PIDTest))
@@ -203,8 +217,8 @@ public class DevControls {
     //     .onTrue(flywheels.dutyCycleCommand(() -> 1.0))
     //     .onFalse(flywheels.dutyCycleCommand(() -> 0.0));
 
-    controller.povUp().onTrue(hood.setAngleCommand(() -> Degrees.of(25)));
-    controller.povDown().onTrue(hood.setAngleCommand(() -> Degrees.of(0)));
+    // controller.povUp().onTrue(hood.setAngleCommand(() -> Degrees.of(25)));
+    // controller.povDown().onTrue(hood.setAngleCommand(() -> Degrees.of(0)));
 
     // Y button - index fuel in parallel (same effect since it's the same command)
     // controller
