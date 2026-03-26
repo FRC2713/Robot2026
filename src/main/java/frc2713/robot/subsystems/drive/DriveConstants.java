@@ -11,10 +11,10 @@ public class DriveConstants {
   public final class AutoConstants {
     public static final LoggedTunableGains positionTrajectoryController =
         new LoggedTunableGains(
-            "positionTraj", new Slot0Configs().withKP(2), new MotionMagicConfigs());
+            "positionTraj", new Slot0Configs().withKP(1.7).withKD(0.08), new MotionMagicConfigs());
     public static final LoggedTunableGains headingTrajectoryController =
         new LoggedTunableGains(
-            "headingTraj", new Slot0Configs().withKP(5.7).withKD(0.0), new MotionMagicConfigs());
+            "headingTraj", new Slot0Configs().withKP(6.5).withKD(0.2), new MotionMagicConfigs());
   }
 
   public static final LoggedTunableNumber speedScalar =
