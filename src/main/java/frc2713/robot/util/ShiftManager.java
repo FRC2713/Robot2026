@@ -2,24 +2,30 @@ package frc2713.robot.util;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc2713.lib.util.LoggedTunableBoolean;
+import frc2713.robot.Robot;
+
 import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
 public class ShiftManager {
 
   private static String autoWinner = "";
-  private static String autoWinnerInfo = "Unknown";
+  private static String autoWinnerInfo = "?";
   private static String autoWinnerColor = "#000000";
   private static String allianceAbbrev = "";
   private static String allianceColor = "#000000";
   private static String opponentColor = "#000000";
   private static boolean isAuto = true;
 
+  private static LoggedTunableBoolean logAllData =
+      new LoggedTunableBoolean("matchData/logAllData", false);
+
   public static double getTimeLeftInActivationPeriod(double time) {
     if (ourHubActive(time)) {
       return getTimeLeftToScore(time);
     } else {
-      return getTimeLeftInOffShift(time);
+      return getTimeLeftInShift(time);
     }
   }
 
@@ -53,32 +59,6 @@ public class ShiftManager {
     }
   }
 
-  public static double getTimeLeftInOffShift(double time) {
-    if (ShiftManager.isAuto) {
-      return 0;
-    }
-
-    if (time >= 130 || (time <= 30 && time >= 0)) {
-      return 0;
-    } else if (autoWinner.equals(allianceAbbrev)) {
-      if (time < 130 && time >= 105) {
-        return time - 105;
-      } else if (time < 80 && time >= 55) {
-        return time - 55;
-      } else {
-        return 0;
-      }
-    } else {
-      if (time < 105 && time >= 80) {
-        return time - 105;
-      } else if (time < 55 && time >= 30) {
-        return time - 55;
-      } else {
-        return 0;
-      }
-    }
-  }
-
   public static double getTimeLeftInShift(double time) {
     int shiftTime = 25;
     if (time >= 130) {
@@ -95,7 +75,7 @@ public class ShiftManager {
       return allianceAbbrev;
     }
 
-    if (time >= 130) {
+    if (time >= 130 || time <= 30) {
       return allianceAbbrev;
     }
 
@@ -149,10 +129,10 @@ public class ShiftManager {
     return currentHub.equals(allianceAbbrev);
   }
 
-  /** For a lot of driver station data, once we get it once we really need to ask again */
+  /** For a lot of driver station data, once we get it once we dont really need to ask again */
   public static void pollDriverStationData() {
     // Poll and store the current alliance
-    if (allianceAbbrev.length() == 0) {
+    if (allianceAbbrev.length() == 0 || Robot.isSimulation()) {
       Optional<Alliance> currentAlliance = DriverStation.getAlliance();
       if (currentAlliance.isPresent()) {
         allianceAbbrev = currentAlliance.get() == DriverStation.Alliance.Red ? "R" : "B";
@@ -162,15 +142,14 @@ public class ShiftManager {
     }
 
     // Poll and store who won auto
-    if (autoWinner.length() == 0) {
+    if (autoWinner.length() == 0 || Robot.isSimulation()) {
       String gameMessage = DriverStation.getGameSpecificMessage();
       if (gameMessage.length() > 0) {
         autoWinner = gameMessage.substring(0, 1);
         autoWinnerColor =
             autoWinner.equals("R") ? "#FF0000" : autoWinner.equals("B") ? "#0000FF" : "#000000";
+        autoWinnerInfo = autoWinner.equals(allianceAbbrev) ? "YES" : "NO";
       }
-
-      autoWinnerInfo = autoWinner.equals(allianceAbbrev) ? "YES" : "NO";
     }
 
     isAuto = DriverStation.isAutonomous();
@@ -181,22 +160,25 @@ public class ShiftManager {
     pollDriverStationData();
 
     // Helps loop time to reduce logs
+    if (logAllData.get()) {
+      Logger.recordOutput("matchData/timeLeftInShift", getTimeLeftInShift(matchTime));
+      Logger.recordOutput("matchData/timeLeftToScore", getTimeLeftToScore(matchTime));
+      Logger.recordOutput("matchData/whoWonAuto", autoWinner);
+      Logger.recordOutput(
+          "matchData/FirstActive",
+          autoWinner.equals("R") ? "0000FF" : autoWinner.equals("B") ? "FF0000" : "000000");
+      Logger.recordOutput("matchData/autoWinnerColor", autoWinnerColor);
+      Logger.recordOutput("matchData/time", matchTime);
+    }
 
-    // Logger.recordOutput("matchData/timeLeftInShift", getTimeLeftInShift(matchTime));
-    // Logger.recordOutput("matchData/timeLeftToScore", getTimeLeftToScore(matchTime));
-    // Logger.recordOutput("matchData/timeUntilShift", getTimeLeftInOffShift(matchTime));
+    // Things actively being used in elastic_layout.json
     Logger.recordOutput("matchData/currentMatchPhase", getCurrentPhase(matchTime));
     Logger.recordOutput("matchData/ourHubActive", ourHubActive(matchTime));
-    // Logger.recordOutput("matchData/whoWonAuto", autoWinner);
-    // Logger.recordOutput(
-    //     "matchData/FirstActive",
-    //     autoWinner.equals("R") ? "0000FF" : autoWinner.equals("B") ? "FF0000" : "000000");
-    // Logger.recordOutput("matchData/autoWinnerColor", autoWinnerColor);
+
     Logger.recordOutput("matchData/autoWinnerInfo", autoWinnerInfo);
     Logger.recordOutput(
         "matchData/currentActivationPeriod", getTimeLeftInActivationPeriod(matchTime));
     Logger.recordOutput(
         "matchData/currentActiveHubColor", ourHubActive(matchTime) ? allianceColor : opponentColor);
-    // Logger.recordOutput("matchData/time", matchTime);
   }
 }
