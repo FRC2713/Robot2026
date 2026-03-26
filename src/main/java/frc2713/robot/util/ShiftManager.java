@@ -6,8 +6,80 @@ import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
 public class ShiftManager {
-  public static double getTimeLeftInShift() {
-    double time = DriverStation.getMatchTime();
+
+  private static String autoWinner = "";
+  private static boolean autoWinnerIsUs = false;
+  private static String autoWinnerColor = "#000000";
+  private static String allianceAbbrev = "";
+  private static String allianceColor = "#000000";
+  private static String opponentColor = "#000000";
+  private static boolean isAuto = true;
+
+  public static double getTimeLeftInActivationPeriod(double time) {
+    if (ourHubActive(time)) {
+      return getTimeLeftToScore(time);
+    } else {
+      return getTimeLeftInOffShift(time);
+    }
+  }
+
+  public static double getTimeLeftToScore(double time) {
+    if (ShiftManager.isAuto) {
+      return time;
+    }
+
+    if (autoWinner.equals(allianceAbbrev)) {
+      // When we won auto: transition (140->130), shift2 (105->80), shift4+endgame (55->0)
+      if (time > 130 && time <= 140) {
+        return time - 130;
+      } else if (time > 80 && time <= 105) {
+        return time - 80;
+      } else if (time >= 0 && time <= 55) {
+        return time;
+      } else {
+        return 0;
+      }
+    } else {
+      // When we lost auto: transition+shift1 (140->105), shift3 (80->55), endgame (30->0)
+      if (time > 105 && time <= 140) {
+        return time - 105;
+      } else if (time > 55 && time <= 80) {
+        return time - 55;
+      } else if (time >= 0 && time <= 30) {
+        return time;
+      } else {
+        return 0;
+      }
+    }
+  }
+
+  public static double getTimeLeftInOffShift(double time) {
+    if (ShiftManager.isAuto) {
+      return 0;
+    }
+
+    if (time >= 130 || (time <= 30 && time >= 0)) {
+      return 0;
+    } else if (autoWinner.equals(allianceAbbrev)) {
+      if (time < 130 && time >= 105) {
+        return time - 105;
+      } else if (time < 80 && time >= 55) {
+        return time - 55;
+      } else {
+        return 0;
+      }
+    } else {
+      if (time < 105 && time >= 80) {
+        return time - 105;
+      } else if (time < 55 && time >= 30) {
+        return time - 55;
+      } else {
+        return 0;
+      }
+    }
+  }
+
+  public static double getTimeLeftInShift(double time) {
     int shiftTime = 25;
     if (time >= 130) {
       return 0;
@@ -18,20 +90,14 @@ public class ShiftManager {
     }
   }
 
-  public static String whoWonAuto() {
-    String gameMessage = DriverStation.getGameSpecificMessage();
-    String firstInactive;
-    if (gameMessage.length() > 0) {
-      firstInactive = gameMessage.substring(0, 1);
-    } else {
-      firstInactive = "";
+  public static String currentActiveHub(double time) {
+    if (ShiftManager.isAuto) {
+      return allianceAbbrev;
     }
-    return firstInactive;
-  }
 
-  public static String currentActiveHub() {
-    String firstInactive = whoWonAuto();
-    double time = DriverStation.getMatchTime();
+    if (time >= 130) {
+      return allianceAbbrev;
+    }
 
     int shift;
     if (time > 30 && time < 130) {
@@ -42,11 +108,11 @@ public class ShiftManager {
     if (shift == 0) {
       return "";
     } else if (shift % 2 == 0) {
-      return firstInactive;
+      return autoWinner;
     } else {
-      if (firstInactive.equals("R")) {
+      if (autoWinner.equals("R")) {
         return "B";
-      } else if (firstInactive.equals("B")) {
+      } else if (autoWinner.equals("B")) {
         return "R";
       } else {
         return "";
@@ -54,46 +120,83 @@ public class ShiftManager {
     }
   }
 
-  public static String getCurrentPhase() {
-    double time = DriverStation.getMatchTime();
-    if (time >= 105) {
-      return "Phase 1";
+  public static String getCurrentPhase(double time) {
+    if (ShiftManager.isAuto) {
+      return "Auto";
+    }
+
+    if (time >= 130) {
+      return "Transition";
+    } else if (time >= 105) {
+      return "Shift 1";
     } else if (time >= 80) {
-      return "Phase 2";
+      return "Shift 2";
     } else if (time >= 55) {
-      return "Phase 3";
+      return "Shift 3";
     } else if (time >= 30) {
-      return "Phase 4";
+      return "Shift 4";
     } else {
-      return "";
+      return "Endgame";
     }
   }
 
-  public static boolean ourHubActive() {
-    String currentHub = currentActiveHub();
-    Optional<Alliance> currentAlliance = DriverStation.getAlliance();
-    if (currentAlliance.isPresent()) {
-      if (currentHub.equals("R")) {
-        return (currentAlliance.get() == DriverStation.Alliance.Red);
-      } else if (currentHub.equals("B")) {
-        return (currentAlliance.get() == DriverStation.Alliance.Blue);
+  public static boolean ourHubActive(double time) {
+    String currentHub = currentActiveHub(time);
+    if (ShiftManager.isAuto) {
+      return true;
+    }
+
+    return currentHub.equals(allianceAbbrev);
+  }
+
+  /** For a lot of driver station data, once we get it once we really need to ask again */
+  public static void pollDriverStationData() {
+    // Poll and store the current alliance
+    if (allianceAbbrev.length() == 0) {
+      Optional<Alliance> currentAlliance = DriverStation.getAlliance();
+      if (currentAlliance.isPresent()) {
+        allianceAbbrev = currentAlliance.get() == DriverStation.Alliance.Red ? "R" : "B";
+        allianceColor = currentAlliance.get() == DriverStation.Alliance.Red ? "#FF0000" : "#0000FF";
+        opponentColor = currentAlliance.get() == DriverStation.Alliance.Red ? "#0000FF" : "#FF0000";
       }
     }
-    return true;
+
+    // Poll and store who won auto
+    if (autoWinner.length() == 0) {
+      String gameMessage = DriverStation.getGameSpecificMessage();
+      if (gameMessage.length() > 0) {
+        autoWinner = gameMessage.substring(0, 1);
+        autoWinnerColor =
+            autoWinner.equals("R") ? "#FF0000" : autoWinner.equals("B") ? "#0000FF" : "#000000";
+      }
+
+      autoWinnerIsUs = autoWinner.equals(allianceAbbrev);
+    }
+
+    isAuto = DriverStation.isAutonomous();
   }
 
   public static void periodic() {
-    Logger.recordOutput("matchData/timeLeftInShift", getTimeLeftInShift());
-    Logger.recordOutput("matchData/currentMatchPhase", getCurrentPhase());
-    Logger.recordOutput("matchData/ourHubActive", ourHubActive());
-    String autoWinner = whoWonAuto();
-    Logger.recordOutput("matchData/whoWonAuto", autoWinner);
+    double matchTime = DriverStation.getMatchTime();
+    pollDriverStationData();
+
+    // Helps loop time to reduce logs
+
+    // Logger.recordOutput("matchData/timeLeftInShift", getTimeLeftInShift(matchTime));
+    // Logger.recordOutput("matchData/timeLeftToScore", getTimeLeftToScore(matchTime));
+    // Logger.recordOutput("matchData/timeUntilShift", getTimeLeftInOffShift(matchTime));
+    Logger.recordOutput("matchData/currentMatchPhase", getCurrentPhase(matchTime));
+    Logger.recordOutput("matchData/ourHubActive", ourHubActive(matchTime));
+    // Logger.recordOutput("matchData/whoWonAuto", autoWinner);
+    // Logger.recordOutput(
+    //     "matchData/FirstActive",
+    //     autoWinner.equals("R") ? "0000FF" : autoWinner.equals("B") ? "FF0000" : "000000");
+    // Logger.recordOutput("matchData/autoWinnerColor", autoWinnerColor);
+    Logger.recordOutput("matchData/autoWinnerIsUs", autoWinnerIsUs);
     Logger.recordOutput(
-        "matchData/FirstActive",
-        autoWinner.equals("R") ? "0000FF" : autoWinner.equals("B") ? "FF0000" : "000000");
+        "matchData/currentActivationPeriod", getTimeLeftInActivationPeriod(matchTime));
     Logger.recordOutput(
-        "matchData/autoWinnerColor",
-        "#" + (autoWinner.equals("B") ? "0000FF" : autoWinner.equals("R") ? "FF0000" : "000000"));
-    Logger.recordOutput("matchData/time", DriverStation.getMatchTime());
+        "matchData/currentActiveHubColor", ourHubActive(matchTime) ? allianceColor : opponentColor);
+    // Logger.recordOutput("matchData/time", matchTime);
   }
 }
