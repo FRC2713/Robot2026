@@ -601,27 +601,30 @@ public class FieldConstants {
      * once at robot init to see the zones on the field view.
      */
     public static void logZones() {
-      Logger.recordOutput(
-          "Field/HoodRetractionZones/BlueLeftDuck", BLUE_LEFT_DUCK_ZONE.getBoundaryPoses());
-      Logger.recordOutput(
-          "Field/HoodRetractionZones/BlueRightDuck", BLUE_RIGHT_DUCK_ZONE.getBoundaryPoses());
-      Logger.recordOutput(
-          "Field/HoodRetractionZones/BlueLeftDuckExit",
-          BLUE_LEFT_DUCK_EXIT_ZONE.getBoundaryPoses());
-      Logger.recordOutput(
-          "Field/HoodRetractionZones/BlueRightDuckExit",
-          BLUE_RIGHT_DUCK_EXIT_ZONE.getBoundaryPoses());
-      Logger.recordOutput(
-          "Field/HoodRetractionZones/RedLeftDuck", RED_LEFT_DUCK_ZONE.getBoundaryPoses());
-      Logger.recordOutput(
-          "Field/HoodRetractionZones/RedRightDuck", RED_RIGHT_DUCK_ZONE.getBoundaryPoses());
-      Logger.recordOutput(
-          "Field/HoodRetractionZones/RedLeftDuckExit", RED_LEFT_DUCK_EXIT_ZONE.getBoundaryPoses());
-      Logger.recordOutput(
-          "Field/HoodRetractionZones/RedRightDuckExit",
-          RED_RIGHT_DUCK_EXIT_ZONE.getBoundaryPoses());
-      Logger.recordOutput("Field/FIELD_PLUS_HALF", FIELD_PLUS_HALF_METER.getBoundaryPoses());
-      Logger.recordOutput("Field/FIELD_PLUS_ONE", FIELD_PLUS_METER.getBoundaryPoses());
+      if (Constants.tuningMode) {
+        Logger.recordOutput(
+            "Field/HoodRetractionZones/BlueLeftDuck", BLUE_LEFT_DUCK_ZONE.getBoundaryPoses());
+        Logger.recordOutput(
+            "Field/HoodRetractionZones/BlueRightDuck", BLUE_RIGHT_DUCK_ZONE.getBoundaryPoses());
+        Logger.recordOutput(
+            "Field/HoodRetractionZones/BlueLeftDuckExit",
+            BLUE_LEFT_DUCK_EXIT_ZONE.getBoundaryPoses());
+        Logger.recordOutput(
+            "Field/HoodRetractionZones/BlueRightDuckExit",
+            BLUE_RIGHT_DUCK_EXIT_ZONE.getBoundaryPoses());
+        Logger.recordOutput(
+            "Field/HoodRetractionZones/RedLeftDuck", RED_LEFT_DUCK_ZONE.getBoundaryPoses());
+        Logger.recordOutput(
+            "Field/HoodRetractionZones/RedRightDuck", RED_RIGHT_DUCK_ZONE.getBoundaryPoses());
+        Logger.recordOutput(
+            "Field/HoodRetractionZones/RedLeftDuckExit",
+            RED_LEFT_DUCK_EXIT_ZONE.getBoundaryPoses());
+        Logger.recordOutput(
+            "Field/HoodRetractionZones/RedRightDuckExit",
+            RED_RIGHT_DUCK_EXIT_ZONE.getBoundaryPoses());
+        Logger.recordOutput("Field/FIELD_PLUS_HALF", FIELD_PLUS_HALF_METER.getBoundaryPoses());
+        Logger.recordOutput("Field/FIELD_PLUS_ONE", FIELD_PLUS_METER.getBoundaryPoses());
+      }
     }
   }
 

@@ -54,6 +54,7 @@ public class TalonFXIO implements MotorIO {
   private final StatusSignal<Angle> rawRotorPositionSignal;
   private final StatusSignal<Double> closedLoopErrorSignal;
   private final StatusSignal<Boolean> motionMagicAtTargetSignal;
+  private final StatusSignal<Double> dutyCycleSignal;
   private final BaseStatusSignal[] signals;
 
   protected static final double KRAKEN_X60_KV_RPS_PER_VOLT = 5.29; // (from CTRE specs)
@@ -90,6 +91,7 @@ public class TalonFXIO implements MotorIO {
     rawRotorPositionSignal = talon.getRotorPosition();
     closedLoopErrorSignal = talon.getClosedLoopError();
     motionMagicAtTargetSignal = talon.getMotionMagicAtTarget();
+    dutyCycleSignal = talon.getDutyCycle();
     signals =
         new BaseStatusSignal[] {
           positionSignal,
@@ -101,6 +103,7 @@ public class TalonFXIO implements MotorIO {
           rawRotorPositionSignal,
           closedLoopErrorSignal,
           motionMagicAtTargetSignal,
+          dutyCycleSignal
         };
 
     CTREUtil.tryUntilOK(
@@ -127,6 +130,7 @@ public class TalonFXIO implements MotorIO {
     inputs.rawRotorPosition = rawRotorPositionSignal.getValue();
     inputs.closedLoopError = closedLoopErrorSignal.getValue();
     inputs.isMotionMagicAtTarget = motionMagicAtTargetSignal.getValue();
+    inputs.dutyCycle = dutyCycleSignal.getValue();
 
     // Update PID gains from dashboard if tunable and any value changed
     if (this.config.tunable && tunableGains != null) {

@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import frc2713.lib.drivers.CANDeviceId;
+import frc2713.robot.Constants;
 
 public class DifferentialSubsystemConfig {
 
@@ -27,7 +28,7 @@ public class DifferentialSubsystemConfig {
   public DifferentialMotorConstants<TalonFXConfiguration> differentialConstants;
 
   // Marks Slot0 and Slot1 as live-tunable
-  public boolean tunable = false;
+  public boolean tunable = Constants.tuningMode;
   public boolean useFOC = true;
 
   // Differential-specific ratios

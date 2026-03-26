@@ -53,7 +53,6 @@ public final class SerializerConstants {
       config.fxConfig.Slot0.kS =
           Util.modeDependentValue(0.275, 0.); // Volts to overcome static friction
       config.fxConfig.Slot0.kV = 0.12 * gearRatio; // Volts per rps (feedforward)
-      config.tunable = true;
 
       config.fxConfig.CurrentLimits =
           new CurrentLimitsConfigs()
@@ -75,7 +74,7 @@ public final class SerializerConstants {
     }
 
     public static LoggedTunableMeasure<AngularVelocity> indexingSpeed =
-        new LoggedTunableMeasure<AngularVelocity>("Dye Rotor/Index Speed", RPM.of(78));
+        new LoggedTunableMeasure<AngularVelocity>("Dye Rotor/Index Speed", RPM.of(100));
     public static LoggedTunableMeasure<AngularVelocity> stirSpeed =
         new LoggedTunableMeasure<AngularVelocity>("Dye Rotor/Stir Speed", RPM.of(30));
     public static AngularVelocity outdexingSpeed = RotationsPerSecond.of(-3);
@@ -85,7 +84,6 @@ public final class SerializerConstants {
   }
 
   public static final class Feeder {
-
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
     public static double gearRatio = 37.0 / 14.0;
 
@@ -94,7 +92,6 @@ public final class SerializerConstants {
       config.talonCANID = new CANDeviceId(44, "canivore"); // Example CAN ID, replace with actual ID
       config.useFOC = false;
       config.motor = DCMotor.getKrakenX60(1);
-      config.tunable = true;
 
       // Velocity PID gains for VelocityVoltage control
       // Units: kP/kV/kS are in volts

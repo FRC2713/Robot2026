@@ -6,6 +6,8 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc2713.lib.logging.PeriodicTimingLogger;
+import frc2713.lib.logging.TimeLogged;
 import frc2713.robot.RobotContainer;
 import frc2713.robot.subsystems.vision.VisionConstants.PoseEstimatorErrorStDevs;
 import java.util.Optional;
@@ -22,16 +24,21 @@ public class Vision extends SubsystemBase {
   }
 
   @Override
+  @TimeLogged("Performance/SubsystemPeriodic/Vision")
   public void periodic() {
-    io.updateInputs(inputs);
+    try (var ignored = PeriodicTimingLogger.time(this)) {
 
-    if (inputs.applying) {
-      RobotContainer.drive.addVisionMeasurement(
-          inputs.pose,
-          inputs.timestamp,
-          new PoseEstimatorErrorStDevs(inputs.translationStdDev, inputs.rotationStdDev).toMatrix());
+      io.updateInputs(inputs);
+
+      if (inputs.applying) {
+        RobotContainer.drive.addVisionMeasurement(
+            inputs.pose,
+            inputs.timestamp,
+            new PoseEstimatorErrorStDevs(inputs.translationStdDev, inputs.rotationStdDev)
+                .toMatrix());
+      }
+      Logger.processInputs("Vision", inputs);
     }
-    Logger.processInputs("Vision", inputs);
   }
 
   public void setGyroAngle(Angle angle) {

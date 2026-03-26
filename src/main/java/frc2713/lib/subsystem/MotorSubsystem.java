@@ -1,5 +1,6 @@
 package frc2713.lib.subsystem;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
@@ -25,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import frc2713.lib.energy.EnergyManagement;
 import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputs;
@@ -54,11 +56,6 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
     this.io = io;
 
     this.pb = new AdvantageScopePathBuilder(this.getName());
-
-    // setDefaultCommand(
-    //     this.dutyCycleCommand(() -> 0.0)
-    //         .withName(pb.makeName("DefaultCommand"))
-    //         .ignoringDisable(true));
   }
 
   @Override
@@ -66,6 +63,7 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
     Time timestamp = RobotTime.getTimestamp();
     io.readInputs(inputs);
     Logger.processInputs(getName(), inputs);
+    reportEnergyToMonitor();
 
     if (!initialized) {
       initialize();
@@ -81,6 +79,15 @@ public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends 
   /** Initialize the subsystem. Does nothing by default. */
   protected void initialize() {
     this.initialized = true;
+  }
+
+  /**
+   * Report motor energy usage to EnergyMonitor. Override in MotorFollowerSubsystem for
+   * leader/follower.
+   */
+  protected void reportEnergyToMonitor() {
+    EnergyManagement.EnergyMonitor.report(
+        getName(), "Motor", inputs.appliedVolts.in(Volts), inputs.currentSupplyAmps.in(Amps));
   }
 
   /**

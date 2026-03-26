@@ -4,6 +4,10 @@ Subsystem folders should contain related mechanisms. For example, an `intake` su
 > [!NOTE]
 > Note the difference in terminology between WPILib subsystems and as they are documented here and by the CAD team. We group different WPILib "subsystems" for simplicity. All mechanisms should still at some point extend WPILib's `SubsystemBase`.
 
+## Related Docs
+
+- [Performance Tracking (Subsystem Loop Timing)](./PERFORMANCE_TRACKING.md)
+
 ## Layout
 ```
 [subsystem] # The subsystem foloder

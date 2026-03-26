@@ -9,6 +9,7 @@ package frc2713.robot;
 
 import edu.wpi.first.wpilibj.RobotBase;
 import frc2713.lib.drivers.CANDeviceId;
+// import frc2713.robot.generated.BuildConstants;
 
 /**
  * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
@@ -20,10 +21,16 @@ public final class Constants {
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
 
   // sets default behaviour to track OTF solutions
-  public static final boolean enableOTFFeatures = false; // currentMode == Mode.SIM;
+  public static final boolean enableOTFFeatures = true; // currentMode == Mode.SIM;
 
   public static final CANDeviceId launcherMotorDeviceId = new CANDeviceId(2);
+
+  // Set this to true to enable tunable numbers for all subsystems
+  // Based off event branch: !BuildConstants.GIT_BRANCH.startsWith("event");
   public static boolean tuningMode = true;
+
+  // Set this to true to log performance data for each subsystem
+  public static boolean logPerformanceData = true;
 
   public static enum Mode {
     /** Running on a real robot. */

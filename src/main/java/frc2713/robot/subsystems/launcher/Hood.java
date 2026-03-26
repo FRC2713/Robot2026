@@ -14,10 +14,11 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc2713.lib.io.ArticulatedComponent;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
+import frc2713.lib.logging.PeriodicTimingLogger;
+import frc2713.lib.logging.TimeLogged;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.robot.FieldConstants;
-import frc2713.robot.RobotContainer;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 
@@ -27,10 +28,7 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   public Hood(final TalonFXSubsystemConfig config, final MotorIO launcherMotorIO) {
     super(config, new MotorInputsAutoLogged(), launcherMotorIO);
     // if (Constants.enableOTFFeatures)
-    setDefaultCommand(
-        autoRetractCommand(
-                RobotContainer.drive::getPose, () -> LauncherConstants.Hood.retractedPosition)
-            .withName("OTF Lock AutoRetract"));
+    setDefaultCommand(retract());
   }
 
   public Command setAngleCommand(Supplier<Angle> desiredAngle) {
@@ -38,15 +36,7 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   }
 
   public Command retract() {
-    return setAngleCommand(() -> LauncherConstants.Hood.retractedPosition);
-  }
-
-  public Command dumbCommand() {
-    return setAngleCommand(LauncherConstants.Hood.staticTowerAngle);
-  }
-
-  public Command hubCommand() {
-    return setAngleCommand(LauncherConstants.Hood.staticHubAngle);
+    return setAngleCommand(() -> LauncherConstants.Hood.retractedPosition).withName("Retract");
   }
 
   public Command otfCommand() {
@@ -94,11 +84,14 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   @AutoLogOutput public boolean disableDucking = false;
 
   @Override
+  @TimeLogged("Performance/SubsystemPeriodic/Hood")
   public void periodic() {
-    if (DriverStation.isDisabled()) {
-      setAngleCommand(() -> getCurrentPosition());
+    try (var ignored = PeriodicTimingLogger.time(this)) {
+      if (DriverStation.isDisabled()) {
+        setAngleCommand(() -> getCurrentPosition());
+      }
+      super.periodic();
     }
-    super.periodic();
   }
 
   @Override

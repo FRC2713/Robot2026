@@ -14,6 +14,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc2713.lib.io.ArticulatedComponent;
+import frc2713.lib.logging.PeriodicTimingLogger;
+import frc2713.lib.logging.TimeLogged;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.robot.subsystems.intake.intakeExtensionIO.IntakeExtensionIO;
@@ -137,21 +139,24 @@ public class IntakeExtension
   }
 
   @Override
+  @TimeLogged("Performance/SubsystemPeriodic/IntakeExtension")
   public void periodic() {
-    io.readInputs(inputs);
-    super.periodic();
+    try (var ignored = PeriodicTimingLogger.time(this)) {
+      io.readInputs(inputs);
+      super.periodic();
 
-    Logger.recordOutput(pb.makePath("CurrentDistanceMeters"), getCurrentPositionAsDistance());
-    Logger.recordOutput(pb.makePath("SetpointDistanceMeters"), getPositionSetpointAsDistance());
+      Logger.recordOutput(pb.makePath("CurrentDistanceMeters"), getCurrentPositionAsDistance());
+      Logger.recordOutput(pb.makePath("SetpointDistanceMeters"), getPositionSetpointAsDistance());
 
-    Logger.recordOutput(pb.makePath("AtTarget"), atTarget());
+      Logger.recordOutput(pb.makePath("AtTarget"), atTarget());
 
-    Logger.recordOutput(
-        pb.makePath("LinearVelocity"),
-        convertMotorVelocityToSubsystemVelocity(getCurrentVelocity()));
+      Logger.recordOutput(
+          pb.makePath("LinearVelocity"),
+          convertMotorVelocityToSubsystemVelocity(getCurrentVelocity()));
 
-    if (DriverStation.isDisabled()) {
-      setPositionSetpointImpl(inputs.position);
+      if (DriverStation.isDisabled()) {
+        setPositionSetpointImpl(inputs.position);
+      }
     }
   }
 

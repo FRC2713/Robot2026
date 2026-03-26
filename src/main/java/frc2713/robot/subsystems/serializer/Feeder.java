@@ -1,6 +1,7 @@
 package frc2713.robot.subsystems.serializer;
 
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Time;
@@ -8,6 +9,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
+import frc2713.lib.logging.PeriodicTimingLogger;
+import frc2713.lib.logging.TimeLogged;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import java.util.function.BooleanSupplier;
@@ -29,8 +32,7 @@ public class Feeder extends MotorSubsystem<MotorInputsAutoLogged, MotorIO> {
   }
 
   public Command feedWhenReady(BooleanSupplier isReady) {
-    return Commands.sequence(
-        Commands.waitUntil(isReady), setVelocity(SerializerConstants.Feeder.shootingSpeed));
+    return feedWhenReady(isReady, Seconds.of(Double.POSITIVE_INFINITY));
     // return setVelocity(
     //     () ->
     //         isReady.getAsBoolean()
@@ -49,8 +51,11 @@ public class Feeder extends MotorSubsystem<MotorInputsAutoLogged, MotorIO> {
   }
 
   @Override
+  @TimeLogged("Performance/SubsystemPeriodic/Feeder")
   public void periodic() {
-    super.periodic();
-    // Additional periodic code for feeder can be added here
+    try (var ignored = PeriodicTimingLogger.time(this)) {
+      super.periodic();
+      // Additional periodic code for feeder can be added here
+    }
   }
 }

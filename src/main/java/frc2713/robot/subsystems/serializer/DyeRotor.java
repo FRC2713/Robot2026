@@ -3,6 +3,7 @@ package frc2713.robot.subsystems.serializer;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -15,6 +16,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc2713.lib.io.ArticulatedComponent;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
+import frc2713.lib.logging.PeriodicTimingLogger;
+import frc2713.lib.logging.TimeLogged;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
@@ -39,7 +42,7 @@ public class DyeRotor extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
     return setVelocity(SerializerConstants.DyeRotor.indexingSpeed);
   }
 
-  @AutoLogOutput
+  @AutoLogOutput(key = "Dye Rotor/DynamicIndexSpeed")
   public AngularVelocity dynamicIndexSpeed() {
     return RPM.of(
         SerializerConstants.DyeRotor.otfSpeeds.get(
@@ -59,7 +62,7 @@ public class DyeRotor extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   }
 
   public Command feedWhenReady(BooleanSupplier isReady) {
-    return Commands.sequence(Commands.waitUntil(isReady), indexFuel());
+    return feedWhenReady(isReady, Seconds.of(Double.POSITIVE_INFINITY));
   }
 
   public Command feedWhenReady(BooleanSupplier isReady, Time timout) {
@@ -75,9 +78,12 @@ public class DyeRotor extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   }
 
   @Override
+  @TimeLogged("Performance/SubsystemPeriodic/DyeRotor")
   public void periodic() {
-    super.periodic();
-    // Additional periodic code for indexer can be added here
+    try (var ignored = PeriodicTimingLogger.time(this)) {
+      super.periodic();
+      // Additional periodic code for indexer can be added here
+    }
   }
 
   @Override

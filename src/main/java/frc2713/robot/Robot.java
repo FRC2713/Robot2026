@@ -13,11 +13,14 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc2713.lib.energy.EnergyManagement;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.generated.BuildConstants;
 import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
+import frc2713.robot.util.ShiftManager;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -88,7 +91,7 @@ public class Robot extends LoggedRobot {
   public void robotPeriodic() {
     // Optionally switch the thread to high priority to improve loop
     // timing (see the template project documentation for details)
-    // Threads.setCurrentThreadPriority(true, 99);
+    Threads.setCurrentThreadPriority(true, 99);
 
     // Runs the Scheduler. This is responsible for polling buttons, adding
     // newly-scheduled commands, running already-scheduled commands, removing
@@ -97,13 +100,15 @@ public class Robot extends LoggedRobot {
     // the Command-based framework to work.
     CommandScheduler.getInstance().run();
 
+    EnergyManagement.EnergyMonitor.log();
+
     FieldConstants.HoodRetractionZones.logZones();
 
     // Elastic
-    // ShiftManager.periodic();
+    ShiftManager.periodic();
 
     // Return to non-RT thread priority (do not modify the first argument)
-    // Threads.setCurrentThreadPriority(false, 10);
+    Threads.setCurrentThreadPriority(false, 10);
   }
 
   /** This function is called once when the robot is disabled. */
