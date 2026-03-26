@@ -73,9 +73,10 @@ public final class GameCommandGroups {
         IntakeExtension extension,
         IntakeRoller intakeRoller) {
       return Commands.either(
-          Commands.none(),
-          otfShot(drive, flywheels, hood, turret, feeder, dyeRotor, extension, intakeRoller),
-          () -> hood.inRetractionZone(() -> drive.getPose())).withName("OTF Shooting w Hood Protect");
+              Commands.none(),
+              otfShot(drive, flywheels, hood, turret, feeder, dyeRotor, extension, intakeRoller),
+              () -> hood.inRetractionZone(() -> drive.getPose()))
+          .withName("OTF Shooting w Hood Protect");
     }
 
     /** OTF shooting with drive limits. Use for driver/operator triggers. */

@@ -7,6 +7,7 @@ import static edu.wpi.first.units.Units.Watts;
 
 import edu.wpi.first.wpilibj.Timer;
 import frc2713.lib.io.AdvantageScopePathBuilder;
+import frc2713.robot.Constants;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -24,7 +25,9 @@ public class EnergyManagement {
 
     private final Map<String, MotorEnergyState> motorStates = new HashMap<>();
 
-    private EnergyMonitor() {}
+    private EnergyMonitor() {
+      if (!Constants.logPowerData) Logger.recordOutput(BASE_PATH + "/loggingDisabled", true);
+    }
 
     public static EnergyMonitor getInstance() {
       return Holder.INSTANCE;
@@ -84,6 +87,8 @@ public class EnergyManagement {
     }
 
     private void logInternal() {
+      if (!Constants.logPowerData) return;
+
       // Per-motor logging
       for (MotorEnergyState state : motorStates.values()) {
         Logger.recordOutput(state.pb.makePath("PowerW"), state.powerW, Watts);
@@ -136,6 +141,8 @@ public class EnergyManagement {
     }
 
     private void logAggregated(String pathBase, AggregatedState a) {
+      if (!Constants.logPowerData) return;
+
       AdvantageScopePathBuilder pb = new AdvantageScopePathBuilder(pathBase);
       Logger.recordOutput(pb.makePath("PowerW"), a.powerW, Watts);
       Logger.recordOutput(pb.makePath("TotalEnergyJ"), a.totalEnergyJ, Joules);

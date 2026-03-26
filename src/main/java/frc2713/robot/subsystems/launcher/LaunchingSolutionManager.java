@@ -48,6 +48,9 @@ public class LaunchingSolutionManager extends SubsystemBase {
   public static final LoggedTunableBoolean itofDebug =
       new LoggedTunableBoolean("LaunchingSolutionManager/itof_debug", false);
 
+  public static final LoggedTunableBoolean vectorApproxDebug =
+      new LoggedTunableBoolean("LaunchingSolutionManager/vector_approx_debug", false);
+
   // --- Data Structures ---
   public static record LaunchSolution(
       Rotation2d turretFieldYaw, // desired global yaw for the turret
@@ -107,21 +110,9 @@ public class LaunchingSolutionManager extends SubsystemBase {
       if (FieldConstants.NeutralZone.region.contains(
           robotPose.getTranslation().toTranslation2d())) {
         ZoneSelectionHelpers.configureForFeeding(robotPose.toPose2d());
-        Logger.recordOutput(pb.makePath("shot selection"), "Feeding");
       } else {
         ZoneSelectionHelpers.configureForScoring();
-        Logger.recordOutput(pb.makePath("shot selection"), "Scoring");
       }
-
-      // 3. Solve for the Launch Vector
-      currentSolution =
-          calculateStatic(robotPose, robotLinVel, LaunchingSolutionManager.currentGoal);
-
-      // 4. Log
-      Logger.recordOutput(pb.makePath("used robot pose"), robotPose);
-      Logger.recordOutput(pb.makePath("used robot lin vel"), robotLinVel);
-      Logger.recordOutput(pb.makePath("current goal"), LaunchingSolutionManager.currentGoal);
-      Logger.recordOutput(pb.makePath("current solution"), currentSolution);
 
       // 3. Solve for the Launch Vector
       LauncherConstants.LaunchSolverMode solverMode = launchSolverModeChooser.getSelected();
@@ -138,9 +129,8 @@ public class LaunchingSolutionManager extends SubsystemBase {
                 robotPose, robotLinVel, LaunchingSolutionManager.currentGoal);
           };
 
-      Logger.recordOutput(pb.makePath("solver mode"), solverMode.name());
-
       // 4. Log
+      Logger.recordOutput(pb.makePath("solver mode"), solverMode.name());
       Logger.recordOutput(pb.makePath("used robot pose"), robotPose);
       Logger.recordOutput(pb.makePath("used robot lin vel"), robotLinVel);
       Logger.recordOutput(pb.makePath("current goal"), LaunchingSolutionManager.currentGoal);
@@ -186,6 +176,9 @@ public class LaunchingSolutionManager extends SubsystemBase {
    */
   private LaunchSolution calculateVectorApprox(
       Pose3d robotPose, Translation3d robotVel, Translation3d targetPose) {
+
+    boolean dbg = vectorApproxDebug.get();
+
     // A. Relative Position
     Translation3d rangeVec = targetPose.minus(robotPose.getTranslation());
     // Use 2D horizontal distance for map lookups (maps are indexed by ground distance)
@@ -199,7 +192,11 @@ public class LaunchingSolutionManager extends SubsystemBase {
     // C. LUT + kinematics → ideal field-frame launch vector
     double rpmSetpoint = LaunchingSolutionManager.currentRPMMap.get(horizontalDist);
     double idealSpeed = LaunchingLookupMaps.velocityToRpmBiDiMap.reverseGet(rpmSetpoint);
-    Logger.recordOutput(pb.makePath("ideal ball speed"), idealSpeed);
+
+    if (dbg) {
+      Logger.recordOutput(pb.makePath("ideal ball speed"), idealSpeed);
+    }
+
     double idealPitchRad =
         LaunchingLookupMaps.distanceToAngleMap.get(
             LaunchingSolutionManager.currentHoodMap.get(horizontalDist));
