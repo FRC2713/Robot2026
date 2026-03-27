@@ -22,6 +22,9 @@ import frc2713.lib.util.LoggedTunableNumber;
 import frc2713.robot.FieldConstants;
 import frc2713.robot.RobotContainer;
 import org.littletonrobotics.junction.Logger;
+import org.zeromq.SocketType;
+import org.zeromq.ZContext;
+import org.zeromq.ZMQ;
 
 public class VisionIOSLAMDunk implements VisionIO {
   private NetworkTableInstance inst;
@@ -38,19 +41,19 @@ public class VisionIOSLAMDunk implements VisionIO {
   private final Alert gyroAlert =
       new Alert("Failed to send gyro update to SuperCap", AlertType.kError);
 
-  // private final ZContext supercapContext;
-  // private final ZMQ.Socket superCapSocket;
+  private final ZContext supercapContext;
+  private final ZMQ.Socket superCapSocket;
 
   public VisionIOSLAMDunk() {
     inst = NetworkTableInstance.getDefault();
     table = inst.getTable("slamdunk");
     sub = table.getDoubleArrayTopic("pose_robot").subscribe(new double[0]);
 
-    // supercapContext = new ZContext();
-    // superCapSocket = supercapContext.createSocket(SocketType.REQ);
-    // superCapSocket.setSendTimeOut(500); // timeout for sending gyro updates
-    // superCapSocket.setReceiveTimeOut(500); // timeout for receiving replies
-    // superCapSocket.connect(VisionConstants.SUPERCAP_IPC_ADDRESS);
+    supercapContext = new ZContext();
+    superCapSocket = supercapContext.createSocket(SocketType.REQ);
+    superCapSocket.setSendTimeOut(500); // timeout for sending gyro updates
+    superCapSocket.setReceiveTimeOut(500); // timeout for receiving replies
+    superCapSocket.connect(VisionConstants.SUPERCAP_IPC_ADDRESS);
   }
 
   @Override
@@ -177,38 +180,38 @@ public class VisionIOSLAMDunk implements VisionIO {
 
   @Override
   public void setGyroAngle(Angle angle) {
-    // new Thread(
-    //         () -> {
-    //           try {
+    new Thread(
+            () -> {
+              try {
 
-    //             superCapSocket.sendMore("reset_gyro");
-    //             boolean success =
-    //                 superCapSocket.send(
-    //                     String.valueOf(
-    //                         angle
-    //                             .minus(SLAMDUNK_TRANSFORM.getRotation().getMeasureZ())
-    //                             .in(Degrees)));
+                superCapSocket.sendMore("reset_gyro");
+                boolean success =
+                    superCapSocket.send(
+                        String.valueOf(
+                            angle
+                                .minus(SLAMDUNK_TRANSFORM.getRotation().getMeasureZ())
+                                .in(Degrees)));
 
-    //             if (success) {
-    //               byte[] reply = superCapSocket.recv(0);
-    //               String replyStr = reply != null ? new String(reply) : "null";
-    //               System.out.println("Received reply from SuperCap: " + replyStr);
-    //               if (reply == null || !replyStr.equals("OK")) {
-    //                 gyroAlert.set(true);
-    //                 System.err.println("Unexpected reply from SuperCap: " + replyStr);
-    //                 Logger.recordOutput("Vision/SuperCapReplyError", replyStr);
-    //               } else {
-    //                 gyroAlert.set(false);
-    //               }
-    //             } else {
-    //               gyroAlert.set(true);
-    //             }
-    //           } catch (Exception e) {
-    //             gyroAlert.set(true);
-    //             System.err.println("Error sending gyro update to SuperCap: " + e.getMessage());
-    //             Logger.recordOutput("Vision/ZmqError", e.getMessage());
-    //           }
-    //         })
-    //     .start();
+                if (success) {
+                  byte[] reply = superCapSocket.recv(0);
+                  String replyStr = reply != null ? new String(reply) : "null";
+                  System.out.println("Received reply from SuperCap: " + replyStr);
+                  if (reply == null || !replyStr.equals("OK")) {
+                    gyroAlert.set(true);
+                    System.err.println("Unexpected reply from SuperCap: " + replyStr);
+                    Logger.recordOutput("Vision/SuperCapReplyError", replyStr);
+                  } else {
+                    gyroAlert.set(false);
+                  }
+                } else {
+                  gyroAlert.set(true);
+                }
+              } catch (Exception e) {
+                gyroAlert.set(true);
+                System.err.println("Error sending gyro update to SuperCap: " + e.getMessage());
+                Logger.recordOutput("Vision/ZmqError", e.getMessage());
+              }
+            })
+        .start();
   }
 }
