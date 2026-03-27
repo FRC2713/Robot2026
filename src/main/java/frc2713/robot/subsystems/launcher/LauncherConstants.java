@@ -38,11 +38,11 @@ public final class LauncherConstants {
     public static TalonFXSubsystemConfig config = new TalonFXSubsystemConfig();
     public static CanCoderConfig canCoderConfig = new CanCoderConfig();
     public static Angle staticHubAngle = Degrees.of(0);
-    public static Angle manualOffset = Radians.of(0);
+    public static Angle manualOffset = Degrees.of(180);
 
     // Turret rotation limits
-    public static final double FORWARD_LIMIT_DEGREES = 60;
-    public static final double REVERSE_LIMIT_DEGREES = -60.0;
+    public static final double FORWARD_LIMIT_DEGREES = 190;
+    public static final double REVERSE_LIMIT_DEGREES = -179.0;
 
     public static final Angle forwardSoftLimit = Degrees.of(FORWARD_LIMIT_DEGREES);
     public static final Angle reverseSoftLimit = Degrees.of(REVERSE_LIMIT_DEGREES);
@@ -73,7 +73,7 @@ public final class LauncherConstants {
       config.generalControlMode = GeneralControlMode.POSITION;
       config.acceptablePositionError = Degrees.of(3);
 
-      config.fxConfig.Feedback.FeedbackRotorOffset = 0.297363;
+      config.fxConfig.Feedback.FeedbackRotorOffset = 0.226563;
 
       config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;

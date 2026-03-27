@@ -96,7 +96,7 @@ public final class GameCommandGroups {
               turret.otfCommand(),
               flywheels.simulateLaunchFuelCommand(flywheels::atTarget),
               feeder.feedWhenReady(flywheels::atTarget),
-              dyeRotor.feedWhenReady(
+              dyeRotor.dynamicFeedWhenReady(
                   flywheels::atTarget)) // used to be dynamic but we slowed it way down
           .withName("OTF Shooting");
     }
