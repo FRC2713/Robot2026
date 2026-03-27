@@ -142,10 +142,10 @@ public final class LauncherConstants {
     static {
       leaderConfig.name = "Flywheels";
       leaderConfig.talonCANID = new CANDeviceId(50, "canivore");
-      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(0.5, 3.5); // last foc val: 400.0
+      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(0.5, 1.0); // last foc val: 400.0
       leaderConfig.fxConfig.Slot0.kI = 0.0;
       leaderConfig.fxConfig.Slot0.kD = 0.0;
-      leaderConfig.fxConfig.Slot0.kS = Util.modeDependentValue(0.2, 2.0); // last foc val: 2.0
+      leaderConfig.fxConfig.Slot0.kS = Util.modeDependentValue(0.2, 0.0); // last foc val: 2.0
       leaderConfig.fxConfig.Slot0.kV = 0.12 * gearRatio; // last foc val: 0
       leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimit = 180.0;
       leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
@@ -216,7 +216,7 @@ public final class LauncherConstants {
       config.name = "Hood";
       config.talonCANID = new CANDeviceId(54, "canivore"); // Example CAN ID, replace with actual ID
 
-      config.fxConfig.Feedback.FeedbackRotorOffset = 0.45218;
+      config.fxConfig.Feedback.FeedbackRotorOffset = 0.;
 
       // PID gains for Motion Magic
       config.fxConfig.Slot0.kP = 400.0;
