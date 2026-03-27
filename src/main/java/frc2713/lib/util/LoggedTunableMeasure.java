@@ -22,6 +22,6 @@ public class LoggedTunableMeasure<M extends Measure<?>> implements Supplier<M> {
   @Override
   @SuppressWarnings("unchecked")
   public M get() {
-    return (M) unit.of(tunableNumber.get());
+    return (M) this.unit.of(tunableNumber.get());
   }
 }

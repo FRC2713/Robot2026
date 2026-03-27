@@ -1,6 +1,7 @@
 package frc2713.lib.subsystem;
 
 import static edu.wpi.first.units.Units.Degree;
+import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
@@ -15,6 +16,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import frc2713.lib.drivers.CANDeviceId;
 import frc2713.robot.Constants;
@@ -49,6 +51,9 @@ public class TalonFXSubsystemConfig {
 
   public Angle acceptablePositionError = Degree.of(0.5);
   public AngularVelocity acceptableVelocityError = RPM.of(200);
+
+  /** commented out for testing smth */
+  public Frequency velocityControlFrequency = Hertz.of(50); // CAN FD can go up to 1000
 
   public static void setLinearAcceptableError(
       TalonFXSubsystemConfig config, double metersPerRotation, Distance acceptableError) {

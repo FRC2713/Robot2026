@@ -1,6 +1,7 @@
 package frc2713.robot.subsystems.launcher;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
@@ -141,14 +142,15 @@ public final class LauncherConstants {
     static {
       leaderConfig.name = "Flywheels";
       leaderConfig.talonCANID = new CANDeviceId(50, "canivore");
-      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(400.0, 3.5);
+      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(0.5, 3.5); // last foc val: 400.0
       leaderConfig.fxConfig.Slot0.kI = 0.0;
       leaderConfig.fxConfig.Slot0.kD = 0.0;
-      leaderConfig.fxConfig.Slot0.kS = Util.modeDependentValue(2.0, 2.0);
-      leaderConfig.fxConfig.Slot0.kV = 0.0 * gearRatio;
+      leaderConfig.fxConfig.Slot0.kS = Util.modeDependentValue(0.2, 2.0); // last foc val: 2.0
+      leaderConfig.fxConfig.Slot0.kV = 0.12 * gearRatio; // last foc val: 0
       leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimit = 180.0;
       leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
       leaderConfig.fxConfig.CurrentLimits.SupplyCurrentLimit = 80.0;
+      leaderConfig.fxConfig.CurrentLimits.SupplyCurrentLowerTime = 0.0;
       leaderConfig.fxConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
       leaderConfig.simOrientation = ChassisReference.CounterClockwise_Positive;
       leaderConfig.unitToRotorRatio = gearRatio;
@@ -156,10 +158,11 @@ public final class LauncherConstants {
       leaderConfig.fxConfig.Voltage.PeakReverseVoltage = 0;
       leaderConfig.fxConfig.TorqueCurrent.PeakReverseTorqueCurrent = 0;
       leaderConfig.momentOfInertia = flywhMomentOfInertia.times(0.5);
-      leaderConfig.useFOC = true;
+      leaderConfig.useFOC = false;
       leaderConfig.fxConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
       leaderConfig.generalControlMode = GeneralControlMode.VELOCITY;
       leaderConfig.acceptableVelocityError = RPM.of(100);
+      leaderConfig.velocityControlFrequency = Hertz.of(100); // CAN FD can go up to 1000
 
       followerConfig.name = "Flywheels Follower";
       followerConfig.talonCANID = new CANDeviceId(51, "canivore");

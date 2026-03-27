@@ -16,11 +16,13 @@ public class MotorInputs {
   public AngularVelocity velocity = RotationsPerSecond.of(0.0);
   public Angle position = Rotations.of(0.0);
   public Voltage appliedVolts = Volts.of(0.0);
+  public Voltage suppliedVoltage = Volts.of(0.0);
   public Current currentStatorAmps = Amps.of(0.0);
   public Current currentSupplyAmps = Amps.of(0.0);
   public Current currentTorqueAmps = Amps.of(0.0);
   public Angle rawRotorPosition = Rotations.of(0.0);
   public double dutyCycle = 0.0;
   public double closedLoopError = 0.0;
+  public double closedLoopOutput = 0.0;
   public boolean isMotionMagicAtTarget = true;
 }
