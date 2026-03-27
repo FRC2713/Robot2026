@@ -86,6 +86,7 @@ public class Midwars {
                     Commands.print("[AUTO] Starting launch sequence"),
                     Commands.runOnce(driveSubsystem::stop),
                     GameCommandGroups.Launching.autoOtfShot(
+                            driveSubsystem,
                             flywheels,
                             hood,
                             turret,
@@ -135,6 +136,7 @@ public class Midwars {
                                 .withDeadline(new WaitCommand(9)),
                             Commands.race(
                                 GameCommandGroups.Launching.autoOtfShot(
+                                    driveSubsystem,
                                     flywheels,
                                     hood,
                                     turret,

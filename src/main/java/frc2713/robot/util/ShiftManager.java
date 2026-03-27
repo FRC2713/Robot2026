@@ -4,7 +4,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc2713.lib.util.LoggedTunableBoolean;
 import frc2713.robot.Robot;
-
 import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 

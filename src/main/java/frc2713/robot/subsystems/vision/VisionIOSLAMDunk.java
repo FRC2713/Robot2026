@@ -31,7 +31,7 @@ public class VisionIOSLAMDunk implements VisionIO {
   private NetworkTable table;
   private DoubleArraySubscriber sub;
   private double lastTimestamp = -1;
-  private static final LoggedTunableNumber k = new LoggedTunableNumber("Vision/k", 2);
+  private static final LoggedTunableNumber k = new LoggedTunableNumber("Vision/k", 3);
   private static final Transform3d SLAMDUNK_TRANSFORM =
       new Transform3d(new Translation3d(), new Rotation3d(0, 0, Math.PI / 2));
 
