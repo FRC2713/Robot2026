@@ -156,7 +156,7 @@ public class Robot extends LoggedRobot {
       autonomousCommand.cancel();
     }
 
-    RobotContainer.drive.changeDriveCurrentLimits(Amps.of(70));
+    RobotContainer.drive.changeDriveCurrentLimits(Amps.of(60));
   }
 
   /** This function is called periodically during operator control. */

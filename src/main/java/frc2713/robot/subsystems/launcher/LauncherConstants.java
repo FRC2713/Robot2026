@@ -137,14 +137,14 @@ public final class LauncherConstants {
     public static TalonFXSubsystemConfig leaderConfig = new TalonFXSubsystemConfig();
     public static TalonFXSubsystemConfig followerConfig = new TalonFXSubsystemConfig();
     public static MomentOfInertia flywhMomentOfInertia = MoiUnits.PoundSquareInches.of(10.410164);
-    public static double gearRatio = 21.0 / 21.0; // 1.33:1 reduction from motor to flywheel
+    public static double gearRatio = 24.0 / 18.0; // 1.33:1 reduction from motor to flywheel
 
     static {
       leaderConfig.name = "Flywheels";
       leaderConfig.talonCANID = new CANDeviceId(50, "canivore");
-      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(0.5, 1.0); // last foc val: 400.0
+      leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(.7, 1.0); // last foc val: 400.0
       leaderConfig.fxConfig.Slot0.kI = 0.0;
-      leaderConfig.fxConfig.Slot0.kD = 0.0;
+      leaderConfig.fxConfig.Slot0.kD = 0.004;
       leaderConfig.fxConfig.Slot0.kS = Util.modeDependentValue(0.2, 0.0); // last foc val: 2.0
       leaderConfig.fxConfig.Slot0.kV = 0.12 * gearRatio; // last foc val: 0
       leaderConfig.fxConfig.CurrentLimits.StatorCurrentLimit = 180.0;
