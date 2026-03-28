@@ -46,11 +46,11 @@ public final class LaunchingLookupMaps {
 
   static {
     // Distance to hub center (m) -> RPM (rpm)
-    distanceToRpmMap.put(1.03, 2500.);
-    distanceToRpmMap.put(2.1, 2600.);
-    distanceToRpmMap.put(3.36, 2800.);
-    distanceToRpmMap.put(5.0, 3100.);
-    distanceToRpmMap.put(6.03, 3550.);
+    distanceToRpmMap.put(1.03, 2450.);
+    distanceToRpmMap.put(2.1, 2550.);
+    distanceToRpmMap.put(3.36, 2750.);
+    distanceToRpmMap.put(5.0, 3050.);
+    distanceToRpmMap.put(6.03, 3500.);
 
     // from north shore
     // rpmVelocityMap.put(1.03, 2500.);
