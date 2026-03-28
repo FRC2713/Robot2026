@@ -119,7 +119,8 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, Pose2d.kZero);
   // private SwerveDrivePoseEstimator odometryPoseEstimator =
-  //     new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, Pose2d.kZero);
+  //     new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions,
+  // Pose2d.kZero);
 
   private PIDController xController;
   private PIDController yController;
@@ -310,7 +311,8 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
 
         // Apply update
         poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
-        // odometryPoseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+        // odometryPoseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation,
+        // modulePositions);
       }
 
       // Update gyro alert
