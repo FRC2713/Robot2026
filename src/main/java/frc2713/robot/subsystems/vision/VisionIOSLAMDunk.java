@@ -71,6 +71,7 @@ public class VisionIOSLAMDunk implements VisionIO {
     }
 
     var poseArray = sub.get();
+    Logger.recordOutput("Vision/SLAMDunk Array", poseArray);
     if (poseArray.length > 0) {
       double t = poseArray[0];
 
