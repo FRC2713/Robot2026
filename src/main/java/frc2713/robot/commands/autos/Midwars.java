@@ -44,7 +44,7 @@ public class Midwars {
     AutoTrajectory intakeFuelRight2 =
         AutoUtil.flipHorizontalIf(doFlip, routine.trajectory("IntakeFuelRight2"), routine);
     AutoTrajectory moveToLaunchRight2 =
-        AutoUtil.flipHorizontalIf(doFlip, routine.trajectory("MoveToLaunchRight2"), routine);
+        AutoUtil.flipHorizontalIf(doFlip, routine.trajectory("BumpToLaunchRight"), routine);
 
     routine
         .active()
