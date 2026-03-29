@@ -22,6 +22,7 @@ import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.commands.autos.Demo;
 import frc2713.robot.commands.autos.DriveTest;
 import frc2713.robot.commands.autos.Midwars;
+import frc2713.robot.commands.autos.NoIntake;
 import frc2713.robot.generated.TunerConstants;
 import frc2713.robot.oi.DevControls;
 import frc2713.robot.oi.DriverControls;
@@ -351,6 +352,8 @@ public class RobotContainer {
           "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
       autoChooser.addOption("DriveTest", DriveTest.routine(autoFactory));
+
+      autoChooser.addOption("DemoMode", Demo.demo());
     }
 
     autoChooser.addDefaultOption(
@@ -381,7 +384,9 @@ public class RobotContainer {
             dyeRotor,
             feeder));
 
-    autoChooser.addOption("DemoMode", Demo.demo());
+    autoChooser.addOption("NoIntakeFlipped", NoIntake.getRoutine(autoFactory, true, drive));
+
+    autoChooser.addOption("NoIntake", NoIntake.getRoutine(autoFactory, false, drive));
   }
 
   /**
