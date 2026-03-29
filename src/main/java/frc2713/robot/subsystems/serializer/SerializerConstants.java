@@ -36,6 +36,7 @@ public final class SerializerConstants {
       // Distance (m), RPM
       otfSpeeds.put(2.11, 80.); // north shore: 80
       otfSpeeds.put(3.2, 80.);
+      otfSpeeds.put(4.2, 60.);
       otfSpeeds.put(6.44, 50.); // north shore: 30
     }
 
