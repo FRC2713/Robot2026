@@ -94,7 +94,7 @@ public class Midwars {
                             dyeRotor,
                             intakeExtension,
                             intakeRoller)
-                        .withTimeout(5),
+                        .withTimeout(5 - 0.2),
                     GameCommandGroups.Launching.stopShootingAndRetractHood(
                             driveSubsystem, feeder, dyeRotor, hood, flywheels)
                         .withTimeout(0.25),

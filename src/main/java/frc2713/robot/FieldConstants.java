@@ -9,6 +9,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
 import frc2713.lib.field.CircularFieldRegion;
 import frc2713.lib.field.RectangleFieldRegion;
+import frc2713.lib.util.AllianceFlipUtil;
 import java.io.IOException;
 import java.nio.file.Path;
 import lombok.Getter;
@@ -116,6 +117,10 @@ public class FieldConstants {
   }
 
   public static class AllianceZone {
+
+    public static RectangleFieldRegion getAllianceRegion() {
+      return AllianceFlipUtil.shouldFlip() ? oppRegion : region;
+    }
 
     public static final RectangleFieldRegion region =
         new RectangleFieldRegion(

@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc2713.lib.geometry.GeometryUtil;
 import frc2713.lib.io.ArticulatedComponent;
 import frc2713.lib.io.CanCoderIO;
@@ -54,6 +55,20 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
       final CanCoderIO cancoderIO) {
     super(config, new MotorInputsAutoLogged(), turretMotorIO, cancoderInputs, cancoderIO);
     setDefaultCommand(otfCommand());
+  }
+
+  public static void setDefaultTurretCommand(Turret turret, Command cmd, String name) {
+    Logger.recordOutput("CurrentTurretCommand", name);
+    var currentCmd = turret.getCurrentCommand();
+    if (currentCmd != null) {
+      turret.getCurrentCommand().cancel();
+      turret.removeDefaultCommand();
+    }
+    turret.setDefaultCommand(cmd);
+  }
+
+  public static Command changeDefaultTurretCommand(Turret turret, Command cmd, String name) {
+    return Commands.runOnce(() -> setDefaultTurretCommand(turret, cmd, name));
   }
 
   @AutoLogOutput
@@ -127,6 +142,12 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
 
           return boundedAngleDegrees;
         });
+  }
+
+  public Command manualControl() {
+    return Commands.sequence(
+        Commands.runOnce(() -> lastManualControlAngle = inputs.position),
+        setAngle(() -> lastManualControlAngle.plus(fudgeFactor)));
   }
 
   /**
@@ -274,4 +295,6 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
   public Translation3d getRelativeAngularVelocity() {
     return new Translation3d(0, 0, super.getCurrentVelocity().in(RadiansPerSecond));
   }
+
+  private Angle lastManualControlAngle = Degrees.of(0);
 }
