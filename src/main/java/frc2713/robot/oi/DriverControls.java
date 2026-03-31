@@ -129,6 +129,20 @@ public class DriverControls {
         .onTrue(
             Commands.runOnce(
                 () -> LaunchingSolutionManager.ZoneSelectionHelpers.setIntakeRotation()));
+    // aligns the drive to the hub for if turret breaks
+    controller
+        .b()
+        .whileTrue(
+            Commands.parallel(
+                DriveCommands.changeDefaultDriveCommand(
+                    drive,
+                    GameCommandGroups.staticTurretOtf(
+                        drive, () -> -controller.getLeftY(), () -> -controller.getLeftX()),
+                    "OTF with drive")))
+        .onFalse(setToNormalDriveCmd())
+        .onTrue(
+                Commands.runOnce(
+                    () -> LaunchingSolutionManager.ZoneSelectionHelpers.setStaticShotRotation()));
 
     // shoot otf
     controller

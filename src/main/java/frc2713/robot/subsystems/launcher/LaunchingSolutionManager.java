@@ -15,6 +15,8 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -27,6 +29,7 @@ import frc2713.lib.util.LoggedTunableBoolean;
 import frc2713.robot.FieldConstants;
 import frc2713.robot.RobotContainer;
 import java.util.Arrays;
+import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
 public class LaunchingSolutionManager extends SubsystemBase {
@@ -470,6 +473,29 @@ public class LaunchingSolutionManager extends SubsystemBase {
       } else {
         storedIntakeRotation = RobotContainer.drive.getRotation();
       }
+    }
+
+    public static Rotation2d storedStaticShotRotation = new Rotation2d(0);
+
+    public static void setStaticShotRotation() {
+
+      double xDistance =
+          (AllianceFlipUtil.applyX(FieldConstants.LinesVertical.hubCenter))
+              - (RobotContainer.drive.getPose().getTranslation().getX());
+      double yDistance =
+          (AllianceFlipUtil.applyY(FieldConstants.LinesHorizontal.center))
+              - (RobotContainer.drive.getPose().getTranslation().getY());
+      Optional<Alliance> currentAlliance = DriverStation.getAlliance();
+      if (RobotContainer.drive.getPose().getTranslation().getX()
+              < AllianceFlipUtil.applyX(FieldConstants.LinesVertical.allianceZone)
+          && (currentAlliance.get() == DriverStation.Alliance.Blue)) {
+        storedStaticShotRotation = new Rotation2d((Math.atan2(yDistance, xDistance)) + Math.PI);
+      } else if (RobotContainer.drive.getPose().getTranslation().getX()
+              > AllianceFlipUtil.applyX(FieldConstants.LinesVertical.allianceZone)
+          && (currentAlliance.get() == DriverStation.Alliance.Red)) {
+        storedStaticShotRotation = new Rotation2d((Math.atan2(yDistance, xDistance)) + Math.PI);
+      }
+      ;
     }
   }
 }
