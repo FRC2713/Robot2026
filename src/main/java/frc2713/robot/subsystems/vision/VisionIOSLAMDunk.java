@@ -30,6 +30,8 @@ public class VisionIOSLAMDunk implements VisionIO {
   private NetworkTableInstance inst;
   private NetworkTable table;
   private DoubleArraySubscriber sub;
+  private DoubleArraySubscriber sc_sub;
+
   private double lastTimestamp = -1;
   private static final LoggedTunableNumber k = new LoggedTunableNumber("Vision/k", 3);
   private static final Transform3d SLAMDUNK_TRANSFORM =
@@ -48,6 +50,7 @@ public class VisionIOSLAMDunk implements VisionIO {
     inst = NetworkTableInstance.getDefault();
     table = inst.getTable("slamdunk");
     sub = table.getDoubleArrayTopic("pose_robot").subscribe(new double[0]);
+    sc_sub = table.getDoubleArrayTopic("supercap_tags").subscribe(new double[0]);
 
     supercapContext = new ZContext();
     superCapSocket = supercapContext.createSocket(SocketType.REQ);
@@ -71,6 +74,11 @@ public class VisionIOSLAMDunk implements VisionIO {
     }
 
     var poseArray = sub.get();
+    Logger.recordOutput("Vision/SLAMDunk Array", poseArray);
+
+    var scArray = sc_sub.get();
+    Logger.recordOutput("Vision/SuperCap Array", scArray);
+
     if (poseArray.length > 0) {
       double t = poseArray[0];
 

@@ -128,6 +128,10 @@ public class Robot extends LoggedRobot {
     if (RobotContainer.turret != null) {
       RobotContainer.turret.fudgeFactor = Degrees.of(0.0);
     }
+
+    if (RobotContainer.hood != null) {
+      RobotContainer.hood.fudgeFactor = Degrees.of(0.0);
+    }
   }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
@@ -156,7 +160,7 @@ public class Robot extends LoggedRobot {
       autonomousCommand.cancel();
     }
 
-    RobotContainer.drive.changeDriveCurrentLimits(Amps.of(70));
+    RobotContainer.drive.changeDriveCurrentLimits(Amps.of(60));
   }
 
   /** This function is called periodically during operator control. */
