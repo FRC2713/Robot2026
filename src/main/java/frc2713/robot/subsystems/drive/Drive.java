@@ -57,6 +57,7 @@ import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.io.ArticulatedComponent;
 import frc2713.lib.logging.PeriodicTimingLogger;
 import frc2713.lib.logging.TimeLogged;
+import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.lib.util.LoggedTunableGains;
 import frc2713.robot.Constants;
 import frc2713.robot.Constants.Mode;
@@ -181,7 +182,7 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
         new PPHolonomicDriveController(
             new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
         PP_CONFIG,
-        () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
+        () -> AllianceFlipUtil.getPresentAlliance() == Alliance.Red,
         this);
     Pathfinding.setPathfinder(new LocalADStarAK());
     PathPlannerLogging.setLogActivePathCallback(

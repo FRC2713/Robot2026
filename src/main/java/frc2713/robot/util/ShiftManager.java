@@ -2,7 +2,9 @@ package frc2713.robot.util;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import java.util.Optional;
+import frc2713.lib.util.AllianceFlipUtil;
+import frc2713.robot.Robot;
+
 import org.littletonrobotics.junction.Logger;
 
 public class ShiftManager {
@@ -152,17 +154,17 @@ public class ShiftManager {
   /** For a lot of driver station data, once we get it once we really need to ask again */
   public static void pollDriverStationData() {
     // Poll and store the current alliance
-    if (allianceAbbrev.length() == 0) {
-      Optional<Alliance> currentAlliance = DriverStation.getAlliance();
-      if (currentAlliance.isPresent()) {
-        allianceAbbrev = currentAlliance.get() == DriverStation.Alliance.Red ? "R" : "B";
-        allianceColor = currentAlliance.get() == DriverStation.Alliance.Red ? "#FF0000" : "#0000FF";
-        opponentColor = currentAlliance.get() == DriverStation.Alliance.Red ? "#0000FF" : "#FF0000";
+    if (allianceAbbrev.length() == 0 || Robot.isSimulation()) {
+      Alliance currentAlliance = AllianceFlipUtil.getPresentAlliance();
+      if (currentAlliance != null) {
+        allianceAbbrev = currentAlliance == DriverStation.Alliance.Red ? "R" : "B";
+        allianceColor = currentAlliance == DriverStation.Alliance.Red ? "#FF0000" : "#0000FF";
+        opponentColor = currentAlliance == DriverStation.Alliance.Red ? "#0000FF" : "#FF0000";
       }
     }
 
     // Poll and store who won auto
-    if (autoWinner.length() == 0) {
+    if (autoWinner.length() == 0 || Robot.isSimulation()) {
       String gameMessage = DriverStation.getGameSpecificMessage();
       if (gameMessage.length() > 0) {
         autoWinner = gameMessage.substring(0, 1);

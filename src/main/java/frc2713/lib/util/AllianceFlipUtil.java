@@ -3,12 +3,32 @@
 
 package frc2713.lib.util;
 
+import java.util.Optional;
+
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc2713.robot.Constants;
 import frc2713.robot.FieldConstants;
 
 public class AllianceFlipUtil {
+  
+  private static Alliance presentAlliance = null;
+
+  public static Alliance getPresentAlliance() {
+    if (presentAlliance == null) {
+      Optional<Alliance> res = DriverStation.getAlliance();
+      if (res.isPresent())
+        presentAlliance = res.get();
+    }
+
+    return presentAlliance;
+  }
+
+  public static void resetPresentAlliance() {
+    presentAlliance = null;
+  }
+
   public static double applyX(double x) {
     return shouldFlip() ? FieldConstants.fieldLength - x : x;
   }
@@ -62,8 +82,7 @@ public class AllianceFlipUtil {
 
   public static boolean shouldFlip() {
     return !Constants.disableHAL
-        && DriverStation.getAlliance().isPresent()
-        && DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
+        && getPresentAlliance() == DriverStation.Alliance.Red;
   }
 
   public static int shouldFlipInt() {

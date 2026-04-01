@@ -36,7 +36,7 @@ public class VisionIOSLAMDunk implements VisionIO {
 
   private static final LoggedTunableNumber k =
       new LoggedTunableNumber("Vision/k", 2); // gets cast to int
-  private CachedPow powN396 = new CachedPow(-0.396);
+  private CachedPow powN396 = new CachedPow(-0.396, 50); // input is tag size (pixels^2)
   
   private static final Transform3d SLAMDUNK_TRANSFORM =
       new Transform3d(new Translation3d(), new Rotation3d(0, 0, Math.PI / 2));

@@ -12,11 +12,11 @@ public final class CachedPow {
    * every bit helps(?)
    *
    * @param exp the fixed fractional exponent
-   * @param bucketSize defines how floating point entries are stored in cache
+   * @param inputBucketSize defines how floating point entries are stored in cache
    */
-  public CachedPow(double exp, double bucketSize) {
+  public CachedPow(double exp, double inputBucketSize) {
     this.exp = exp;
-    this.bucketSize = bucketSize;
+    this.bucketSize = inputBucketSize;
     this.cache = new HashMap<>();
   }
 
