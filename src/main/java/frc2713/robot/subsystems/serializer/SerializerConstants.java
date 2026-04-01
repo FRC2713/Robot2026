@@ -34,8 +34,8 @@ public final class SerializerConstants {
 
     static {
       // Distance (m), RPM
-      otfSpeeds.put(2.11, 80.);
-      otfSpeeds.put(6.44, 30.);
+      otfSpeeds.put(2.11, 80.); // north shore: 80
+      otfSpeeds.put(6.44, 30.); // north shore: 30
     }
 
     static {
@@ -74,7 +74,7 @@ public final class SerializerConstants {
     }
 
     public static LoggedTunableMeasure<AngularVelocity> indexingSpeed =
-        new LoggedTunableMeasure<AngularVelocity>("Dye Rotor/Index Speed", RPM.of(100));
+        new LoggedTunableMeasure<AngularVelocity>("Dye Rotor/Index Speed", RPM.of(50));
     public static LoggedTunableMeasure<AngularVelocity> stirSpeed =
         new LoggedTunableMeasure<AngularVelocity>("Dye Rotor/Stir Speed", RPM.of(30));
     public static AngularVelocity outdexingSpeed = RotationsPerSecond.of(-3);

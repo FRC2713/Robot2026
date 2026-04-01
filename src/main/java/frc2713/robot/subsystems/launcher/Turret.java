@@ -15,7 +15,6 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc2713.lib.geometry.GeometryUtil;
@@ -55,7 +54,7 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
       final CanCoderInputsAutoLogged cancoderInputs,
       final CanCoderIO cancoderIO) {
     super(config, new MotorInputsAutoLogged(), turretMotorIO, cancoderInputs, cancoderIO);
-    // setDefaultCommand(otfCommand());
+    setDefaultCommand(otfCommand());
   }
 
   @AutoLogOutput

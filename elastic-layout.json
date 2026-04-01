@@ -576,8 +576,8 @@
           },
           {
             "title": "k",
-            "x": 896.0,
-            "y": 256.0,
+            "x": 768.0,
+            "y": 384.0,
             "width": 128.0,
             "height": 128.0,
             "type": "Text Display",
@@ -590,7 +590,7 @@
           },
           {
             "title": "Flywheels Static Tower Rotation per Minute",
-            "x": 1152.0,
+            "x": 1024.0,
             "y": 128.0,
             "width": 128.0,
             "height": 128.0,
@@ -604,7 +604,7 @@
           },
           {
             "title": "Index Speed Rotation per Minute",
-            "x": 1152.0,
+            "x": 1024.0,
             "y": 256.0,
             "width": 384.0,
             "height": 128.0,
@@ -620,7 +620,7 @@
       }
     },
     {
-      "name": "Tab 5",
+      "name": "Drive",
       "grid_layout": {
         "layouts": [
           {

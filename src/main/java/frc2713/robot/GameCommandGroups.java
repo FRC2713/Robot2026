@@ -32,6 +32,7 @@ public final class GameCommandGroups {
 
     /** OTF shooting without drive limits. Use for auto routines. */
     public static Command autoOtfShot(
+        Drive drive,
         Flywheels flywheels,
         Hood hood,
         Turret turret,
@@ -40,7 +41,7 @@ public final class GameCommandGroups {
         IntakeExtension extension,
         IntakeRoller intakeRoller) {
       return Commands.either(
-              Commands.none(),
+              Commands.print("[AUTO] Auto in neutral!"),
               Commands.parallel(
                   flywheels.otfCommand(),
                   hood.otfCommand(),
@@ -53,13 +54,7 @@ public final class GameCommandGroups {
                   dyeRotor.feedWhenReady(
                       () -> flywheels.atTarget() && hood.atTarget(), Seconds.of(0.8)),
                   extension.maintainFuelPressureCommand(1).beforeStarting(Commands.waitSeconds(1))),
-              () -> {
-                var inNeutral =
-                    FieldConstants.NeutralZone.region.contains(
-                        RobotContainer.drive.getPose().getTranslation());
-                System.out.println("Auto in neutral: " + inNeutral);
-                return inNeutral;
-              })
+              () -> FieldConstants.NeutralZone.region.contains(drive.getPose().getTranslation()))
           .withName("Auto OTF Shooting");
     }
 
@@ -101,7 +96,8 @@ public final class GameCommandGroups {
               turret.otfCommand(),
               flywheels.simulateLaunchFuelCommand(flywheels::atTarget),
               feeder.feedWhenReady(flywheels::atTarget),
-              dyeRotor.indexFuel()) // used to be dynamic but we slowed it way down
+              dyeRotor.dynamicFeedWhenReady(
+                  flywheels::atTarget)) // used to be dynamic but we slowed it way down
           .withName("OTF Shooting");
     }
 
