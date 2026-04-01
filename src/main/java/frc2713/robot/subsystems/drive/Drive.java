@@ -118,8 +118,9 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
       };
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, Pose2d.kZero);
-  private SwerveDrivePoseEstimator odometryPoseEstimator =
-      new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, Pose2d.kZero);
+  // private SwerveDrivePoseEstimator odometryPoseEstimator =
+  //     new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions,
+  // Pose2d.kZero);
 
   private PIDController xController;
   private PIDController yController;
@@ -310,7 +311,8 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
 
         // Apply update
         poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
-        odometryPoseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+        // odometryPoseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation,
+        // modulePositions);
       }
 
       // Update gyro alert
@@ -590,10 +592,10 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
     return poseEstimator.getEstimatedPosition();
   }
 
-  @AutoLogOutput(key = "Odometry/RobotNoVision")
-  public Pose2d getOdomPose() {
-    return odometryPoseEstimator.getEstimatedPosition();
-  }
+  // @AutoLogOutput(key = "Odometry/RobotNoVision")
+  // public Pose2d getOdomPose() {
+  //   return odometryPoseEstimator.getEstimatedPosition();
+  // }
 
   /** Returns the current odometry rotation. */
   public Rotation2d getRotation() {
@@ -603,7 +605,7 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
     poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
-    odometryPoseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+    // odometryPoseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
   }
 
   /** Adds a new timestamped vision measurement. */

@@ -51,14 +51,15 @@ public class OperatorControls {
     controller
         .povUp()
         .onTrue(
-            Commands.runOnce(() -> flywheels.fudgeFactor = flywheels.fudgeFactor.plus(RPM.of(250)))
-                .withName("flywheels fudgeFactor up"));
+            Commands.runOnce(() -> hood.fudgeFactor = hood.fudgeFactor.plus(Degrees.of(1)))
+                .withName("hood fudgeFactor up"));
 
     controller
         .povDown()
         .onTrue(
-            Commands.runOnce(() -> flywheels.fudgeFactor = flywheels.fudgeFactor.minus(RPM.of(250)))
-                .withName("flywheels fudgeFactor down"));
+            Commands.runOnce(() -> hood.fudgeFactor = hood.fudgeFactor.minus(Degrees.of(1)))
+                .withName("hood fudgeFactor down"));
+
     controller
         .povRight()
         .onTrue(
@@ -74,21 +75,29 @@ public class OperatorControls {
     controller
         .start()
         .onTrue(
-            Commands.runOnce(
-                    () -> {
-                      turret.fudgeFactor = Degrees.of(0.0);
-                      flywheels.fudgeFactor = RPM.of(0.0);
-                    })
+            Commands.sequence(
+                    Commands.runOnce(
+                        () -> {
+                          turret.fudgeFactor = Degrees.of(0.0);
+                          flywheels.fudgeFactor = RPM.of(0.0);
+                          hood.fudgeFactor = Degrees.of(0.0);
+                        }),
+                    Turret.changeDefaultTurretCommand(
+                        turret, turret.otfCommand(), "Reset Turret Command"))
                 .withName("fudgeFacor reset"));
 
     controller
         .back()
         .onTrue(
-            Commands.runOnce(
-                    () -> {
-                      turret.fudgeFactor = Degrees.of(0.0);
-                      flywheels.fudgeFactor = RPM.of(0.0);
-                    })
+            Commands.sequence(
+                    Commands.runOnce(
+                        () -> {
+                          turret.fudgeFactor = Degrees.of(0.0);
+                          flywheels.fudgeFactor = RPM.of(0.0);
+                          hood.fudgeFactor = Degrees.of(0.0);
+                        }),
+                    Turret.changeDefaultTurretCommand(
+                        turret, turret.otfCommand(), "Reset Turret Command"))
                 .withName("fudgeFacor reset"));
 
     controller
@@ -125,7 +134,11 @@ public class OperatorControls {
                 .withName("Stop Shooting + Hood Retract"));
 
     // disable ducking
-    controller.a().onTrue(Commands.run(() -> hood.disableDucking = !hood.disableDucking));
+    // controller.a().onTrue(Commands.run(() -> hood.disableDucking = !hood.disableDucking));
+    controller
+        .a()
+        .onTrue(
+            Turret.changeDefaultTurretCommand(turret, turret.manualControl(), "Disable Turret"));
 
     controller
         .x()

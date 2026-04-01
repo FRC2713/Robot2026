@@ -1,5 +1,6 @@
 package frc2713.robot.subsystems.launcher;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
@@ -25,6 +26,8 @@ import org.littletonrobotics.junction.AutoLogOutput;
 public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
     implements ArticulatedComponent {
 
+  @AutoLogOutput public Angle fudgeFactor = Degrees.of(0.0);
+
   public Hood(final TalonFXSubsystemConfig config, final MotorIO launcherMotorIO) {
     super(config, new MotorInputsAutoLogged(), launcherMotorIO);
     // if (Constants.enableOTFFeatures)
@@ -41,7 +44,12 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
 
   public Command otfCommand() {
     return setAngleCommand(
-        () -> LaunchingSolutionManager.getInstance().getSolution().hoodPitch().getMeasure());
+        () ->
+            LaunchingSolutionManager.getInstance()
+                .getSolution()
+                .hoodPitch()
+                .getMeasure()
+                .plus(fudgeFactor));
   }
 
   public Command setTargetPositionToCurrent() {

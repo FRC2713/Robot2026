@@ -53,7 +53,9 @@ public final class GameCommandGroups {
                       () -> flywheels.atTarget() && hood.atTarget(), Seconds.of(0.8)),
                   dyeRotor.feedWhenReady(
                       () -> flywheels.atTarget() && hood.atTarget(), Seconds.of(0.8)),
-                  extension.maintainFuelPressureCommand(1).beforeStarting(Commands.waitSeconds(1))),
+                  extension
+                      .maintainFuelPressureCommand(1.2)
+                      .beforeStarting(Commands.waitSeconds(1))),
               () -> FieldConstants.NeutralZone.region.contains(drive.getPose().getTranslation()))
           .withName("Auto OTF Shooting");
     }
