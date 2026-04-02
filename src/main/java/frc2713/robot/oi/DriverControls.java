@@ -141,8 +141,8 @@ public class DriverControls {
                     "OTF with drive")))
         .onFalse(setToNormalDriveCmd())
         .onTrue(
-                Commands.runOnce(
-                    () -> LaunchingSolutionManager.ZoneSelectionHelpers.setStaticShotRotation()));
+            Commands.runOnce(
+                () -> LaunchingSolutionManager.ZoneSelectionHelpers.setStaticShotRotation()));
 
     // shoot otf
     controller
