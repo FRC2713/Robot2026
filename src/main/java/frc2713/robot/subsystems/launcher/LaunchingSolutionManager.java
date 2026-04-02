@@ -102,6 +102,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
       // 1. Get Robot State (ID 0 = Chassis)
       Pose3d robotPose = KinematicsManager.getInstance().getGlobalPose(0);
       Translation3d robotLinVel = KinematicsManager.getInstance().getGlobalLinearVelocity(0);
+      Translation3d robotAngVel = KinematicsManager.getInstance().getGlobalAngularVelocity(0);
 
       // 2. Select goal
       if (FieldConstants.NeutralZone.region.contains(
@@ -133,7 +134,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
             case VECTOR_APPROX -> calculateVectorApprox(
                 robotPose, robotLinVel, LaunchingSolutionManager.currentGoal);
             case ITOF -> calculateITOF(
-                robotPose, robotLinVel, LaunchingSolutionManager.currentGoal);
+                robotPose, robotLinVel, robotAngVel, LaunchingSolutionManager.currentGoal);
             case STATIC -> calculateStatic(
                 robotPose, robotLinVel, LaunchingSolutionManager.currentGoal);
           };
@@ -246,9 +247,14 @@ public class LaunchingSolutionManager extends SubsystemBase {
    * constant velocity.
    */
   private LaunchSolution calculateITOF(
-      Pose3d robotPose, Translation3d robotVel, Translation3d targetPose) {
+      Pose3d robotPose,
+      Translation3d robotVel,
+      Translation3d robotAngVel,
+      Translation3d targetPose) {
     boolean dbg = itofDebug.get();
     Translation3d robotTrans = robotPose.getTranslation();
+    Rotation3d robotRot = robotPose.getRotation();
+    double robotYawRateRadPerSec = robotAngVel.getZ();
     double tMin = LauncherConstants.itofTofMin.get().in(Seconds);
     double tMax = LauncherConstants.itofTofMax.get().in(Seconds);
     double eps = LauncherConstants.itofConvergenceSeconds.get().in(Seconds);
@@ -275,6 +281,8 @@ public class LaunchingSolutionManager extends SubsystemBase {
       Logger.recordOutput(pb.makePath("itof debug", "robot translation"), robotTrans);
       Logger.recordOutput(pb.makePath("itof debug", "robot pose"), robotPose);
       Logger.recordOutput(pb.makePath("itof debug", "robot lin vel"), robotVel);
+      Logger.recordOutput(pb.makePath("itof debug", "robot ang vel"), robotAngVel);
+      Logger.recordOutput(pb.makePath("itof debug", "robot yaw rate rad/s"), robotYawRateRadPerSec);
       Logger.recordOutput(pb.makePath("itof debug", "target"), targetPose);
       Logger.recordOutput(pb.makePath("itof debug", "t init s"), t);
       Logger.recordOutput(
@@ -295,17 +303,19 @@ public class LaunchingSolutionManager extends SubsystemBase {
     double[] tNextPerIter = dbg && maxIter > 0 ? new double[maxIter] : null;
 
     for (int i = 0; i < maxIter; i++) {
-      Translation3d projected =
+      Translation3d projectedTrans =
           robotTrans.plus(
               new Translation3d(robotVel.getX() * t, robotVel.getY() * t, robotVel.getZ() * t));
-      rel = targetPose.minus(projected);
+      Rotation3d projectedRot = robotRot.plus(new Rotation3d(0, 0, robotYawRateRadPerSec * t));
+      Pose3d projectedPose = new Pose3d(projectedTrans, projectedRot);
+      rel = targetPose.minus(projectedPose.getTranslation());
       horizontalDist = rel.toTranslation2d().getNorm();
       if (horizontalDist < 0.05) {
         if (dbg) {
           Logger.recordOutput(pb.makePath("itof debug", "status"), "fallback iter d_h too small");
           Logger.recordOutput(pb.makePath("itof debug", "last iter"), i);
           logItofDebugIteration(
-              i, t, projected, rel, horizontalDist, Double.NaN, robotPose.getRotation());
+              i, t, projectedPose, rel, horizontalDist, Double.NaN);
         }
         lastItofTofSeconds = -1.0;
         return calculateStatic(robotPose, robotVel, targetPose);
@@ -320,7 +330,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
         tNextPerIter[i] = tNext;
       }
       if (dbg) {
-        logItofDebugIteration(i, t, projected, rel, horizontalDist, tNext, robotPose.getRotation());
+        logItofDebugIteration(i, t, projectedPose, rel, horizontalDist, tNext);
       }
       if (Math.abs(tNext - t) < eps) {
         t = tNext;
@@ -343,16 +353,18 @@ public class LaunchingSolutionManager extends SubsystemBase {
           Arrays.copyOf(tNextPerIter, iterationsUsed));
     }
 
-    Translation3d projected =
+    Translation3d projectedTrans =
         robotTrans.plus(
             new Translation3d(robotVel.getX() * t, robotVel.getY() * t, robotVel.getZ() * t));
-    rel = targetPose.minus(projected);
+    Rotation3d projectedRot = robotRot.plus(new Rotation3d(0, 0, robotYawRateRadPerSec * t));
+    Pose3d projectedPose = new Pose3d(projectedTrans, projectedRot);
+    rel = targetPose.minus(projectedPose.getTranslation());
     horizontalDist = rel.toTranslation2d().getNorm();
 
     if (dbg) {
       Logger.recordOutput(
           pb.makePath("itof debug", "projected robot pose"),
-          new Pose3d(projected, robotPose.getRotation()));
+          projectedPose);
       Logger.recordOutput(pb.makePath("itof debug", "final rel to target"), rel);
       Logger.recordOutput(pb.makePath("itof debug", "final d_h m"), horizontalDist);
       Logger.recordOutput(pb.makePath("itof debug", "converged t s"), t);
@@ -409,16 +421,13 @@ public class LaunchingSolutionManager extends SubsystemBase {
   private void logItofDebugIteration(
       int i,
       double t,
-      Translation3d projectedTrans,
+      Pose3d projectedPose,
       Translation3d relToTarget,
       double dHorizontal,
-      double tNext,
-      Rotation3d robotRotation) {
+      double tNext) {
     Logger.recordOutput(pb.makePath("itof debug", "iter index"), i);
     Logger.recordOutput(pb.makePath("itof debug", "iter t s"), t);
-    Logger.recordOutput(
-        pb.makePath("itof debug", "iter projected pose"),
-        new Pose3d(projectedTrans, robotRotation));
+    Logger.recordOutput(pb.makePath("itof debug", "iter projected pose"), projectedPose);
     Logger.recordOutput(pb.makePath("itof debug", "iter rel to target"), relToTarget);
     Logger.recordOutput(pb.makePath("itof debug", "iter d_h m"), dHorizontal);
     Logger.recordOutput(pb.makePath("itof debug", "iter t next s"), tNext);
