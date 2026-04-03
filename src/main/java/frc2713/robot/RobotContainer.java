@@ -2,12 +2,15 @@ package frc2713.robot;
 
 import choreo.auto.AutoFactory;
 import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.lib.BLine.FollowPath;
+import frc.robot.lib.BLine.Path;
 import frc2713.lib.io.CanCoderIO;
 import frc2713.lib.io.CanCoderIOHardware;
 import frc2713.lib.io.CanCoderInputs;
@@ -19,6 +22,7 @@ import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.commands.DriveCommands;
+import frc2713.robot.commands.autos.BLineMidwars;
 import frc2713.robot.commands.autos.Demo;
 import frc2713.robot.commands.autos.DriveTest;
 import frc2713.robot.commands.autos.Midwars;
@@ -28,6 +32,7 @@ import frc2713.robot.oi.DevControls;
 import frc2713.robot.oi.DriverControls;
 import frc2713.robot.oi.OperatorControls;
 import frc2713.robot.subsystems.drive.Drive;
+import frc2713.robot.subsystems.drive.DriveConstants;
 import frc2713.robot.subsystems.drive.GyroIO;
 import frc2713.robot.subsystems.drive.GyroIOPigeon2;
 import frc2713.robot.subsystems.drive.ModuleIO;
@@ -68,10 +73,10 @@ public class RobotContainer {
   public static Flywheels flywheels;
   public static Turret turret;
   public static Hood hood;
-  private static IntakeRoller intakeRoller;
+  public static IntakeRoller intakeRoller;
   public static IntakeExtension intakeExtension;
-  private static DyeRotor dyeRotor;
-  private static Feeder feeder;
+  public static DyeRotor dyeRotor;
+  public static Feeder feeder;
   public static Vision vision;
 
   // Lazy loaders
@@ -89,6 +94,8 @@ public class RobotContainer {
   // Dashboard inputs
   private final AutoFactory autoFactory;
   private final LoggedDashboardChooser<Command> autoChooser;
+
+  public static FollowPath.Builder pathBuilder;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -262,6 +269,7 @@ public class RobotContainer {
         new OperatorControls(
             drive, flywheels, turret, hood, intakeRoller, intakeExtension, dyeRotor, feeder);
 
+    configurePathBuilder();
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
     configureAutonomousRoutines(autoChooser, false);
@@ -271,6 +279,33 @@ public class RobotContainer {
 
     // configure the kinematics calculations
     configureKinematics();
+
+    Path.setDefaultGlobalConstraints(
+        new Path.DefaultGlobalConstraints(4.5, 12.0, 540, 860, 0.03, 2.0, 0.2));
+  }
+
+  private void configurePathBuilder() {
+    // Path following
+    this.pathBuilder =
+        new FollowPath.Builder(
+                drive,
+                drive::getPose,
+                drive::getChassisSpeeds,
+                drive::runVelocity,
+                new PIDController(
+                    DriveConstants.AutoConstants.positionTrajectoryController.getP().get(),
+                    DriveConstants.AutoConstants.positionTrajectoryController.getI().get(),
+                    DriveConstants.AutoConstants.positionTrajectoryController.getD().get()),
+                new PIDController(
+                    DriveConstants.AutoConstants.headingTrajectoryController.getP().get(),
+                    DriveConstants.AutoConstants.headingTrajectoryController.getI().get(),
+                    DriveConstants.AutoConstants.headingTrajectoryController.getD().get()),
+                new PIDController(
+                    DriveConstants.AutoConstants.positionTrajectoryController.getP().get(),
+                    DriveConstants.AutoConstants.positionTrajectoryController.getI().get(),
+                    DriveConstants.AutoConstants.positionTrajectoryController.getD().get()))
+            .withDefaultShouldFlip()
+            .withPoseReset(drive::setPose);
   }
 
   /** Use this robot to configure the transforms between subsystems. */
@@ -355,6 +390,8 @@ public class RobotContainer {
 
       autoChooser.addOption("DemoMode", Demo.demo());
     }
+
+    autoChooser.addDefaultOption("BlineMidwars", BLineMidwars.getCommand());
 
     autoChooser.addDefaultOption(
         "Midwars",
