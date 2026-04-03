@@ -8,7 +8,6 @@ import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.forward
 import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.reverseSoftLimit;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
