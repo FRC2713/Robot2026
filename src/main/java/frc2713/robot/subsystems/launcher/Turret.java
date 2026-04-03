@@ -8,7 +8,6 @@ import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.forward
 import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.reverseSoftLimit;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -220,20 +219,21 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
         Angle targetAngle;
 
         if (solution.isValid()) {
+          Angle omegaCompensation =
+              RobotContainer.drive
+                  .getAngularSpeed()
+                  .times(LauncherConstants.Turret.OTF_OMEGA_LOOKAHEAD);
+          Angle predictedFieldYaw =
+              Degrees.of(solution.turretFieldYaw().getDegrees()).plus(omegaCompensation);
+
           // Convert the field-relative yaw to robot-relative using the current robot heading.
           // This must happen here (not in LaunchingSolutionManager) so we always use the
           // robot's heading RIGHT NOW, not a projected or stale heading from a previous cycle.
           targetAngle =
-              Util.fieldToRobotRelative(
-                  Degrees.of(solution.turretFieldYaw().getDegrees()),
-                  RobotContainer.drive.getPose());
+              Util.fieldToRobotRelative(predictedFieldYaw, RobotContainer.drive.getPose());
+          Logger.recordOutput(
+              super.pb.makePath("OTF", "omegaCompensationDegrees"), omegaCompensation);
           Logger.recordOutput(super.pb.makePath("OTF", "response"), "using solution");
-        } else if (solution.effectiveDistanceMeters() <= 0.9) {
-          // invalid bc we're too close
-          Logger.recordOutput(super.pb.makePath("OTF", "response"), "hub shot");
-          targetAngle =
-              Util.fieldToRobotRelative(
-                  LauncherConstants.Turret.staticHubAngle, RobotContainer.drive.getPose());
         } else {
           Logger.recordOutput(super.pb.makePath("OTF", "response"), "stay at measured");
           targetAngle = inputs.position;
@@ -241,7 +241,7 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
 
         targetAngle = convertToClosestBoundedTurretAngleDegrees(targetAngle, inputs.position);
         Logger.recordOutput(super.pb.makePath("OTF", "solutionIsValid"), solution.isValid());
-        Logger.recordOutput(pb.makePath("OTF", "targetAngleDegrees"), targetAngle.in(Degrees));
+        Logger.recordOutput(pb.makePath("OTF", "targetAngleDegrees"), targetAngle);
         return targetAngle.plus(fudgeFactor);
       };
 
@@ -261,10 +261,6 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
 
   @Override
   public void initialize() {
-
-    // this.io.setCurrentPosition(
-    //     getTurretPositionFromEncoders(
-    //         this.inputs.rawRotorPosition, this.cancoderInputs.absolutePosition));
     super.initialize();
   }
 
@@ -277,10 +273,6 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
       if (!initialized) {
         initialize();
       }
-
-      // Log the goal pose for visualization
-      Pose3d goalPose = new Pose3d(LaunchingSolutionManager.currentGoal, new Rotation3d());
-      Logger.recordOutput(pb.makePath("goalVector"), new Pose3d[] {this.getGlobalPose(), goalPose});
     }
   }
 

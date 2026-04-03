@@ -89,10 +89,10 @@ public final class GameCommandGroups {
       return Commands.parallel(
               DriveCommands.setDriveLimits(
                   drive,
-                  Optional.of(FeetPerSecond.of(4.0)),
-                  Optional.of(FeetPerSecondPerSecond.of(12.0)),
-                  Optional.of(DegreesPerSecond.of(90.0)),
-                  Optional.of(DegreesPerSecondPerSecond.of(360.0))),
+                  Optional.of(FeetPerSecond.of(3.0)),
+                  Optional.of(FeetPerSecondPerSecond.of(11.0)),
+                  Optional.of(DegreesPerSecond.of(45.0)),
+                  Optional.of(DegreesPerSecondPerSecond.of(180.0))),
               flywheels.otfCommand(),
               hood.otfCommand(),
               turret.otfCommand(),

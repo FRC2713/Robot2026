@@ -120,6 +120,15 @@ public class RobotContainer {
                 new TalonFXIO(LauncherConstants.Turret.config),
                 new CanCoderInputsAutoLogged(),
                 new CanCoderIOHardware(LauncherConstants.Turret.canCoderConfig));
+        // turret =
+        //     new Turret(
+        //         LauncherConstants.Turret.config,
+        //         new MotorIO() {},
+        //         new CanCoderInputsAutoLogged(),
+        //         new CanCoderIO() {
+        //           @Override
+        //           public void readInputs(CanCoderInputs inputs) {}
+        //         });
 
         intakeRoller =
             new IntakeRoller(

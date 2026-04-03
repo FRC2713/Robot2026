@@ -434,7 +434,7 @@ public class DriveCommands {
   }
 
   /**
-   * Wraps another command so that drive limits are active while it runs. When the inner command
+   * Wraps another comm and so that drive limits are active while it runs. When the inner command
    * starts, the limits are applied. When it ends (for any reason), the limits are automatically
    * cleared.
    *
