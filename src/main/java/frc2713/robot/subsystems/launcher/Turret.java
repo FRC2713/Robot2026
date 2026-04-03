@@ -262,10 +262,6 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
 
   @Override
   public void initialize() {
-
-    // this.io.setCurrentPosition(
-    //     getTurretPositionFromEncoders(
-    //         this.inputs.rawRotorPosition, this.cancoderInputs.absolutePosition));
     super.initialize();
   }
 
@@ -278,10 +274,6 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
       if (!initialized) {
         initialize();
       }
-
-      // Log the goal pose for visualization
-      Pose3d goalPose = new Pose3d(LaunchingSolutionManager.currentGoal, new Rotation3d());
-      Logger.recordOutput(pb.makePath("goalVector"), new Pose3d[] {this.getGlobalPose(), goalPose});
     }
   }
 
