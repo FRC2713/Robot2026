@@ -48,6 +48,8 @@ public final class LauncherConstants {
     public static final Angle forwardSoftLimit = Degrees.of(FORWARD_LIMIT_DEGREES);
     public static final Angle reverseSoftLimit = Degrees.of(REVERSE_LIMIT_DEGREES);
 
+    public static final Time OTF_OMEGA_LOOKAHEAD = Seconds.of(0.1);
+
     // Gear tooth counts for calculating overall gear ratio
     public static final int pinionGearTeeth = 15;
     public static final int spurGear1Teeth = 26;
