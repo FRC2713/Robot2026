@@ -138,9 +138,9 @@ public class DriverControls {
                     drive,
                     GameCommandGroups.staticTurretOtf(
                         drive, () -> -controller.getLeftY(), () -> -controller.getLeftX()),
-                    "OTF with drive")))
-        .onFalse(setToNormalDriveCmd())
-        .onTrue(Commands.runOnce(() -> Drive.setStaticShotRotation()));
+                    "OTF with drive"),
+                    Commands.run(() -> Drive.setStaticShotRotation())))
+        .onFalse(setToNormalDriveCmd());
 
     // shoot otf
     controller
