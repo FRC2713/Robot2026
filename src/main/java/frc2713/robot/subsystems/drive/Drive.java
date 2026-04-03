@@ -41,7 +41,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -60,20 +59,16 @@ import frc2713.lib.logging.PeriodicTimingLogger;
 import frc2713.lib.logging.TimeLogged;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.lib.util.LoggedTunableGains;
-import frc2713.lib.util.Util;
 import frc2713.robot.Constants;
 import frc2713.robot.Constants.Mode;
 import frc2713.robot.FieldConstants;
 import frc2713.robot.Robot;
 import frc2713.robot.RobotContainer;
 import frc2713.robot.generated.TunerConstants;
-import frc2713.robot.subsystems.launcher.LauncherConstants;
-import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
 import frc2713.robot.util.LocalADStarAK;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -558,7 +553,6 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
   public Command sysIdDynamic(SysIdRoutine.Direction direction) {
     return run(() -> runCharacterization(0.0)).withTimeout(1.0).andThen(sysId.dynamic(direction));
   }
-
 
   @AutoLogOutput(key = "Drive/SwerveStates/Measured")
   private SwerveModuleState[] getModuleStates() {

@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc2713.lib.util.LoggedTunableBoolean;
 import frc2713.robot.Robot;
+import frc2713.robot.RobotContainer;
 import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
@@ -98,6 +99,21 @@ public class ShiftManager {
       }
     }
   }
+
+  // play the rumble on controllers when the last 2 seconds in a shift
+  public final void rumbleControllers(double time) {
+    if (getTimeLeftInShift(time) <= 2.0) {
+      // WPILib GenericHID (or XboxController)
+      RobotContainer.driverControls.rumbleController();
+      Logger.recordOutput("ControllerRumble", "Enabled");
+    } else if (getTimeLeftInShift(time) <= 1.3) {
+
+      // stop the rumble after 0.5 seconds to avoid being annoying
+      RobotContainer.driverControls.stopRumbleController();
+      Logger.recordOutput("ControllerRumble", "Disabled");
+    }
+  }
+  ;
 
   public static String getCurrentPhase(double time) {
     if (ShiftManager.isAuto) {

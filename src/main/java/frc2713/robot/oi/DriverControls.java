@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Degrees;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -139,7 +140,7 @@ public class DriverControls {
                     GameCommandGroups.staticTurretOtf(
                         drive, () -> -controller.getLeftY(), () -> -controller.getLeftX()),
                     "OTF with drive"),
-                    Commands.run(() -> Drive.setStaticShotRotation())))
+                Commands.run(() -> Drive.setStaticShotRotation())))
         .onFalse(setToNormalDriveCmd());
 
     // shoot otf
@@ -196,6 +197,16 @@ public class DriverControls {
   public Command stopWithX() {
     return DriveCommands.changeDefaultDriveCommand(
         drive, new InstantCommand(() -> drive.stopWithX()), "Stop With X");
+  }
+
+  public void rumbleController() {
+    controller.setRumble(GenericHID.RumbleType.kLeftRumble, 0.5);
+    controller.setRumble(GenericHID.RumbleType.kRightRumble, 0.5);
+  }
+
+  public void stopRumbleController() {
+    controller.setRumble(GenericHID.RumbleType.kLeftRumble, 0.0);
+    controller.setRumble(GenericHID.RumbleType.kRightRumble, 0.0);
   }
 
   private Command normalDriveCmd() {
