@@ -42,8 +42,8 @@ public final class LauncherConstants {
     public static Angle manualOffset = Degrees.of(180);
 
     // Turret rotation limits
-    public static final double FORWARD_LIMIT_DEGREES = 190;
-    public static final double REVERSE_LIMIT_DEGREES = -179.0;
+    public static final double FORWARD_LIMIT_DEGREES = 90;
+    public static final double REVERSE_LIMIT_DEGREES = -90;
 
     public static final Angle forwardSoftLimit = Degrees.of(FORWARD_LIMIT_DEGREES);
     public static final Angle reverseSoftLimit = Degrees.of(REVERSE_LIMIT_DEGREES);
@@ -74,7 +74,7 @@ public final class LauncherConstants {
       config.generalControlMode = GeneralControlMode.POSITION;
       config.acceptablePositionError = Degrees.of(3);
 
-      config.fxConfig.Feedback.FeedbackRotorOffset = 0.226563;
+      config.fxConfig.Feedback.FeedbackRotorOffset = -0.113281;
 
       config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -88,8 +88,8 @@ public final class LauncherConstants {
       config.fxConfig.Slot0.kA = Util.modeDependentValue(0.0, 0.0); // acceleration feedforward
 
       // Motion Magic parameters
-      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 20.0 / 2; // rotations per second
-      config.fxConfig.MotionMagic.MotionMagicAcceleration = 50.0 / 2; // rotations per second^2
+      config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 20.0 / 8; // rotations per second
+      config.fxConfig.MotionMagic.MotionMagicAcceleration = 50.0 / 4; // rotations per second^2
       config.fxConfig.MotionMagic.MotionMagicJerk = 0.; // limit jerk for smooth motion
 
       // Gear ratio: motor rotations per turret rotation = GEAR_1/GEAR_0 = 120/60 = 2.0

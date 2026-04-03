@@ -49,8 +49,9 @@ public final class LaunchingLookupMaps {
     distanceToRpmMap.put(1.03, 2450.);
     distanceToRpmMap.put(2.1, 2550.);
     distanceToRpmMap.put(3.36, 2750.);
-    distanceToRpmMap.put(5.0, 3050.);
-    distanceToRpmMap.put(6.03, 3500.);
+    distanceToRpmMap.put(4.5, 3107.);
+    distanceToRpmMap.put(5.0, 3200.);
+    distanceToRpmMap.put(6.03, 3750.);
 
     // from north shore
     // rpmVelocityMap.put(1.03, 2500.);
@@ -113,21 +114,23 @@ public final class LaunchingLookupMaps {
     rpmToReleaseAngleAdjustmentMap.put(5000., 15.);
 
     /** Distance to hub (m) -> Time of flight (s) */
-    tofMap.put(0.974, 1.14);
-    tofMap.put(1.443, 1.18);
-    tofMap.put(2.905, 1.2);
-    tofMap.put(3.345, 1.2);
-    tofMap.put(3.945, 1.22);
-    tofMap.put(5.422, 1.38);
-    tofMap.put(6.329, 1.52);
+    tofMap.put(0.85, 1.0241);
+    tofMap.put(1.94, 1.0502);
+    tofMap.put(2.60, 1.0085);
+    tofMap.put(3.66, 1.0782);
+    tofMap.put(4.08, 1.0810);
+    tofMap.put(4.58, 1.1223);
+    tofMap.put(5.71, 1.2328);
+    tofMap.put(6.39, 1.2714);
 
-    tofMapAZ.put(0.974, 1.14);
-    tofMapAZ.put(1.443, 1.18);
-    tofMapAZ.put(2.905, 1.2);
-    tofMapAZ.put(3.345, 1.2);
-    tofMapAZ.put(3.945, 1.22);
-    tofMapAZ.put(5.422, 1.38);
-    tofMapAZ.put(6.329, 1.52);
+    tofMapAZ.put(0.85, 1.0241);
+    tofMapAZ.put(1.94, 1.0502);
+    tofMapAZ.put(2.60, 1.0085);
+    tofMapAZ.put(3.66, 1.0782);
+    tofMapAZ.put(4.08, 1.0810);
+    tofMapAZ.put(4.58, 1.1223);
+    tofMapAZ.put(5.71, 1.2328);
+    tofMapAZ.put(6.39, 1.2714);
   }
 
   public static AngularVelocity getVelocityFromDistance(Distance dist, boolean isHub) {
