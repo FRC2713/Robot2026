@@ -57,13 +57,16 @@ import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.io.ArticulatedComponent;
 import frc2713.lib.logging.PeriodicTimingLogger;
 import frc2713.lib.logging.TimeLogged;
+import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.lib.util.LoggedTunableGains;
 import frc2713.robot.Constants;
 import frc2713.robot.Constants.Mode;
 import frc2713.robot.FieldConstants;
 import frc2713.robot.Robot;
+import frc2713.robot.RobotContainer;
 import frc2713.robot.generated.TunerConstants;
 import frc2713.robot.util.LocalADStarAK;
+import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -358,6 +361,28 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
     }
   }
 
+  public static Rotation2d storedStaticShotRotation = new Rotation2d(0);
+
+  public static void setStaticShotRotation() {
+
+    double xDistance =
+        (AllianceFlipUtil.applyX(FieldConstants.LinesVertical.hubCenter))
+            - (RobotContainer.drive.getPose().getTranslation().getX());
+    double yDistance =
+        (AllianceFlipUtil.applyY(FieldConstants.LinesHorizontal.center))
+            - (RobotContainer.drive.getPose().getTranslation().getY());
+    Optional<Alliance> currentAlliance = DriverStation.getAlliance();
+    if (RobotContainer.drive.getPose().getTranslation().getX()
+            < AllianceFlipUtil.applyX(FieldConstants.LinesVertical.allianceZone)
+        && (currentAlliance.get() == DriverStation.Alliance.Blue)) {
+      storedStaticShotRotation = new Rotation2d((Math.atan2(yDistance, xDistance)) + Math.PI);
+    } else if (RobotContainer.drive.getPose().getTranslation().getX()
+            > AllianceFlipUtil.applyX(FieldConstants.LinesVertical.allianceZone)
+        && (currentAlliance.get() == DriverStation.Alliance.Red)) {
+      storedStaticShotRotation = new Rotation2d((Math.atan2(yDistance, xDistance)) + Math.PI);
+    }
+  }
+
   /**
    * Runs the drive at the desired velocity.
    *
@@ -528,7 +553,10 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
   public Command sysIdDynamic(SysIdRoutine.Direction direction) {
     return run(() -> runCharacterization(0.0)).withTimeout(1.0).andThen(sysId.dynamic(direction));
   }
+  public Command otfCommand() {
+    return setAngle(storedStaticShotRotation);
 
+  }
   /** Returns the module states (turn angles and drive velocities) for all of the modules. */
   @AutoLogOutput(key = "Drive/SwerveStates/Measured")
   private SwerveModuleState[] getModuleStates() {

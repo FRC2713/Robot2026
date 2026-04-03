@@ -237,10 +237,7 @@ public final class GameCommandGroups {
   public static Command staticTurretOtf(
       Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier) {
     return DriveCommands.joystickDriveAtAngle(
-            RobotContainer.drive,
-            xSupplier,
-            ySupplier,
-            () -> LaunchingSolutionManager.ZoneSelectionHelpers.storedStaticShotRotation)
+            RobotContainer.drive, xSupplier, ySupplier, () -> Drive.storedStaticShotRotation)
         .withName("Drive Intake Align");
   }
 }
