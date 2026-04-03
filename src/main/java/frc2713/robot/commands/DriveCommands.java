@@ -13,9 +13,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -29,7 +27,10 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc2713.lib.util.DriveLimits;
+import frc2713.lib.util.InputShaping;
 import frc2713.lib.util.LoggedTunableGains;
+import frc2713.lib.util.Util;
 import frc2713.robot.Constants;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.drive.DriveConstants;
@@ -52,6 +53,8 @@ public class DriveCommands {
   private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
   private static final double WHEEL_RADIUS_MAX_VELOCITY = 1.25; // Rad/Sec
   private static final double WHEEL_RADIUS_RAMP_RATE = 0.25; // Rad/Sec^2
+  private static final InputShaping LINEAR_INPUT_SHAPING =
+      InputShaping.squareWithSign().mapToCircle().deadband(DEADBAND);
   public static double target = 0.0;
 
   public static final DoubleSupplier INCH_SPEED = () -> 0.1;
@@ -88,17 +91,7 @@ public class DriveCommands {
   }
 
   private static Translation2d getLinearVelocityFromJoysticks(double x, double y) {
-    // Apply deadband
-    double linearMagnitude = MathUtil.applyDeadband(Math.hypot(x, y), DEADBAND);
-    Rotation2d linearDirection = new Rotation2d(Math.atan2(y, x));
-
-    // Square magnitude for more precise control
-    linearMagnitude = linearMagnitude * linearMagnitude;
-
-    // Return new linear velocity
-    return new Pose2d(Translation2d.kZero, linearDirection)
-        .transformBy(new Transform2d(linearMagnitude, 0.0, Rotation2d.kZero))
-        .getTranslation();
+    return LINEAR_INPUT_SHAPING.apply(x, y);
   }
 
   /**
@@ -119,7 +112,7 @@ public class DriveCommands {
           double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
 
           // Square rotation value for more precise control
-          omega = Math.copySign(omega * omega, omega);
+          omega = Util.squareWithSign(omega);
 
           // Convert to field relative speeds & send command
           ChassisSpeeds speeds =
@@ -430,6 +423,17 @@ public class DriveCommands {
           linearAcceleration.ifPresent(drive::setLinearAccelerationLimit);
           angularVelocity.ifPresent(drive::setAngularVelocityLimit);
           angularAcceleration.ifPresent(drive::setAngularAccelerationLimit);
+        });
+  }
+
+  /** Returns a command that applies all four drive limits at once. */
+  public static Command setDriveLimits(Drive drive, DriveLimits limits) {
+    return Commands.runOnce(
+        () -> {
+          drive.setLinearVelocityLimit(limits.linearVelocity());
+          drive.setLinearAccelerationLimit(limits.linearAcceleration());
+          drive.setAngularVelocityLimit(limits.angularVelocity());
+          drive.setAngularAccelerationLimit(limits.angularAcceleration());
         });
   }
 
