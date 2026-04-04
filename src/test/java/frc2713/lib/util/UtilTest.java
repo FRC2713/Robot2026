@@ -3,11 +3,13 @@ package frc2713.lib.util;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import org.junit.jupiter.api.Nested;
@@ -154,6 +156,56 @@ class UtilTest {
       // Robot-relative: 0 - 180 = -180 or 180 (same rotation)
       double resultRad = result.in(Radians);
       assertTrue(Math.abs(resultRad - Math.PI) < 0.01 || Math.abs(resultRad + Math.PI) < 0.01);
+    }
+  }
+
+  @Nested
+  class MapToUnitCircle {
+    @Test
+    void axisInputUnchanged() {
+      Translation2d result = Util.mapToUnitCircle(1.0, 0.0);
+      assertEquals(1.0, result.getX(), Util.EPSILON);
+      assertEquals(0.0, result.getY(), Util.EPSILON);
+      assertEquals(1.0, result.getNorm(), Util.EPSILON);
+    }
+
+    @Test
+    void diagonalInputGetsNormalizedToUnitMagnitude() {
+      Translation2d result = Util.mapToUnitCircle(1.0, 1.0);
+      assertEquals(1.0, result.getNorm(), Util.EPSILON);
+      assertEquals(result.getX(), result.getY(), Util.EPSILON);
+    }
+
+    @Test
+    void insideUnitCircleUnchanged() {
+      Translation2d result = Util.mapToUnitCircle(0.3, -0.4);
+      assertEquals(0.3, result.getX(), Util.EPSILON);
+      assertEquals(-0.4, result.getY(), Util.EPSILON);
+      assertEquals(0.5, result.getNorm(), Util.EPSILON);
+    }
+  }
+
+  @Nested
+  class NonLinearStickShaping {
+    @Test
+    void signedPowerSquaresAndPreservesSign() {
+      assertEquals(0.0625, Util.signedPower(0.25, 2.0), Util.EPSILON);
+      assertEquals(-0.0625, Util.signedPower(-0.25, 2.0), Util.EPSILON);
+      assertEquals(1.0, Util.signedPower(1.0, 2.0), Util.EPSILON);
+      assertEquals(-1.0, Util.signedPower(-1.0, 2.0), Util.EPSILON);
+    }
+
+    @Test
+    void squareWithSignOnScalarMatchesExpectedCurve() {
+      assertEquals(0.0625, Util.squareWithSign(0.25), Util.EPSILON);
+      assertEquals(-0.0625, Util.squareWithSign(-0.25), Util.EPSILON);
+    }
+
+    @Test
+    void squareWithSignOnVectorAppliesPerAxis() {
+      Translation2d result = Util.squareWithSign(0.25, -0.5);
+      assertEquals(0.0625, result.getX(), Util.EPSILON);
+      assertEquals(-0.25, result.getY(), Util.EPSILON);
     }
   }
 }

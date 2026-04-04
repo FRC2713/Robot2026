@@ -1,26 +1,23 @@
 package frc2713.robot;
 
-import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
-import static edu.wpi.first.units.Units.FeetPerSecond;
-import static edu.wpi.first.units.Units.FeetPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
+import frc2713.robot.subsystems.drive.DriveConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.launcher.Flywheels;
 import frc2713.robot.subsystems.launcher.Hood;
 import frc2713.robot.subsystems.launcher.LauncherConstants;
 import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
+import frc2713.robot.subsystems.launcher.LaunchingSolutionManager.LaunchingAction;
 import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 import frc2713.robot.subsystems.serializer.SerializerConstants;
-import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
 /**
@@ -87,12 +84,10 @@ public final class GameCommandGroups {
         IntakeExtension extension,
         IntakeRoller intakeRoller) {
       return Commands.parallel(
-              DriveCommands.setDriveLimits(
-                  drive,
-                  Optional.of(FeetPerSecond.of(6.0)),
-                  Optional.of(FeetPerSecondPerSecond.of(11.0)),
-                  Optional.of(DegreesPerSecond.of(45.0)),
-                  Optional.of(DegreesPerSecondPerSecond.of(180.0))),
+              Commands.either(
+                  DriveCommands.setDriveLimits(drive, DriveConstants.scoringDriveLimits),
+                  DriveCommands.setDriveLimits(drive, DriveConstants.feedingDriveLimits),
+                  () -> LaunchingSolutionManager.currentAction == LaunchingAction.SCORING),
               flywheels.otfCommand(),
               hood.otfCommand(),
               turret.otfCommand(),
