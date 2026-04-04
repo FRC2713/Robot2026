@@ -28,7 +28,6 @@ import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig.GeneralControlMode;
 import frc2713.lib.util.LoggedTunableBoolean;
 import frc2713.lib.util.LoggedTunableMeasure;
-import frc2713.lib.util.LoggedTunableNumber;
 import frc2713.lib.util.Util;
 import frc2713.robot.GamePieceConstants;
 
@@ -283,21 +282,6 @@ public final class LauncherConstants {
     ITOF;
   }
 
-  public static final LoggedTunableMeasure<Time> itofConvergenceSeconds =
-      new LoggedTunableMeasure<>("LaunchingSolutionManager/itof_convergence_s", Seconds.of(0.002));
-  public static final LoggedTunableNumber itofMaxIterations =
-      new LoggedTunableNumber("LaunchingSolutionManager/itof_max_iterations", 12.0);
-  public static final LoggedTunableMeasure<Time> itofTofMin =
-      new LoggedTunableMeasure<>("LaunchingSolutionManager/itof_tof_min", Seconds.of(0.05));
-  public static final LoggedTunableMeasure<Time> itofTofMax =
-      new LoggedTunableMeasure<>("LaunchingSolutionManager/itof_tof_max", Seconds.of(4.0));
-
-  public static LoggedTunableMeasure<Time> otfLinearProjectionSeconds =
-      new LoggedTunableMeasure<Time>(
-          "LaunchingSolutionManager/time_to_project_lin", Seconds.of(0.5));
-  public static LoggedTunableMeasure<Time> otfAngularProjectionSeconds =
-      new LoggedTunableMeasure<Time>(
-          "LaunchingSolutionManager/time_to_project_ang", Seconds.of(0.5));
   public static LoggedTunableBoolean otfFutureProjectionEnabled =
       new LoggedTunableBoolean("LaunchingSolutionManager/projection_enabled", true);
 }

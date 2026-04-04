@@ -1,10 +1,6 @@
 package frc2713.robot.subsystems.launcher;
 
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -14,7 +10,6 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -29,6 +24,15 @@ import java.util.Arrays;
 import org.littletonrobotics.junction.Logger;
 
 public class LaunchingSolutionManager extends SubsystemBase {
+  // Solver tunables:
+  // - [tMin, tMax] bounds the allowed ToF solution range
+  // - eps is the fixed-point convergence tolerance
+  // - maxIter is the hard stop for iteration count
+  double tMin = 0.05;
+  double tMax = 4.0;
+  double eps = 0.002;
+  int maxIter = 12;
+
   public enum LaunchingAction {
     PASSING,
     SCORING
@@ -242,46 +246,49 @@ public class LaunchingSolutionManager extends SubsystemBase {
    */
   private LaunchSolution calculateITOF(
       Pose3d robotPose, Translation3d robotVel, Translation3d targetPose) {
+    // Enable/disable expensive debug logging from tunables.
     boolean dbg = itofDebug.get();
     Translation3d robotTrans = robotPose.getTranslation();
-    double tMin = LauncherConstants.itofTofMin.get().in(Seconds);
-    double tMax = LauncherConstants.itofTofMax.get().in(Seconds);
-    double eps = LauncherConstants.itofConvergenceSeconds.get().in(Seconds);
-    int maxIter = (int) Math.round(LauncherConstants.itofMaxIterations.get());
 
+    // Step 1: compute the immediate range. If we are effectively at the goal in XY,
+    // fall back to the static solver to avoid unstable divide-by-near-zero behavior.
     Translation3d rangeVec0 = targetPose.minus(robotTrans);
-    double d0 = rangeVec0.toTranslation2d().getNorm();
-    if (d0 < 0.05) {
+    double initialDistance = rangeVec0.toTranslation2d().getNorm();
+    if (initialDistance < 0.05) {
       if (dbg) {
-        Logger.recordOutput(pb.makePath("itof debug", "status"), "fallback d0 too small");
+        Logger.recordOutput(
+            pb.makePath("itof debug", "status"), "fallback static: initial distance too small");
       }
       lastItofTofSeconds = -1.0;
       return calculateStatic(robotPose, robotVel, targetPose);
     }
 
+    // Step 2: initialize ToF with warm start from previous cycle when valid,
+    // otherwise seed from the ToF lookup table at current distance.
     double t = lastItofTofSeconds;
     if (t < tMin || t > tMax || Double.isNaN(t)) {
-      t = MathUtil.clamp(LaunchingSolutionManager.currentTofMap.get(d0), tMin, tMax);
+      t = MathUtil.clamp(LaunchingSolutionManager.currentTofMap.get(initialDistance), tMin, tMax);
     }
 
     if (dbg) {
-      Logger.recordOutput(pb.makePath("itof debug", "rangeVec0"), rangeVec0);
-      Logger.recordOutput(pb.makePath("itof debug", "d0 m"), d0);
+      Logger.recordOutput(pb.makePath("itof debug", "initial relative vector"), rangeVec0);
+      Logger.recordOutput(
+          pb.makePath("itof debug", "initial horizontal distance m"), initialDistance);
       Logger.recordOutput(pb.makePath("itof debug", "robot translation"), robotTrans);
       Logger.recordOutput(pb.makePath("itof debug", "robot pose"), robotPose);
       Logger.recordOutput(pb.makePath("itof debug", "robot lin vel"), robotVel);
       Logger.recordOutput(pb.makePath("itof debug", "target"), targetPose);
-      Logger.recordOutput(pb.makePath("itof debug", "t init s"), t);
+      Logger.recordOutput(pb.makePath("itof debug", "initial tof guess s"), t);
       Logger.recordOutput(
-          pb.makePath("itof debug", "tof from d0 s"),
-          LaunchingSolutionManager.currentTofMap.get(d0));
-      Logger.recordOutput(pb.makePath("itof debug", "t min s"), tMin);
-      Logger.recordOutput(pb.makePath("itof debug", "t max s"), tMax);
-      Logger.recordOutput(pb.makePath("itof debug", "convergence eps s"), eps);
-      Logger.recordOutput(pb.makePath("itof debug", "max iterations"), maxIter);
+          pb.makePath("itof debug", "tof lookup at initial distance s"),
+          LaunchingSolutionManager.currentTofMap.get(initialDistance));
+      Logger.recordOutput(pb.makePath("itof debug", "tof lower bound s"), tMin);
+      Logger.recordOutput(pb.makePath("itof debug", "tof upper bound s"), tMax);
+      Logger.recordOutput(pb.makePath("itof debug", "convergence tolerance s"), eps);
+      Logger.recordOutput(pb.makePath("itof debug", "maximum iterations"), maxIter);
     }
 
-    double horizontalDist = d0;
+    double horizontalDist = initialDistance;
     Translation3d rel = rangeVec0;
     int iterationsUsed = 0;
 
@@ -289,6 +296,12 @@ public class LaunchingSolutionManager extends SubsystemBase {
     double[] dPerIter = dbg && maxIter > 0 ? new double[maxIter] : null;
     double[] tNextPerIter = dbg && maxIter > 0 ? new double[maxIter] : null;
 
+    // Step 3: fixed-point iteration.
+    // For each ToF guess t:
+    //  - project where the robot will be at t
+    //  - recompute distance to the target from that projected position
+    //  - look up the drag-aware ToF for that projected distance
+    //  - repeat until converged or max iterations reached
     for (int i = 0; i < maxIter; i++) {
       Translation3d projected =
           robotTrans.plus(
@@ -297,8 +310,9 @@ public class LaunchingSolutionManager extends SubsystemBase {
       horizontalDist = rel.toTranslation2d().getNorm();
       if (horizontalDist < 0.05) {
         if (dbg) {
-          Logger.recordOutput(pb.makePath("itof debug", "status"), "fallback iter d_h too small");
-          Logger.recordOutput(pb.makePath("itof debug", "last iter"), i);
+          Logger.recordOutput(
+              pb.makePath("itof debug", "status"), "fallback static: iteration distance too small");
+          Logger.recordOutput(pb.makePath("itof debug", "fallback iteration index"), i);
           logItofDebugIteration(
               i, t, projected, rel, horizontalDist, Double.NaN, robotPose.getRotation());
         }
@@ -324,78 +338,62 @@ public class LaunchingSolutionManager extends SubsystemBase {
       t = tNext;
     }
 
+    // Persist converged ToF for warm-starting next cycle.
     lastItofTofSeconds = t;
-    Logger.recordOutput(pb.makePath("itof iterations"), iterationsUsed);
-    Logger.recordOutput(pb.makePath("itof tof s"), t);
+    Logger.recordOutput(pb.makePath("itof iteration count"), iterationsUsed);
+    Logger.recordOutput(pb.makePath("itof solved tof s"), t);
 
     if (dbg && tPerIter != null && iterationsUsed > 0) {
       Logger.recordOutput(
-          pb.makePath("itof debug", "t per iter"), Arrays.copyOf(tPerIter, iterationsUsed));
+          pb.makePath("itof debug", "iteration tof estimate s"),
+          Arrays.copyOf(tPerIter, iterationsUsed));
       Logger.recordOutput(
-          pb.makePath("itof debug", "d_h per iter m"), Arrays.copyOf(dPerIter, iterationsUsed));
+          pb.makePath("itof debug", "iteration horizontal distance m"),
+          Arrays.copyOf(dPerIter, iterationsUsed));
       Logger.recordOutput(
-          pb.makePath("itof debug", "t next per iter s"),
+          pb.makePath("itof debug", "iteration next tof estimate s"),
           Arrays.copyOf(tNextPerIter, iterationsUsed));
     }
 
+    // Step 4: evaluate final projected geometry using solved ToF.
     Translation3d projected =
-        robotTrans.plus(
-            new Translation3d(robotVel.getX() * t, robotVel.getY() * t, robotVel.getZ() * t));
+        robotTrans.plus(new Translation3d(robotVel.getX() * t, robotVel.getY() * t, 0));
     rel = targetPose.minus(projected);
     horizontalDist = rel.toTranslation2d().getNorm();
 
     if (dbg) {
       Logger.recordOutput(
-          pb.makePath("itof debug", "projected robot pose"),
+          pb.makePath("itof debug", "final projected robot pose"),
           new Pose3d(projected, robotPose.getRotation()));
-      Logger.recordOutput(pb.makePath("itof debug", "final rel to target"), rel);
-      Logger.recordOutput(pb.makePath("itof debug", "final d_h m"), horizontalDist);
-      Logger.recordOutput(pb.makePath("itof debug", "converged t s"), t);
+      Logger.recordOutput(pb.makePath("itof debug", "final relative vector to target"), rel);
+      Logger.recordOutput(pb.makePath("itof debug", "final horizontal distance m"), horizontalDist);
+      Logger.recordOutput(pb.makePath("itof debug", "converged tof s"), t);
     }
 
     if (horizontalDist < 0.05 || Double.isNaN(horizontalDist)) {
       if (dbg) {
-        Logger.recordOutput(pb.makePath("itof debug", "status"), "fallback final d_h invalid");
+        Logger.recordOutput(
+            pb.makePath("itof debug", "status"), "fallback static: final distance invalid");
       }
       lastItofTofSeconds = -1.0;
       return calculateStatic(robotPose, robotVel, targetPose);
     }
 
+    // Step 5: convert final projected distance into shooter setpoints.
+    // Yaw aims directly from projected robot position to target using the converged relative
+    // vector.
+    // (Do not apply an additional robot-velocity subtraction here.)
     double rpmSetpoint = LaunchingSolutionManager.currentRPMMap.get(horizontalDist);
     double hoodDeg = LaunchingSolutionManager.currentHoodMap.get(horizontalDist);
-    LinearVelocity ballVelocityMeasure =
-        LaunchingLookupMaps.getBallVelocityFromFlywheelVelocity(RPM.of(rpmSetpoint));
-    double idealBallSpeed = ballVelocityMeasure.in(MetersPerSecond);
-    double idealPitchRad =
-        LaunchingLookupMaps.getReleaseAngleFromDistanceAndFlywheelVelocity(
-                Meters.of(horizontalDist),
-                RPM.of(rpmSetpoint),
-                LaunchingSolutionManager.currentAction == LaunchingAction.SCORING)
-            .in(Radians);
-
-    Translation3d horizontalDir = new Translation3d(rel.getX(), rel.getY(), 0).div(horizontalDist);
-
-    Translation3d idealVelocity =
-        horizontalDir
-            .times(idealBallSpeed * Math.cos(idealPitchRad))
-            .plus(new Translation3d(0, 0, idealBallSpeed * Math.sin(idealPitchRad)));
-
-    Translation3d neededMuzzleVelocity = idealVelocity.minus(robotVel);
 
     if (dbg) {
-      Logger.recordOutput(pb.makePath("itof debug", "rpm lut"), rpmSetpoint);
-      Logger.recordOutput(pb.makePath("itof debug", "hood deg lut"), hoodDeg);
-      Logger.recordOutput(pb.makePath("itof debug", "ideal ball speed mps"), idealBallSpeed);
-      Logger.recordOutput(pb.makePath("itof debug", "ideal pitch rad"), idealPitchRad);
-      Logger.recordOutput(pb.makePath("itof debug", "ideal velocity"), idealVelocity);
-      Logger.recordOutput(
-          pb.makePath("itof debug", "needed muzzle velocity"), neededMuzzleVelocity);
-      Logger.recordOutput(pb.makePath("itof debug", "status"), "ok");
+      Logger.recordOutput(pb.makePath("itof debug", "lookup flywheel rpm"), rpmSetpoint);
+      Logger.recordOutput(pb.makePath("itof debug", "lookup hood angle deg"), hoodDeg);
+      Logger.recordOutput(pb.makePath("itof debug", "aim relative vector"), rel);
+      Logger.recordOutput(pb.makePath("itof debug", "status"), "solver success");
     }
 
-    Rotation2d newYaw =
-        new Rotation2d(Math.atan2(neededMuzzleVelocity.getY(), neededMuzzleVelocity.getX()))
-            .rotateBy(manualOffset);
+    Rotation2d newYaw = new Rotation2d(Math.atan2(rel.getY(), rel.getX())).rotateBy(manualOffset);
 
     return new LaunchSolution(
         newYaw, rpmSetpoint, Rotation2d.fromDegrees(hoodDeg), horizontalDist, true);
@@ -409,14 +407,15 @@ public class LaunchingSolutionManager extends SubsystemBase {
       double dHorizontal,
       double tNext,
       Rotation3d robotRotation) {
-    Logger.recordOutput(pb.makePath("itof debug", "iter index"), i);
-    Logger.recordOutput(pb.makePath("itof debug", "iter t s"), t);
+    Logger.recordOutput(pb.makePath("itof debug", "iteration index"), i);
+    Logger.recordOutput(pb.makePath("itof debug", "iteration tof estimate s"), t);
     Logger.recordOutput(
-        pb.makePath("itof debug", "iter projected pose"),
+        pb.makePath("itof debug", "iteration projected robot pose"),
         new Pose3d(projectedTrans, robotRotation));
-    Logger.recordOutput(pb.makePath("itof debug", "iter rel to target"), relToTarget);
-    Logger.recordOutput(pb.makePath("itof debug", "iter d_h m"), dHorizontal);
-    Logger.recordOutput(pb.makePath("itof debug", "iter t next s"), tNext);
+    Logger.recordOutput(
+        pb.makePath("itof debug", "iteration relative vector to target"), relToTarget);
+    Logger.recordOutput(pb.makePath("itof debug", "iteration horizontal distance m"), dHorizontal);
+    Logger.recordOutput(pb.makePath("itof debug", "iteration next tof estimate s"), tNext);
   }
 
   public class ZoneSelectionHelpers {
