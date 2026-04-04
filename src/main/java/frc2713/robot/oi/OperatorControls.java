@@ -3,11 +3,7 @@ package frc2713.robot.oi;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RPM;
 
-import java.util.function.BooleanSupplier;
-
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc2713.robot.GameCommandGroups;
@@ -21,6 +17,7 @@ import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 import frc2713.robot.util.ShiftManager;
+import java.util.function.BooleanSupplier;
 
 public class OperatorControls {
   private final CommandVader4Controller controller = new CommandVader4Controller(1);
@@ -159,25 +156,7 @@ public class OperatorControls {
                   }
                 }));
 
-    new Trigger((BooleanSupplier) () -> ShiftManager.getTimeLeftInShift(DriverStation.getMatchTime()) <= 2)
-        .whileTrue(startRumble())
-        .onFalse(stopRumble());
+    new Trigger(() -> ShiftManager.getTimeLeftInShift(DriverStation.getMatchTime()) <= 2)
+        .whileTrue(controller.RumbleForDuration(0.5));
   }
-
-
-    public Command startRumble() {
-    return Commands.run(
-        () -> {
-          controller.setRumble(GenericHID.RumbleType.kLeftRumble, 0.5);
-          controller.setRumble(GenericHID.RumbleType.kRightRumble, 0.5);
-        });
-  }
-
-  public Command stopRumble() {
-    return Commands.run(
-        () -> {
-          controller.setRumble(GenericHID.RumbleType.kLeftRumble, 0.0);
-          controller.setRumble(GenericHID.RumbleType.kRightRumble, 0.0);
-        });
-    }
 }

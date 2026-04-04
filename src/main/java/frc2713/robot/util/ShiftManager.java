@@ -2,13 +2,8 @@ package frc2713.robot.util;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj.GenericHID;
 import frc2713.lib.util.LoggedTunableBoolean;
 import frc2713.robot.Robot;
-import frc2713.robot.RobotContainer;
-import frc2713.robot.oi.DevControls;
-
 import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
@@ -104,7 +99,6 @@ public class ShiftManager {
     }
   }
   // play the rumble on controllers when the last 2 seconds in a shift
-
 
   public static String getCurrentPhase(double time) {
     if (ShiftManager.isAuto) {
