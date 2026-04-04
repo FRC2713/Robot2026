@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.logging.PeriodicTimingLogger;
 import frc2713.lib.logging.TimeLogged;
+import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.lib.util.LoggedTunableBoolean;
 import frc2713.robot.FieldConstants;
@@ -104,7 +105,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
     try (var ignored = PeriodicTimingLogger.time(this)) {
       // 1. Get Robot State (ID 0 = Chassis)
       Pose3d robotPose = new Pose3d(RobotContainer.drive.getPose());
-      Translation3d robotLinVel = RobotContainer.drive.getRelativeLinearVelocity();
+      Translation3d robotLinVel = KinematicsManager.getInstance().getGlobalLinearVelocity(0);
 
       // 2. Select goal
       if (FieldConstants.NeutralZone.region.contains(

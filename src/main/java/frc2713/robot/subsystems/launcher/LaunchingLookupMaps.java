@@ -61,13 +61,8 @@ public final class LaunchingLookupMaps {
     // rpmVelocityMap.put(6.03, 4200.);
 
     // Distance to az Corner (m) -> RPM (rpm)
-    distanceToRpmAzMap.put(1.03, 2400.);
-    distanceToRpmAzMap.put(1.75, 2666.66);
-    distanceToRpmAzMap.put(2.1, 2800.);
-    distanceToRpmAzMap.put(3.36, 2933.);
-    distanceToRpmAzMap.put(4.5, 3066.);
-    distanceToRpmAzMap.put(5.0, 3333.);
-    distanceToRpmAzMap.put(6.03, 4266.);
+    distanceToRpmAzMap.put(2.41, 1800.);
+    distanceToRpmAzMap.put(7.16, 4266.);
 
     // from north shore
     // rpmVelocityAZMap.put(1.03, 2500.);
@@ -99,11 +94,8 @@ public final class LaunchingLookupMaps {
     // angleMap.put(6.03, 30.0);
 
     // Distance to AZ corner (m) -> Hood Pitch (Degrees)
-    distanceToAngleAzMap.put(1.03, 5.0);
-    distanceToAngleAzMap.put(2.1, 20.0);
-    distanceToAngleAzMap.put(3.36, 25.0);
-    distanceToAngleAzMap.put(5.0, 27.13);
-    distanceToAngleAzMap.put(6.03, 30.0);
+    distanceToAngleAzMap.put(2.41, 30.0);
+    distanceToAngleAzMap.put(7.16, 30.0);
 
     // Hood angle (deg) -> release angle (deg)
     rpmToReleaseAngleAdjustmentMap.put(2000., 5.0);

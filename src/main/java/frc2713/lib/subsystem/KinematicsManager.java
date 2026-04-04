@@ -124,6 +124,9 @@ public class KinematicsManager extends SubsystemBase {
         Logger.recordOutput(pb.makePath("localPoses"), localPoses);
         Logger.recordOutput(pb.makePath("globalPoses"), globalPoses);
       }
+      Logger.recordOutput(pb.makePath("globalAngVel"), getGlobalAngularVelocity(0).getNorm());
+      Logger.recordOutput(
+          pb.makePath("globalAngAccels"), getGlobalAngularAcceleration(0).getNorm());
     }
   }
 

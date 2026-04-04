@@ -479,8 +479,8 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
       // Think of it like: we want to move toward the target speed, but only take a step
       // of size maxLinearDelta in that direction.
       double scale = maxLinearDelta / deltaLinearSpeed;
-      vx = lastCommandedSpeeds.vxMetersPerSecond + dvx * scale;
-      vy = lastCommandedSpeeds.vyMetersPerSecond + dvy * scale;
+      // vx = lastCommandedSpeeds.vxMetersPerSecond + dvx * scale;
+      // vy = lastCommandedSpeeds.vyMetersPerSecond + dvy * scale;
     }
 
     // --- Angular acceleration limiting ---
@@ -489,7 +489,7 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
 
     if (Math.abs(dOmega) > maxAngularDelta) {
       // Clamp the angular speed change to the max allowed step
-      omega = lastCommandedSpeeds.omegaRadiansPerSecond + Math.copySign(maxAngularDelta, dOmega);
+      // omega = lastCommandedSpeeds.omegaRadiansPerSecond + Math.copySign(maxAngularDelta, dOmega);
     }
 
     // --- Linear velocity limiting ---
