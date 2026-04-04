@@ -89,7 +89,7 @@ public final class GameCommandGroups {
       return Commands.parallel(
               DriveCommands.setDriveLimits(
                   drive,
-                  Optional.of(FeetPerSecond.of(3.0)),
+                  Optional.of(FeetPerSecond.of(6.0)),
                   Optional.of(FeetPerSecondPerSecond.of(11.0)),
                   Optional.of(DegreesPerSecond.of(45.0)),
                   Optional.of(DegreesPerSecondPerSecond.of(180.0))),

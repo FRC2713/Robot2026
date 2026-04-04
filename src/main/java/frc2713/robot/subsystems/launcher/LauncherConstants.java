@@ -42,13 +42,11 @@ public final class LauncherConstants {
     public static Angle manualOffset = Degrees.of(180);
 
     // Turret rotation limits
-    public static final double FORWARD_LIMIT_DEGREES = 90;
-    public static final double REVERSE_LIMIT_DEGREES = -90;
+    public static final Angle forwardSoftLimit = Degrees.of(180);
+    public static final Angle reverseSoftLimit = Degrees.of(-180);
 
-    public static final Angle forwardSoftLimit = Degrees.of(FORWARD_LIMIT_DEGREES);
-    public static final Angle reverseSoftLimit = Degrees.of(REVERSE_LIMIT_DEGREES);
-
-    public static final Time OTF_OMEGA_LOOKAHEAD = Seconds.of(0.1);
+    public static final LoggedTunableMeasure<Time> OTF_OMEGA_LOOKAHEAD =
+        new LoggedTunableMeasure<Time>("LaunchingSolutionManager/omegaTime", Seconds.of(0.1));
 
     // Gear tooth counts for calculating overall gear ratio
     public static final int pinionGearTeeth = 15;
