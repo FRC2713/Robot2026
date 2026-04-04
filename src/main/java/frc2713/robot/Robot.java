@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc2713.lib.energy.EnergyManagement;
+import frc2713.lib.util.AllianceCache;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.generated.BuildConstants;
 import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
@@ -93,6 +94,8 @@ public class Robot extends LoggedRobot {
     // timing (see the template project documentation for details)
     Threads.setCurrentThreadPriority(true, 99);
 
+    AllianceCache.periodicUpdate();
+
     // Runs the Scheduler. This is responsible for polling buttons, adding
     // newly-scheduled commands, running already-scheduled commands, removing
     // finished or interrupted commands, and running subsystem periodic() methods.
@@ -118,6 +121,8 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically when disabled. */
   @Override
   public void disabledPeriodic() {
+    AllianceCache.disabledPeriodicUpdate();
+
     LaunchingSolutionManager.currentGoal =
         AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint);
 
@@ -137,6 +142,8 @@ public class Robot extends LoggedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+    AllianceCache.refreshNow();
+
     autonomousCommand = robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
@@ -152,6 +159,8 @@ public class Robot extends LoggedRobot {
   /** This function is called once when teleop is enabled. */
   @Override
   public void teleopInit() {
+    AllianceCache.refreshNow();
+
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
