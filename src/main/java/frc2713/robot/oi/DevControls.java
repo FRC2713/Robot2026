@@ -4,6 +4,8 @@ import static edu.wpi.first.units.Units.RPM;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -232,6 +234,19 @@ public class DevControls {
     //     .onFalse(Commands.parallel(dyeRotor.stop(), feeder.stop(), flywheels.stop()));
 
     // Shoot when flywheels are ready
+  }
+  public Command startRumble() {
+    return Commands.run(() -> {
+      controller.setRumble(GenericHID.RumbleType.kLeftRumble, 1.0);
+      controller.setRumble(GenericHID.RumbleType.kRightRumble, 1.0);
+    });
+  }
+
+  public Command stopRumble() {
+    return Commands.run(() -> {
+      controller.setRumble(GenericHID.RumbleType.kLeftRumble, 0.0);
+      controller.setRumble(GenericHID.RumbleType.kRightRumble, 0.0);
+    });
   }
 
   public double getLeftY() {

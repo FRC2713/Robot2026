@@ -2,13 +2,19 @@ package frc2713.robot.oi;
 
 import static edu.wpi.first.units.Units.Degrees;
 
+import java.util.function.BooleanSupplier;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc2713.robot.GameCommandGroups;
+import frc2713.robot.RobotContainer;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
@@ -20,6 +26,7 @@ import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 import frc2713.robot.subsystems.vision.Vision;
+import frc2713.robot.util.ShiftManager;
 
 public class DriverControls {
   private final CommandVader4Controller controller = new CommandVader4Controller(0);
@@ -142,6 +149,10 @@ public class DriverControls {
                     "OTF with drive"),
                 Commands.run(() -> Drive.setStaticShotRotation())))
         .onFalse(setToNormalDriveCmd());
+            // Rumble when <= 2 seconds left in the shift
+        new Trigger((BooleanSupplier) () -> ShiftManager.getTimeLeftInShift(DriverStation.getMatchTime()) <= 2)
+                .whileTrue(startRumble())
+                .onFalse(stopRumble());
 
     // shoot otf
     controller
@@ -168,7 +179,22 @@ public class DriverControls {
 
     // controller
   }
+  public Command startRumble() {
+    return Commands.run(
+        () -> {
+          controller.setRumble(GenericHID.RumbleType.kLeftRumble, 0.5);
+          controller.setRumble(GenericHID.RumbleType.kRightRumble, 0.5);
+        });
+  }
 
+  public Command stopRumble() {
+    return Commands.run(
+        () -> {
+          controller.setRumble(GenericHID.RumbleType.kLeftRumble, 0.0);
+          controller.setRumble(GenericHID.RumbleType.kRightRumble, 0.0);
+        });
+    }
+  
   public double getLeftY() {
     return controller.getLeftY();
   }
