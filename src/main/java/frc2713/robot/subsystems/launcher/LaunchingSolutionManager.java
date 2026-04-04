@@ -21,7 +21,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.logging.PeriodicTimingLogger;
 import frc2713.lib.logging.TimeLogged;
-import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.lib.util.LoggedTunableBoolean;
 import frc2713.robot.FieldConstants;
@@ -46,7 +45,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
    * and iteration data under {@code LaunchingSolutionManager/itof debug/...}.
    */
   public static final LoggedTunableBoolean itofDebug =
-      new LoggedTunableBoolean("LaunchingSolutionManager/itof_debug", false);
+      new LoggedTunableBoolean("LaunchingSolutionManager/itof_debug", true);
 
   // --- Data Structures ---
   public static record LaunchSolution(
@@ -100,8 +99,8 @@ public class LaunchingSolutionManager extends SubsystemBase {
   public void periodic() {
     try (var ignored = PeriodicTimingLogger.time(this)) {
       // 1. Get Robot State (ID 0 = Chassis)
-      Pose3d robotPose = KinematicsManager.getInstance().getGlobalPose(0);
-      Translation3d robotLinVel = KinematicsManager.getInstance().getGlobalLinearVelocity(0);
+      Pose3d robotPose = new Pose3d(RobotContainer.drive.getPose());
+      Translation3d robotLinVel = RobotContainer.drive.getRelativeLinearVelocity();
 
       // 2. Select goal
       if (FieldConstants.NeutralZone.region.contains(
@@ -112,10 +111,6 @@ public class LaunchingSolutionManager extends SubsystemBase {
         ZoneSelectionHelpers.configureForScoring();
         Logger.recordOutput(pb.makePath("shot selection"), "Scoring");
       }
-
-      // 3. Solve for the Launch Vector
-      currentSolution =
-          calculateStatic(robotPose, robotLinVel, LaunchingSolutionManager.currentGoal);
 
       // 4. Log
       Logger.recordOutput(pb.makePath("used robot pose"), robotPose);

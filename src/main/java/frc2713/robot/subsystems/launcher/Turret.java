@@ -222,7 +222,8 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
           Angle omegaCompensation =
               RobotContainer.drive
                   .getAngularSpeed()
-                  .times(LauncherConstants.Turret.OTF_OMEGA_LOOKAHEAD);
+                  .times(LauncherConstants.Turret.OTF_OMEGA_LOOKAHEAD.get())
+                  .times(-1);
           Angle predictedFieldYaw =
               Degrees.of(solution.turretFieldYaw().getDegrees()).plus(omegaCompensation);
 
