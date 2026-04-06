@@ -23,6 +23,7 @@ import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.commands.autos.BLineMidwars;
+import frc2713.robot.commands.autos.BLineTuning;
 import frc2713.robot.commands.autos.Demo;
 import frc2713.robot.commands.autos.DriveTest;
 import frc2713.robot.commands.autos.Midwars;
@@ -389,6 +390,7 @@ public class RobotContainer {
       autoChooser.addOption("DriveTest", DriveTest.routine(autoFactory));
 
       autoChooser.addOption("DemoMode", Demo.demo());
+      autoChooser.addOption("BLine Tuning", BLineTuning.getCommand());
     }
 
     autoChooser.addDefaultOption("BlineMidwars", BLineMidwars.getCommand());
