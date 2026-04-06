@@ -23,7 +23,9 @@ public class DriveConstants {
             "headingTraj", new Slot0Configs().withKP(6.5).withKD(0.2), new MotionMagicConfigs());
     public static final LoggedTunableGains crosstrackTrajectoryController =
         new LoggedTunableGains(
-            "crosstrackTraj", new Slot0Configs().withKP(1.0).withKD(0.0), new MotionMagicConfigs());
+            "crosstrackTraj",
+            new Slot0Configs().withKP(1.7).withKD(0.08),
+            new MotionMagicConfigs());
   }
 
   public static final LoggedTunableNumber speedScalar =

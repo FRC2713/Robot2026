@@ -300,8 +300,30 @@ public class RobotContainer {
   }
 
   private void configurePathBuilder() {
+
+    // path logging
+    FollowPath.setDoubleLoggingConsumer(
+        pair -> {
+          Logger.recordOutput(pair.getFirst(), pair.getSecond());
+        });
+
+    FollowPath.setBooleanLoggingConsumer(
+        pair -> {
+          Logger.recordOutput(pair.getFirst(), pair.getSecond());
+        });
+
+    FollowPath.setPoseLoggingConsumer(
+        pair -> {
+          Logger.recordOutput(pair.getFirst(), pair.getSecond());
+        });
+
+    FollowPath.setTranslationListLoggingConsumer(
+        pair -> {
+          Logger.recordOutput(pair.getFirst(), pair.getSecond());
+        });
+
     // Path following
-    this.pathBuilder =
+    RobotContainer.pathBuilder =
         new FollowPath.Builder(
                 drive,
                 drive::getPose,
@@ -426,11 +448,11 @@ public class RobotContainer {
       autoChooser.addOption("BLine Tuning", BLineTuning.getCommand());
     }
 
-    autoChooser.addDefaultOption("BlineMidwars", BLineMidwars.getCommand());
-    autoChooser.addDefaultOption("BlineMidwarsOvercenter", BLineMidwarsOvercenter.getCommand());
+    autoChooser.addDefaultOption("BlineMidwarsRight", BLineMidwars.getCommand(() -> false));
+    autoChooser.addDefaultOption("BlineMidwarsLeft", BLineMidwars.getCommand(() -> true));
 
     autoChooser.addDefaultOption(
-        "Midwars",
+        "MidwarsRight",
         Midwars.getRoutine(
             autoFactory,
             false,
@@ -444,7 +466,7 @@ public class RobotContainer {
             feeder));
 
     autoChooser.addOption(
-        "MidwarsFlipped",
+        "MidwarsLeft",
         Midwars.getRoutine(
             autoFactory,
             true,

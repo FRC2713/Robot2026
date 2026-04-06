@@ -5,19 +5,23 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.lib.BLine.*;
 import frc2713.robot.GameCommandGroups;
 import frc2713.robot.RobotContainer;
+import java.util.function.Supplier;
 
 public class BLineMidwars {
 
-  // Load Paths
-  static Path midWars = new Path("mid_wards");
-  static Path backToTrench = new Path("back_to_trench");
-  static Path midWarsStraight = new Path("mid_wards_straight");
+  public static Path getPath(
+      String name, Supplier<Boolean> shouldMirror, Supplier<Boolean> shouldFlip) {
+    return new Path(name);
+  }
 
-  public static Command getCommand() {
+  public static Command getCommand(Supplier<Boolean> shouldMirror) {
     return Commands.sequence(
         GameCommandGroups.Intaking.intake(
                 RobotContainer.intakeExtension, RobotContainer.intakeRoller)
-            .withDeadline(RobotContainer.pathBuilder.build(midWars)),
+            .withDeadline(
+                RobotContainer.pathBuilder
+                    .withShouldMirror(shouldMirror)
+                    .build(new Path("mid_wards"))),
         Commands.parallel(
             GameCommandGroups.Launching.otfShot(
                     RobotContainer.drive,
@@ -29,10 +33,15 @@ public class BLineMidwars {
                     RobotContainer.intakeExtension,
                     RobotContainer.intakeRoller)
                 .withDeadline(Commands.waitSeconds(5.0)),
-            RobotContainer.pathBuilder.build(backToTrench)),
+            RobotContainer.pathBuilder
+                .withShouldMirror(shouldMirror)
+                .build(new Path("back_to_trench"))),
         GameCommandGroups.Intaking.intake(
                 RobotContainer.intakeExtension, RobotContainer.intakeRoller)
-            .withDeadline(RobotContainer.pathBuilder.build(midWarsStraight)),
+            .withDeadline(
+                RobotContainer.pathBuilder
+                    .withShouldMirror(shouldMirror)
+                    .build(new Path("mid_wards_straight"))),
         Commands.parallel(
             GameCommandGroups.Launching.otfShot(
                 RobotContainer.drive,
@@ -43,6 +52,8 @@ public class BLineMidwars {
                 RobotContainer.dyeRotor,
                 RobotContainer.intakeExtension,
                 RobotContainer.intakeRoller),
-            RobotContainer.pathBuilder.build(backToTrench)));
+            RobotContainer.pathBuilder
+                .withShouldMirror(shouldMirror)
+                .build(new Path("back_to_trench"))));
   }
 }
