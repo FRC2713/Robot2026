@@ -273,7 +273,7 @@ public class RobotContainer {
     configurePathBuilder();
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
-    configureAutonomousRoutines(autoChooser, false);
+    configureAutonomousRoutines(autoChooser, true);
 
     // Configure the button bindings
     configureButtonBindings();
@@ -302,9 +302,9 @@ public class RobotContainer {
                     DriveConstants.AutoConstants.headingTrajectoryController.getI().get(),
                     DriveConstants.AutoConstants.headingTrajectoryController.getD().get()),
                 new PIDController(
-                    DriveConstants.AutoConstants.positionTrajectoryController.getP().get(),
-                    DriveConstants.AutoConstants.positionTrajectoryController.getI().get(),
-                    DriveConstants.AutoConstants.positionTrajectoryController.getD().get()))
+                    DriveConstants.AutoConstants.crosstrackTrajectoryController.getP().get(),
+                    DriveConstants.AutoConstants.crosstrackTrajectoryController.getI().get(),
+                    DriveConstants.AutoConstants.crosstrackTrajectoryController.getD().get()))
             .withDefaultShouldFlip()
             .withPoseReset(drive::setPose);
   }
@@ -370,6 +370,25 @@ public class RobotContainer {
   private void configureAutonomousRoutines(
       LoggedDashboardChooser<Command> autoChooser, boolean isDev) {
 
+    FollowPath.setTranslationListLoggingConsumer(
+        pair -> {
+          Logger.recordOutput(pair.getFirst(), pair.getSecond());
+        });
+
+    FollowPath.setDoubleLoggingConsumer(
+        pair -> {
+          Logger.recordOutput(pair.getFirst(), pair.getSecond());
+        });
+
+    FollowPath.setBooleanLoggingConsumer(
+        pair -> {
+          Logger.recordOutput(pair.getFirst(), pair.getSecond());
+        });
+
+    FollowPath.setPoseLoggingConsumer(
+        pair -> {
+          Logger.recordOutput(pair.getFirst(), pair.getSecond());
+        });
     if (isDev) {
       // Set up SysId routines
       autoChooser.addOption(
