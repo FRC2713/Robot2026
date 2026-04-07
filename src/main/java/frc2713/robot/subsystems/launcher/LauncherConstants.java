@@ -189,6 +189,8 @@ public final class LauncherConstants {
 
     public static LoggedTunableMeasure<AngularVelocity> idleVelocity =
         new LoggedTunableMeasure<>("Flywheels/Idle Velocity", RPM.of(300));
+    public static LoggedTunableMeasure<AngularVelocity> launchingDetectionThreshold =
+        new LoggedTunableMeasure<>("Flywheels/Launching Detection Threshold", RPM.of(1200));
     public static LoggedTunableMeasure<AngularVelocity> PIDTest =
         new LoggedTunableMeasure<>("Flywheels/PIDTest", RPM.of(4000));
     public static LoggedTunableMeasure<AngularVelocity> staticRightLeftTrench =
