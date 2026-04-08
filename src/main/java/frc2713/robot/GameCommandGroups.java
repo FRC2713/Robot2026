@@ -97,7 +97,35 @@ public final class GameCommandGroups {
                   flywheels::atTarget)) // used to be dynamic but we slowed it way down
           .withName("OTF Shooting");
     }
+    /** OTF shooting with drive limits. Use for driver/operator triggers. */
+    public static Command otfShotWithDriveTrain(
+        Drive drive,
+        Flywheels flywheels,
+        Hood hood,
+        Feeder feeder,
+        DyeRotor dyeRotor,
+        IntakeExtension extension,
+        IntakeRoller intakeRoller) {
+      return Commands.parallel(
+              DriveCommands.setDriveLimits(
+                  drive,
+                  Optional.of(FeetPerSecond.of(4.0)),
+                  Optional.of(FeetPerSecondPerSecond.of(12.0)),
+                  Optional.of(DegreesPerSecond.of(90.0)),
+                  Optional.of(DegreesPerSecondPerSecond.of(360.0))),
+              flywheels.otfCommand(),
+              hood.otfCommand(),
+              flywheels.simulateLaunchFuelCommand(flywheels::atTarget),
+              feeder.feedWhenReady(flywheels::atTarget),
+              dyeRotor.dynamicFeedWhenReady(
+                  flywheels::atTarget)) // used to be dynamic but we slowed it way down
+          .withName("OTF Shooting");
+    }
 
+    /**
+     * OTF shooting with drive limits. Use for driver/operator triggers. If the turret has been
+     * broken and the turret can not move.
+     */
     public static Command towerShot(
         Drive drive,
         Flywheels flywheels,
@@ -212,6 +240,13 @@ public final class GameCommandGroups {
             xSupplier,
             ySupplier,
             () -> LaunchingSolutionManager.ZoneSelectionHelpers.storedIntakeRotation)
+        .withName("Drive Intake Align");
+  }
+
+  public static Command staticTurretOtf(
+      Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier) {
+    return DriveCommands.joystickDriveAtAngle(
+            RobotContainer.drive, xSupplier, ySupplier, () -> Drive.storedStaticShotRotation)
         .withName("Drive Intake Align");
   }
 }

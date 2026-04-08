@@ -4,9 +4,12 @@ import static edu.wpi.first.units.Units.Degrees;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc2713.robot.GameCommandGroups;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
@@ -19,6 +22,7 @@ import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 import frc2713.robot.subsystems.vision.Vision;
+import frc2713.robot.util.ShiftManager;
 
 public class DriverControls {
   private final CommandVader4Controller controller = new CommandVader4Controller(0);
@@ -129,7 +133,21 @@ public class DriverControls {
         .onTrue(
             Commands.runOnce(
                 () -> LaunchingSolutionManager.ZoneSelectionHelpers.setIntakeRotation()));
-
+    // aligns the drive to the hub for if turret breaks
+    controller
+        .b()
+        .whileTrue(
+            Commands.parallel(
+                DriveCommands.changeDefaultDriveCommand(
+                    drive,
+                    GameCommandGroups.staticTurretOtf(
+                        drive, () -> -controller.getLeftY(), () -> -controller.getLeftX()),
+                    "OTF with drive"),
+                Commands.run(() -> Drive.setStaticShotRotation())))
+        .onFalse(setToNormalDriveCmd());
+    // Rumble when <= 2 seconds left in the shift
+    new Trigger(() -> ShiftManager.getTimeLeftInShift(DriverStation.getMatchTime()) <= 2)
+        .whileTrue(controller.RumbleForDuration(0.5));
     // shoot otf
     controller
         .rightBumper()
@@ -184,6 +202,16 @@ public class DriverControls {
   public Command stopWithX() {
     return DriveCommands.changeDefaultDriveCommand(
         drive, new InstantCommand(() -> drive.stopWithX()), "Stop With X");
+  }
+
+  public void rumbleController() {
+    controller.setRumble(GenericHID.RumbleType.kLeftRumble, 0.5);
+    controller.setRumble(GenericHID.RumbleType.kRightRumble, 0.5);
+  }
+
+  public void stopRumbleController() {
+    controller.setRumble(GenericHID.RumbleType.kLeftRumble, 0.0);
+    controller.setRumble(GenericHID.RumbleType.kRightRumble, 0.0);
   }
 
   private Command normalDriveCmd() {
