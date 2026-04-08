@@ -85,6 +85,15 @@ public class Flywheels extends MotorFollowerSubsystem<MotorInputsAutoLogged, Mot
                 .plus(fudgeFactor));
   }
 
+  @AutoLogOutput(key = "Flywheels/IsLaunching")
+  public boolean isLaunching() {
+    double thresholdRps =
+        LauncherConstants.Flywheels.launchingDetectionThreshold.get().in(RotationsPerSecond);
+    double currentRps = Math.abs(getCurrentVelocity().in(RotationsPerSecond));
+    double setpointRps = Math.abs(velocitySetpoint.in(RotationsPerSecond));
+    return currentRps > thresholdRps || setpointRps > thresholdRps;
+  }
+
   @Override
   @TimeLogged("Performance/SubsystemPeriodic/Flywheels")
   public void periodic() {

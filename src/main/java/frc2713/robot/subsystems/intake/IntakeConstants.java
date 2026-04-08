@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.InchesPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Pounds;
+import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
@@ -92,6 +93,8 @@ public final class IntakeConstants {
     public static Voltage outtakeVoltageDesired = Volts.of(-5.0);
     public static LoggedTunableMeasure<AngularVelocity> intakeSpeed =
         new LoggedTunableMeasure<>("Intake Rollers/Intake Speed", freeSpeed.times(0.8));
+    public static LoggedTunableMeasure<AngularVelocity> intakingDetectionThreshold =
+        new LoggedTunableMeasure<>("Intake Rollers/Intaking Detection Threshold", RPM.of(200));
   }
 
   public static final class Extension {

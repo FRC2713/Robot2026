@@ -51,6 +51,10 @@ import frc2713.robot.subsystems.launcher.LauncherConstants;
 import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
 import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.launcher.TurretSim;
+import frc2713.robot.subsystems.led.LEDIO;
+import frc2713.robot.subsystems.led.LEDIOCANdle;
+import frc2713.robot.subsystems.led.LEDIOSim;
+import frc2713.robot.subsystems.led.LEDSubsystem;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 import frc2713.robot.subsystems.serializer.SerializerConstants;
@@ -58,6 +62,7 @@ import frc2713.robot.subsystems.vision.Vision;
 import frc2713.robot.subsystems.vision.VisionIO;
 import frc2713.robot.subsystems.vision.VisionIOSLAMDunk;
 import java.util.Arrays;
+import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -71,6 +76,7 @@ public class RobotContainer {
 
   // Subsystems
   public static Drive drive;
+  public static LEDSubsystem leds;
   public static Flywheels flywheels;
   public static Turret turret;
   public static Hood hood;
@@ -159,6 +165,7 @@ public class RobotContainer {
                 SerializerConstants.Feeder.config,
                 new TalonFXIO(SerializerConstants.Feeder.config));
         vision = new Vision(new VisionIOSLAMDunk());
+        leds = new LEDSubsystem(new LEDIOCANdle());
         break;
 
       case SIM:
@@ -201,6 +208,7 @@ public class RobotContainer {
                 SerializerConstants.Feeder.config,
                 new SimTalonFXIO(SerializerConstants.Feeder.config));
         vision = new Vision(new VisionIOSLAMDunk());
+        leds = new LEDSubsystem(new LEDIOSim());
         break;
 
       default:
@@ -239,6 +247,7 @@ public class RobotContainer {
         dyeRotor = new DyeRotor(new TalonFXSubsystemConfig(), new MotorIO() {});
         feeder = new Feeder(new TalonFXSubsystemConfig(), new MotorIO() {});
         vision = new Vision(new VisionIO() {});
+        leds = new LEDSubsystem(new LEDIO() {});
         break;
     }
     autoFactory =
@@ -287,6 +296,8 @@ public class RobotContainer {
     // Configure the button bindings
     configureButtonBindings();
 
+    configureLEDStateSuppliers();
+
     // configure the kinematics calculations
     configureKinematics();
 
@@ -316,6 +327,20 @@ public class RobotContainer {
                     DriveConstants.AutoConstants.crosstrackTrajectoryController.getD().get()))
             .withDefaultShouldFlip()
             .withPoseReset(drive::setPose);
+  }
+
+  private void configureLEDStateSuppliers() {
+    leds.configureStateSuppliers(
+        flywheels::isLaunching,
+        intakeRoller::isIntaking,
+        () -> {
+          String driveCommandName =
+              Optional.ofNullable(drive.getCurrentCommand()).map(Command::getName).orElse("");
+          boolean intakeAlignActive = driveCommandName.contains("Intake Align");
+          boolean solutionValid = launchingSolutionManager.getSolution().isValid();
+          return intakeAlignActive || (DriverStation.isEnabled() && !solutionValid);
+        },
+        () -> DriverStation.isTestEnabled());
   }
 
   /** Use this robot to configure the transforms between subsystems. */

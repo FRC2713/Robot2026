@@ -2,12 +2,14 @@ package frc2713.robot.oi;
 
 import static edu.wpi.first.units.Units.RPM;
 
+import com.ctre.phoenix6.controls.RgbFadeAnimation;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc2713.robot.RobotContainer;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
@@ -16,6 +18,7 @@ import frc2713.robot.subsystems.launcher.Flywheels;
 import frc2713.robot.subsystems.launcher.Hood;
 import frc2713.robot.subsystems.launcher.LauncherConstants;
 import frc2713.robot.subsystems.launcher.Turret;
+import frc2713.robot.subsystems.led.LEDConstants;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 
@@ -157,13 +160,11 @@ public class DevControls {
     controller
         .a()
         .onTrue(
-            Commands.parallel(
-                // turret.otfCommand(),
-                hood.setAngleCommand(LauncherConstants.Hood.staticHubAngle),
-                flywheels.setVelocity(LauncherConstants.Flywheels.PIDTest),
-                feeder.feedWhenReady(flywheels::atTarget),
-                dyeRotor.feedWhenReady(flywheels::atTarget)))
-        .onFalse(Commands.parallel(feeder.stop(), dyeRotor.stop(), flywheels.stop()));
+            RobotContainer.leds
+                .setAnimation(
+                    new RgbFadeAnimation(0, Math.max(0, LEDConstants.ledCount - 1)).withSlot(0))
+                .ignoringDisable(true)
+                .withName("Dev LED RGB Fade"));
     controller
         .rightBumper()
         .onTrue(flywheels.setVelocity(LauncherConstants.Flywheels.PIDTest))
