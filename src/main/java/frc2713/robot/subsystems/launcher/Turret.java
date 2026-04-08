@@ -30,6 +30,7 @@ import frc2713.lib.logging.PeriodicTimingLogger;
 import frc2713.lib.logging.TimeLogged;
 import frc2713.lib.subsystem.MotorCancoderSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
+import frc2713.lib.util.AllianceCache;
 import frc2713.lib.util.CrtSolver;
 import frc2713.lib.util.Util;
 import frc2713.robot.RobotContainer;
@@ -259,8 +260,7 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
   public final Supplier<Angle> hubAngleSupplier =
       () -> {
         Angle val = LauncherConstants.Turret.staticHubAngle;
-        if (DriverStation.getAlliance().isPresent()
-            && DriverStation.getAlliance().get() == Alliance.Red) {
+        if (AllianceCache.isRed()) {
           val = val.plus(Degrees.of(180.0));
         }
         return val;

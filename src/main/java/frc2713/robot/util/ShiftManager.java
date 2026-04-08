@@ -1,10 +1,9 @@
 package frc2713.robot.util;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc2713.lib.util.AllianceCache;
 import frc2713.lib.util.LoggedTunableBoolean;
 import frc2713.robot.Robot;
-import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
 public class ShiftManager {
@@ -131,13 +130,14 @@ public class ShiftManager {
 
   /** For a lot of driver station data, once we get it once we dont really need to ask again */
   public static void pollDriverStationData() {
-    // Poll and store the current alliance
-    if (allianceAbbrev.length() == 0 || Robot.isSimulation()) {
-      Optional<Alliance> currentAlliance = DriverStation.getAlliance();
-      if (currentAlliance.isPresent()) {
-        allianceAbbrev = currentAlliance.get() == DriverStation.Alliance.Red ? "R" : "B";
-        allianceColor = currentAlliance.get() == DriverStation.Alliance.Red ? "#FF0000" : "#0000FF";
-        opponentColor = currentAlliance.get() == DriverStation.Alliance.Red ? "#0000FF" : "#FF0000";
+    // Pull alliance from cache. Cache updates quickly until known, and refreshes while disabled.
+    if (AllianceCache.hasAlliance()) {
+      String newAllianceAbbrev = AllianceCache.isRed() ? "R" : "B";
+      if (!newAllianceAbbrev.equals(allianceAbbrev) || Robot.isSimulation()) {
+        allianceAbbrev = newAllianceAbbrev;
+        allianceColor = AllianceCache.isRed() ? "#FF0000" : "#0000FF";
+        opponentColor = AllianceCache.isRed() ? "#0000FF" : "#FF0000";
+        autoWinnerInfo = autoWinner.equals(allianceAbbrev) ? "YES" : "NO";
       }
     }
 
