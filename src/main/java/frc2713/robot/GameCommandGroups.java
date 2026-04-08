@@ -166,6 +166,20 @@ public final class GameCommandGroups {
     }
   }
 
+  public static final class Intaking {
+    public static Command intake(IntakeExtension extension, IntakeRoller rollers) {
+      return Commands.parallel(extension.extendCommand(), rollers.intake());
+    }
+
+    public static Command outtake(IntakeExtension extension, IntakeRoller rollers) {
+      return Commands.parallel(extension.extendCommand(), rollers.outtake());
+    }
+
+    public static Command stopIntake(IntakeExtension extension, IntakeRoller rollers) {
+      return Commands.parallel(rollers.stop());
+    }
+  }
+
   public static final class OperatorOverriderrs {
     public static Command stir(DyeRotor dyeRotor, IntakeRoller rollers) {
       return Commands.parallel(dyeRotor.stirFuel(), rollers.intake());
