@@ -14,8 +14,12 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc2713.lib.geometry.GeometryUtil;
 import frc2713.lib.io.ArticulatedComponent;
 import frc2713.lib.io.CanCoderIO;
@@ -53,6 +57,14 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
       final CanCoderIO cancoderIO) {
     super(config, new MotorInputsAutoLogged(), turretMotorIO, cancoderInputs, cancoderIO);
     setDefaultCommand(otfCommand());
+    SmartDashboard.putBoolean("Turret Debug", false);
+    new Trigger(() -> SmartDashboard.getBoolean("Turret Debug", false))
+        .onTrue(
+            Turret.changeDefaultTurretCommand(
+                this, manualControl(), "disableTurret from SmartDashboard trigger"))
+        .onFalse(
+            Turret.changeDefaultTurretCommand(
+                this, otfCommand(), "enable Turret from smartDashboard trigger"));
   }
 
   public static void setDefaultTurretCommand(Turret turret, Command cmd, String name) {
@@ -66,7 +78,7 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
   }
 
   public static Command changeDefaultTurretCommand(Turret turret, Command cmd, String name) {
-    return Commands.runOnce(() -> setDefaultTurretCommand(turret, cmd, name));
+    return Commands.runOnce(() -> setDefaultTurretCommand(turret, cmd, name)).ignoringDisable(true);
   }
 
   @AutoLogOutput

@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StringArraySubscriber;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.Alert;
@@ -29,8 +30,9 @@ import org.zeromq.ZMQ;
 public class VisionIOSLAMDunk implements VisionIO {
   private NetworkTableInstance inst;
   private NetworkTable table;
-  private DoubleArraySubscriber sub;
-  private DoubleArraySubscriber sc_sub;
+  private DoubleArraySubscriber poseSub;
+  private DoubleArraySubscriber scTagsSub;
+  private StringArraySubscriber scErrorsSub;
 
   private double lastTimestamp = -1;
   private static final LoggedTunableNumber k = new LoggedTunableNumber("Vision/k", 3);
@@ -39,9 +41,13 @@ public class VisionIOSLAMDunk implements VisionIO {
 
   private final Time WARN_AFTER_NO_UPDATES_FOR = Seconds.of(4);
   private final Alert slamdunkAlert =
-      new Alert("No SLAMDunk! updates for >" + WARN_AFTER_NO_UPDATES_FOR, AlertType.kWarning);
+      new Alert(
+          "Vision/Alerts",
+          "No SLAMDunk! updates for >" + WARN_AFTER_NO_UPDATES_FOR,
+          AlertType.kWarning);
   private final Alert gyroAlert =
-      new Alert("Failed to send gyro update to SuperCap", AlertType.kError);
+      new Alert("Vision/Alerts", "Failed to send gyro update to SuperCap", AlertType.kError);
+  private final Alert[] scAlerts = new Alert[10];
 
   private final ZContext supercapContext;
   private final ZMQ.Socket superCapSocket;
@@ -49,14 +55,19 @@ public class VisionIOSLAMDunk implements VisionIO {
   public VisionIOSLAMDunk() {
     inst = NetworkTableInstance.getDefault();
     table = inst.getTable("slamdunk");
-    sub = table.getDoubleArrayTopic("pose_robot").subscribe(new double[0]);
-    sc_sub = table.getDoubleArrayTopic("supercap_tags").subscribe(new double[0]);
+    poseSub = table.getDoubleArrayTopic("pose_robot").subscribe(new double[0]);
+    scTagsSub = table.getDoubleArrayTopic("supercap_tags").subscribe(new double[0]);
+    scErrorsSub = table.getStringArrayTopic("supercap_alerts/errors").subscribe(new String[0]);
 
     supercapContext = new ZContext();
     superCapSocket = supercapContext.createSocket(SocketType.REQ);
     superCapSocket.setSendTimeOut(500); // timeout for sending gyro updates
     superCapSocket.setReceiveTimeOut(500); // timeout for receiving replies
     superCapSocket.connect(VisionConstants.SUPERCAP_IPC_ADDRESS);
+
+    for (int i = 0; i < scAlerts.length; i++) {
+      scAlerts[i] = new Alert("Vision/Alerts", "", AlertType.kError);
+    }
   }
 
   @Override
@@ -73,11 +84,23 @@ public class VisionIOSLAMDunk implements VisionIO {
       slamdunkAlert.set(false);
     }
 
-    var poseArray = sub.get();
+    var poseArray = poseSub.get();
     Logger.recordOutput("Vision/SLAMDunk Array", poseArray);
 
-    var scArray = sc_sub.get();
-    Logger.recordOutput("Vision/SuperCap Array", scArray);
+    var scArray = scTagsSub.get();
+    Logger.recordOutput("Vision/SuperCap Tags Array", scArray);
+
+    var scErrorsArray = scErrorsSub.get();
+    Logger.recordOutput("Vision/SuperCap Errors Array", scErrorsArray);
+
+    for (int i = 0; i < scAlerts.length; i++) {
+      if (i < scErrorsArray.length) {
+        scAlerts[i].setText(scErrorsArray[i]);
+        scAlerts[i].set(true);
+      } else {
+        scAlerts[i].set(false);
+      }
+    }
 
     if (poseArray.length > 0) {
       double t = poseArray[0];

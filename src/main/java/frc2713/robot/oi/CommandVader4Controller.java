@@ -6,8 +6,11 @@
 
 package frc2713.robot.oi;
 
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.event.EventLoop;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -238,5 +241,28 @@ public class CommandVader4Controller extends CommandGenericHID {
   /** Get the right trigger axis value of the controller. */
   public double getRightTriggerAxis() {
     return m_hid.getRightTriggerAxis();
+  }
+
+  public Command startRumble() {
+    return Commands.run(
+        () -> {
+          setRumble(GenericHID.RumbleType.kLeftRumble, 0.5);
+          setRumble(GenericHID.RumbleType.kRightRumble, 0.5);
+        });
+  }
+
+  public Command stopRumble() {
+    return Commands.run(
+        () -> {
+          setRumble(GenericHID.RumbleType.kLeftRumble, 0.0);
+          setRumble(GenericHID.RumbleType.kRightRumble, 0.0);
+        });
+  }
+
+  public Command RumbleForDuration(double seconds) {
+    return startRumble()
+      .withTimeout(seconds)
+      .andThen(stopRumble())
+      .withName("Rumble for " + seconds + " seconds");
   }
 }

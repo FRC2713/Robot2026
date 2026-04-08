@@ -3,7 +3,9 @@ package frc2713.robot.oi;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RPM;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc2713.robot.GameCommandGroups;
 import frc2713.robot.RobotContainer;
 import frc2713.robot.subsystems.drive.Drive;
@@ -14,6 +16,8 @@ import frc2713.robot.subsystems.launcher.Hood;
 import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
+import frc2713.robot.util.ShiftManager;
+import java.util.function.BooleanSupplier;
 
 public class OperatorControls {
   private final CommandVader4Controller controller = new CommandVader4Controller(1);
@@ -151,5 +155,8 @@ public class OperatorControls {
                     RobotContainer.drive.setPose(visionPose.get());
                   }
                 }));
+
+    new Trigger(() -> ShiftManager.getTimeLeftInShift(DriverStation.getMatchTime()) <= 2)
+        .whileTrue(controller.RumbleForDuration(0.5));
   }
 }

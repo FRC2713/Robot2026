@@ -97,6 +97,7 @@ public class ShiftManager {
       }
     }
   }
+  // play the rumble on controllers when the last 2 seconds in a shift
 
   public static String getCurrentPhase(double time) {
     if (ShiftManager.isAuto) {
