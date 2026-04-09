@@ -49,7 +49,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
    * and iteration data under {@code LaunchingSolutionManager/itof debug/...}.
    */
   public static final LoggedTunableBoolean itofDebug =
-      new LoggedTunableBoolean("LaunchingSolutionManager/itof_debug", true);
+      new LoggedTunableBoolean("LaunchingSolutionManager/itof_debug", false);
 
   // --- Data Structures ---
   public static record LaunchSolution(
@@ -415,7 +415,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
     Logger.recordOutput(
         pb.makePath("itof debug", "iteration relative vector to target"), relToTarget);
     Logger.recordOutput(pb.makePath("itof debug", "iteration horizontal distance m"), dHorizontal);
-    Logger.recordOutput(pb.makePath("itof debug", "iteration next tof estimate s"), tNext);
+    // Logger.recordOutput(pb.makePath("itof debug", "iteration next tof estimate s"), tNext);
   }
 
   public class ZoneSelectionHelpers {

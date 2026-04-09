@@ -3,8 +3,6 @@ package frc2713.robot.subsystems.vision;
 import choreo.auto.AutoTrajectory;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -19,8 +17,6 @@ public class Vision extends SubsystemBase {
 
   private final VisionIO io;
   private final VisionInputsAutoLogged inputs;
-
-  private final Field2d loggedPoseOnField = new Field2d(); // for elastic layout
 
   public Vision(VisionIO io) {
     this.io = io;
@@ -40,12 +36,9 @@ public class Vision extends SubsystemBase {
             inputs.timestamp,
             new PoseEstimatorErrorStDevs(inputs.translationStdDev, inputs.rotationStdDev)
                 .toMatrix());
-
-        loggedPoseOnField.setRobotPose(inputs.pose);
       }
 
       Logger.processInputs("Vision", inputs);
-      SmartDashboard.putData("Vision/robot_on_field", loggedPoseOnField);
     }
   }
 

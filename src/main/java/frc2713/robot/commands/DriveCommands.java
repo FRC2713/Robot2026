@@ -374,21 +374,9 @@ public class DriveCommands {
     return Commands.runOnce(() -> drive.setLinearVelocityLimit(maxLinearVelocity));
   }
 
-  /** Returns a command that caps how fast the robot can change its driving speed (m/s^2). */
-  public static Command setLinearAccelerationLimit(
-      Drive drive, LinearAcceleration maxLinearAcceleration) {
-    return Commands.runOnce(() -> drive.setLinearAccelerationLimit(maxLinearAcceleration));
-  }
-
   /** Returns a command that caps the robot's maximum turning speed (rad/s). */
   public static Command setAngularVelocityLimit(Drive drive, AngularVelocity maxAngularVelocity) {
     return Commands.runOnce(() -> drive.setAngularVelocityLimit(maxAngularVelocity));
-  }
-
-  /** Returns a command that caps how fast the robot can change its turning speed (rad/s^2). */
-  public static Command setAngularAccelerationLimit(
-      Drive drive, AngularAcceleration maxAngularAcceleration) {
-    return Commands.runOnce(() -> drive.setAngularAccelerationLimit(maxAngularAcceleration));
   }
 
   /** Returns a command that removes all drive limits, restoring full speed. */
@@ -420,9 +408,7 @@ public class DriveCommands {
         () -> {
           // Only apply limits that were provided; skip the rest so they stay as-is
           linearVelocity.ifPresent(drive::setLinearVelocityLimit);
-          linearAcceleration.ifPresent(drive::setLinearAccelerationLimit);
           angularVelocity.ifPresent(drive::setAngularVelocityLimit);
-          angularAcceleration.ifPresent(drive::setAngularAccelerationLimit);
         });
   }
 
@@ -431,9 +417,7 @@ public class DriveCommands {
     return Commands.runOnce(
         () -> {
           drive.setLinearVelocityLimit(limits.linearVelocity());
-          drive.setLinearAccelerationLimit(limits.linearAcceleration());
           drive.setAngularVelocityLimit(limits.angularVelocity());
-          drive.setAngularAccelerationLimit(limits.angularAcceleration());
         });
   }
 
@@ -472,9 +456,7 @@ public class DriveCommands {
         .beforeStarting(
             () -> {
               drive.setLinearVelocityLimit(linearVelLimit);
-              drive.setLinearAccelerationLimit(linearAccelLimit);
               drive.setAngularVelocityLimit(angularVelLimit);
-              drive.setAngularAccelerationLimit(angularAccelLimit);
             })
         .finallyDo(() -> drive.clearDriveLimits());
   }

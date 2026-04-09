@@ -17,7 +17,6 @@ import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 import frc2713.robot.util.ShiftManager;
-import java.util.function.BooleanSupplier;
 
 public class OperatorControls {
   private final CommandVader4Controller controller = new CommandVader4Controller(1);

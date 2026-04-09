@@ -23,6 +23,7 @@ import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.commands.autos.BLineMidwars;
+import frc2713.robot.commands.autos.BLineMidwarsOvercenter;
 import frc2713.robot.commands.autos.BLineTuning;
 import frc2713.robot.commands.autos.Demo;
 import frc2713.robot.commands.autos.DriveTest;
@@ -119,6 +120,10 @@ public class RobotContainer {
                 LauncherConstants.Flywheels.followerConfig,
                 new TalonFXIO(LauncherConstants.Flywheels.leaderConfig),
                 new TalonFXIO(LauncherConstants.Flywheels.followerConfig));
+
+        hood =
+            new Hood(
+                LauncherConstants.Hood.config, new SimTalonFXIO(LauncherConstants.Hood.config));
         hood =
             new Hood(LauncherConstants.Hood.config, new TalonFXIO(LauncherConstants.Hood.config));
 
@@ -422,6 +427,7 @@ public class RobotContainer {
     }
 
     autoChooser.addDefaultOption("BlineMidwars", BLineMidwars.getCommand());
+    autoChooser.addDefaultOption("BlineMidwarsOvercenter", BLineMidwarsOvercenter.getCommand());
 
     autoChooser.addDefaultOption(
         "Midwars",
