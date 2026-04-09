@@ -107,7 +107,7 @@ dependencies {
 
     implementation 'org.zeromq:jeromq:0.6.0'
 
-    implementation 'com.github.FRC2713:BLine-Lib-2026:35e99a433b01dbcf033660fd05d4fd586c78649b'
+    implementation 'com.github.FRC2713:BLine-Lib-2026:c8b3383f32d0a12d85fd7bdaf2dc58f3d29e0f1b'
 }
 
 test {
