@@ -94,7 +94,7 @@ public class RobotContainer {
   public static DevControls devControls;
 
   // Dashboard inputs
-  private final AutoFactory autoFactory;
+  private AutoFactory autoFactory;
   private final LoggedDashboardChooser<Command> autoChooser;
 
   public static FollowPath.Builder pathBuilder;
@@ -245,21 +245,6 @@ public class RobotContainer {
         vision = new Vision(new VisionIO() {});
         break;
     }
-    autoFactory =
-        new AutoFactory(
-            drive::getPose, // Function that returns the current robot pose
-            drive::setPose, // Function that resets the current robot pose to the provided Pose2d
-            drive::followTrajectory, // The drive subsystem trajectory follower
-            true, // If alliance flipping should be enabled
-            drive,
-            (sample, isStart) -> {
-              Logger.recordOutput(
-                  "TrajectoryFollowing/ActiveTrajectory",
-                  Arrays.stream(sample.getPoses())
-                      .map(AllianceFlipUtil::apply)
-                      .toArray(Pose2d[]::new));
-            } // The drive subsystem
-            );
 
     // This setting is ignored when the FMS is connected
     DriverStation.silenceJoystickConnectionWarning(true);
@@ -283,7 +268,9 @@ public class RobotContainer {
         new OperatorControls(
             drive, flywheels, turret, hood, intakeRoller, intakeExtension, dyeRotor, feeder);
 
-    configurePathBuilder();
+    configurePIDPathBuilder();
+    configureChoreoFactory();
+
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
     configureAutonomousRoutines(autoChooser, true);
@@ -298,9 +285,27 @@ public class RobotContainer {
         new Path.DefaultGlobalConstraints(4.5, 12.0, 540, 860, 0.03, 2.0, 0.2));
   }
 
-  private void configurePathBuilder() {
+  private void configureChoreoFactory() {
+    autoFactory =
+        new AutoFactory(
+            drive::getPose, // Function that returns the current robot pose
+            drive::setPose, // Function that resets the current robot pose to the provided Pose2d
+            drive::followTrajectory, // The drive subsystem trajectory follower
+            true, // If alliance flipping should be enabled
+            drive,
+            (sample, isStart) -> {
+              Logger.recordOutput(
+                  "TrajectoryFollowing/ActiveTrajectory",
+                  Arrays.stream(sample.getPoses())
+                      .map(AllianceFlipUtil::apply)
+                      .toArray(Pose2d[]::new));
+            } // The drive subsystem
+            );
+  }
+
+  private void configurePIDPathBuilder() {
     // Path following
-    this.pathBuilder =
+    RobotContainer.pathBuilder =
         new FollowPath.Builder(
                 drive,
                 drive::getPose,
@@ -318,8 +323,28 @@ public class RobotContainer {
                     DriveConstants.AutoConstants.crosstrackTrajectoryController.getP().get(),
                     DriveConstants.AutoConstants.crosstrackTrajectoryController.getI().get(),
                     DriveConstants.AutoConstants.crosstrackTrajectoryController.getD().get()))
-            .withDefaultShouldFlip()
-            .withPoseReset(drive::setPose);
+            .withDefaultShouldFlip();
+
+    // Bline logging
+    FollowPath.setTranslationListLoggingConsumer(
+        pair -> {
+          Logger.recordOutput(pair.getFirst(), pair.getSecond());
+        });
+
+    FollowPath.setDoubleLoggingConsumer(
+        pair -> {
+          Logger.recordOutput(pair.getFirst(), pair.getSecond());
+        });
+
+    FollowPath.setBooleanLoggingConsumer(
+        pair -> {
+          Logger.recordOutput(pair.getFirst(), pair.getSecond());
+        });
+
+    FollowPath.setPoseLoggingConsumer(
+        pair -> {
+          Logger.recordOutput(pair.getFirst(), pair.getSecond());
+        });
   }
 
   /** Use this robot to configure the transforms between subsystems. */
@@ -382,26 +407,6 @@ public class RobotContainer {
    */
   private void configureAutonomousRoutines(
       LoggedDashboardChooser<Command> autoChooser, boolean isDev) {
-
-    FollowPath.setTranslationListLoggingConsumer(
-        pair -> {
-          Logger.recordOutput(pair.getFirst(), pair.getSecond());
-        });
-
-    FollowPath.setDoubleLoggingConsumer(
-        pair -> {
-          Logger.recordOutput(pair.getFirst(), pair.getSecond());
-        });
-
-    FollowPath.setBooleanLoggingConsumer(
-        pair -> {
-          Logger.recordOutput(pair.getFirst(), pair.getSecond());
-        });
-
-    FollowPath.setPoseLoggingConsumer(
-        pair -> {
-          Logger.recordOutput(pair.getFirst(), pair.getSecond());
-        });
 
     if (isDev) {
       // Set up SysId routines

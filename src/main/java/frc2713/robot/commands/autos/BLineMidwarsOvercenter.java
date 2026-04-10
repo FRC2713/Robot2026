@@ -15,6 +15,7 @@ public class BLineMidwarsOvercenter {
                 RobotContainer.intakeExtension, RobotContainer.intakeRoller)
             .withDeadline(
                 RobotContainer.pathBuilder
+                    .withPoseReset(RobotContainer.drive::setPose)
                     .withShouldMirror(shouldMirror)
                     .build(new Path("mid_wards_overcenter"))),
         Commands.parallel(
@@ -29,6 +30,7 @@ public class BLineMidwarsOvercenter {
                     RobotContainer.intakeRoller)
                 .withDeadline(Commands.waitSeconds(5.0)),
             RobotContainer.pathBuilder
+                .withPoseReset(pose -> {})
                 .withShouldMirror(shouldMirror)
                 .build(new Path("back_to_trench"))),
         GameCommandGroups.Intaking.intake(
@@ -36,6 +38,7 @@ public class BLineMidwarsOvercenter {
             .withDeadline(
                 RobotContainer.pathBuilder
                     .withShouldMirror(shouldMirror)
+                    .withPoseReset(pose -> {})
                     .build(new Path("mid_wards_straight"))),
         Commands.parallel(
             GameCommandGroups.Launching.otfShot(
@@ -49,6 +52,7 @@ public class BLineMidwarsOvercenter {
                 RobotContainer.intakeRoller),
             RobotContainer.pathBuilder
                 .withShouldMirror(shouldMirror)
+                .withPoseReset(pose -> {})
                 .build(new Path("back_to_trench"))));
   }
 }
