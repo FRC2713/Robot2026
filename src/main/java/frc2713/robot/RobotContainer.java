@@ -122,8 +122,7 @@ public class RobotContainer {
                 new TalonFXIO(LauncherConstants.Flywheels.followerConfig));
 
         hood =
-            new Hood(
-                LauncherConstants.Hood.config, new SimTalonFXIO(LauncherConstants.Hood.config));
+            new Hood(LauncherConstants.Hood.config, new TalonFXIO(LauncherConstants.Hood.config));
         hood =
             new Hood(LauncherConstants.Hood.config, new TalonFXIO(LauncherConstants.Hood.config));
 
@@ -403,6 +402,7 @@ public class RobotContainer {
         pair -> {
           Logger.recordOutput(pair.getFirst(), pair.getSecond());
         });
+
     if (isDev) {
       // Set up SysId routines
       autoChooser.addOption(
@@ -427,7 +427,10 @@ public class RobotContainer {
     }
 
     autoChooser.addDefaultOption("BlineMidwars", BLineMidwars.getCommand());
-    autoChooser.addDefaultOption("BlineMidwarsOvercenter", BLineMidwarsOvercenter.getCommand());
+    autoChooser.addDefaultOption(
+        "BlineMidwarsOvercenter - R", BLineMidwarsOvercenter.getCommand(() -> false));
+    autoChooser.addDefaultOption(
+        "BlineMidwarsOvercenter - L", BLineMidwarsOvercenter.getCommand(() -> true));
 
     autoChooser.addDefaultOption(
         "Midwars",

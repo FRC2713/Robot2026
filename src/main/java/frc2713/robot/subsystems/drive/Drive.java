@@ -295,10 +295,15 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
         if (gyroInputs.connected) {
           // Use the real gyro angle
           rawGyroRotation = gyroInputs.odometryYawPositions[i];
+          Logger.recordOutput(
+              "Drive/moduleTwistRotation", kinematics.toTwist2d(moduleDeltas).dtheta);
+          Logger.recordOutput("Drive/rawGyroRotation", rawGyroRotation);
         } else {
           // Use the angle delta from the kinematics and module deltas
           Twist2d twist = kinematics.toTwist2d(moduleDeltas);
           rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
+          Logger.recordOutput("Drive/moduleTwistRotation", twist.dtheta);
+          Logger.recordOutput("Drive/rawGyroRotation", rawGyroRotation);
         }
 
         // Apply update

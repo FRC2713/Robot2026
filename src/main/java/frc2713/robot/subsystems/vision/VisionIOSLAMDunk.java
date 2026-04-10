@@ -188,7 +188,7 @@ public class VisionIOSLAMDunk implements VisionIO {
                 .translationalStDev()
                 .times(distScaleFactor)
                 .times(countScaleFactor);
-        inputs.rotationStdDev = Degrees.of(999);
+        inputs.rotationStdDev = Degrees.of(99999);
         // VisionConstants.POSE_ESTIMATOR_STATE_STDEVS
         //     .rotationalStDev()
         //     .times(distScaleFactor)

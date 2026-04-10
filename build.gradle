@@ -6,6 +6,10 @@ plugins {
     id("io.freefair.lombok") version "9.2.0"
 }
 
+repositories {
+    maven {url = uri("https://jitpack.io") }
+}
+
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
@@ -102,6 +106,8 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.34'
 
     implementation 'org.zeromq:jeromq:0.6.0'
+
+    implementation 'com.github.FRC2713:BLine-Lib-2026:c8b3383f32d0a12d85fd7bdaf2dc58f3d29e0f1b'
 }
 
 test {
