@@ -14,14 +14,14 @@
     },
     {
       "type": "event_trigger",
-      "t_ratio": 0.30799999999999966,
+      "t_ratio": 0.3079999999999998,
       "lib_key": "intake"
     },
     {
       "type": "waypoint",
       "translation_target": {
-        "x_meters": 8.76928108024164,
-        "y_meters": 0.9699331732523175,
+        "x_meters": 8.598298139543017,
+        "y_meters": 0.9556845948607648,
         "intermediate_handoff_radius_meters": 0.45
       },
       "rotation_target": {
@@ -32,8 +32,8 @@
     {
       "type": "waypoint",
       "translation_target": {
-        "x_meters": 8.728143966989023,
-        "y_meters": 3.2682464274209995,
+        "x_meters": 8.47166955594109,
+        "y_meters": 3.353737897770311,
         "intermediate_handoff_radius_meters": 0.2
       },
       "rotation_target": {
@@ -45,7 +45,7 @@
       "type": "waypoint",
       "translation_target": {
         "x_meters": 6.566206047497332,
-        "y_meters": 3.230332454865013,
+        "y_meters": 3.301575346822772,
         "intermediate_handoff_radius_meters": 0.2
       },
       "rotation_target": {
@@ -56,24 +56,24 @@
     {
       "type": "waypoint",
       "translation_target": {
-        "x_meters": 5.862970728170203,
-        "y_meters": 2.6722424215327214,
-        "intermediate_handoff_radius_meters": 0.2
+        "x_meters": 6.076699404043476,
+        "y_meters": 2.558253794400308,
+        "intermediate_handoff_radius_meters": 0.10000000000000002
       },
       "rotation_target": {
-        "rotation_radians": 5.323254218582705,
+        "rotation_radians": 4.71238898038469,
         "profiled_rotation": true
       }
     },
     {
       "type": "waypoint",
       "translation_target": {
-        "x_meters": 2.9145085296506905,
-        "y_meters": 2.3860113728675865,
+        "x_meters": 2.5,
+        "y_meters": 2.5,
         "intermediate_handoff_radius_meters": 0.10000000000000002
       },
       "rotation_target": {
-        "rotation_radians": 5.323254218582705,
+        "rotation_radians": 4.71238898038469,
         "profiled_rotation": true
       }
     }

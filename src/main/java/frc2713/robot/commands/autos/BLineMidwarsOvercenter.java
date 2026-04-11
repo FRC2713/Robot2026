@@ -19,7 +19,7 @@ public class BLineMidwarsOvercenter {
                     .withShouldMirror(shouldMirror)
                     .build(new Path("mid_wards_overcenter"))),
         Commands.parallel(
-            GameCommandGroups.Launching.otfShot(
+            GameCommandGroups.Launching.autoOtfShot(
                     RobotContainer.drive,
                     RobotContainer.flywheels,
                     RobotContainer.hood,
@@ -28,11 +28,18 @@ public class BLineMidwarsOvercenter {
                     RobotContainer.dyeRotor,
                     RobotContainer.intakeExtension,
                     RobotContainer.intakeRoller)
+                .repeatedly()
                 .withDeadline(Commands.waitSeconds(5.0)),
             RobotContainer.pathBuilder
                 .withPoseReset(pose -> {})
                 .withShouldMirror(shouldMirror)
                 .build(new Path("back_to_trench"))),
+        GameCommandGroups.Launching.stopShootingAndRetractHood(
+            RobotContainer.drive,
+            RobotContainer.feeder,
+            RobotContainer.dyeRotor,
+            RobotContainer.hood,
+            RobotContainer.flywheels),
         GameCommandGroups.Intaking.intake(
                 RobotContainer.intakeExtension, RobotContainer.intakeRoller)
             .withDeadline(
@@ -41,7 +48,7 @@ public class BLineMidwarsOvercenter {
                     .withPoseReset(pose -> {})
                     .build(new Path("mid_wards_straight"))),
         Commands.parallel(
-            GameCommandGroups.Launching.otfShot(
+            GameCommandGroups.Launching.autoOtfShot(
                 RobotContainer.drive,
                 RobotContainer.flywheels,
                 RobotContainer.hood,

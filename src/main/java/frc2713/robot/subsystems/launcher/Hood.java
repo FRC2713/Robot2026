@@ -31,7 +31,7 @@ public class Hood extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   public Hood(final TalonFXSubsystemConfig config, final MotorIO launcherMotorIO) {
     super(config, new MotorInputsAutoLogged(), launcherMotorIO);
     // if (Constants.enableOTFFeatures)
-    setDefaultCommand(retract());
+    // setDefaultCommand(retract());
   }
 
   public Command setAngleCommand(Supplier<Angle> desiredAngle) {

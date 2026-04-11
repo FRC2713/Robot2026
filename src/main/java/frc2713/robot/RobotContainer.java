@@ -25,6 +25,7 @@ import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.commands.autos.BLineMidwars;
 import frc2713.robot.commands.autos.BLineMidwarsOvercenter;
 import frc2713.robot.commands.autos.BLineTuning;
+import frc2713.robot.commands.autos.BumpTest;
 import frc2713.robot.commands.autos.Demo;
 import frc2713.robot.commands.autos.DriveTest;
 import frc2713.robot.commands.autos.Midwars;
@@ -431,6 +432,7 @@ public class RobotContainer {
       autoChooser.addOption("BLine Tuning", BLineTuning.getCommand());
     }
 
+    autoChooser.addOption("Bump Test", BumpTest.getCommand());
     autoChooser.addDefaultOption("BlineMidwars", BLineMidwars.getCommand());
     autoChooser.addDefaultOption(
         "BlineMidwarsOvercenter - R", BLineMidwarsOvercenter.getCommand(() -> false));
