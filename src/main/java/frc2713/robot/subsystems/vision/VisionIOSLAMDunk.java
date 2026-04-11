@@ -17,11 +17,15 @@ import edu.wpi.first.networktables.StringArraySubscriber;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.Timer;
+import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.util.LoggedTunableNumber;
 import frc2713.robot.FieldConstants;
 import frc2713.robot.RobotContainer;
+
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.zeromq.SocketType;
 import org.zeromq.ZContext;
@@ -34,8 +38,9 @@ public class VisionIOSLAMDunk implements VisionIO {
   private DoubleArraySubscriber scTagsSub;
   private StringArraySubscriber scErrorsSub;
 
+  private final AdvantageScopePathBuilder pb = new AdvantageScopePathBuilder("Vision");
+
   private double lastTimestamp = -1;
-  private static final LoggedTunableNumber k = new LoggedTunableNumber("Vision/k", 3);
   private static final Transform3d SLAMDUNK_TRANSFORM =
       new Transform3d(new Translation3d(), new Rotation3d(0, 0, Math.PI / 2));
 
@@ -51,6 +56,12 @@ public class VisionIOSLAMDunk implements VisionIO {
 
   private final ZContext supercapContext;
   private final ZMQ.Socket superCapSocket;
+
+  private static final LoggedTunableNumber kDistance = new LoggedTunableNumber("Vision/kDistance", 3);
+
+  private final LoggedTunableNumber starvationThreshold = new LoggedTunableNumber("Vision/starvationThresholdSec", 1.0);
+  private final LoggedTunableNumber cStarvation = new LoggedTunableNumber("Vision/cStarvation", 2.0);
+  private final LoggedTunableNumber nStarvation = new LoggedTunableNumber("Vision/nStarvation", 1); // cast to int
 
   public VisionIOSLAMDunk() {
     inst = NetworkTableInstance.getDefault();
@@ -85,13 +96,13 @@ public class VisionIOSLAMDunk implements VisionIO {
     }
 
     var poseArray = poseSub.get();
-    Logger.recordOutput("Vision/SLAMDunk Array", poseArray);
+    Logger.recordOutput(pb.makeName("SLAMDunk Array"), poseArray);
 
     var scArray = scTagsSub.get();
-    Logger.recordOutput("Vision/SuperCap Tags Array", scArray);
+    Logger.recordOutput(pb.makeName("SuperCap Tags Array"), scArray);
 
     var scErrorsArray = scErrorsSub.get();
-    Logger.recordOutput("Vision/SuperCap Errors Array", scErrorsArray);
+    Logger.recordOutput(pb.makeName("SuperCap Errors Array"), scErrorsArray);
 
     for (int i = 0; i < scAlerts.length; i++) {
       if (i < scErrorsArray.length) {
@@ -142,22 +153,23 @@ public class VisionIOSLAMDunk implements VisionIO {
               RobotContainer.drive.getPose().getTranslation())) {
             inputs.reasoning = "ROBOT OUTSIDE FIELD!! HARD RESET";
             inputs.applying = true;
+            inputs.lastAppliedTimestamp = inputs.timestamp;
             RobotContainer.drive.setPose(inputs.pose);
-            Logger.recordOutput("Vision/robotOutsideField", true);
+            Logger.recordOutput(pb.makeName("robotOutsideField"), true);
             return;
           } else {
-            Logger.recordOutput("Vision/robotOutsideField", false);
+            Logger.recordOutput(pb.makeName("robotOutsideField"), false);
           }
         }
 
-        Logger.recordOutput(
-            "Vision/distanceTag9",
-            FieldConstants.AprilTagLayoutType.OFFICIAL
-                .getLayout()
-                .getTagPose(9)
-                .get()
-                .getTranslation()
-                .getDistance(inputs.pose3d.getTranslation()));
+        // Logger.recordOutput(
+        //     pb.makeName("distanceTag9"),
+        //     FieldConstants.AprilTagLayoutType.OFFICIAL
+        //         .getLayout()
+        //         .getTagPose(9)
+        //         .get()
+        //         .getTranslation()
+        //         .getDistance(inputs.pose3d.getTranslation()));
 
         if (!FieldConstants.FIELD_PLUS_HALF_METER.contains(inputs.pose.getTranslation())) {
           inputs.reasoning = "Vision outside field";
@@ -171,31 +183,17 @@ public class VisionIOSLAMDunk implements VisionIO {
           return;
         }
 
-        // double poseDelta =
-        //     inputs
-        //         .pose
-        //         .getTranslation()
-        //         .getDistance(RobotContainer.drive.getPose().getTranslation());
-        double roughDist = 74.7 * Math.pow(inputs.avgTagSize, -0.396);
-        Logger.recordOutput("Vision/roughDist", roughDist);
-        double distScaleFactor = Math.pow(roughDist, k.get());
-        Logger.recordOutput("Vision/distanceScaleFactor", distScaleFactor);
-        double countScaleFactor = 1 / Math.max(1, Math.pow(inputs.tagCount, 2));
-        Logger.recordOutput("Vision/countScaleFactor", countScaleFactor);
-
         inputs.translationStdDev =
             VisionConstants.POSE_ESTIMATOR_STATE_STDEVS
                 .translationalStDev()
-                .times(distScaleFactor)
-                .times(countScaleFactor);
+                .times(distanceScaleFactor(inputs))
+                .times(countScaleFactor(inputs))
+                .times(starvationScaleFactor(inputs, false));
         inputs.rotationStdDev = Degrees.of(99999);
-        // VisionConstants.POSE_ESTIMATOR_STATE_STDEVS
-        //     .rotationalStDev()
-        //     .times(distScaleFactor)
-        //     .times(countScaleFactor);
 
         inputs.reasoning = "Valid pose.";
         inputs.applying = true;
+        inputs.lastAppliedTimestamp = inputs.timestamp;
         return;
       }
     }
@@ -207,6 +205,36 @@ public class VisionIOSLAMDunk implements VisionIO {
     }
     inputs.applying = false;
     return;
+  }
+
+  @AutoLogOutput
+  private double roughDist(VisionInputs inputs) {
+    return 74.7 * Math.pow(inputs.avgTagSize, -0.396);
+  }
+
+  /** The farter the average tag is, the higher the stddev (less trust) */
+  @AutoLogOutput
+  private double distanceScaleFactor(VisionInputs inputs) {
+    return Math.pow(roughDist(inputs), kDistance.get());
+  } 
+
+  /** The more tags we see, the lower the stddev (more trust) */
+  @AutoLogOutput
+  private double countScaleFactor(VisionInputs inputs) {
+    return 1 / Math.max(1, Math.pow(inputs.tagCount, 2));
+  }
+
+  /** If we were starved for vision poses, then odometry has had a lot of time to drift,
+   * so when we finally get a new vision pose, lower its stddev (more trust) */
+  @AutoLogOutput
+  private double starvationScaleFactor(VisionInputs inputs, boolean autoOnly) {
+    double timeElapsed = inputs.timestamp - inputs.lastAppliedTimestamp;
+    if (timeElapsed < starvationThreshold.get() || (autoOnly && !DriverStation.isAutonomous())) {
+      return 1.0; // Not starved yet
+    }
+
+    double excessTime = timeElapsed - starvationThreshold.get();
+    return 1 / (cStarvation.get() * Math.pow(1 + excessTime, (int) nStarvation.get()));
   }
 
   @Override
@@ -230,7 +258,7 @@ public class VisionIOSLAMDunk implements VisionIO {
                   if (reply == null || !replyStr.equals("OK")) {
                     gyroAlert.set(true);
                     System.err.println("Unexpected reply from SuperCap: " + replyStr);
-                    Logger.recordOutput("Vision/SuperCapReplyError", replyStr);
+                    Logger.recordOutput(pb.makeName("SuperCapReplyError"), replyStr);
                   } else {
                     gyroAlert.set(false);
                   }
@@ -240,7 +268,7 @@ public class VisionIOSLAMDunk implements VisionIO {
               } catch (Exception e) {
                 gyroAlert.set(true);
                 System.err.println("Error sending gyro update to SuperCap: " + e.getMessage());
-                Logger.recordOutput("Vision/ZmqError", e.getMessage());
+                Logger.recordOutput(pb.makeName("ZmqError"), e.getMessage());
               }
             })
         .start();
