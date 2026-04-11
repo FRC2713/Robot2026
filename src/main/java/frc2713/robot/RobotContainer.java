@@ -269,12 +269,12 @@ public class RobotContainer {
         new OperatorControls(
             drive, flywheels, turret, hood, intakeRoller, intakeExtension, dyeRotor, feeder);
 
-    configurePIDPathBuilder();
+    configurePIDPathBuilder(Constants.tuningMode);
     configureChoreoFactory();
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
-    configureAutonomousRoutines(autoChooser, true);
+    configureAutonomousRoutines(autoChooser, Constants.tuningMode);
 
     // Configure the button bindings
     configureButtonBindings();
@@ -304,7 +304,7 @@ public class RobotContainer {
             );
   }
 
-  private void configurePIDPathBuilder() {
+  private void configurePIDPathBuilder(boolean isDev) {
     // Path following
     RobotContainer.pathBuilder =
         new FollowPath.Builder(
@@ -332,20 +332,22 @@ public class RobotContainer {
           Logger.recordOutput(pair.getFirst(), pair.getSecond());
         });
 
-    FollowPath.setDoubleLoggingConsumer(
-        pair -> {
-          Logger.recordOutput(pair.getFirst(), pair.getSecond());
-        });
+    if (isDev) {
+      FollowPath.setDoubleLoggingConsumer(
+          pair -> {
+            Logger.recordOutput(pair.getFirst(), pair.getSecond());
+          });
 
-    FollowPath.setBooleanLoggingConsumer(
-        pair -> {
-          Logger.recordOutput(pair.getFirst(), pair.getSecond());
-        });
+      FollowPath.setBooleanLoggingConsumer(
+          pair -> {
+            Logger.recordOutput(pair.getFirst(), pair.getSecond());
+          });
 
-    FollowPath.setPoseLoggingConsumer(
-        pair -> {
-          Logger.recordOutput(pair.getFirst(), pair.getSecond());
-        });
+      FollowPath.setPoseLoggingConsumer(
+          pair -> {
+            Logger.recordOutput(pair.getFirst(), pair.getSecond());
+          });
+    }
   }
 
   /** Use this robot to configure the transforms between subsystems. */
@@ -427,20 +429,19 @@ public class RobotContainer {
           "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
       autoChooser.addOption("DriveTest", DriveTest.routine(autoFactory));
-
       autoChooser.addOption("DemoMode", Demo.demo());
       autoChooser.addOption("BLine Tuning", BLineTuning.getCommand());
+      autoChooser.addOption("Bump Test", BumpTest.getCommand());
     }
 
-    autoChooser.addOption("Bump Test", BumpTest.getCommand());
-    autoChooser.addDefaultOption("BlineMidwars", BLineMidwars.getCommand());
+    autoChooser.addDefaultOption("BlineMidwars", BLineMidwars.getCommand(() -> false));
     autoChooser.addDefaultOption(
         "BlineMidwarsOvercenter - R", BLineMidwarsOvercenter.getCommand(() -> false));
     autoChooser.addDefaultOption(
         "BlineMidwarsOvercenter - L", BLineMidwarsOvercenter.getCommand(() -> true));
 
     autoChooser.addDefaultOption(
-        "Midwars",
+        "ChoreoMidwars - R",
         Midwars.getRoutine(
             autoFactory,
             false,
@@ -454,7 +455,7 @@ public class RobotContainer {
             feeder));
 
     autoChooser.addOption(
-        "MidwarsFlipped",
+        "ChoreoMidwarsFlipped - L",
         Midwars.getRoutine(
             autoFactory,
             true,
@@ -467,9 +468,8 @@ public class RobotContainer {
             dyeRotor,
             feeder));
 
-    autoChooser.addOption("NoIntakeFlipped", NoIntake.getRoutine(autoFactory, true, drive));
-
-    autoChooser.addOption("NoIntake", NoIntake.getRoutine(autoFactory, false, drive));
+    autoChooser.addOption("NoIntake - R", NoIntake.getRoutine(autoFactory, false, drive));
+    autoChooser.addOption("NoIntake - L", NoIntake.getRoutine(autoFactory, true, drive));
   }
 
   /**

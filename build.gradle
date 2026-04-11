@@ -107,7 +107,9 @@ dependencies {
 
     implementation 'org.zeromq:jeromq:0.6.0'
 
-    implementation 'com.github.FRC2713:BLine-Lib-2026:74916c893e9ac5aedcff2e7fe29c1940834d6a09'
+    // Use local BLine fork for development - switch back to maven for remote
+    // implementation files('../BLine-Lib-2026/build/libs/BLine-Lib-0.8.4.jar')
+    implementation 'com.github.FRC2713:BLine-Lib-2026:main-SNAPSHOT'
 }
 
 test {

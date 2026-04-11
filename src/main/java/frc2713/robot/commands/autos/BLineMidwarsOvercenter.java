@@ -11,15 +11,17 @@ public class BLineMidwarsOvercenter {
 
   public static Command getCommand(Supplier<Boolean> shouldMirror) {
     return Commands.sequence(
-        GameCommandGroups.Intaking.intake(
-                RobotContainer.intakeExtension, RobotContainer.intakeRoller)
-            .withDeadline(
-                RobotContainer.pathBuilder
-                    .withPoseReset(RobotContainer.drive::setPose)
-                    .withShouldMirror(shouldMirror)
-                    .build(new Path("mid_wards_overcenter"))),
-        Commands.parallel(
-            GameCommandGroups.Launching.autoOtfShot(
+        // Drive through neutral zone with intake and shoot events
+        RobotContainer.pathBuilder
+            .withPoseReset(RobotContainer.drive::setPose)
+            .withShouldMirror(shouldMirror)
+            .withEvent(
+                "intake",
+                GameCommandGroups.Intaking.intake(
+                    RobotContainer.intakeExtension, RobotContainer.intakeRoller))
+            .withEvent(
+                "shoot_1",
+                GameCommandGroups.Launching.autoOtfShot(
                     RobotContainer.drive,
                     RobotContainer.flywheels,
                     RobotContainer.hood,
@@ -27,26 +29,62 @@ public class BLineMidwarsOvercenter {
                     RobotContainer.feeder,
                     RobotContainer.dyeRotor,
                     RobotContainer.intakeExtension,
-                    RobotContainer.intakeRoller)
-                .repeatedly()
-                .withDeadline(Commands.waitSeconds(5.0)),
-            RobotContainer.pathBuilder
-                .withPoseReset(pose -> {})
-                .withShouldMirror(shouldMirror)
-                .build(new Path("back_to_trench"))),
-        GameCommandGroups.Launching.stopShootingAndRetractHood(
-            RobotContainer.drive,
-            RobotContainer.feeder,
-            RobotContainer.dyeRotor,
-            RobotContainer.hood,
-            RobotContainer.flywheels),
-        GameCommandGroups.Intaking.intake(
-                RobotContainer.intakeExtension, RobotContainer.intakeRoller)
-            .withDeadline(
-                RobotContainer.pathBuilder
-                    .withShouldMirror(shouldMirror)
-                    .withPoseReset(pose -> {})
-                    .build(new Path("mid_wards_straight"))),
+                    RobotContainer.intakeRoller))
+            .build(new Path("mid_wards_overcenter")),
+        // Pausing near hub to shoot
+        GameCommandGroups.Launching.autoOtfShot(
+                RobotContainer.drive,
+                RobotContainer.flywheels,
+                RobotContainer.hood,
+                RobotContainer.turret,
+                RobotContainer.feeder,
+                RobotContainer.dyeRotor,
+                RobotContainer.intakeExtension,
+                RobotContainer.intakeRoller)
+            .withDeadline(Commands.waitSeconds(3.0)),
+        // Drive to trench while shooting
+        RobotContainer.pathBuilder
+            .withPoseReset(pose -> {})
+            .withShouldMirror(shouldMirror)
+            .withStartingEvent(
+                GameCommandGroups.Launching.autoOtfShot(
+                    RobotContainer.drive,
+                    RobotContainer.flywheels,
+                    RobotContainer.hood,
+                    RobotContainer.turret,
+                    RobotContainer.feeder,
+                    RobotContainer.dyeRotor,
+                    RobotContainer.intakeExtension,
+                    RobotContainer.intakeRoller))
+            .build(new Path("back_to_trench")),
+        // Drive through neutral zone with intake and shoot events
+        RobotContainer.pathBuilder
+            .withShouldMirror(shouldMirror)
+            .withPoseReset(pose -> {})
+            .withStartingEvent(
+                Commands.parallel(
+                    GameCommandGroups.Launching.stopShootingAndRetractHood(
+                        RobotContainer.drive,
+                        RobotContainer.feeder,
+                        RobotContainer.dyeRotor,
+                        RobotContainer.hood,
+                        RobotContainer.flywheels),
+                    GameCommandGroups.Intaking.intake(
+                        RobotContainer.intakeExtension, RobotContainer.intakeRoller)))
+            .withEvent(
+                "shoot_2",
+                GameCommandGroups.Launching.autoOtfShot(
+                        RobotContainer.drive,
+                        RobotContainer.flywheels,
+                        RobotContainer.hood,
+                        RobotContainer.turret,
+                        RobotContainer.feeder,
+                        RobotContainer.dyeRotor,
+                        RobotContainer.intakeExtension,
+                        RobotContainer.intakeRoller)
+                    .repeatedly())
+            .build(new Path("mid_wards_straight")),
+        // Drive to trench while shooting
         Commands.parallel(
             GameCommandGroups.Launching.autoOtfShot(
                 RobotContainer.drive,

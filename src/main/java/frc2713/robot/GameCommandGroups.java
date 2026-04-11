@@ -201,15 +201,15 @@ public final class GameCommandGroups {
 
   public static final class Intaking {
     public static Command intake(IntakeExtension extension, IntakeRoller rollers) {
-      return Commands.parallel(extension.extendCommand(), rollers.intake());
+      return Commands.parallel(extension.extendCommand(), rollers.intake()).withName("Intake");
     }
 
     public static Command outtake(IntakeExtension extension, IntakeRoller rollers) {
-      return Commands.parallel(extension.extendCommand(), rollers.outtake());
+      return Commands.parallel(extension.extendCommand(), rollers.outtake()).withName("Outtake");
     }
 
     public static Command stopIntake(IntakeExtension extension, IntakeRoller rollers) {
-      return Commands.parallel(rollers.stop());
+      return Commands.parallel(rollers.stop()).withName("Stop Intaking");
     }
   }
 
