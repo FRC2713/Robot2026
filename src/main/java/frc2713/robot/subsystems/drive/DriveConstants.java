@@ -31,14 +31,14 @@ public class DriveConstants {
 
   public static final DriveLimits scoringDriveLimits =
       new DriveLimits(
-          FeetPerSecond.of(6.0),
+          FeetPerSecond.of(5.0),
           FeetPerSecondPerSecond.of(40.0),
           DegreesPerSecond.of(180.0),
           DegreesPerSecondPerSecond.of(1800.0));
 
   public static final DriveLimits feedingDriveLimits =
       new DriveLimits(
-          FeetPerSecond.of(12.0),
+          FeetPerSecond.of(10.0),
           FeetPerSecondPerSecond.of(30.0),
           DegreesPerSecond.of(180.0),
           DegreesPerSecondPerSecond.of(3600.0));

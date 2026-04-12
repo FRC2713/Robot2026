@@ -65,7 +65,7 @@
       "translation_target": {
         "x_meters": 6.083549940020671,
         "y_meters": 2.65,
-        "intermediate_handoff_radius_meters": 0.2
+        "intermediate_handoff_radius_meters": 0.25
       },
       "rotation_target": {
         "rotation_radians": 4.71238898038469,
@@ -74,7 +74,7 @@
     },
     {
       "type": "event_trigger",
-      "t_ratio": 0.6561239575258645,
+      "t_ratio": 0.8752622475017144,
       "lib_key": "shoot_2"
     },
     {
@@ -94,7 +94,7 @@
     "max_velocity_meters_per_sec": [
       {
         "value": 2.5,
-        "start_ordinal": 1,
+        "start_ordinal": 2,
         "end_ordinal": 4
       }
     ]

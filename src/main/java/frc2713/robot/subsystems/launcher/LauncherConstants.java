@@ -45,7 +45,7 @@ public final class LauncherConstants {
     public static final Angle reverseSoftLimit = Degrees.of(-180);
 
     public static final LoggedTunableMeasure<Time> OTF_OMEGA_LOOKAHEAD =
-        new LoggedTunableMeasure<Time>("LaunchingSolutionManager/omegaTime", Seconds.of(0.1));
+        new LoggedTunableMeasure<Time>("LaunchingSolutionManager/omegaTime", Seconds.of(0.05));
 
     // Gear tooth counts for calculating overall gear ratio
     public static final int pinionGearTeeth = 15;
@@ -73,7 +73,7 @@ public final class LauncherConstants {
       config.generalControlMode = GeneralControlMode.POSITION;
       config.acceptablePositionError = Degrees.of(3);
 
-      config.fxConfig.Feedback.FeedbackRotorOffset = -0.113281;
+      config.fxConfig.Feedback.FeedbackRotorOffset = 0.154297;
 
       config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -215,7 +215,7 @@ public final class LauncherConstants {
       config.name = "Hood";
       config.talonCANID = new CANDeviceId(54, "canivore"); // Example CAN ID, replace with actual ID
 
-      config.fxConfig.Feedback.FeedbackRotorOffset = 0.379395;
+      config.fxConfig.Feedback.FeedbackRotorOffset = -0.700684;
 
       // PID gains for Motion Magic
       config.fxConfig.Slot0.kP = 400.0;

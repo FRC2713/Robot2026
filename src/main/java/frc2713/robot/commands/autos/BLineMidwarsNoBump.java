@@ -7,7 +7,7 @@ import frc2713.robot.GameCommandGroups;
 import frc2713.robot.RobotContainer;
 import java.util.function.Supplier;
 
-public class BLineMidwars {
+public class BLineMidwarsNoBump {
 
   public static Command getCommand(Supplier<Boolean> shouldMirror) {
     return Commands.sequence(
@@ -30,8 +30,8 @@ public class BLineMidwars {
                     RobotContainer.dyeRotor,
                     RobotContainer.intakeExtension,
                     RobotContainer.intakeRoller))
-            .build(new Path("mid_wards")),
-        // Pausing near hub to shoot
+            .build(new Path("nobump_mid_wards")),
+        // Pausing to shoot
         GameCommandGroups.Launching.autoOtfShot(
                 RobotContainer.drive,
                 RobotContainer.flywheels,
@@ -41,22 +41,8 @@ public class BLineMidwars {
                 RobotContainer.dyeRotor,
                 RobotContainer.intakeExtension,
                 RobotContainer.intakeRoller)
-            .withDeadline(Commands.waitSeconds(3.0)),
-        // Drive to trench while shooting
-        RobotContainer.pathBuilder
-            .withPoseReset(pose -> {})
-            .withShouldMirror(shouldMirror)
-            .withStartingEvent(
-                GameCommandGroups.Launching.autoOtfShot(
-                    RobotContainer.drive,
-                    RobotContainer.flywheels,
-                    RobotContainer.hood,
-                    RobotContainer.turret,
-                    RobotContainer.feeder,
-                    RobotContainer.dyeRotor,
-                    RobotContainer.intakeExtension,
-                    RobotContainer.intakeRoller))
-            .build(new Path("back_to_trench")),
+            .withDeadline(Commands.waitSeconds(2)),
+
         // Drive through neutral zone with intake and shoot events
         RobotContainer.pathBuilder
             .withShouldMirror(shouldMirror)
@@ -83,10 +69,9 @@ public class BLineMidwars {
                         RobotContainer.intakeExtension,
                         RobotContainer.intakeRoller)
                     .repeatedly())
-            .build(new Path("mid_wards_straight")),
-        // Drive to trench while shooting
-        Commands.parallel(
-            GameCommandGroups.Launching.autoOtfShot(
+            .build(new Path("nobump_mid_wards_straight")),
+        // Shooting
+        GameCommandGroups.Launching.autoOtfShot(
                 RobotContainer.drive,
                 RobotContainer.flywheels,
                 RobotContainer.hood,
@@ -94,10 +79,7 @@ public class BLineMidwars {
                 RobotContainer.feeder,
                 RobotContainer.dyeRotor,
                 RobotContainer.intakeExtension,
-                RobotContainer.intakeRoller),
-            RobotContainer.pathBuilder
-                .withShouldMirror(shouldMirror)
-                .withPoseReset(pose -> {})
-                .build(new Path("back_to_trench"))));
+                RobotContainer.intakeRoller)
+            .repeatedly());
   }
 }
