@@ -41,14 +41,15 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -56,7 +57,6 @@ import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.io.ArticulatedComponent;
 import frc2713.lib.logging.PeriodicTimingLogger;
 import frc2713.lib.logging.TimeLogged;
-import frc2713.lib.util.AllianceCache;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.lib.util.LoggedTunableGains;
 import frc2713.robot.Constants;
@@ -121,6 +121,8 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
       };
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, Pose2d.kZero);
+
+  private final Field2d loggedPoseOnField = new Field2d(); // for elastic layout
   // private SwerveDrivePoseEstimator odometryPoseEstimator =
   //     new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions,
   // Pose2d.kZero);
@@ -134,23 +136,10 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
   private final AdvantageScopePathBuilder drivePb;
 
   // ----- Drive Limits -----
-  // These limits let us cap how fast and how quickly the robot can change speed.
-  // A value of POSITIVE_INFINITY means "no limit" (the default).
-  private static final double LOOP_PERIOD_SECS = 0.02; // 20ms robot loop
-
   // Max allowed linear speed (m/s). Speeds above this get scaled down.
   private double linearVelocityLimit = Double.POSITIVE_INFINITY;
-  // Max allowed linear acceleration (m/s^2). Limits how fast we speed up, slow down, or change
-  // direction.
-  private double linearAccelerationLimit = Double.POSITIVE_INFINITY;
   // Max allowed angular (turning) speed (rad/s). Rotation rates above this get clamped.
   private double angularVelocityLimit = Double.POSITIVE_INFINITY;
-  // Max allowed angular acceleration (rad/s^2). Limits how fast the robot can start or stop
-  // spinning.
-  private double angularAccelerationLimit = Double.POSITIVE_INFINITY;
-
-  // Remembers what we actually commanded last cycle so we can calculate acceleration
-  private ChassisSpeeds lastCommandedSpeeds = new ChassisSpeeds();
   private LoggedTunableGains loggedTunableDriveGains;
   private LoggedTunableGains loggedTunableTurnGains;
   private LoggedTunableGains loggedTunablePositionGains;
@@ -185,7 +174,7 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
         new PPHolonomicDriveController(
             new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
         PP_CONFIG,
-        AllianceCache::isRed,
+        () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
         this);
     Pathfinding.setPathfinder(new LocalADStarAK());
     PathPlannerLogging.setLogActivePathCallback(
@@ -306,14 +295,23 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
         if (gyroInputs.connected) {
           // Use the real gyro angle
           rawGyroRotation = gyroInputs.odometryYawPositions[i];
+          Logger.recordOutput(
+              "Drive/moduleTwistRotation", kinematics.toTwist2d(moduleDeltas).dtheta);
+          Logger.recordOutput("Drive/rawGyroRotation", rawGyroRotation);
         } else {
           // Use the angle delta from the kinematics and module deltas
           Twist2d twist = kinematics.toTwist2d(moduleDeltas);
           rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
+          Logger.recordOutput("Drive/moduleTwistRotation", twist.dtheta);
+          Logger.recordOutput("Drive/rawGyroRotation", rawGyroRotation);
         }
 
         // Apply update
         poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+
+        loggedPoseOnField.setRobotPose(getPose());
+
+        SmartDashboard.putData("Vision/robot_on_field", loggedPoseOnField);
         // odometryPoseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation,
         // modulePositions);
       }
@@ -442,33 +440,15 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
     this.linearVelocityLimit = maxlLinearVelocity.in(MetersPerSecond);
   }
 
-  /**
-   * Sets the maximum linear acceleration (m/s^2). Limits how fast the robot speeds up, slows down,
-   * or changes direction.
-   */
-  public void setLinearAccelerationLimit(LinearAcceleration maxLinearAcceleration) {
-    this.linearAccelerationLimit = maxLinearAcceleration.in(MetersPerSecondPerSecond);
-  }
-
   /** Sets the maximum angular (turning) velocity (rad/s). The robot won't spin faster than this. */
   public void setAngularVelocityLimit(AngularVelocity maxAngularVelocity) {
     this.angularVelocityLimit = maxAngularVelocity.in(RadiansPerSecond);
   }
 
-  /**
-   * Sets the maximum angular acceleration (rad/s^2). Limits how fast the robot starts or stops
-   * spinning.
-   */
-  public void setAngularAccelerationLimit(AngularAcceleration maxAngularAcceleration) {
-    this.angularAccelerationLimit = maxAngularAcceleration.in(RadiansPerSecondPerSecond);
-  }
-
   /** Removes all drive limits so the robot can use its full speed and acceleration. */
   public void clearDriveLimits() {
     this.linearVelocityLimit = Double.POSITIVE_INFINITY;
-    this.linearAccelerationLimit = Double.POSITIVE_INFINITY;
     this.angularVelocityLimit = Double.POSITIVE_INFINITY;
-    this.angularAccelerationLimit = Double.POSITIVE_INFINITY;
   }
 
   /**
@@ -490,33 +470,6 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
     double vy = desired.vyMetersPerSecond;
     double omega = desired.omegaRadiansPerSecond;
 
-    // --- Linear acceleration limiting ---
-    // Figure out how much the linear velocity is trying to change since last cycle
-    double dvx = vx - lastCommandedSpeeds.vxMetersPerSecond;
-    double dvy = vy - lastCommandedSpeeds.vyMetersPerSecond;
-    double deltaLinearSpeed = Math.hypot(dvx, dvy);
-
-    // The maximum change allowed in one loop cycle = maxAccel * dt
-    double maxLinearDelta = linearAccelerationLimit * LOOP_PERIOD_SECS;
-
-    if (deltaLinearSpeed > maxLinearDelta) {
-      // Scale the change down so it doesn't exceed the acceleration limit.
-      // Think of it like: we want to move toward the target speed, but only take a step
-      // of size maxLinearDelta in that direction.
-      double scale = maxLinearDelta / deltaLinearSpeed;
-      vx = lastCommandedSpeeds.vxMetersPerSecond + dvx * scale;
-      vy = lastCommandedSpeeds.vyMetersPerSecond + dvy * scale;
-    }
-
-    // --- Angular acceleration limiting ---
-    double dOmega = omega - lastCommandedSpeeds.omegaRadiansPerSecond;
-    double maxAngularDelta = angularAccelerationLimit * LOOP_PERIOD_SECS;
-
-    if (Math.abs(dOmega) > maxAngularDelta) {
-      // Clamp the angular speed change to the max allowed step
-      omega = lastCommandedSpeeds.omegaRadiansPerSecond + Math.copySign(maxAngularDelta, dOmega);
-    }
-
     // --- Linear velocity limiting ---
     // Cap the overall driving speed so the robot doesn't exceed the velocity limit
     double linearSpeed = Math.hypot(vx, vy);
@@ -531,9 +484,6 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
     omega = MathUtil.clamp(omega, -angularVelocityLimit, angularVelocityLimit);
 
     ChassisSpeeds limited = new ChassisSpeeds(vx, vy, omega);
-
-    // Remember what we're actually commanding so next cycle can compute acceleration
-    lastCommandedSpeeds = limited;
 
     // Log both the raw request and what we actually sent so we can see the limits in action
     Logger.recordOutput(drivePb.makePath("SwerveChassisSpeeds", "Desired"), desired);

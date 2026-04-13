@@ -31,17 +31,17 @@ public class DriveConstants {
 
   public static final DriveLimits scoringDriveLimits =
       new DriveLimits(
-          FeetPerSecond.of(3.0),
-          FeetPerSecondPerSecond.of(11.0),
-          DegreesPerSecond.of(45.0),
-          DegreesPerSecondPerSecond.of(180.0));
+          FeetPerSecond.of(5.0),
+          FeetPerSecondPerSecond.of(40.0),
+          DegreesPerSecond.of(180.0),
+          DegreesPerSecondPerSecond.of(1800.0));
 
   public static final DriveLimits feedingDriveLimits =
       new DriveLimits(
-          FeetPerSecond.of(5.0),
-          FeetPerSecondPerSecond.of(15.0),
-          DegreesPerSecond.of(90.0),
-          DegreesPerSecondPerSecond.of(360.0));
+          FeetPerSecond.of(10.0),
+          FeetPerSecondPerSecond.of(30.0),
+          DegreesPerSecond.of(180.0),
+          DegreesPerSecondPerSecond.of(3600.0));
 
   public static final MomentOfInertia intakeExtendedMoi =
       MoiUnits.PoundSquareInches.of(29546.954784);

@@ -17,7 +17,6 @@ import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 import frc2713.robot.util.ShiftManager;
-import java.util.function.BooleanSupplier;
 
 public class OperatorControls {
   private final CommandVader4Controller controller = new CommandVader4Controller(1);
@@ -144,17 +143,7 @@ public class OperatorControls {
         .onTrue(
             Turret.changeDefaultTurretCommand(turret, turret.manualControl(), "Disable Turret"));
 
-    controller
-        .x()
-        .whileTrue(
-            Commands.run(
-                () -> {
-                  System.out.println("HARD RESET VISION!");
-                  var visionPose = RobotContainer.vision.getPose();
-                  if (visionPose.isPresent()) {
-                    RobotContainer.drive.setPose(visionPose.get());
-                  }
-                }));
+    controller.x().whileTrue(Commands.run(() -> RobotContainer.vision.hardResetDrivePose()));
 
     new Trigger(() -> ShiftManager.getTimeLeftInShift(DriverStation.getMatchTime()) <= 2)
         .whileTrue(controller.RumbleForDuration(0.5));

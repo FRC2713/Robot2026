@@ -4,6 +4,7 @@
 package frc2713.lib.util;
 
 import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.wpilibj.DriverStation;
 import frc2713.robot.Constants;
 import frc2713.robot.FieldConstants;
 
@@ -60,7 +61,9 @@ public class AllianceFlipUtil {
   }
 
   public static boolean shouldFlip() {
-    return !Constants.disableHAL && AllianceCache.isRed();
+    return !Constants.disableHAL
+        && DriverStation.getAlliance().isPresent()
+        && DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
   }
 
   public static int shouldFlipInt() {

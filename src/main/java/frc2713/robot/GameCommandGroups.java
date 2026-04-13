@@ -1,5 +1,9 @@
 package frc2713.robot;
 
+import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
+import static edu.wpi.first.units.Units.FeetPerSecond;
+import static edu.wpi.first.units.Units.FeetPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -18,6 +22,7 @@ import frc2713.robot.subsystems.launcher.Turret;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 import frc2713.robot.subsystems.serializer.SerializerConstants;
+import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
 /**
@@ -38,7 +43,7 @@ public final class GameCommandGroups {
         IntakeExtension extension,
         IntakeRoller intakeRoller) {
       return Commands.either(
-              Commands.print("[AUTO] Auto in neutral!"),
+              Commands.print("[AUTO] Auto in neutral zone!"),
               Commands.parallel(
                   flywheels.otfCommand(),
                   hood.otfCommand(),
@@ -196,15 +201,15 @@ public final class GameCommandGroups {
 
   public static final class Intaking {
     public static Command intake(IntakeExtension extension, IntakeRoller rollers) {
-      return Commands.parallel(extension.extendCommand(), rollers.intake());
+      return Commands.parallel(extension.extendCommand(), rollers.intake()).withName("Intake");
     }
 
     public static Command outtake(IntakeExtension extension, IntakeRoller rollers) {
-      return Commands.parallel(extension.extendCommand(), rollers.outtake());
+      return Commands.parallel(extension.extendCommand(), rollers.outtake()).withName("Outtake");
     }
 
     public static Command stopIntake(IntakeExtension extension, IntakeRoller rollers) {
-      return Commands.parallel(rollers.stop());
+      return Commands.parallel(rollers.stop()).withName("Stop Intaking");
     }
   }
 

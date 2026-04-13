@@ -261,8 +261,8 @@ public class CommandVader4Controller extends CommandGenericHID {
 
   public Command RumbleForDuration(double seconds) {
     return startRumble()
-      .withTimeout(seconds)
-      .andThen(stopRumble())
-      .withName("Rumble for " + seconds + " seconds");
+        .withTimeout(seconds)
+        .andThen(stopRumble())
+        .withName("Rumble for " + seconds + " seconds");
   }
 }

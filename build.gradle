@@ -6,6 +6,10 @@ plugins {
     id("io.freefair.lombok") version "9.2.0"
 }
 
+repositories {
+    maven {url = uri("https://jitpack.io") }
+}
+
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
@@ -102,6 +106,12 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.34'
 
     implementation 'org.zeromq:jeromq:0.6.0'
+
+    // Use local build path for development of Bline
+    // implementation files('../BLine-Lib-2026/build/libs/BLine-Lib-0.8.4.jar')
+
+    // Use jitpack build url for development of robot code
+    implementation 'com.github.FRC2713:BLine-Lib-2026:main-SNAPSHOT'
 }
 
 test {

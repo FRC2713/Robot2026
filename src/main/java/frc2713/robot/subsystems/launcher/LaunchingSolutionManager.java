@@ -49,7 +49,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
    * and iteration data under {@code LaunchingSolutionManager/itof debug/...}.
    */
   public static final LoggedTunableBoolean itofDebug =
-      new LoggedTunableBoolean("LaunchingSolutionManager/itof_debug", true);
+      new LoggedTunableBoolean("LaunchingSolutionManager/itof_debug", false);
 
   // --- Data Structures ---
   public static record LaunchSolution(
@@ -250,10 +250,19 @@ public class LaunchingSolutionManager extends SubsystemBase {
     boolean dbg = itofDebug.get();
     Translation3d robotTrans = robotPose.getTranslation();
 
+    // Needs to be field-relative when projecting forward
+    robotVel = robotVel.rotateBy(robotPose.getRotation());
+
     // Step 1: compute the immediate range. If we are effectively at the goal in XY,
     // fall back to the static solver to avoid unstable divide-by-near-zero behavior.
     Translation3d rangeVec0 = targetPose.minus(robotTrans);
     double initialDistance = rangeVec0.toTranslation2d().getNorm();
+
+    // The tof map was measured using the t@launch to the t@hub-entrance
+    // So for the iterations, we'll use the direct distance to the target.
+    // But the RPM and Hood maps will still need the horizontal distance for now.
+    double initialDirectDirection = rangeVec0.getNorm();
+
     if (initialDistance < 0.05) {
       if (dbg) {
         Logger.recordOutput(
@@ -267,13 +276,17 @@ public class LaunchingSolutionManager extends SubsystemBase {
     // otherwise seed from the ToF lookup table at current distance.
     double t = lastItofTofSeconds;
     if (t < tMin || t > tMax || Double.isNaN(t)) {
-      t = MathUtil.clamp(LaunchingSolutionManager.currentTofMap.get(initialDistance), tMin, tMax);
+      t =
+          MathUtil.clamp(
+              LaunchingSolutionManager.currentTofMap.get(initialDirectDirection), tMin, tMax);
     }
 
     if (dbg) {
       Logger.recordOutput(pb.makePath("itof debug", "initial relative vector"), rangeVec0);
       Logger.recordOutput(
           pb.makePath("itof debug", "initial horizontal distance m"), initialDistance);
+      Logger.recordOutput(
+          pb.makePath("itof debug", "initial direct distance m"), initialDirectDirection);
       Logger.recordOutput(pb.makePath("itof debug", "robot translation"), robotTrans);
       Logger.recordOutput(pb.makePath("itof debug", "robot pose"), robotPose);
       Logger.recordOutput(pb.makePath("itof debug", "robot lin vel"), robotVel);
@@ -289,6 +302,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
     }
 
     double horizontalDist = initialDistance;
+    double directDistance = initialDirectDirection;
     Translation3d rel = rangeVec0;
     int iterationsUsed = 0;
 
@@ -308,6 +322,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
               new Translation3d(robotVel.getX() * t, robotVel.getY() * t, robotVel.getZ() * t));
       rel = targetPose.minus(projected);
       horizontalDist = rel.toTranslation2d().getNorm();
+      directDistance = rel.getNorm();
       if (horizontalDist < 0.05) {
         if (dbg) {
           Logger.recordOutput(
@@ -321,15 +336,15 @@ public class LaunchingSolutionManager extends SubsystemBase {
       }
 
       double tNext =
-          MathUtil.clamp(LaunchingSolutionManager.currentTofMap.get(horizontalDist), tMin, tMax);
+          MathUtil.clamp(LaunchingSolutionManager.currentTofMap.get(directDistance), tMin, tMax);
       iterationsUsed = i + 1;
       if (tPerIter != null) {
         tPerIter[i] = t;
-        dPerIter[i] = horizontalDist;
+        dPerIter[i] = directDistance;
         tNextPerIter[i] = tNext;
       }
       if (dbg) {
-        logItofDebugIteration(i, t, projected, rel, horizontalDist, tNext, robotPose.getRotation());
+        logItofDebugIteration(i, t, projected, rel, directDistance, tNext, robotPose.getRotation());
       }
       if (Math.abs(tNext - t) < eps) {
         t = tNext;
@@ -360,6 +375,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
         robotTrans.plus(new Translation3d(robotVel.getX() * t, robotVel.getY() * t, 0));
     rel = targetPose.minus(projected);
     horizontalDist = rel.toTranslation2d().getNorm();
+    directDistance = rel.getNorm();
 
     if (dbg) {
       Logger.recordOutput(
@@ -367,6 +383,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
           new Pose3d(projected, robotPose.getRotation()));
       Logger.recordOutput(pb.makePath("itof debug", "final relative vector to target"), rel);
       Logger.recordOutput(pb.makePath("itof debug", "final horizontal distance m"), horizontalDist);
+      Logger.recordOutput(pb.makePath("itof debug", "final direct distance m"), directDistance);
       Logger.recordOutput(pb.makePath("itof debug", "converged tof s"), t);
     }
 
@@ -415,7 +432,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
     Logger.recordOutput(
         pb.makePath("itof debug", "iteration relative vector to target"), relToTarget);
     Logger.recordOutput(pb.makePath("itof debug", "iteration horizontal distance m"), dHorizontal);
-    Logger.recordOutput(pb.makePath("itof debug", "iteration next tof estimate s"), tNext);
+    // Logger.recordOutput(pb.makePath("itof debug", "iteration next tof estimate s"), tNext);
   }
 
   public class ZoneSelectionHelpers {
@@ -452,6 +469,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
       LaunchingSolutionManager.currentAction = LaunchingAction.SCORING;
     }
 
+    // For intake align
     public static Rotation2d storedIntakeRotation = new Rotation2d(0);
 
     public static void setIntakeRotation() {

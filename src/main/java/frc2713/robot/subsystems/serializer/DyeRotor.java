@@ -20,6 +20,7 @@ import frc2713.lib.logging.PeriodicTimingLogger;
 import frc2713.lib.logging.TimeLogged;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
+import frc2713.robot.subsystems.launcher.LaunchingLookupMaps;
 import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
@@ -45,7 +46,7 @@ public class DyeRotor extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   @AutoLogOutput(key = "Dye Rotor/DynamicIndexSpeed")
   public AngularVelocity dynamicIndexSpeed() {
     return RPM.of(
-        SerializerConstants.DyeRotor.otfSpeeds.get(
+        LaunchingLookupMaps.distanceToDyeRotorSpeedMap.get(
             LaunchingSolutionManager.getInstance().getSolution().effectiveDistanceMeters()));
   }
 

@@ -22,8 +22,10 @@ import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.commands.DriveCommands;
-import frc2713.robot.commands.autos.BLineMidwars;
+import frc2713.robot.commands.autos.BLineMidwarsNoBump;
+import frc2713.robot.commands.autos.BLineMidwarsOvercenter;
 import frc2713.robot.commands.autos.BLineTuning;
+import frc2713.robot.commands.autos.BumpTest;
 import frc2713.robot.commands.autos.Demo;
 import frc2713.robot.commands.autos.DriveTest;
 import frc2713.robot.commands.autos.Midwars;
@@ -93,9 +95,9 @@ public class RobotContainer {
   public static DevControls devControls;
 
   // Dashboard inputs
-  private final AutoFactory autoFactory;
   private final LoggedDashboardChooser<Command> autoChooser;
 
+  private static AutoFactory choreoFactory;
   public static FollowPath.Builder pathBuilder;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -119,6 +121,7 @@ public class RobotContainer {
                 LauncherConstants.Flywheels.followerConfig,
                 new TalonFXIO(LauncherConstants.Flywheels.leaderConfig),
                 new TalonFXIO(LauncherConstants.Flywheels.followerConfig));
+
         hood =
             new Hood(LauncherConstants.Hood.config, new TalonFXIO(LauncherConstants.Hood.config));
 
@@ -128,15 +131,6 @@ public class RobotContainer {
                 new TalonFXIO(LauncherConstants.Turret.config),
                 new CanCoderInputsAutoLogged(),
                 new CanCoderIOHardware(LauncherConstants.Turret.canCoderConfig));
-        // turret =
-        //     new Turret(
-        //         LauncherConstants.Turret.config,
-        //         new MotorIO() {},
-        //         new CanCoderInputsAutoLogged(),
-        //         new CanCoderIO() {
-        //           @Override
-        //           public void readInputs(CanCoderInputs inputs) {}
-        //         });
 
         intakeRoller =
             new IntakeRoller(
@@ -241,21 +235,6 @@ public class RobotContainer {
         vision = new Vision(new VisionIO() {});
         break;
     }
-    autoFactory =
-        new AutoFactory(
-            drive::getPose, // Function that returns the current robot pose
-            drive::setPose, // Function that resets the current robot pose to the provided Pose2d
-            drive::followTrajectory, // The drive subsystem trajectory follower
-            true, // If alliance flipping should be enabled
-            drive,
-            (sample, isStart) -> {
-              Logger.recordOutput(
-                  "TrajectoryFollowing/ActiveTrajectory",
-                  Arrays.stream(sample.getPoses())
-                      .map(AllianceFlipUtil::apply)
-                      .toArray(Pose2d[]::new));
-            } // The drive subsystem
-            );
 
     // This setting is ignored when the FMS is connected
     DriverStation.silenceJoystickConnectionWarning(true);
@@ -279,10 +258,12 @@ public class RobotContainer {
         new OperatorControls(
             drive, flywheels, turret, hood, intakeRoller, intakeExtension, dyeRotor, feeder);
 
-    configurePathBuilder();
     // Set up auto routines
+    configurePIDPathBuilder(Constants.tuningMode);
+    configureChoreoFactory();
+
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
-    configureAutonomousRoutines(autoChooser, true);
+    configureAutonomousRoutines(autoChooser, Constants.tuningMode);
 
     // Configure the button bindings
     configureButtonBindings();
@@ -294,9 +275,27 @@ public class RobotContainer {
         new Path.DefaultGlobalConstraints(4.5, 12.0, 540, 860, 0.03, 2.0, 0.2));
   }
 
-  private void configurePathBuilder() {
+  private void configureChoreoFactory() {
+    RobotContainer.choreoFactory =
+        new AutoFactory(
+            drive::getPose, // Function that returns the current robot pose
+            drive::setPose, // Function that resets the current robot pose to the provided Pose2d
+            drive::followTrajectory, // The drive subsystem trajectory follower
+            true, // If alliance flipping should be enabled
+            drive,
+            (sample, isStart) -> {
+              Logger.recordOutput(
+                  "TrajectoryFollowing/ActiveTrajectory",
+                  Arrays.stream(sample.getPoses())
+                      .map(AllianceFlipUtil::apply)
+                      .toArray(Pose2d[]::new));
+            } // The drive subsystem
+            );
+  }
+
+  private void configurePIDPathBuilder(boolean isDev) {
     // Path following
-    this.pathBuilder =
+    RobotContainer.pathBuilder =
         new FollowPath.Builder(
                 drive,
                 drive::getPose,
@@ -314,8 +313,30 @@ public class RobotContainer {
                     DriveConstants.AutoConstants.crosstrackTrajectoryController.getP().get(),
                     DriveConstants.AutoConstants.crosstrackTrajectoryController.getI().get(),
                     DriveConstants.AutoConstants.crosstrackTrajectoryController.getD().get()))
-            .withDefaultShouldFlip()
-            .withPoseReset(drive::setPose);
+            .withDefaultShouldFlip();
+
+    // Bline logging
+    FollowPath.setTranslationListLoggingConsumer(
+        pair -> {
+          Logger.recordOutput(pair.getFirst(), pair.getSecond());
+        });
+
+    if (isDev) {
+      FollowPath.setDoubleLoggingConsumer(
+          pair -> {
+            Logger.recordOutput(pair.getFirst(), pair.getSecond());
+          });
+
+      FollowPath.setBooleanLoggingConsumer(
+          pair -> {
+            Logger.recordOutput(pair.getFirst(), pair.getSecond());
+          });
+
+      FollowPath.setPoseLoggingConsumer(
+          pair -> {
+            Logger.recordOutput(pair.getFirst(), pair.getSecond());
+          });
+    }
   }
 
   /** Use this robot to configure the transforms between subsystems. */
@@ -379,25 +400,6 @@ public class RobotContainer {
   private void configureAutonomousRoutines(
       LoggedDashboardChooser<Command> autoChooser, boolean isDev) {
 
-    FollowPath.setTranslationListLoggingConsumer(
-        pair -> {
-          Logger.recordOutput(pair.getFirst(), pair.getSecond());
-        });
-
-    FollowPath.setDoubleLoggingConsumer(
-        pair -> {
-          Logger.recordOutput(pair.getFirst(), pair.getSecond());
-        });
-
-    FollowPath.setBooleanLoggingConsumer(
-        pair -> {
-          Logger.recordOutput(pair.getFirst(), pair.getSecond());
-        });
-
-    FollowPath.setPoseLoggingConsumer(
-        pair -> {
-          Logger.recordOutput(pair.getFirst(), pair.getSecond());
-        });
     if (isDev) {
       // Set up SysId routines
       autoChooser.addOption(
@@ -415,18 +417,22 @@ public class RobotContainer {
       autoChooser.addOption(
           "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
-      autoChooser.addOption("DriveTest", DriveTest.routine(autoFactory));
-
+      autoChooser.addOption("DriveTest", DriveTest.routine(choreoFactory));
       autoChooser.addOption("DemoMode", Demo.demo());
       autoChooser.addOption("BLine Tuning", BLineTuning.getCommand());
+      autoChooser.addOption("Bump Test", BumpTest.getCommand());
     }
 
-    autoChooser.addDefaultOption("BlineMidwars", BLineMidwars.getCommand());
-
     autoChooser.addDefaultOption(
-        "Midwars",
+        "Bline Midwars - R", BLineMidwarsOvercenter.getCommand(() -> false));
+    autoChooser.addOption("Bline Midwars - L", BLineMidwarsOvercenter.getCommand(() -> true));
+    autoChooser.addOption("Bline No Bump - R", BLineMidwarsNoBump.getCommand(() -> false));
+    autoChooser.addOption("Bline No Bump - L", BLineMidwarsNoBump.getCommand(() -> true));
+
+    autoChooser.addOption(
+        "Choreo Midwars - R",
         Midwars.getRoutine(
-            autoFactory,
+            choreoFactory,
             false,
             drive,
             intakeExtension,
@@ -438,9 +444,9 @@ public class RobotContainer {
             feeder));
 
     autoChooser.addOption(
-        "MidwarsFlipped",
+        "Choreo Midwars - L",
         Midwars.getRoutine(
-            autoFactory,
+            choreoFactory,
             true,
             drive,
             intakeExtension,
@@ -451,9 +457,8 @@ public class RobotContainer {
             dyeRotor,
             feeder));
 
-    autoChooser.addOption("NoIntakeFlipped", NoIntake.getRoutine(autoFactory, true, drive));
-
-    autoChooser.addOption("NoIntake", NoIntake.getRoutine(autoFactory, false, drive));
+    autoChooser.addOption("NoIntake - R", NoIntake.getRoutine(choreoFactory, false, drive));
+    autoChooser.addOption("NoIntake - L", NoIntake.getRoutine(choreoFactory, true, drive));
   }
 
   /**

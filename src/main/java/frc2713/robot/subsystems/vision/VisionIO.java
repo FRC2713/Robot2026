@@ -23,6 +23,7 @@ public interface VisionIO {
     public int tagCount;
 
     public boolean applying;
+    public double lastAppliedTimestamp = 0;
     public String reasoning = "";
 
     public Distance translationStdDev =

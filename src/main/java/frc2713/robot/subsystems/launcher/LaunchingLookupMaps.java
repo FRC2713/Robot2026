@@ -18,16 +18,14 @@ import frc2713.lib.util.LoggedTunableNumber;
 
 public final class LaunchingLookupMaps {
 
-  // TODO: see if feed shot maps could be replaced with constant offsets
-
   /** Distance to hub (m) -> RPM (rpm) */
   public static InterpolatingDoubleTreeMap distanceToRpmMap = new InterpolatingDoubleTreeMap();
-  /** Distance to az corner (m) -> RPM (rpm) */
+  /** Distance to az (m) -> RPM (rpm) */
   public static InterpolatingDoubleTreeMap distanceToRpmAzMap = new InterpolatingDoubleTreeMap();
 
   /** Distance to hub (m) -> Angle (deg) */
   public static InterpolatingDoubleTreeMap distanceToAngleMap = new InterpolatingDoubleTreeMap();
-  /** Distance to az corner (m) -> Angle (deg) */
+  /** Distance to az (m) -> Angle (deg) */
   public static InterpolatingDoubleTreeMap distanceToAngleAzMap = new InterpolatingDoubleTreeMap();
 
   /** Ball velocity (m/s) <-> RPM (rpm) */
@@ -37,47 +35,36 @@ public final class LaunchingLookupMaps {
   public static InterpolatingDoubleTreeMap rpmToReleaseAngleAdjustmentMap =
       new InterpolatingDoubleTreeMap();
 
+  /** Distance to hub (m) -> Dye Rotor */
+  public static InterpolatingDoubleTreeMap distanceToDyeRotorSpeedMap =
+      new InterpolatingDoubleTreeMap();
+
   /** Distance to hub (m) -> Time of flight (s) */
   public static InterpolatingDoubleTreeMap tofMap = new InterpolatingDoubleTreeMap();
-  /** Distance to az corner (m) -> Time of flight (s) */
+  /** Distance to az (m) -> Time of flight (s) */
   public static InterpolatingDoubleTreeMap tofMapAZ = new InterpolatingDoubleTreeMap();
   /** Muzzle height above carpet used when generating drag-aware ToF lookup tables. */
   public static final double tofSeedMuzzleHeightMeters = Inches.of(22).in(Meters);
 
   static {
     // Distance to hub center (m) -> RPM (rpm)
-    distanceToRpmMap.put(1.03, 2450.);
-    distanceToRpmMap.put(2.1, 2550.);
-    distanceToRpmMap.put(3.36, 2750.);
-    distanceToRpmMap.put(4.5, 3107.);
-    distanceToRpmMap.put(5.0, 3200.);
-    distanceToRpmMap.put(6.03, 3750.);
-
-    // from north shore
-    // rpmVelocityMap.put(1.03, 2500.);
-    // rpmVelocityMap.put(2.1, 2500.);
-    // rpmVelocityMap.put(3.36, 2713.);
-    // rpmVelocityMap.put(5.0, 3250.);
-    // rpmVelocityMap.put(6.03, 4200.);
+    distanceToRpmMap.put(1.03, 2450.); // north shore: 2500
+    distanceToRpmMap.put(2.1, 2550.); // north shore: 2500
+    distanceToRpmMap.put(3.36, 2750.); // north shore: 2713
+    distanceToRpmMap.put(4.5, 3107.); // north shore: dne
+    distanceToRpmMap.put(5.0, 3200.); // north shore: 3250
+    distanceToRpmMap.put(6.03, 3750.); // north shore: 4200
 
     // Distance to az Corner (m) -> RPM (rpm)
-    distanceToRpmAzMap.put(1.03, 2400.);
-    distanceToRpmAzMap.put(1.75, 2666.66);
-    distanceToRpmAzMap.put(2.1, 2800.);
-    distanceToRpmAzMap.put(3.36, 2933.);
-    distanceToRpmAzMap.put(4.5, 3066.);
-    distanceToRpmAzMap.put(5.0, 3333.);
-    distanceToRpmAzMap.put(6.03, 4266.);
-
-    // from north shore
-    // rpmVelocityAZMap.put(1.03, 2500.);
-    // rpmVelocityAZMap.put(2.1, 2500.);
-    // rpmVelocityAZMap.put(3.36, 2713.);
-    // rpmVelocityAZMap.put(5.0, 3250.);
-    // rpmVelocityAZMap.put(6.03, 4200.);
+    distanceToRpmAzMap.put(1.03, 2400.); // north shore: 2500
+    distanceToRpmAzMap.put(1.75, 2666.66); // north shore: dne
+    distanceToRpmAzMap.put(2.1, 2800.); // north shore: 2500
+    distanceToRpmAzMap.put(3.36, 2933.); // north shore: 2713
+    distanceToRpmAzMap.put(4.5, 3066.); // north shore: dne
+    distanceToRpmAzMap.put(5.0, 3333.); //  north shore: 3250
+    distanceToRpmAzMap.put(6.03, 4266.); // north shore: 4200
 
     // Ball Velocity (ft/s) <-> RPM (rpm)
-
     velocityToRpmBiDiMap.put(17.69, 2500.);
     velocityToRpmBiDiMap.put(20.19, 3000.);
     velocityToRpmBiDiMap.put(22.07, 3500.);
@@ -85,18 +72,11 @@ public final class LaunchingLookupMaps {
     velocityToRpmBiDiMap.put(25.52, 4500.);
 
     // Distance to hub center (m) -> Hood Pitch (Degrees)
-    distanceToAngleMap.put(1.03, 5.0);
-    distanceToAngleMap.put(2.1, 20.0);
-    distanceToAngleMap.put(3.36, 26.0);
-    distanceToAngleMap.put(5.0, 30.0);
-    distanceToAngleMap.put(6.03, 30.0);
-
-    // from north shore
-    // angleMap.put(1.03, 5.0);
-    // angleMap.put(2.1, 20.0);
-    // angleMap.put(3.36, 25.0);
-    // angleMap.put(5.0, 27.13);
-    // angleMap.put(6.03, 30.0);
+    distanceToAngleMap.put(1.03, 5.0); // north shore: 55.0
+    distanceToAngleMap.put(2.1, 20.0); // north shore: 20.0
+    distanceToAngleMap.put(3.36, 26.0); // north shore: 25.0
+    distanceToAngleMap.put(5.0, 30.0); // north shore: 27.13
+    distanceToAngleMap.put(6.03, 30.0); // north shore: 30.0
 
     // Distance to AZ corner (m) -> Hood Pitch (Degrees)
     distanceToAngleAzMap.put(1.03, 5.0);
@@ -113,7 +93,13 @@ public final class LaunchingLookupMaps {
     rpmToReleaseAngleAdjustmentMap.put(4500., 15.);
     rpmToReleaseAngleAdjustmentMap.put(5000., 15.);
 
-    /** Distance to hub (m) -> Time of flight (s) */
+    // Distance (m) -> Dye Rotor RPM
+    distanceToDyeRotorSpeedMap.put(2.11, 80.); // north shore: 80
+    distanceToDyeRotorSpeedMap.put(3.2, 80.);
+    distanceToDyeRotorSpeedMap.put(4.2, 60.);
+    distanceToDyeRotorSpeedMap.put(6.44, 50.); // north shore: 30
+
+    // Distance to hub (m) -> Time of flight (s)
     tofMap.put(0.85, 1.0241);
     tofMap.put(1.94, 1.0502);
     tofMap.put(2.60, 1.0085);
@@ -123,6 +109,7 @@ public final class LaunchingLookupMaps {
     tofMap.put(5.71, 1.2328);
     tofMap.put(6.39, 1.2714);
 
+    // Distance to az (m) -> Time of flight (s)
     tofMapAZ.put(0.85, 1.0241);
     tofMapAZ.put(1.94, 1.0502);
     tofMapAZ.put(2.60, 1.0085);

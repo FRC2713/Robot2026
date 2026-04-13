@@ -6,11 +6,11 @@
     },
     "protrusions": {
       "enabled": true,
-      "distance_meters": 0.2159,
+      "distance_meters": 0.305,
       "side": "front",
       "default_state": "hidden",
       "show_on_event_keys": [
-        "extend"
+        "intake"
       ],
       "hide_on_event_keys": [
         "retract"

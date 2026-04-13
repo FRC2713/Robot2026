@@ -44,20 +44,20 @@
     {
       "type": "waypoint",
       "translation_target": {
-        "x_meters": 6.566206047497332,
-        "y_meters": 3.230332454865013,
+        "x_meters": 6.9651662424607785,
+        "y_meters": 3.330072503605874,
         "intermediate_handoff_radius_meters": 0.2
       },
       "rotation_target": {
-        "rotation_radians": -1.8413900010100381,
+        "rotation_radians": -2.436372123856629,
         "profiled_rotation": true
       }
     },
     {
       "type": "waypoint",
       "translation_target": {
-        "x_meters": 5.805976414603996,
-        "y_meters": 2.65,
+        "x_meters": 6.447162442223817,
+        "y_meters": 2.6499999999999995,
         "intermediate_handoff_radius_meters": 0.3
       },
       "rotation_target": {
@@ -66,29 +66,48 @@
       }
     },
     {
-      "type": "event_trigger",
-      "t_ratio": 0.6419554655417328,
-      "lib_key": "shoot_2"
+      "type": "rotation",
+      "rotation_radians": -1.5707963267948966,
+      "t_ratio": 0.29004877021482106,
+      "profiled_rotation": true
     },
     {
       "type": "waypoint",
       "translation_target": {
-        "x_meters": 2.5,
-        "y_meters": 2.65,
-        "intermediate_handoff_radius_meters": 0.10000000000000002
+        "x_meters": 6.475353371242891,
+        "y_meters": 0.5269618196588102,
+        "intermediate_handoff_radius_meters": 0.3
       },
       "rotation_target": {
-        "rotation_radians": -1.5707963267948966,
+        "rotation_radians": 0.0,
+        "profiled_rotation": true
+      }
+    },
+    {
+      "type": "event_trigger",
+      "t_ratio": 0.8274104411830538,
+      "lib_key": "shoot_1"
+    },
+    {
+      "type": "waypoint",
+      "translation_target": {
+        "x_meters": 2.9935461156393455,
+        "y_meters": 0.5606131045068778,
+        "intermediate_handoff_radius_meters": 0.2
+      },
+      "rotation_target": {
+        "rotation_radians": 0.0,
         "profiled_rotation": true
       }
     }
   ],
   "constraints": {
+    "end_translation_tolerance_meters": 0.06999999999999999,
     "max_velocity_meters_per_sec": [
       {
         "value": 2.5,
         "start_ordinal": 2,
-        "end_ordinal": 4
+        "end_ordinal": 5
       }
     ]
   }
