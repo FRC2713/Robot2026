@@ -469,6 +469,7 @@ public class LaunchingSolutionManager extends SubsystemBase {
       LaunchingSolutionManager.currentAction = LaunchingAction.SCORING;
     }
 
+    // For intake align
     public static Rotation2d storedIntakeRotation = new Rotation2d(0);
 
     public static void setIntakeRotation() {

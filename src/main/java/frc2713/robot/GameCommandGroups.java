@@ -43,7 +43,7 @@ public final class GameCommandGroups {
         IntakeExtension extension,
         IntakeRoller intakeRoller) {
       return Commands.either(
-              Commands.print("[AUTO] Auto in neutral!"),
+              Commands.print("[AUTO] Auto in neutral zone!"),
               Commands.parallel(
                   flywheels.otfCommand(),
                   hood.otfCommand(),

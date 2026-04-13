@@ -95,9 +95,9 @@ public class RobotContainer {
   public static DevControls devControls;
 
   // Dashboard inputs
-  private AutoFactory autoFactory;
   private final LoggedDashboardChooser<Command> autoChooser;
 
+  private static AutoFactory choreoFactory;
   public static FollowPath.Builder pathBuilder;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -131,15 +131,6 @@ public class RobotContainer {
                 new TalonFXIO(LauncherConstants.Turret.config),
                 new CanCoderInputsAutoLogged(),
                 new CanCoderIOHardware(LauncherConstants.Turret.canCoderConfig));
-        // turret =
-        //     new Turret(
-        //         LauncherConstants.Turret.config,
-        //         new MotorIO() {},
-        //         new CanCoderInputsAutoLogged(),
-        //         new CanCoderIO() {
-        //           @Override
-        //           public void readInputs(CanCoderInputs inputs) {}
-        //         });
 
         intakeRoller =
             new IntakeRoller(
@@ -267,10 +258,10 @@ public class RobotContainer {
         new OperatorControls(
             drive, flywheels, turret, hood, intakeRoller, intakeExtension, dyeRotor, feeder);
 
+    // Set up auto routines
     configurePIDPathBuilder(Constants.tuningMode);
     configureChoreoFactory();
 
-    // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
     configureAutonomousRoutines(autoChooser, Constants.tuningMode);
 
@@ -285,7 +276,7 @@ public class RobotContainer {
   }
 
   private void configureChoreoFactory() {
-    autoFactory =
+    RobotContainer.choreoFactory =
         new AutoFactory(
             drive::getPose, // Function that returns the current robot pose
             drive::setPose, // Function that resets the current robot pose to the provided Pose2d
@@ -426,24 +417,22 @@ public class RobotContainer {
       autoChooser.addOption(
           "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
-      autoChooser.addOption("DriveTest", DriveTest.routine(autoFactory));
+      autoChooser.addOption("DriveTest", DriveTest.routine(choreoFactory));
       autoChooser.addOption("DemoMode", Demo.demo());
       autoChooser.addOption("BLine Tuning", BLineTuning.getCommand());
       autoChooser.addOption("Bump Test", BumpTest.getCommand());
     }
 
     autoChooser.addDefaultOption(
-        "BlineMidwarsBump - R", BLineMidwarsNoBump.getCommand(() -> false));
-    autoChooser.addDefaultOption("BlineMidwarsBump - L", BLineMidwarsNoBump.getCommand(() -> true));
-    autoChooser.addDefaultOption(
-        "BlineMidwarsOvercenter - R", BLineMidwarsOvercenter.getCommand(() -> false));
-    autoChooser.addDefaultOption(
-        "BlineMidwarsOvercenter - L", BLineMidwarsOvercenter.getCommand(() -> true));
+        "Bline Midwars - R", BLineMidwarsOvercenter.getCommand(() -> false));
+    autoChooser.addOption("Bline Midwars - L", BLineMidwarsOvercenter.getCommand(() -> true));
+    autoChooser.addOption("Bline No Bump - R", BLineMidwarsNoBump.getCommand(() -> false));
+    autoChooser.addOption("Bline No Bump - L", BLineMidwarsNoBump.getCommand(() -> true));
 
-    autoChooser.addDefaultOption(
-        "ChoreoMidwars - R",
+    autoChooser.addOption(
+        "Choreo Midwars - R",
         Midwars.getRoutine(
-            autoFactory,
+            choreoFactory,
             false,
             drive,
             intakeExtension,
@@ -455,9 +444,9 @@ public class RobotContainer {
             feeder));
 
     autoChooser.addOption(
-        "ChoreoMidwarsFlipped - L",
+        "Choreo Midwars - L",
         Midwars.getRoutine(
-            autoFactory,
+            choreoFactory,
             true,
             drive,
             intakeExtension,
@@ -468,8 +457,8 @@ public class RobotContainer {
             dyeRotor,
             feeder));
 
-    autoChooser.addOption("NoIntake - R", NoIntake.getRoutine(autoFactory, false, drive));
-    autoChooser.addOption("NoIntake - L", NoIntake.getRoutine(autoFactory, true, drive));
+    autoChooser.addOption("NoIntake - R", NoIntake.getRoutine(choreoFactory, false, drive));
+    autoChooser.addOption("NoIntake - L", NoIntake.getRoutine(choreoFactory, true, drive));
   }
 
   /**

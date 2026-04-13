@@ -64,4 +64,15 @@ public class Vision extends SubsystemBase {
       return Optional.empty();
     }
   }
+
+  public void hardResetDrivePose() {
+    System.out.println("HARD RESET VISION!");
+
+    var visionPose = getPose();
+    if (visionPose.isPresent()) {
+      RobotContainer.drive.setPose(visionPose.get());
+      inputs.reasoning = "OPERATOR RESET HARD RESET!!";
+      inputs.lastAppliedTimestamp = inputs.timestamp;
+    }
+  }
 }

@@ -107,8 +107,10 @@ dependencies {
 
     implementation 'org.zeromq:jeromq:0.6.0'
 
-    // Use local BLine fork for development - switch back to maven for remote
+    // Use local build path for development of Bline
     // implementation files('../BLine-Lib-2026/build/libs/BLine-Lib-0.8.4.jar')
+
+    // Use jitpack build url for development of robot code
     implementation 'com.github.FRC2713:BLine-Lib-2026:main-SNAPSHOT'
 }
 

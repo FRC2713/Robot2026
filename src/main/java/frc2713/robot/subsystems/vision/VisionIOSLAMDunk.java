@@ -220,19 +220,22 @@ public class VisionIOSLAMDunk implements VisionIO {
     return 74.7 * Math.pow(inputs.avgTagSize, -0.396);
   }
 
-  /** The farter the average tag is, the higher the stddev (less trust) */
+  /** A penalty for average tag size being farther away. */
   private double distanceScaleFactor(VisionInputs inputs) {
     return Math.pow(roughDist(inputs), kDistance.get());
   }
 
-  /** The more tags we see, the lower the stddev (more trust) */
+  /** A bonus for seeing more tags. */
   private double countScaleFactor(VisionInputs inputs) {
     return 1 / Math.max(1, Math.pow(inputs.tagCount, 2));
   }
 
   /**
-   * If we were starved for vision poses, then odometry has had a lot of time to drift, so when we
-   * finally get a new vision pose, lower its stddev out of desperation (more trust)
+   * A bonus for being the first reported pose after a period of starvation.
+   *
+   * <p>If we were starved for vision poses, then odometry has had a lot of time to drift. So, when
+   * we finally get a new vision pose, it's impact on the pose estimate is too low to correct drift
+   * for a while.
    */
   private double starvationScaleFactor(VisionInputs inputs, boolean autoOnly) {
     double timeElapsed = inputs.timestamp - inputs.lastAppliedTimestamp;
