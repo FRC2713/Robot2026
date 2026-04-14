@@ -6,7 +6,7 @@ public final class LEDConstants {
   private LEDConstants() {}
 
   /** CANdle CAN ID and bus. Update these values to match your robot wiring. */
-  public static final CANDeviceId candleCanId = new CANDeviceId(50, "canivore");
+  public static final CANDeviceId candleCanId = new CANDeviceId(50);
 
   /** Number of LEDs in the primary strip wired to the CANdle. */
   public static final int ledCount = 74;

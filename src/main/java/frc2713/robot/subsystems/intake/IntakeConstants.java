@@ -166,8 +166,8 @@ public final class IntakeConstants {
 
       // Differential configuration
       differentialConfig.name = config.name;
-      differentialConfig.leaderCANID = new CANDeviceId(40, "canivore"); // Leader motor CAN ID
-      differentialConfig.followerCANID = new CANDeviceId(41, "canivore"); // Follower motor CAN ID
+      differentialConfig.leaderCANID = new CANDeviceId(40); // Leader motor CAN ID
+      differentialConfig.followerCANID = new CANDeviceId(41); // Follower motor CAN ID
 
       // Average axis gains typically go in Slot 0
       differentialConfig.averageGains = avgGains;

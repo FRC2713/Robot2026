@@ -42,7 +42,7 @@ public final class SerializerConstants {
 
     static {
       config.name = "Dye Rotor";
-      config.talonCANID = new CANDeviceId(45, "canivore"); // Example CAN ID, replace with actual ID
+      config.talonCANID = new CANDeviceId(45); // Example CAN ID, replace with actual ID
 
       config.useFOC = false;
 
@@ -91,7 +91,7 @@ public final class SerializerConstants {
 
     static {
       config.name = "Feeder";
-      config.talonCANID = new CANDeviceId(44, "canivore"); // Example CAN ID, replace with actual ID
+      config.talonCANID = new CANDeviceId(44); // Example CAN ID, replace with actual ID
       config.useFOC = false;
       config.motor = DCMotor.getKrakenX60(1);
 

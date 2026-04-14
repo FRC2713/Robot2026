@@ -69,7 +69,7 @@ public final class LauncherConstants {
 
     static {
       config.name = "Turret";
-      config.talonCANID = new CANDeviceId(52, "canivore");
+      config.talonCANID = new CANDeviceId(52);
       config.generalControlMode = GeneralControlMode.POSITION;
       config.acceptablePositionError = Degrees.of(3);
 
@@ -112,8 +112,7 @@ public final class LauncherConstants {
     }
 
     static {
-      canCoderConfig.canId =
-          new CANDeviceId(53, "canivore"); // CANCoder CAN ID, replace with actual ID
+      canCoderConfig.canId = new CANDeviceId(53); // CANCoder CAN ID, replace with actual ID
     }
 
     public static int MODEL_INDEX = 3;
@@ -140,7 +139,7 @@ public final class LauncherConstants {
 
     static {
       leaderConfig.name = "Flywheels";
-      leaderConfig.talonCANID = new CANDeviceId(50, "canivore");
+      leaderConfig.talonCANID = new CANDeviceId(50);
       leaderConfig.fxConfig.Slot0.kP = Util.modeDependentValue(.7, 1.0); // last foc val: 400.0
       leaderConfig.fxConfig.Slot0.kI = 0.0;
       leaderConfig.fxConfig.Slot0.kD = 0.004;
@@ -164,7 +163,7 @@ public final class LauncherConstants {
       leaderConfig.velocityControlFrequency = Hertz.of(100); // CAN FD can go up to 1000
 
       followerConfig.name = "Flywheels Follower";
-      followerConfig.talonCANID = new CANDeviceId(51, "canivore");
+      followerConfig.talonCANID = new CANDeviceId(51);
       followerConfig.unitToRotorRatio = gearRatio;
       followerConfig.momentOfInertia = flywhMomentOfInertia.times(0.5);
       followerConfig.useFOC = false;
@@ -215,7 +214,7 @@ public final class LauncherConstants {
 
     static {
       config.name = "Hood";
-      config.talonCANID = new CANDeviceId(54, "canivore"); // Example CAN ID, replace with actual ID
+      config.talonCANID = new CANDeviceId(54); // Example CAN ID, replace with actual ID
 
       config.fxConfig.Feedback.FeedbackRotorOffset = -0.049316;
 

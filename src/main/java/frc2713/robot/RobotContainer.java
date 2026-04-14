@@ -9,12 +9,10 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc2713.lib.io.CanCoderIO;
-import frc2713.lib.io.CanCoderIOHardware;
 import frc2713.lib.io.CanCoderInputs;
 import frc2713.lib.io.CanCoderInputsAutoLogged;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.SimTalonFXIO;
-import frc2713.lib.io.TalonFXIO;
 import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.AllianceFlipUtil;
@@ -29,16 +27,13 @@ import frc2713.robot.oi.DriverControls;
 import frc2713.robot.oi.OperatorControls;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.drive.GyroIO;
-import frc2713.robot.subsystems.drive.GyroIOPigeon2;
 import frc2713.robot.subsystems.drive.ModuleIO;
 import frc2713.robot.subsystems.drive.ModuleIOSim;
-import frc2713.robot.subsystems.drive.ModuleIOTalonFX;
 import frc2713.robot.subsystems.intake.IntakeConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.intake.intakeExtensionIO.IntakeExtensionIO;
 import frc2713.robot.subsystems.intake.intakeExtensionIO.IntakeExtensionIOSim;
-import frc2713.robot.subsystems.intake.intakeExtensionIO.IntakeExtensionIOTalonFX;
 import frc2713.robot.subsystems.launcher.Flywheels;
 import frc2713.robot.subsystems.launcher.Hood;
 import frc2713.robot.subsystems.launcher.LauncherConstants;
@@ -104,28 +99,29 @@ public class RobotContainer {
         // ModuleIOTalonFX is intended for modules with TalonFX drive, TalonFX turn, and
         // a CANcoder
 
-        drive =
-            new Drive(
-                new GyroIOPigeon2(),
-                new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                new ModuleIOTalonFX(TunerConstants.FrontRight),
-                new ModuleIOTalonFX(TunerConstants.BackLeft),
-                new ModuleIOTalonFX(TunerConstants.BackRight));
-        flywheels =
-            new Flywheels(
-                LauncherConstants.Flywheels.leaderConfig,
-                LauncherConstants.Flywheels.followerConfig,
-                new TalonFXIO(LauncherConstants.Flywheels.leaderConfig),
-                new TalonFXIO(LauncherConstants.Flywheels.followerConfig));
-        hood =
-            new Hood(LauncherConstants.Hood.config, new TalonFXIO(LauncherConstants.Hood.config));
+        // drive =
+        //     new Drive(
+        //         new GyroIOPigeon2(),
+        //         new ModuleIOTalonFX(TunerConstants.FrontLeft),
+        //         new ModuleIOTalonFX(TunerConstants.FrontRight),
+        //         new ModuleIOTalonFX(TunerConstants.BackLeft),
+        //         new ModuleIOTalonFX(TunerConstants.BackRight));
+        // flywheels =
+        //     new Flywheels(
+        //         LauncherConstants.Flywheels.leaderConfig,
+        //         LauncherConstants.Flywheels.followerConfig,
+        //         new TalonFXIO(LauncherConstants.Flywheels.leaderConfig),
+        //         new TalonFXIO(LauncherConstants.Flywheels.followerConfig));
+        // hood =
+        //     new Hood(LauncherConstants.Hood.config, new
+        // TalonFXIO(LauncherConstants.Hood.config));
 
-        turret =
-            new Turret(
-                LauncherConstants.Turret.config,
-                new TalonFXIO(LauncherConstants.Turret.config),
-                new CanCoderInputsAutoLogged(),
-                new CanCoderIOHardware(LauncherConstants.Turret.canCoderConfig));
+        // turret =
+        //     new Turret(
+        //         LauncherConstants.Turret.config,
+        //         new TalonFXIO(LauncherConstants.Turret.config),
+        //         new CanCoderInputsAutoLogged(),
+        //         new CanCoderIOHardware(LauncherConstants.Turret.canCoderConfig));
         // turret =
         //     new Turret(
         //         LauncherConstants.Turret.config,
@@ -136,27 +132,62 @@ public class RobotContainer {
         //           public void readInputs(CanCoderInputs inputs) {}
         //         });
 
+        // intakeRoller =
+        //     new IntakeRoller(
+        //         IntakeConstants.Roller.leaderConfig,
+        //         IntakeConstants.Roller.followerConfig,
+        //         new TalonFXIO(IntakeConstants.Roller.leaderConfig),
+        //         new TalonFXIO(IntakeConstants.Roller.followerConfig));
+
+        // intakeExtension =
+        //     new IntakeExtension(
+        //         IntakeConstants.Extension.config,
+        //         new IntakeExtensionIOTalonFX(IntakeConstants.Extension.differentialConfig));
+
+        // dyeRotor =
+        //     new DyeRotor(
+        //         SerializerConstants.DyeRotor.config,
+        //         new TalonFXIO(SerializerConstants.DyeRotor.config));
+        // feeder =
+        //     new Feeder(
+        //         SerializerConstants.Feeder.config,
+        //         new TalonFXIO(SerializerConstants.Feeder.config));
+        // vision = new Vision(new VisionIOSLAMDunk());
+        drive =
+            new Drive(
+                new GyroIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {});
+        flywheels =
+            new Flywheels(
+                LauncherConstants.Flywheels.leaderConfig,
+                LauncherConstants.Flywheels.followerConfig,
+                new MotorIO() {},
+                new MotorIO() {});
+        hood = new Hood(new TalonFXSubsystemConfig(), new MotorIO() {});
+        turret =
+            new Turret(
+                LauncherConstants.Turret.config,
+                new MotorIO() {},
+                new CanCoderInputsAutoLogged(),
+                new CanCoderIO() {
+                  @Override
+                  public void readInputs(CanCoderInputs inputs) {}
+                });
         intakeRoller =
             new IntakeRoller(
-                IntakeConstants.Roller.leaderConfig,
-                IntakeConstants.Roller.followerConfig,
-                new TalonFXIO(IntakeConstants.Roller.leaderConfig),
-                new TalonFXIO(IntakeConstants.Roller.followerConfig));
-
+                new TalonFXSubsystemConfig(),
+                new TalonFXSubsystemConfig(),
+                new MotorIO() {},
+                new MotorIO() {});
         intakeExtension =
-            new IntakeExtension(
-                IntakeConstants.Extension.config,
-                new IntakeExtensionIOTalonFX(IntakeConstants.Extension.differentialConfig));
+            new IntakeExtension(new TalonFXSubsystemConfig(), new IntakeExtensionIO() {});
+        dyeRotor = new DyeRotor(new TalonFXSubsystemConfig(), new MotorIO() {});
+        feeder = new Feeder(new TalonFXSubsystemConfig(), new MotorIO() {});
+        vision = new Vision(new VisionIO() {});
 
-        dyeRotor =
-            new DyeRotor(
-                SerializerConstants.DyeRotor.config,
-                new TalonFXIO(SerializerConstants.DyeRotor.config));
-        feeder =
-            new Feeder(
-                SerializerConstants.Feeder.config,
-                new TalonFXIO(SerializerConstants.Feeder.config));
-        vision = new Vision(new VisionIOSLAMDunk());
         leds = new LEDSubsystem(new LEDIOCANdle());
         break;
 
