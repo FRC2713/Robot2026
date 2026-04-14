@@ -160,6 +160,12 @@ public class DriverControls {
                     GameCommandGroups.Launching.stopShootingAndRetractHood(
                         drive, feeder, dyeRotor, hood, flywheels))
                 .withName("Stop Shooting"));
+    controller
+        .rightTrigger(0.98)
+        .whileTrue(
+            GameCommandGroups.OperatorOverriderrs.outtake(intakeExtension, intakeRoller, dyeRotor)
+                .withName("Outtake"))
+        .onFalse(Commands.parallel(intakeRoller.stop()).withName("Stop Intake"));
 
     // controller
     //     .a()

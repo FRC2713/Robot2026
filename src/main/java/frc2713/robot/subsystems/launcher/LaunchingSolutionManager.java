@@ -3,7 +3,6 @@ package frc2713.robot.subsystems.launcher;
 import static edu.wpi.first.units.Units.Meters;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -107,11 +106,16 @@ public class LaunchingSolutionManager extends SubsystemBase {
       Translation3d robotLinVel = RobotContainer.drive.getRelativeLinearVelocity();
 
       // 2. Select goal
-      if (FieldConstants.NeutralZone.region.contains(
+      if (FieldConstants.NeutralZone.btmFeedingRegion.contains(
           robotPose.getTranslation().toTranslation2d())) {
-        ZoneSelectionHelpers.configureForFeeding(robotPose.toPose2d());
-        Logger.recordOutput(pb.makePath("shot selection"), "Feeding");
-      } else {
+        ZoneSelectionHelpers.configureForBtmFeeding();
+        Logger.recordOutput(pb.makePath("shot selection"), "Btm Feeding");
+      } else if (FieldConstants.NeutralZone.topFeedingRegion.contains(
+          robotPose.getTranslation().toTranslation2d())) {
+        ZoneSelectionHelpers.configureForTopFeeding();
+        Logger.recordOutput(pb.makePath("shot selection"), "Top Feeding");
+      } else if (FieldConstants.AllianceZone.getAllianceRegion()
+          .contains(robotPose.getTranslation().toTranslation2d())) {
         ZoneSelectionHelpers.configureForScoring();
         Logger.recordOutput(pb.makePath("shot selection"), "Scoring");
       }
@@ -437,27 +441,33 @@ public class LaunchingSolutionManager extends SubsystemBase {
 
   public class ZoneSelectionHelpers {
 
-    public static void configureForFeeding(Pose2d robotPose) {
-      boolean bottom = robotPose.getTranslation().getY() < FieldConstants.LinesHorizontal.center;
-
-      if (bottom) {
-
-        LaunchingSolutionManager.currentGoal =
-            AllianceFlipUtil.applyX(FieldConstants.AllianceZone.bottomPassingTarget.getCenter3d());
-
-        LaunchingSolutionManager.targetRadius =
-            Meters.of(FieldConstants.AllianceZone.bottomPassingTarget.getRadiusMeters());
-      } else {
-        LaunchingSolutionManager.currentGoal =
-            AllianceFlipUtil.applyX(FieldConstants.AllianceZone.topPassingTarget.getCenter3d());
-
-        LaunchingSolutionManager.targetRadius =
-            Meters.of(FieldConstants.AllianceZone.topPassingTarget.getRadiusMeters());
-      }
+    private static void configureForFeeding() {
       LaunchingSolutionManager.currentHoodMap = LaunchingLookupMaps.distanceToAngleAzMap;
       LaunchingSolutionManager.currentRPMMap = LaunchingLookupMaps.distanceToRpmAzMap;
       LaunchingSolutionManager.currentTofMap = LaunchingLookupMaps.tofMapAZ;
       LaunchingSolutionManager.currentAction = LaunchingAction.PASSING;
+    }
+
+    public static void configureForBtmFeeding() {
+
+      LaunchingSolutionManager.currentGoal =
+          AllianceFlipUtil.applyX(FieldConstants.AllianceZone.bottomPassingTarget.getCenter3d());
+
+      LaunchingSolutionManager.targetRadius =
+          Meters.of(FieldConstants.AllianceZone.bottomPassingTarget.getRadiusMeters());
+
+      configureForFeeding();
+    }
+
+    public static void configureForTopFeeding() {
+
+      LaunchingSolutionManager.currentGoal =
+          AllianceFlipUtil.applyX(FieldConstants.AllianceZone.topPassingTarget.getCenter3d());
+
+      LaunchingSolutionManager.targetRadius =
+          Meters.of(FieldConstants.AllianceZone.topPassingTarget.getRadiusMeters());
+
+      configureForFeeding();
     }
 
     public static void configureForScoring() {
