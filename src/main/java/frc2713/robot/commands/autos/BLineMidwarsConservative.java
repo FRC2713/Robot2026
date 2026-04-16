@@ -86,13 +86,14 @@ public class BLineMidwarsConservative {
             .build(new Path("mid_wards_conservative_second")),
         // Drive to trench while shooting
         GameCommandGroups.Launching.autoOtfShot(
-            RobotContainer.drive,
-            RobotContainer.flywheels,
-            RobotContainer.hood,
-            RobotContainer.turret,
-            RobotContainer.feeder,
-            RobotContainer.dyeRotor,
-            RobotContainer.intakeExtension,
-            RobotContainer.intakeRoller).repeatedly());
+                RobotContainer.drive,
+                RobotContainer.flywheels,
+                RobotContainer.hood,
+                RobotContainer.turret,
+                RobotContainer.feeder,
+                RobotContainer.dyeRotor,
+                RobotContainer.intakeExtension,
+                RobotContainer.intakeRoller)
+            .repeatedly());
   }
 }
