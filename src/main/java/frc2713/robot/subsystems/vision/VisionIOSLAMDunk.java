@@ -151,7 +151,7 @@ public class VisionIOSLAMDunk implements VisionIO {
         }
 
         if (RobotContainer.drive != null) {
-          if (!FieldConstants.FIELD.contains(
+          if (!FieldConstants.FIELD_PLUS_HALF_METER.contains(
               RobotContainer.drive.getPose().getTranslation())) {
             inputs.reasoning = "ROBOT OUTSIDE FIELD!! HARD RESET";
             inputs.applying = true;
@@ -173,7 +173,7 @@ public class VisionIOSLAMDunk implements VisionIO {
         //         .getTranslation()
         //         .getDistance(inputs.pose3d.getTranslation()));
 
-        if (!FieldConstants.FIELD_PLUS_HALF_METER.contains(inputs.pose.getTranslation())) {
+        if (!FieldConstants.FIELD.contains(inputs.pose.getTranslation())) {
           inputs.reasoning = "Vision outside field";
           inputs.applying = false;
           return;
