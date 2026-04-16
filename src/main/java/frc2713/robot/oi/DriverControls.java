@@ -146,7 +146,7 @@ public class DriverControls {
                 Commands.run(() -> Drive.setStaticShotRotation())))
         .onFalse(setToNormalDriveCmd());
     // Rumble when <= 2 seconds left in the shift
-    new Trigger(() -> ShiftManager.getTimeLeftInShift(DriverStation.getMatchTime()) <= 2)
+    new Trigger(() -> ShiftManager.getTimeLeftInShift(DriverStation.getMatchTime()) <= 5)
         .whileTrue(controller.RumbleForDuration(0.5));
     // shoot otf
     controller

@@ -157,7 +157,7 @@ public class OperatorControls {
 
     controller.x().whileTrue(Commands.run(() -> RobotContainer.vision.hardResetDrivePose()));
 
-    new Trigger(() -> ShiftManager.getTimeLeftInShift(DriverStation.getMatchTime()) <= 2)
+    new Trigger(() -> ShiftManager.getTimeLeftInShift(DriverStation.getMatchTime()) <= 5)
         .whileTrue(controller.RumbleForDuration(0.5));
   }
 }
