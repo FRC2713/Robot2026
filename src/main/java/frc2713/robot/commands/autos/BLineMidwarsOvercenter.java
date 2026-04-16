@@ -41,7 +41,7 @@ public class BLineMidwarsOvercenter {
                 RobotContainer.dyeRotor,
                 RobotContainer.intakeExtension,
                 RobotContainer.intakeRoller)
-            .withDeadline(Commands.waitSeconds(0.25)),
+            .withTimeout(0.25),
         // Drive to trench while shooting
         RobotContainer.pathBuilder
             .withPoseReset(pose -> {})
