@@ -94,8 +94,8 @@ public final class LaunchingLookupMaps {
     rpmToReleaseAngleAdjustmentMap.put(5000., 15.);
 
     // Distance (m) -> Dye Rotor RPM
-    distanceToDyeRotorSpeedMap.put(2.11, 80.); // north shore: 80
-    distanceToDyeRotorSpeedMap.put(3.2, 80.);
+    distanceToDyeRotorSpeedMap.put(2.11, 90.); // north shore: 80
+    distanceToDyeRotorSpeedMap.put(3.2, 90.);
     distanceToDyeRotorSpeedMap.put(4.2, 60.);
     distanceToDyeRotorSpeedMap.put(6.44, 50.); // north shore: 30
 
