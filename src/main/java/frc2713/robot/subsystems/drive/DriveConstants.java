@@ -31,7 +31,7 @@ public class DriveConstants {
 
   public static final DriveLimits scoringDriveLimits =
       new DriveLimits(
-          FeetPerSecond.of(5.0),
+          FeetPerSecond.of(2.0),
           FeetPerSecondPerSecond.of(40.0),
           DegreesPerSecond.of(180.0),
           DegreesPerSecondPerSecond.of(1800.0));
