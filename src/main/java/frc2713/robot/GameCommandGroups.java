@@ -4,7 +4,9 @@ import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.FeetPerSecondPerSecond;
+import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -97,7 +99,8 @@ public final class GameCommandGroups {
               hood.otfCommand(),
               turret.otfCommand(),
               flywheels.simulateLaunchFuelCommand(flywheels::atTarget),
-              feeder.feedWhenReady(flywheels::atTarget),
+              Commands.sequence(feeder.voltageCommand(() -> Volts.of(-12)), 
+                Commands.waitSeconds(0.25), feeder.feedWhenReady(flywheels::atTarget)),
               dyeRotor.dynamicFeedWhenReady(
                   flywheels::atTarget)) // used to be dynamic but we slowed it way down
           .withName("OTF Shooting");
