@@ -7,8 +7,10 @@ import static edu.wpi.first.units.Units.FeetPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc2713.lib.util.LoggedTunableMeasure;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.drive.DriveConstants;
@@ -214,6 +216,14 @@ public final class GameCommandGroups {
     public static Command stopIntake(IntakeExtension extension, IntakeRoller rollers) {
       return Commands.parallel(rollers.stop()).withName("Stop Intaking");
     }
+  }
+
+
+  public static Command oscilateExtension(IntakeExtension extension) {
+  
+    return Commands.sequence(extension.retractCommand().withTimeout(2),
+    extension.extendCommand().withTimeout(2)
+    ).repeatedly();
   }
 
   public static final class OperatorOverriderrs {
