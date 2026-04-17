@@ -110,8 +110,8 @@ public final class LauncherConstants {
                   Inches.of(18.484119).in(Meters)),
               new Rotation3d(0, 0, manualOffset.in(Radians)));
 
-    config.fxConfig.CurrentLimits.StatorCurrentLimit = 50;
-    config.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+      config.fxConfig.CurrentLimits.StatorCurrentLimit = 50;
+      config.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     }
 
     static {
