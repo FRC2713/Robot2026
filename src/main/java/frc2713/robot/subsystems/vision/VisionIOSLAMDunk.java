@@ -18,6 +18,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import frc2713.lib.io.AdvantageScopePathBuilder;
@@ -93,8 +94,10 @@ public class VisionIOSLAMDunk implements VisionIO {
 
     if (Timer.getFPGATimestamp() - lastTimestamp > WARN_AFTER_NO_UPDATES_FOR.in(Seconds)) {
       slamdunkAlert.set(true);
+      SmartDashboard.putBoolean("Vision/SLAMDunkUpdates", false);
     } else {
       slamdunkAlert.set(false);
+      SmartDashboard.putBoolean("Vision/SLAMDunkUpdates", true);
     }
 
     var poseArray = poseSub.get();
