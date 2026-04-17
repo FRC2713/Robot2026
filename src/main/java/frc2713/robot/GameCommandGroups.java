@@ -64,7 +64,7 @@ public final class GameCommandGroups {
           .withName("Auto OTF Shooting");
     }
 
-        /** OTF shooting without drive limits. Use for auto routines. */
+    /** OTF shooting without drive limits. Use for auto routines. */
     public static Command autoOtfShotOsic(
         Drive drive,
         Flywheels flywheels,
@@ -87,8 +87,7 @@ public final class GameCommandGroups {
                       () -> flywheels.atTarget() && hood.atTarget(), Seconds.of(0.8)),
                   dyeRotor.feedWhenReady(
                       () -> flywheels.atTarget() && hood.atTarget(), Seconds.of(0.8)),
-                  oscilateExtension(extension)
-                      .beforeStarting(Commands.waitSeconds(1))),
+                  oscilateExtension(extension).beforeStarting(Commands.waitSeconds(1))),
               () -> FieldConstants.NeutralZone.region.contains(drive.getPose().getTranslation()))
           .withName("Auto OTF Shooting");
     }
@@ -247,8 +246,7 @@ public final class GameCommandGroups {
   }
 
   public static Command oscilateExtension(IntakeExtension extension) {
-    return 
-      Commands.sequence(
+    return Commands.sequence(
             extension
                 .setDistanceCommand(IntakeConstants.Extension.pidTestPosition)
                 .withTimeout(0.75),
