@@ -113,7 +113,7 @@ public final class LauncherConstants {
       config.fxConfig.CurrentLimits.StatorCurrentLimit = 100;
       config.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
-            config.fxConfig.CurrentLimits.SupplyCurrentLimit = 60;
+      config.fxConfig.CurrentLimits.SupplyCurrentLimit = 45;
       config.fxConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
     }
 
