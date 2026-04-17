@@ -138,7 +138,7 @@ public final class IntakeConstants {
       config.metersPerRotation = sprocketPitchDiameter.in(Meters) * Math.PI;
       var avgGains =
           new Slot0Configs()
-              .withKP(Util.modeDependentValue(5, 8))
+              .withKP(Util.modeDependentValue(5, 18))
               .withKI(0)
               .withKD(Util.modeDependentValue(0., 0.4))
               .withKS(0)

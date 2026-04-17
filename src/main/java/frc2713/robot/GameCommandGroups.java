@@ -80,6 +80,7 @@ public final class GameCommandGroups {
                   flywheels.otfCommand(),
                   hood.otfCommand(),
                   turret.otfCommand(),
+                  
                   intakeRoller.intake(),
                   flywheels.simulateLaunchFuelCommand(
                       () -> flywheels.atTarget() && hood.atTarget()),
@@ -87,7 +88,7 @@ public final class GameCommandGroups {
                       () -> flywheels.atTarget() && hood.atTarget(), Seconds.of(0.8)),
                   dyeRotor.feedWhenReady(
                       () -> flywheels.atTarget() && hood.atTarget(), Seconds.of(0.8)),
-                  oscilateExtension(extension).beforeStarting(Commands.waitSeconds(1))),
+                  oscilateExtension(extension).beforeStarting(Commands.waitSeconds(0.25))),
               () -> FieldConstants.NeutralZone.region.contains(drive.getPose().getTranslation()))
           .withName("Auto OTF Shooting");
     }
