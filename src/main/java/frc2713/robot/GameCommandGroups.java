@@ -7,13 +7,12 @@ import static edu.wpi.first.units.Units.FeetPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
-import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc2713.lib.util.LoggedTunableMeasure;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.drive.DriveConstants;
+import frc2713.robot.subsystems.intake.IntakeConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.launcher.Flywheels;
@@ -218,12 +217,11 @@ public final class GameCommandGroups {
     }
   }
 
-
   public static Command oscilateExtension(IntakeExtension extension) {
-  
-    return Commands.sequence(extension.retractCommand().withTimeout(2),
-    extension.extendCommand().withTimeout(2)
-    ).repeatedly();
+
+    return Commands.sequence(
+            extension.setDistanceCommand(IntakeConstants.Extension.pidTestPosition).withTimeout(0.75), extension.extendCommand().withTimeout(0.75))
+        .repeatedly();
   }
 
   public static final class OperatorOverriderrs {
