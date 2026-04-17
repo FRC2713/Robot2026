@@ -64,6 +64,35 @@ public final class GameCommandGroups {
           .withName("Auto OTF Shooting");
     }
 
+        /** OTF shooting without drive limits. Use for auto routines. */
+    public static Command autoOtfShotOsic(
+        Drive drive,
+        Flywheels flywheels,
+        Hood hood,
+        Turret turret,
+        Feeder feeder,
+        DyeRotor dyeRotor,
+        IntakeExtension extension,
+        IntakeRoller intakeRoller) {
+      return Commands.either(
+              Commands.print("[AUTO] Auto in neutral zone!"),
+              Commands.parallel(
+                  flywheels.otfCommand(),
+                  hood.otfCommand(),
+                  turret.otfCommand(),
+                  intakeRoller.intake(),
+                  flywheels.simulateLaunchFuelCommand(
+                      () -> flywheels.atTarget() && hood.atTarget()),
+                  feeder.feedWhenReady(
+                      () -> flywheels.atTarget() && hood.atTarget(), Seconds.of(0.8)),
+                  dyeRotor.feedWhenReady(
+                      () -> flywheels.atTarget() && hood.atTarget(), Seconds.of(0.8)),
+                  oscilateExtension(extension)
+                      .beforeStarting(Commands.waitSeconds(1))),
+              () -> FieldConstants.NeutralZone.region.contains(drive.getPose().getTranslation()))
+          .withName("Auto OTF Shooting");
+    }
+
     public static Command otfShotHoodProtect(
         Drive drive,
         Flywheels flywheels,
@@ -218,9 +247,12 @@ public final class GameCommandGroups {
   }
 
   public static Command oscilateExtension(IntakeExtension extension) {
-
-    return Commands.sequence(
-            extension.setDistanceCommand(IntakeConstants.Extension.pidTestPosition).withTimeout(0.75), extension.extendCommand().withTimeout(0.75))
+    return 
+      Commands.sequence(
+            extension
+                .setDistanceCommand(IntakeConstants.Extension.pidTestPosition)
+                .withTimeout(0.75),
+            extension.extendCommand().withTimeout(0.75))
         .repeatedly();
   }
 

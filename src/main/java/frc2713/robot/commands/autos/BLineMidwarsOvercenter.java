@@ -21,7 +21,7 @@ public class BLineMidwarsOvercenter {
                     RobotContainer.intakeExtension, RobotContainer.intakeRoller))
             .withEvent(
                 "shoot_1",
-                GameCommandGroups.Launching.autoOtfShot(
+                GameCommandGroups.Launching.autoOtfShotOsic(
                     RobotContainer.drive,
                     RobotContainer.flywheels,
                     RobotContainer.hood,
@@ -32,7 +32,7 @@ public class BLineMidwarsOvercenter {
                     RobotContainer.intakeRoller))
             .build(new Path("mid_wards_overcenter")),
         // Pausing near hub to shoot
-        GameCommandGroups.Launching.autoOtfShot(
+        GameCommandGroups.Launching.autoOtfShotOsic(
                 RobotContainer.drive,
                 RobotContainer.flywheels,
                 RobotContainer.hood,
@@ -47,7 +47,7 @@ public class BLineMidwarsOvercenter {
             .withPoseReset(pose -> {})
             .withShouldMirror(shouldMirror)
             .withStartingEvent(
-                GameCommandGroups.Launching.autoOtfShot(
+                GameCommandGroups.Launching.autoOtfShotOsic(
                     RobotContainer.drive,
                     RobotContainer.flywheels,
                     RobotContainer.hood,
@@ -73,7 +73,7 @@ public class BLineMidwarsOvercenter {
                         RobotContainer.intakeExtension, RobotContainer.intakeRoller)))
             .withEvent(
                 "shoot_2",
-                GameCommandGroups.Launching.autoOtfShot(
+                GameCommandGroups.Launching.autoOtfShotOsic(
                         RobotContainer.drive,
                         RobotContainer.flywheels,
                         RobotContainer.hood,
@@ -86,7 +86,7 @@ public class BLineMidwarsOvercenter {
             .build(new Path("mid_wards_overcenter_second")),
         // Drive to trench while shooting
         Commands.parallel(
-            GameCommandGroups.Launching.autoOtfShot(
+            GameCommandGroups.Launching.autoOtfShotOsic(
                 RobotContainer.drive,
                 RobotContainer.flywheels,
                 RobotContainer.hood,
