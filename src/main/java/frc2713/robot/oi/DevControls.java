@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc2713.robot.GameCommandGroups;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
@@ -96,7 +95,7 @@ public class DevControls {
     //             Optional.of(DegreesPerSecond.of(90.0)),
     //             Optional.of(DegreesPerSecondPerSecond.of(360.0))));
     // controller.b().onTrue(DriveCommands.clearDriveLimits(drive));
-    controller.b().whileTrue(GameCommandGroups.oscilateExtension(intakeExtension));
+    controller.b().whileTrue(intakeExtension.oscilatingFuelPressure());
 
     controller
         .povLeft()

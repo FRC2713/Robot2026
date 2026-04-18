@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.drive.DriveConstants;
-import frc2713.robot.subsystems.intake.IntakeConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeExtension.FuelPressureType;
 import frc2713.robot.subsystems.intake.IntakeRoller;
@@ -215,15 +214,6 @@ public final class GameCommandGroups {
     public static Command stopIntake(IntakeExtension extension, IntakeRoller rollers) {
       return Commands.parallel(rollers.stop()).withName("Stop Intaking");
     }
-  }
-
-  public static Command oscilateExtension(IntakeExtension extension) {
-    return Commands.sequence(
-            extension
-                .setDistanceCommand(IntakeConstants.Extension.pidTestPosition)
-                .withTimeout(0.75),
-            extension.extendCommand().withTimeout(0.75))
-        .repeatedly();
   }
 
   public static final class OperatorOverriderrs {
