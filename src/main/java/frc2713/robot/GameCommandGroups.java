@@ -58,7 +58,7 @@ public final class GameCommandGroups {
                   dyeRotor.feedWhenReady(
                       () -> flywheels.atTarget() && hood.atTarget(), Seconds.of(0.8)),
                   extension.maintainFuelPressureCommand(
-                      FuelPressureType.OSCILLATING, 0.25)), // retract method had 1.0 delay
+                      FuelPressureType.OSCILLATING, 0.5)), // retract method had 1.0 delay
               () -> FieldConstants.NeutralZone.region.contains(drive.getPose().getTranslation()))
           .withName("Auto OTF Shooting");
     }
