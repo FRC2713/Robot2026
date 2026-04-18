@@ -14,6 +14,7 @@ import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.drive.DriveConstants;
 import frc2713.robot.subsystems.intake.IntakeConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
+import frc2713.robot.subsystems.intake.IntakeExtension.FuelPressureType;
 import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.launcher.Flywheels;
 import frc2713.robot.subsystems.launcher.Hood;
@@ -57,38 +58,8 @@ public final class GameCommandGroups {
                       () -> flywheels.atTarget() && hood.atTarget(), Seconds.of(0.8)),
                   dyeRotor.feedWhenReady(
                       () -> flywheels.atTarget() && hood.atTarget(), Seconds.of(0.8)),
-                  extension
-                      .maintainFuelPressureCommand(1.63)
-                      .beforeStarting(Commands.waitSeconds(1))),
-              () -> FieldConstants.NeutralZone.region.contains(drive.getPose().getTranslation()))
-          .withName("Auto OTF Shooting");
-    }
-
-    /** OTF shooting without drive limits. Use for auto routines. */
-    public static Command autoOtfShotOsic(
-        Drive drive,
-        Flywheels flywheels,
-        Hood hood,
-        Turret turret,
-        Feeder feeder,
-        DyeRotor dyeRotor,
-        IntakeExtension extension,
-        IntakeRoller intakeRoller) {
-      return Commands.either(
-              Commands.print("[AUTO] Auto in neutral zone!"),
-              Commands.parallel(
-                  flywheels.otfCommand(),
-                  hood.otfCommand(),
-                  turret.otfCommand(),
-                  
-                  intakeRoller.intake(),
-                  flywheels.simulateLaunchFuelCommand(
-                      () -> flywheels.atTarget() && hood.atTarget()),
-                  feeder.feedWhenReady(
-                      () -> flywheels.atTarget() && hood.atTarget(), Seconds.of(0.8)),
-                  dyeRotor.feedWhenReady(
-                      () -> flywheels.atTarget() && hood.atTarget(), Seconds.of(0.8)),
-                  oscilateExtension(extension).beforeStarting(Commands.waitSeconds(0.25))),
+                  extension.maintainFuelPressureCommand(
+                      FuelPressureType.OSCILLATING, 0.25)), // retract method had 1.0 delay
               () -> FieldConstants.NeutralZone.region.contains(drive.getPose().getTranslation()))
           .withName("Auto OTF Shooting");
     }
