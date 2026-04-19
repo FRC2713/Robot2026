@@ -1,0 +1,71 @@
+package frc2713.robot.subsystems.fuelDetector;
+
+public class FuelCoordinates {
+  public double chance;
+  public double centerX;
+  public double centerY;
+  public double boxX;
+  public double boxY;
+  public double boxX2;
+  public double boxY2;
+  public double width;
+  public double height;
+  public double depth;
+
+  public FuelCoordinates(double x, double y, double boxWidth, double boxHeight, double c) {
+    centerX = x;
+    centerY = y;
+    width = boxWidth;
+    height = boxHeight;
+    chance = c;
+  }
+
+  public FuelCoordinates(double x, double y) {
+    centerX = x;
+    centerY = y;
+  }
+
+  public FuelCoordinates(double c1x, double c1y, double c4x, double c4y, int imageWidth) {
+    boxX = (c1x > 0) ? c1x : 0;
+    boxY = (c1y > 0) ? c1y : 0;
+    boxX2 = (c4x > 0) ? c4x : 0;
+    boxY2 = (c4y > 0) ? c4y : 0;
+    computeCenterPoint(c1x, c1y, c4x, c4y);
+    width = c4x - c1x;
+    height = c4y - c1y;
+  }
+
+  public FuelCoordinates(String args) {
+    if (args.length() > 0) {
+      String[] values = args.split(",");
+      centerX = Double.parseDouble(values[0]);
+      centerY = Double.parseDouble(values[1]);
+      width = Double.parseDouble(values[2]);
+      height = Double.parseDouble(values[3]);
+      chance = Double.parseDouble(values[4].substring(0, values[4].length() - 1));
+    } else {
+      System.out.println("Not enough parameters to construct fuel. See docs (or Owen)");
+    }
+  }
+
+  public void computeCenterPoint(double x, double y, double x2, double y2) {
+    centerX = (x2 - x) / 2;
+    centerY = (y2 - y) / 2;
+  }
+
+  public void assignSelfToFuelSquare(
+      int gridWidth, int gridHeight, int imageWidth, int imageHeight, FuelSquare[][] squareArray) {
+    int squareX = (int) Math.round(centerX / (imageWidth / gridWidth));
+    int squareY = (int) Math.round(centerY / (imageHeight / gridHeight));
+    System.out.println(boxX);
+    squareArray[squareX][squareY].addFuel(this);
+  }
+  // TODO: implement depth function
+  public double computeDepth(double cameraFOV) {
+    return 0.0;
+  }
+
+  public String toString() {
+    return "x: " + centerX + " y: " + centerY;
+  }
+}
