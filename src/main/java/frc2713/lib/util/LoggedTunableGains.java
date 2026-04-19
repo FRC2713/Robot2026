@@ -3,6 +3,8 @@ package frc2713.lib.util;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc2713.lib.io.AdvantageScopePathBuilder;
 import java.util.function.BiConsumer;
 import lombok.Getter;
@@ -62,6 +64,20 @@ public class LoggedTunableGains {
     this.motionMagicRef = motionMagic;
   }
 
+  public LoggedTunableGains(String name, double p, double i, double d) {
+    this(name, new Slot0Configs().withKP(p).withKI(i).withKD(d), new MotionMagicConfigs());
+  }
+
+  public LoggedTunableGains(
+      String name, double p, double i, double d, TrapezoidProfile.Constraints constraints) {
+    this(
+        name,
+        new Slot0Configs().withKP(p).withKI(i).withKD(d),
+        new MotionMagicConfigs()
+            .withMotionMagicCruiseVelocity(constraints.maxVelocity)
+            .withMotionMagicAcceleration(constraints.maxAcceleration));
+  }
+
   /**
    * Runs the provided action when any of the tunables have changed. The Slot0Configs and
    * MotionMagicConfigs instance passed to the constructor will be updated before the action runs.
@@ -105,6 +121,16 @@ public class LoggedTunableGains {
 
   public PIDController createPIDController() {
     return new PIDController(this.P.getAsDouble(), this.I.getAsDouble(), this.D.getAsDouble());
+  }
+
+  public ProfiledPIDController createProfiledPIDController() {
+    return new ProfiledPIDController(
+        this.P.getAsDouble(),
+        this.I.getAsDouble(),
+        this.D.getAsDouble(),
+        new TrapezoidProfile.Constraints(
+            this.motionMagicCruiseVelocity.getAsDouble(),
+            this.motionMagicAcceleration.getAsDouble()));
   }
 
   public PIDController createAngularPIDController() {

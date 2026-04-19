@@ -7,6 +7,9 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.io.ArticulatedComponent;
+import frc2713.lib.logging.PeriodicTimingLogger;
+import frc2713.lib.logging.TimeLogged;
+import frc2713.robot.Constants;
 import frc2713.robot.FieldConstants;
 import frc2713.robot.subsystems.drive.Drive;
 import java.util.*;
@@ -94,26 +97,34 @@ public class KinematicsManager extends SubsystemBase {
   }
 
   @Override
+  @TimeLogged("Performance/SubsystemPeriodic/KinematicsManager")
   public void periodic() {
-    // 1. Rebuild topology if new components were added
-    if (isDirty) {
-      rebuildTopology();
-    }
+    try (var ignored = PeriodicTimingLogger.time(this)) {
+      // 1. Rebuild topology if new components were added
+      if (isDirty) {
+        rebuildTopology();
+        Pose3d[] zeroedComponentPoses = new Pose3d[publishableIndices.length];
+        Arrays.fill(zeroedComponentPoses, new Pose3d());
+        Logger.recordOutput(pb.makePath("zeroedComponentPoses"), zeroedComponentPoses);
+      }
 
-    // 2. Update Kinematics
-    updateKinematics();
-    // Fast Copy: Only iterate the specific indices we care about
-    for (int i = 0; i < publishableIndices.length; i++) {
-      int nodeID = publishableIndices[i];
-      mechanismPosesBuffer[i] = localPoses[nodeID];
-    }
+      // 2. Update Kinematics
+      updateKinematics();
+      // Fast Copy: Only iterate the specific indices we care about
+      for (int i = 0; i < publishableIndices.length; i++) {
+        int nodeID = publishableIndices[i];
+        mechanismPosesBuffer[i] = localPoses[nodeID];
+      }
 
-    // Log the pre-filled buffer
-    if (mechanismPosesBuffer.length > 0) {
-      Logger.recordOutput(pb.makePath("mechanismPoses"), mechanismPosesBuffer);
+      // Log the pre-filled buffer
+      if (mechanismPosesBuffer.length > 0) {
+        Logger.recordOutput(pb.makePath("mechanismPoses"), mechanismPosesBuffer);
+      }
+      if (Constants.tuningMode) {
+        Logger.recordOutput(pb.makePath("localPoses"), localPoses);
+        Logger.recordOutput(pb.makePath("globalPoses"), globalPoses);
+      }
     }
-    Logger.recordOutput(pb.makePath("localPoses"), localPoses);
-    Logger.recordOutput(pb.makePath("globalPoses"), globalPoses);
   }
 
   private void rebuildTopology() {

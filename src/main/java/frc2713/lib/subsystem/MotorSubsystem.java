@@ -1,6 +1,8 @@
 package frc2713.lib.subsystem;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
@@ -14,6 +16,7 @@ import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
@@ -23,16 +26,19 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import frc2713.lib.energy.EnergyManagement;
 import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.io.MotorIO;
-import frc2713.lib.io.MotorInputsAutoLogged;
+import frc2713.lib.io.MotorInputs;
+import frc2713.lib.subsystem.TalonFXSubsystemConfig.GeneralControlMode;
 import frc2713.lib.util.RobotTime;
 import frc2713.lib.util.Util;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.inputs.LoggableInputs;
 
-public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO>
+public class MotorSubsystem<MI extends MotorInputs & LoggableInputs, IO extends MotorIO>
     extends SubsystemBase {
   protected final IO io;
   protected final MI inputs;
@@ -41,21 +47,15 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
 
   protected Angle positionSetpoint = Radians.of(0.0);
   protected AngularVelocity velocitySetpoint = RotationsPerSecond.of(0.0);
+  protected boolean initialized = false;
 
   public MotorSubsystem(TalonFXSubsystemConfig config, MI inputs, IO io) {
-    // Set the subsystem name
     super(config.name);
     this.config = config;
     this.inputs = inputs;
     this.io = io;
 
     this.pb = new AdvantageScopePathBuilder(this.getName());
-
-    // Set the default command to stop the motor
-    setDefaultCommand(
-        this.dutyCycleCommand(() -> 0.0)
-            .withName(pb.makeName("DefaultCommand"))
-            .ignoringDisable(true));
   }
 
   @Override
@@ -63,22 +63,31 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
     Time timestamp = RobotTime.getTimestamp();
     io.readInputs(inputs);
     Logger.processInputs(getName(), inputs);
+    reportEnergyToMonitor();
+
+    if (!initialized) {
+      initialize();
+    }
+
     Logger.recordOutput(pb.makePath("LatencyPeriodSec"), RobotTime.getTimestamp().minus(timestamp));
     Logger.recordOutput(
         pb.makePath("currentCommand"),
         (getCurrentCommand() == null) ? "Default" : getCurrentCommand().getName());
+    atTarget();
+  }
+
+  /** Initialize the subsystem. Does nothing by default. */
+  protected void initialize() {
+    this.initialized = true;
   }
 
   /**
-   * Convert subsystem position to the position value sent to the motor controller. Since TalonFX is
-   * configured with SensorToMechanismRatio, control requests use mechanism units directly - the
-   * controller handles the conversion internally.
-   *
-   * @param subsystemPosition The desired mechanism position
-   * @return The position to send to the motor controller (same as input)
+   * Report motor energy usage to EnergyMonitor. Override in MotorFollowerSubsystem for
+   * leader/follower.
    */
-  protected Angle convertSubsystemPositionToMotorPosition(Angle subsystemPosition) {
-    return subsystemPosition;
+  protected void reportEnergyToMonitor() {
+    EnergyManagement.EnergyMonitor.report(
+        getName(), "Motor", inputs.appliedVolts.in(Volts), inputs.currentSupplyAmps.in(Amps));
   }
 
   /**
@@ -88,7 +97,38 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
    * @return the number of mechanism rotations to achieve that distance
    */
   protected Angle convertSubsystemPositionToMotorPosition(Distance subsystemPosition) {
-    return Rotations.of(subsystemPosition.in(Meters) * config.unitRotationsPerMeter);
+    return Rotations.of(subsystemPosition.in(Meters) / config.metersPerRotation);
+  }
+
+  /**
+   * Convert mechanism rotations from the motor controller to a linear distance.
+   *
+   * @param motorPosition The current position in mechanism rotations
+   * @return the current position as a linear distance
+   */
+  protected Distance convertMotorPositionToSubsystemPosition(Angle motorPosition) {
+    return Meters.of(motorPosition.in(Rotations) * config.metersPerRotation);
+  }
+
+  /**
+   * Convert a linear velocity to mechanism rotations per second for the motor controller.
+   *
+   * @param subsystemVelocity The desired linear velocity
+   * @return The equivalent angular velocity in mechanism rotations per second
+   */
+  protected AngularVelocity convertSubsystemVelocityToMotorVelocity(
+      LinearVelocity subsystemVelocity) {
+    return RotationsPerSecond.of(subsystemVelocity.in(MetersPerSecond) / config.metersPerRotation);
+  }
+
+  /**
+   * Convert mechanism rotations per second from the motor controller to a linear velocity.
+   *
+   * @param motorVelocity The current velocity in mechanism rotations per second
+   * @return The current velocity as a linear velocity
+   */
+  protected LinearVelocity convertMotorVelocityToSubsystemVelocity(AngularVelocity motorVelocity) {
+    return MetersPerSecond.of(motorVelocity.in(RotationsPerSecond) * config.metersPerRotation);
   }
 
   // IO Implementations
@@ -129,7 +169,6 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
    */
   protected void setVoltageImpl(Voltage voltage) {
     Logger.recordOutput(pb.makePath("API", "setVoltageImpl", "voltage"), voltage);
-    Logger.recordOutput(pb.makePath("API", "setVoltageImpl", "units"), voltage.unit().toString());
     io.setVoltageOutput(voltage);
   }
 
@@ -142,8 +181,6 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
   protected void setPositionSetpointImpl(Angle position) {
     positionSetpoint = position;
     Logger.recordOutput(pb.makePath("API", "setPositionSetpointImpl", "position"), position);
-    Logger.recordOutput(
-        pb.makePath("API", "setPositionSetpointImpl", "units"), position.unit().toString());
     io.setPositionSetpoint(position);
   }
 
@@ -157,8 +194,6 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
   protected void setMotionMagicSetpointImpl(Angle position, int slot) {
     positionSetpoint = position;
     Logger.recordOutput(pb.makePath("API", "setMotionMagicSetpointImpl", "position"), position);
-    Logger.recordOutput(
-        pb.makePath("API", "setMotionMagicSetpointImpl", "units"), position.unit().toString());
     Logger.recordOutput(pb.makePath("API", "setMotionMagicSetpointImpl", "slot"), slot);
     io.setMotionMagicSetpoint(position, slot);
   }
@@ -179,9 +214,6 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
     Velocity<AngularAccelerationUnit> jerk = config.getMotionMagicJerkMeasure();
     Logger.recordOutput(
         pb.makePath("API", "setMotionMagicSetpointImpDynamic", "Position"), position);
-    Logger.recordOutput(
-        pb.makePath("API", "setMotionMagicSetpointImpDynamic", "Units"),
-        position.unit().toString());
     Logger.recordOutput(
         pb.makePath("API", "setMotionMagicSetpointImpDynamic", "Velocity"), velocity);
     Logger.recordOutput(
@@ -210,9 +242,6 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
     Logger.recordOutput(
         pb.makePath("API", "setMotionMagicSetpointImpDynamic", "Position"), position);
     Logger.recordOutput(
-        pb.makePath("API", "setMotionMagicSetpointImpDynamic", "Units"),
-        position.unit().toString());
-    Logger.recordOutput(
         pb.makePath("API", "setMotionMagicSetpointImpDynamic", "Velocity"), velocity);
     Logger.recordOutput(
         pb.makePath("API", "setMotionMagicSetpointImpDynamic", "Accel"), acceleration);
@@ -233,8 +262,6 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
   protected void setVelocitySetpointImpl(AngularVelocity setpoint, int slot) {
     velocitySetpoint = setpoint;
     Logger.recordOutput(pb.makePath("API", "setVelocitySetpointImpl", "Velocity"), setpoint);
-    Logger.recordOutput(
-        pb.makePath("API", "setVelocitySetpointImpl", "Units"), setpoint.unit().toString());
     Logger.recordOutput(pb.makePath("API", "setVelocitySetpointImpl", "Slot"), slot);
     io.setVelocitySetpoint(setpoint, slot);
   }
@@ -251,12 +278,12 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
 
   /**
    * Gets the current position as linear distance. For linear mechanisms (elevators, extensions),
-   * converts mechanism rotations to meters using unitRotationsPerMeter.
+   * converts mechanism rotations to meters.
    *
    * @return The current position as a Distance
    */
   public Distance getCurrentPositionAsDistance() {
-    return Meters.of(inputs.position.in(Rotations) / config.unitRotationsPerMeter);
+    return convertMotorPositionToSubsystemPosition(inputs.position);
   }
 
   /**
@@ -284,7 +311,7 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
    * @return The current position setpoint as a Distance
    */
   public Distance getPositionSetpointAsDistance() {
-    return Meters.of(positionSetpoint.in(Rotations) / config.unitRotationsPerMeter);
+    return convertMotorPositionToSubsystemPosition(positionSetpoint);
   }
 
   /**
@@ -294,10 +321,17 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
    */
   public void setTorqueCurrentFOCImpl(Current current) {
     Logger.recordOutput(pb.makePath("API", "setTorqueCurrentFoC", "Current"), current);
-    Logger.recordOutput(
-        pb.makePath("API", "setTorqueCurrentFoC", "Units"), current.unit().toString());
-
     io.setTorqueCurrentFOC(current);
+  }
+
+  /**
+   * Sets the motor to the specified velocity in FOC control.
+   *
+   * @param velocity The desired velocity.
+   */
+  public void setVelocityTorqueCurrentFOCImpl(AngularVelocity velocity) {
+    Logger.recordOutput(pb.makePath("API", "setVelocityTorqueCurrentFOC", "Velocity"), velocity);
+    io.setVelocityTorqueCurrentFOC(velocity);
   }
 
   /** Sets the current position of the motor as zero. */
@@ -442,14 +476,9 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
    * @return A command that sets the motor to the specified position setpoint and ends when on
    *     target.
    */
-  public Command positionSetpointUntilOnTargetCommand(
-      Supplier<Angle> positionSupplier, Supplier<Angle> epsilonSupplier) {
+  public Command positionSetpointUntilOnTargetCommand(Supplier<Angle> positionSupplier) {
     return new ParallelDeadlineGroup(
-            new WaitUntilCommand(
-                () ->
-                    Util.epsilonEquals(
-                        positionSupplier.get(), inputs.position, epsilonSupplier.get())),
-            positionSetpointCommand(positionSupplier))
+            new WaitUntilCommand(this::atTarget), positionSetpointCommand(positionSupplier))
         .withName(pb.makeName("PositionUntilOnTargetControl"));
   }
 
@@ -462,14 +491,9 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
    * @return A command that sets the motor to the specified velocity setpoint and ends when on
    *     target.
    */
-  public Command velocitySetpointUntilOnTargetCommand(
-      Supplier<AngularVelocity> velocitySupplier, Supplier<AngularVelocity> epsilonSupplier) {
+  public Command velocitySetpointUntilOnTargetCommand(Supplier<AngularVelocity> velocitySupplier) {
     return new ParallelDeadlineGroup(
-            new WaitUntilCommand(
-                () ->
-                    Util.epsilonEquals(
-                        velocitySupplier.get(), inputs.velocity, epsilonSupplier.get())),
-            velocitySetpointCommand(velocitySupplier))
+            new WaitUntilCommand(this::atTarget), velocitySetpointCommand(velocitySupplier))
         .withName(pb.makeName("VelocityUntilOnTargetControl"));
   }
 
@@ -633,6 +657,15 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
         .withName(pb.makeName("torqueCurrentFOCCommand"));
   }
 
+  public Command setVelocityTorqueCurrentFOC(Supplier<AngularVelocity> velocity) {
+    return runEnd(
+            () -> {
+              setVelocityTorqueCurrentFOCImpl(velocity.get());
+            },
+            () -> {})
+        .withName(pb.makeName("velocityTorqueCurrentFOCCommand"));
+  }
+
   /**
    * Creates a command that temporarily disables software limits while running.
    *
@@ -653,5 +686,20 @@ public class MotorSubsystem<MI extends MotorInputsAutoLogged, IO extends MotorIO
         () -> {
           io.setEnableSoftLimits(prev.fwd, prev.rev);
         });
+  }
+
+  public boolean atTarget() {
+    var atTarget = false;
+    if (config.generalControlMode == GeneralControlMode.POSITION) {
+      atTarget =
+          Util.epsilonEquals(
+              getCurrentPosition(), positionSetpoint, config.acceptablePositionError);
+    } else if (config.generalControlMode == GeneralControlMode.VELOCITY) {
+      atTarget =
+          Util.epsilonEquals(
+              getCurrentVelocity(), velocitySetpoint, config.acceptableVelocityError);
+    }
+    Logger.recordOutput(pb.makePath("AtTarget"), atTarget);
+    return atTarget;
   }
 }

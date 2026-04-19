@@ -1,0 +1,102 @@
+{
+  "path_elements": [
+    {
+      "type": "waypoint",
+      "translation_target": {
+        "x_meters": 2.8,
+        "y_meters": 0.6,
+        "intermediate_handoff_radius_meters": 0.2
+      },
+      "rotation_target": {
+        "rotation_radians": 0.0,
+        "profiled_rotation": true
+      }
+    },
+    {
+      "type": "rotation",
+      "rotation_radians": 0.0,
+      "t_ratio": 0.4106366618012701,
+      "profiled_rotation": true
+    },
+    {
+      "type": "waypoint",
+      "translation_target": {
+        "x_meters": 6.781493818069485,
+        "y_meters": 0.6267288344871211,
+        "intermediate_handoff_radius_meters": 0.45
+      },
+      "rotation_target": {
+        "rotation_radians": 1.5707963267948966,
+        "profiled_rotation": true
+      }
+    },
+    {
+      "type": "rotation",
+      "rotation_radians": 1.5707963267948966,
+      "t_ratio": 0.7914722824670096,
+      "profiled_rotation": true
+    },
+    {
+      "type": "waypoint",
+      "translation_target": {
+        "x_meters": 6.928273654424299,
+        "y_meters": 3.7348036474987776,
+        "intermediate_handoff_radius_meters": 0.2
+      },
+      "rotation_target": {
+        "rotation_radians": 2.0943951023931953,
+        "profiled_rotation": false
+      }
+    },
+    {
+      "type": "waypoint",
+      "translation_target": {
+        "x_meters": 6.129106420528829,
+        "y_meters": 3.733443123277656,
+        "intermediate_handoff_radius_meters": 0.2
+      },
+      "rotation_target": {
+        "rotation_radians": -1.8413900010100381,
+        "profiled_rotation": true
+      }
+    },
+    {
+      "type": "waypoint",
+      "translation_target": {
+        "x_meters": 6.083549940020671,
+        "y_meters": 2.65,
+        "intermediate_handoff_radius_meters": 0.25
+      },
+      "rotation_target": {
+        "rotation_radians": 4.71238898038469,
+        "profiled_rotation": true
+      }
+    },
+    {
+      "type": "event_trigger",
+      "t_ratio": 0.8752622475017144,
+      "lib_key": "shoot_2"
+    },
+    {
+      "type": "waypoint",
+      "translation_target": {
+        "x_meters": 2.5073980424143563,
+        "y_meters": 2.65,
+        "intermediate_handoff_radius_meters": 0.3
+      },
+      "rotation_target": {
+        "rotation_radians": 4.71238898038469,
+        "profiled_rotation": true
+      }
+    }
+  ],
+  "constraints": {
+    "max_velocity_meters_per_sec": [
+      {
+        "value": 2.5,
+        "start_ordinal": 2,
+        "end_ordinal": 4
+      }
+    ]
+  }
+}

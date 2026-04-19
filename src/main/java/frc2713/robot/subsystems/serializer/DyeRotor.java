@@ -1,27 +1,38 @@
 package frc2713.robot.subsystems.serializer;
 
+import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc2713.lib.io.ArticulatedComponent;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.MotorInputsAutoLogged;
+import frc2713.lib.logging.PeriodicTimingLogger;
+import frc2713.lib.logging.TimeLogged;
 import frc2713.lib.subsystem.MotorSubsystem;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
+import frc2713.robot.subsystems.launcher.LaunchingLookupMaps;
+import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 
 public class DyeRotor extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
     implements ArticulatedComponent {
 
   public DyeRotor(final TalonFXSubsystemConfig config, final MotorIO indexerMotorIO) {
     super(config, new MotorInputsAutoLogged(), indexerMotorIO);
+
+    setDefaultCommand(setVelocity(() -> RPM.of(0)));
   }
 
   public Command setVelocity(Supplier<AngularVelocity> desiredVelocity) {
@@ -29,29 +40,51 @@ public class DyeRotor extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   }
 
   public Command indexFuel() {
-    return setVelocity(() -> SerializerConstants.DyeRotor.indexingSpeed);
+    return setVelocity(SerializerConstants.DyeRotor.indexingSpeed);
+  }
+
+  @AutoLogOutput(key = "Dye Rotor/DynamicIndexSpeed")
+  public AngularVelocity dynamicIndexSpeed() {
+    return RPM.of(
+        LaunchingLookupMaps.distanceToDyeRotorSpeedMap.get(
+            LaunchingSolutionManager.getInstance().getSolution().effectiveDistanceMeters()));
+  }
+
+  public Command dynamicIndex() {
+    return setVelocity(this::dynamicIndexSpeed);
+  }
+
+  public Command stirFuel() {
+    return setVelocity(SerializerConstants.DyeRotor.stirSpeed);
+  }
+
+  public Command dynamicFeedWhenReady(BooleanSupplier isReady) {
+    return Commands.sequence(Commands.waitUntil(isReady), dynamicIndex());
   }
 
   public Command feedWhenReady(BooleanSupplier isReady) {
-    return setVelocity(
-        () ->
-            isReady.getAsBoolean()
-                ? SerializerConstants.DyeRotor.indexingSpeed
-                : RotationsPerSecond.of(0));
+    return feedWhenReady(isReady, Seconds.of(Double.POSITIVE_INFINITY));
+  }
+
+  public Command feedWhenReady(BooleanSupplier isReady, Time timout) {
+    return Commands.sequence(Commands.waitUntil(isReady).withTimeout(timout), indexFuel());
   }
 
   public Command outtakeFuel() {
     return setVelocity(() -> SerializerConstants.DyeRotor.outdexingSpeed);
   }
 
-  public Command stopCommand() {
+  public Command stop() {
     return setVelocity(() -> RotationsPerSecond.of(0));
   }
 
   @Override
+  @TimeLogged("Performance/SubsystemPeriodic/DyeRotor")
   public void periodic() {
-    super.periodic();
-    // Additional periodic code for indexer can be added here
+    try (var ignored = PeriodicTimingLogger.time(this)) {
+      super.periodic();
+      // Additional periodic code for indexer can be added here
+    }
   }
 
   @Override

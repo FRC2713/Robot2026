@@ -51,7 +51,10 @@ public class TalonFXIO implements MotorIO {
   private final StatusSignal<Current> currentTorqueSignal;
   private final StatusSignal<Angle> rawRotorPositionSignal;
   private final StatusSignal<Double> closedLoopErrorSignal;
+  private final StatusSignal<Double> closedLoopOutputSignal;
   private final StatusSignal<Boolean> motionMagicAtTargetSignal;
+  private final StatusSignal<Double> dutyCycleSignal;
+  private final StatusSignal<Voltage> supplyVoltageSignal;
   private final BaseStatusSignal[] signals;
 
   protected static final double KRAKEN_X60_KV_RPS_PER_VOLT = 5.29; // (from CTRE specs)
@@ -82,27 +85,36 @@ public class TalonFXIO implements MotorIO {
     positionSignal = talon.getPosition();
     velocitySignal = talon.getVelocity();
     voltageSignal = talon.getMotorVoltage();
+    supplyVoltageSignal = talon.getSupplyVoltage();
     currentStatorSignal = talon.getStatorCurrent();
     currentSupplySignal = talon.getSupplyCurrent();
     currentTorqueSignal = talon.getTorqueCurrent();
     rawRotorPositionSignal = talon.getRotorPosition();
     closedLoopErrorSignal = talon.getClosedLoopError();
+    closedLoopOutputSignal = talon.getClosedLoopOutput();
     motionMagicAtTargetSignal = talon.getMotionMagicAtTarget();
+    dutyCycleSignal = talon.getDutyCycle();
     signals =
         new BaseStatusSignal[] {
           positionSignal,
           velocitySignal,
           voltageSignal,
+          supplyVoltageSignal,
           currentStatorSignal,
           currentSupplySignal,
           currentTorqueSignal,
           rawRotorPositionSignal,
           closedLoopErrorSignal,
+          closedLoopOutputSignal,
           motionMagicAtTargetSignal,
+          dutyCycleSignal
         };
 
     CTREUtil.tryUntilOK(
         () -> BaseStatusSignal.setUpdateFrequencyForAll(50.0, signals), talon.getDeviceID());
+    // CTREUtil.tryUntilOK(
+    //     () -> velocitySignal.setUpdateFrequency(config.velocityControlFrequency),
+    //     talon.getDeviceID());
     CTREUtil.tryUntilOK(() -> talon.optimizeBusUtilization(), talon.getDeviceID());
 
     // If this Talon is marked tunable, create dashboard tunables for PID gains
@@ -124,7 +136,10 @@ public class TalonFXIO implements MotorIO {
     inputs.currenTorqueAmps = currentTorqueSignal.getValue();
     inputs.rawRotorPosition = rawRotorPositionSignal.getValue();
     inputs.closedLoopError = closedLoopErrorSignal.getValue();
+    inputs.closedLoopOutput = closedLoopOutputSignal.getValue();
     inputs.isMotionMagicAtTarget = motionMagicAtTargetSignal.getValue();
+    inputs.dutyCycle = dutyCycleSignal.getValue();
+    inputs.suppliedVoltage = supplyVoltageSignal.getValue();
 
     // Update PID gains from dashboard if tunable and any value changed
     if (this.config.tunable && tunableGains != null) {

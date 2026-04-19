@@ -10,12 +10,19 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.Time;
+import frc2713.lib.field.CircularFieldRegion;
 
 public class BallTrajectorySim {
 
   static boolean useMagnus = false;
 
   public static class Ball {
+    public enum TargetResult {
+      PENDING,
+      HIT,
+      MISS
+    }
+
     // Position is Translation3d (Best for Visualization/Field2d)
     public Translation3d position;
 
@@ -25,6 +32,9 @@ public class BallTrajectorySim {
     // Simplified: Spin is just a scalar speed around the Y-axis.
     // Negative = Backspin (Lift), Positive = Topspin (Dive)
     private double spinRateY;
+    private double flightTimeSeconds;
+    private CircularFieldRegion targetRegion;
+    private TargetResult targetResult = TargetResult.PENDING;
 
     double massKg;
     double radiusM;
@@ -41,21 +51,32 @@ public class BallTrajectorySim {
 
       this.position = new Translation3d();
       this.velocity = new Translation3d();
+      this.flightTimeSeconds = 0.0;
     }
 
     public void launch(
         Translation3d startPosition, // Input is now Translation3d
         Translation3d velocity,
         AngularVelocity spinSpeed) {
+      launch(startPosition, velocity, spinSpeed, null);
+    }
 
+    public void launch(
+        Translation3d startPosition,
+        Translation3d velocity,
+        AngularVelocity spinSpeed,
+        CircularFieldRegion targetRegion) {
       this.position = startPosition;
       this.spinRateY = spinSpeed.in(RadiansPerSecond);
-
       this.velocity = velocity;
+      this.flightTimeSeconds = 0.0;
+      this.targetRegion = targetRegion;
+      this.targetResult = TargetResult.PENDING;
     }
 
     public void update(Time timeStep) {
       double dt = timeStep.in(Seconds);
+      flightTimeSeconds += dt;
       double airDensity = 1.225;
 
       // 1. Gravity
@@ -117,6 +138,26 @@ public class BallTrajectorySim {
 
     public Translation3d getVelocity() {
       return velocity;
+    }
+
+    public double getFlightTimeSeconds() {
+      return flightTimeSeconds;
+    }
+
+    public CircularFieldRegion getTargetRegion() {
+      return targetRegion;
+    }
+
+    public boolean hasTargetRegion() {
+      return targetRegion != null;
+    }
+
+    public TargetResult getTargetResult() {
+      return targetResult;
+    }
+
+    public void setTargetResult(TargetResult targetResult) {
+      this.targetResult = targetResult;
     }
   }
 }

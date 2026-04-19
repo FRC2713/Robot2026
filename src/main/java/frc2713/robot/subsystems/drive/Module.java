@@ -8,14 +8,17 @@
 package frc2713.robot.subsystems.drive;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import frc2713.lib.energy.EnergyManagement;
 import org.littletonrobotics.junction.Logger;
 
 public class Module {
@@ -55,6 +58,10 @@ public class Module {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Drive/Module" + Integer.toString(index), inputs);
+    EnergyManagement.EnergyMonitor.report(
+        "Drive", "Module" + index + "_Drive", inputs.driveAppliedVolts, inputs.driveCurrentAmps);
+    EnergyManagement.EnergyMonitor.report(
+        "Drive", "Module" + index + "_Turn", inputs.turnAppliedVolts, inputs.turnCurrentAmps);
 
     // Calculate positions for odometry
     int sampleCount = inputs.odometryTimestamps.length; // All signals are sampled together
@@ -137,5 +144,17 @@ public class Module {
   /** Returns the module velocity in rotations/sec (Phoenix native units). */
   public double getFFCharacterizationVelocity() {
     return Units.radiansToRotations(inputs.driveVelocityRadPerSec);
+  }
+
+  public void setDriveGains(Slot0Configs gains) {
+    io.setDriveGains(gains);
+  }
+
+  public void setTurnGains(Slot0Configs gains) {
+    io.setTurnGains(gains);
+  }
+
+  public void changeDriveCurrentLimits(Current driveLimit) {
+    io.changeDriveCurrentLimits(driveLimit);
   }
 }

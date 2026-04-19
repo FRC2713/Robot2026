@@ -1,22 +1,20 @@
-// Copyright (c) 2021-2026 Littleton Robotics
-// http://github.com/Mechanical-Advantage
-//
-// Use of this source code is governed by a BSD
-// license that can be found in the LICENSE file
-// at the root directory of this project.
-
 package frc2713.robot;
 
 import choreo.auto.AutoFactory;
 import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.lib.BLine.FollowPath;
+import frc.robot.lib.BLine.Path;
+import frc2713.lib.io.CanCoderIO;
+import frc2713.lib.io.CanCoderIOHardware;
+import frc2713.lib.io.CanCoderInputs;
+import frc2713.lib.io.CanCoderInputsAutoLogged;
 import frc2713.lib.io.MotorIO;
 import frc2713.lib.io.SimTalonFXIO;
 import frc2713.lib.io.TalonFXIO;
@@ -24,29 +22,37 @@ import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.commands.DriveCommands;
-import frc2713.robot.commands.autos.RightSideAutoBump;
+import frc2713.robot.commands.autos.BLineMidwarsNoBump;
+import frc2713.robot.commands.autos.BLineMidwarsOvercenter;
+import frc2713.robot.commands.autos.BLineTuning;
+import frc2713.robot.commands.autos.BumpTest;
+import frc2713.robot.commands.autos.Demo;
+import frc2713.robot.commands.autos.DriveTest;
+import frc2713.robot.commands.autos.Midwars;
+import frc2713.robot.commands.autos.NoIntake;
 import frc2713.robot.generated.TunerConstants;
 import frc2713.robot.oi.DevControls;
 import frc2713.robot.oi.DriverControls;
+import frc2713.robot.oi.OperatorControls;
 import frc2713.robot.subsystems.drive.Drive;
+import frc2713.robot.subsystems.drive.DriveConstants;
 import frc2713.robot.subsystems.drive.GyroIO;
 import frc2713.robot.subsystems.drive.GyroIOPigeon2;
 import frc2713.robot.subsystems.drive.ModuleIO;
 import frc2713.robot.subsystems.drive.ModuleIOSim;
 import frc2713.robot.subsystems.drive.ModuleIOTalonFX;
-import frc2713.robot.subsystems.fuelDetector.FuelDetector;
 import frc2713.robot.subsystems.intake.IntakeConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
+import frc2713.robot.subsystems.intake.intakeExtensionIO.IntakeExtensionIO;
+import frc2713.robot.subsystems.intake.intakeExtensionIO.IntakeExtensionIOSim;
+import frc2713.robot.subsystems.intake.intakeExtensionIO.IntakeExtensionIOTalonFX;
 import frc2713.robot.subsystems.launcher.Flywheels;
 import frc2713.robot.subsystems.launcher.Hood;
 import frc2713.robot.subsystems.launcher.LauncherConstants;
 import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
 import frc2713.robot.subsystems.launcher.Turret;
-import frc2713.robot.subsystems.launcher.turretIO.TurretMotorIO;
-import frc2713.robot.subsystems.launcher.turretIO.TurretMotorIOSim;
-import frc2713.robot.subsystems.launcher.turretIO.TurretMotorIOTalonFX;
-import frc2713.robot.subsystems.launcher.turretIO.TurretSubsystemConfig;
+import frc2713.robot.subsystems.launcher.TurretSim;
 import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 import frc2713.robot.subsystems.serializer.SerializerConstants;
@@ -54,7 +60,6 @@ import frc2713.robot.subsystems.vision.Vision;
 import frc2713.robot.subsystems.vision.VisionIO;
 import frc2713.robot.subsystems.vision.VisionIOSLAMDunk;
 import java.util.Arrays;
-import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -68,15 +73,14 @@ public class RobotContainer {
 
   // Subsystems
   public static Drive drive;
-  private static Flywheels flywheels;
-  private static Turret turret;
-  private static Hood hood;
-  private static IntakeRoller intakeRoller;
-  private static IntakeExtension intakeExtension;
-  private static DyeRotor dyeRotor;
-  private static Feeder feeder;
+  public static Flywheels flywheels;
+  public static Turret turret;
+  public static Hood hood;
+  public static IntakeRoller intakeRoller;
+  public static IntakeExtension intakeExtension;
+  public static DyeRotor dyeRotor;
+  public static Feeder feeder;
   public static Vision vision;
-  private static FuelDetector fuels;
 
   // Lazy loaders
   @SuppressWarnings("unused")
@@ -87,11 +91,14 @@ public class RobotContainer {
 
   // Controllers
   public static DriverControls driverControls;
+  public static OperatorControls operatorControls;
   public static DevControls devControls;
 
   // Dashboard inputs
-  private final AutoFactory autoFactory;
   private final LoggedDashboardChooser<Command> autoChooser;
+
+  private static AutoFactory choreoFactory;
+  public static FollowPath.Builder pathBuilder;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -100,6 +107,7 @@ public class RobotContainer {
         // Real robot, instantiate hardware IO implementations
         // ModuleIOTalonFX is intended for modules with TalonFX drive, TalonFX turn, and
         // a CANcoder
+
         drive =
             new Drive(
                 new GyroIOPigeon2(),
@@ -109,22 +117,33 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackRight));
         flywheels =
             new Flywheels(
-                LauncherConstants.Flywheels.leftConfig,
-                LauncherConstants.Flywheels.rightConfig,
-                new TalonFXIO(LauncherConstants.Flywheels.leftConfig),
-                new TalonFXIO(LauncherConstants.Flywheels.rightConfig));
+                LauncherConstants.Flywheels.leaderConfig,
+                LauncherConstants.Flywheels.followerConfig,
+                new TalonFXIO(LauncherConstants.Flywheels.leaderConfig),
+                new TalonFXIO(LauncherConstants.Flywheels.followerConfig));
+
         hood =
             new Hood(LauncherConstants.Hood.config, new TalonFXIO(LauncherConstants.Hood.config));
+
         turret =
             new Turret(
                 LauncherConstants.Turret.config,
-                new TurretMotorIOTalonFX(LauncherConstants.Turret.config));
+                new TalonFXIO(LauncherConstants.Turret.config),
+                new CanCoderInputsAutoLogged(),
+                new CanCoderIOHardware(LauncherConstants.Turret.canCoderConfig));
+
         intakeRoller =
             new IntakeRoller(
-                IntakeConstants.Roller.config, new TalonFXIO(IntakeConstants.Roller.config));
+                IntakeConstants.Roller.leaderConfig,
+                IntakeConstants.Roller.followerConfig,
+                new TalonFXIO(IntakeConstants.Roller.leaderConfig),
+                new TalonFXIO(IntakeConstants.Roller.followerConfig));
+
         intakeExtension =
             new IntakeExtension(
-                IntakeConstants.Extension.config, new TalonFXIO(IntakeConstants.Extension.config));
+                IntakeConstants.Extension.config,
+                new IntakeExtensionIOTalonFX(IntakeConstants.Extension.differentialConfig));
+
         dyeRotor =
             new DyeRotor(
                 SerializerConstants.DyeRotor.config,
@@ -134,7 +153,6 @@ public class RobotContainer {
                 SerializerConstants.Feeder.config,
                 new TalonFXIO(SerializerConstants.Feeder.config));
         vision = new Vision(new VisionIOSLAMDunk());
-        fuels = new FuelDetector();
         break;
 
       case SIM:
@@ -148,24 +166,26 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.BackRight));
         flywheels =
             new Flywheels(
-                LauncherConstants.Flywheels.leftConfig,
-                LauncherConstants.Flywheels.rightConfig,
-                new SimTalonFXIO(LauncherConstants.Flywheels.leftConfig),
-                new SimTalonFXIO(LauncherConstants.Flywheels.rightConfig));
+                LauncherConstants.Flywheels.leaderConfig,
+                LauncherConstants.Flywheels.followerConfig,
+                new SimTalonFXIO(LauncherConstants.Flywheels.leaderConfig),
+                new SimTalonFXIO(LauncherConstants.Flywheels.followerConfig));
         hood =
             new Hood(
                 LauncherConstants.Hood.config, new SimTalonFXIO(LauncherConstants.Hood.config));
-        turret =
-            new Turret(
-                LauncherConstants.Turret.config,
-                new TurretMotorIOSim(LauncherConstants.Turret.config));
+
+        turret = new TurretSim();
+
         intakeRoller =
             new IntakeRoller(
-                IntakeConstants.Roller.config, new SimTalonFXIO(IntakeConstants.Roller.config));
+                IntakeConstants.Roller.leaderConfig,
+                IntakeConstants.Roller.followerConfig,
+                new SimTalonFXIO(IntakeConstants.Roller.leaderConfig),
+                new SimTalonFXIO(IntakeConstants.Roller.followerConfig));
         intakeExtension =
             new IntakeExtension(
                 IntakeConstants.Extension.config,
-                new SimTalonFXIO(IntakeConstants.Extension.config));
+                new IntakeExtensionIOSim(IntakeConstants.Extension.config));
         dyeRotor =
             new DyeRotor(
                 SerializerConstants.DyeRotor.config,
@@ -175,7 +195,6 @@ public class RobotContainer {
                 SerializerConstants.Feeder.config,
                 new SimTalonFXIO(SerializerConstants.Feeder.config));
         vision = new Vision(new VisionIOSLAMDunk());
-        fuels = new FuelDetector();
         break;
 
       default:
@@ -189,22 +208,75 @@ public class RobotContainer {
                 new ModuleIO() {});
         flywheels =
             new Flywheels(
+                LauncherConstants.Flywheels.leaderConfig,
+                LauncherConstants.Flywheels.followerConfig,
+                new MotorIO() {},
+                new MotorIO() {});
+        hood = new Hood(new TalonFXSubsystemConfig(), new MotorIO() {});
+        turret =
+            new Turret(
+                LauncherConstants.Turret.config,
+                new MotorIO() {},
+                new CanCoderInputsAutoLogged(),
+                new CanCoderIO() {
+                  @Override
+                  public void readInputs(CanCoderInputs inputs) {}
+                });
+        intakeRoller =
+            new IntakeRoller(
                 new TalonFXSubsystemConfig(),
                 new TalonFXSubsystemConfig(),
                 new MotorIO() {},
                 new MotorIO() {});
-        hood = new Hood(new TalonFXSubsystemConfig(), new MotorIO() {});
-        turret = new Turret(new TurretSubsystemConfig(), new TurretMotorIO() {});
-        intakeRoller = new IntakeRoller(new TalonFXSubsystemConfig(), new MotorIO() {});
-        intakeExtension = new IntakeExtension(new TalonFXSubsystemConfig(), new MotorIO() {});
+        intakeExtension =
+            new IntakeExtension(new TalonFXSubsystemConfig(), new IntakeExtensionIO() {});
         dyeRotor = new DyeRotor(new TalonFXSubsystemConfig(), new MotorIO() {});
         feeder = new Feeder(new TalonFXSubsystemConfig(), new MotorIO() {});
         vision = new Vision(new VisionIO() {});
-        fuels = new FuelDetector();
         break;
     }
-    //
-    autoFactory =
+
+    // This setting is ignored when the FMS is connected
+    DriverStation.silenceJoystickConnectionWarning(true);
+
+    // Set up controllers
+    driverControls =
+        new DriverControls(
+            drive,
+            flywheels,
+            turret,
+            hood,
+            intakeRoller,
+            intakeExtension,
+            dyeRotor,
+            feeder,
+            vision);
+    devControls =
+        new DevControls(
+            drive, flywheels, turret, hood, intakeRoller, intakeExtension, dyeRotor, feeder);
+    operatorControls =
+        new OperatorControls(
+            drive, flywheels, turret, hood, intakeRoller, intakeExtension, dyeRotor, feeder);
+
+    // Set up auto routines
+    configurePIDPathBuilder(Constants.tuningMode);
+    configureChoreoFactory();
+
+    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+    configureAutonomousRoutines(autoChooser, Constants.tuningMode);
+
+    // Configure the button bindings
+    configureButtonBindings();
+
+    // configure the kinematics calculations
+    configureKinematics();
+
+    Path.setDefaultGlobalConstraints(
+        new Path.DefaultGlobalConstraints(4.5, 12.0, 540, 860, 0.03, 2.0, 0.2));
+  }
+
+  private void configureChoreoFactory() {
+    RobotContainer.choreoFactory =
         new AutoFactory(
             drive::getPose, // Function that returns the current robot pose
             drive::setPose, // Function that resets the current robot pose to the provided Pose2d
@@ -219,53 +291,52 @@ public class RobotContainer {
                       .toArray(Pose2d[]::new));
             } // The drive subsystem
             );
+  }
 
-    // This setting is ignored when the FMS is connected
-    DriverStation.silenceJoystickConnectionWarning(true);
+  private void configurePIDPathBuilder(boolean isDev) {
+    // Path following
+    RobotContainer.pathBuilder =
+        new FollowPath.Builder(
+                drive,
+                drive::getPose,
+                drive::getChassisSpeeds,
+                drive::runVelocity,
+                new PIDController(
+                    DriveConstants.AutoConstants.positionTrajectoryController.getP().get(),
+                    DriveConstants.AutoConstants.positionTrajectoryController.getI().get(),
+                    DriveConstants.AutoConstants.positionTrajectoryController.getD().get()),
+                new PIDController(
+                    DriveConstants.AutoConstants.headingTrajectoryController.getP().get(),
+                    DriveConstants.AutoConstants.headingTrajectoryController.getI().get(),
+                    DriveConstants.AutoConstants.headingTrajectoryController.getD().get()),
+                new PIDController(
+                    DriveConstants.AutoConstants.crosstrackTrajectoryController.getP().get(),
+                    DriveConstants.AutoConstants.crosstrackTrajectoryController.getI().get(),
+                    DriveConstants.AutoConstants.crosstrackTrajectoryController.getD().get()))
+            .withDefaultShouldFlip();
 
-    // Set up controllers
-    driverControls =
-        new DriverControls(
-            drive, flywheels, turret, hood, intakeRoller, intakeExtension, dyeRotor, feeder);
-    devControls =
-        new DevControls(
-            drive, flywheels, turret, hood, intakeRoller, intakeExtension, dyeRotor, feeder);
+    // Bline logging
+    FollowPath.setTranslationListLoggingConsumer(
+        pair -> {
+          Logger.recordOutput(pair.getFirst(), pair.getSecond());
+        });
 
-    // Set up auto routines
-    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+    if (isDev) {
+      FollowPath.setDoubleLoggingConsumer(
+          pair -> {
+            Logger.recordOutput(pair.getFirst(), pair.getSecond());
+          });
 
-    // Set up SysId routines
-    autoChooser.addOption(
-        "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
-    autoChooser.addOption(
-        "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Forward)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Reverse)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Right Side Bump Auto",
-        RightSideAutoBump.routine(
-            autoFactory,
-            drive,
-            intakeExtension,
-            intakeRoller,
-            flywheels,
-            hood,
-            turret,
-            dyeRotor,
-            feeder));
-    // Configure the button bindings
-    configureButtonBindings();
+      FollowPath.setBooleanLoggingConsumer(
+          pair -> {
+            Logger.recordOutput(pair.getFirst(), pair.getSecond());
+          });
 
-    // configure the kinematics calculations
-    configureKinematics();
+      FollowPath.setPoseLoggingConsumer(
+          pair -> {
+            Logger.recordOutput(pair.getFirst(), pair.getSecond());
+          });
+    }
   }
 
   /** Use this robot to configure the transforms between subsystems. */
@@ -302,25 +373,92 @@ public class RobotContainer {
   private void configureButtonBindings() {
     driverControls.configureButtonBindings();
     devControls.configureButtonBindings();
+    operatorControls.configureButtonBindings();
 
     // Default commands
     // Set drive command to accept inputs from both driver and dev controllers
-    DriveCommands.setDefaultDriveCommand(
-        drive,
-        DriveCommands.joystickDrive(
-            drive,
-            () -> -driverControls.getLeftY() + -devControls.getLeftY(),
-            () -> -driverControls.getLeftX() + -devControls.getLeftX(),
-            () -> -driverControls.getRightX() + -devControls.getRightX()),
-        "Dual Controller Drive");
-    turret.setDefaultCommand(turret.otfCommand().withName("OTF Tracking"));
-    hood.setDefaultCommand(
-        hood.autoRetractCommand(drive::getPose, hood.otfAngSupplier)
-            .withName("OTF Tracking with Auto-Retract"));
-    flywheels.setDefaultCommand(flywheels.idleSpeedCommand().withName("Idle Tracking"));
+    // DriveCommands.setDefaultDriveCommand(
+    //     drive,
+    //     DriveCommands.joystickDrive(
+    //         drive,
+    //         () -> -driverControls.getLeftY() + -devControls.getLeftY(),
+    //         () -> -driverControls.getLeftX() + -devControls.getLeftX(),
+    //         () -> -driverControls.getRightX() + -devControls.getRightX()),
+    //     "Dual Controller Drive");
+    driverControls.setToNormalDrive();
 
     // Comment these out when using dev controller
-    driverControls.setToNormalDrive();
+    // driverControls.setToNormalDrive();
+  }
+
+  /**
+   * Configure the autonomous chooser. Pass isDeve=true to add development auto routines.
+   *
+   * @param autoChooser
+   * @param isDev pass true if not at a competition. TODO: Make this configurable
+   */
+  private void configureAutonomousRoutines(
+      LoggedDashboardChooser<Command> autoChooser, boolean isDev) {
+
+    if (isDev) {
+      // Set up SysId routines
+      autoChooser.addOption(
+          "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
+      autoChooser.addOption(
+          "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+      autoChooser.addOption(
+          "Drive SysId (Quasistatic Forward)",
+          drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+      autoChooser.addOption(
+          "Drive SysId (Quasistatic Reverse)",
+          drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+      autoChooser.addOption(
+          "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+      autoChooser.addOption(
+          "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+
+      autoChooser.addOption("DriveTest", DriveTest.routine(choreoFactory));
+      autoChooser.addOption("DemoMode", Demo.demo());
+      autoChooser.addOption("BLine Tuning", BLineTuning.getCommand());
+      autoChooser.addOption("Bump Test", BumpTest.getCommand());
+    }
+
+    autoChooser.addDefaultOption(
+        "Bline Midwars - R", BLineMidwarsOvercenter.getCommand(() -> false));
+    autoChooser.addOption("Bline Midwars - L", BLineMidwarsOvercenter.getCommand(() -> true));
+    autoChooser.addOption("Bline No Bump - R", BLineMidwarsNoBump.getCommand(() -> false));
+    autoChooser.addOption("Bline No Bump - L", BLineMidwarsNoBump.getCommand(() -> true));
+
+    autoChooser.addOption(
+        "Choreo Midwars - R",
+        Midwars.getRoutine(
+            choreoFactory,
+            false,
+            drive,
+            intakeExtension,
+            intakeRoller,
+            flywheels,
+            hood,
+            turret,
+            dyeRotor,
+            feeder));
+
+    autoChooser.addOption(
+        "Choreo Midwars - L",
+        Midwars.getRoutine(
+            choreoFactory,
+            true,
+            drive,
+            intakeExtension,
+            intakeRoller,
+            flywheels,
+            hood,
+            turret,
+            dyeRotor,
+            feeder));
+
+    autoChooser.addOption("NoIntake - R", NoIntake.getRoutine(choreoFactory, false, drive));
+    autoChooser.addOption("NoIntake - L", NoIntake.getRoutine(choreoFactory, true, drive));
   }
 
   /**
@@ -330,116 +468,5 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.get();
-  }
-
-  /**
-   * A Utility class holding common game actions in the form of command groups that can be shared
-   * between Driver, Developer, and AutoRoutines
-   */
-  public static class GameCommandGroups {
-    public static Command otfShot =
-        Commands.parallel(
-                flywheels.otfCommand(),
-                hood.otfCommand(),
-                turret.otfCommand(),
-                flywheels.simulateLaunchedFuel(flywheels::atTarget),
-                feeder.feedWhenReady(flywheels::atTarget),
-                dyeRotor.feedWhenReady(flywheels::atTarget))
-            .withName("OTF Shooting");
-
-    public static Command hubShot =
-        Commands.parallel(
-                flywheels.hubCommand(),
-                hood.hubCommand(),
-                turret.hubCommand(drive::getPose),
-                flywheels.simulateLaunchedFuel(() -> flywheels.atTarget() && hood.atTarget()),
-                feeder.feedWhenReady(() -> flywheels.atTarget() && hood.atTarget()),
-                dyeRotor.feedWhenReady(() -> flywheels.atTarget() && hood.atTarget()))
-            .withName("Hub Shooting");
-
-    public static Command stopShooting =
-        Commands.parallel(feeder.stop(), dyeRotor.stopCommand()).withName("Stopped Shooting");
-  }
-
-  public static double getTimeLeftInShift() {
-    double time = DriverStation.getMatchTime();
-    int shiftTime = 25;
-    if (time >= 130) {
-      return 0;
-    } else if ((30 < time) && (time < 130)) {
-      return (time - 30) % shiftTime;
-    } else {
-      return time;
-    }
-  }
-
-  public static String whoWonAuto() {
-    String gameMessage = DriverStation.getGameSpecificMessage();
-    String firstInactive;
-    if (gameMessage.length() > 0) {
-      firstInactive = gameMessage.substring(0, 1);
-    } else {
-      firstInactive = "";
-    }
-    return firstInactive;
-  }
-
-  public static String currentActiveHub() {
-    String firstInactive = whoWonAuto();
-    double time = DriverStation.getMatchTime();
-
-    int shift;
-    if (time > 30 && time < 130) {
-      shift = (int) (4 - Math.floor(4 * ((time - 30) / (130 - 30))));
-    } else {
-      shift = 0;
-    }
-    if (shift == 0) {
-      return "";
-    } else if (shift % 2 == 0) {
-      return firstInactive;
-    } else {
-      if (firstInactive.equals("R")) {
-        return "B";
-      } else if (firstInactive.equals("B")) {
-        return "R";
-      } else {
-        return "";
-      }
-    }
-  }
-
-  public static String getCurrentPhase() {
-    double time = DriverStation.getMatchTime();
-    if (time >= 105) {
-      return "Phase 1";
-    } else if (time >= 80) {
-      return "Phase 2";
-    } else if (time >= 55) {
-      return "Phase 3";
-    } else if (time >= 30) {
-      return "Phase 4";
-    } else {
-      return "";
-    }
-  }
-
-  public static boolean ourHubActive() {
-    String currentHub = currentActiveHub();
-    Optional<Alliance> currentAlliance = DriverStation.getAlliance();
-    if (currentAlliance.isPresent()) {
-      if (currentHub.equals("R")) {
-        return (currentAlliance.get() == DriverStation.Alliance.Red);
-      } else if (currentHub.equals("B")) {
-        return (currentAlliance.get() == DriverStation.Alliance.Blue);
-      }
-    }
-    return true;
-  }
-
-  public static void getAndPublishFuelHeading() {
-    Logger.recordOutput(
-        "fuelDetector/fuelHeading",
-        RobotContainer.fuels.getHeading(DriverStation.getAlliance()).getDegrees());
   }
 }

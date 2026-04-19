@@ -1,111 +1,162 @@
 package frc2713.robot.subsystems.launcher;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Radian;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.ENCODER_1_TO_TURRET_RATIO;
-import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.FORWARD_LIMIT_DEGREES;
-import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.REVERSE_LIMIT_DEGREES;
-import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.SLOPE;
+import static edu.wpi.first.units.Units.Rotations;
+import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.forwardSoftLimit;
+import static frc2713.robot.subsystems.launcher.LauncherConstants.Turret.reverseSoftLimit;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc2713.lib.geometry.GeometryUtil;
 import frc2713.lib.io.ArticulatedComponent;
-import frc2713.lib.subsystem.MotorSubsystem;
+import frc2713.lib.io.CanCoderIO;
+import frc2713.lib.io.CanCoderInputsAutoLogged;
+import frc2713.lib.io.MotorIO;
+import frc2713.lib.io.MotorInputsAutoLogged;
+import frc2713.lib.logging.PeriodicTimingLogger;
+import frc2713.lib.logging.TimeLogged;
+import frc2713.lib.subsystem.MotorCancoderSubsystem;
+import frc2713.lib.subsystem.TalonFXSubsystemConfig;
+import frc2713.lib.util.CrtSolver;
 import frc2713.lib.util.Util;
-import frc2713.robot.FieldConstants;
 import frc2713.robot.RobotContainer;
-import frc2713.robot.subsystems.launcher.turretIO.TurretInputsAutoLogged;
-import frc2713.robot.subsystems.launcher.turretIO.TurretMotorIO;
-import frc2713.robot.subsystems.launcher.turretIO.TurretSubsystemConfig;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO>
+public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorIO>
     implements ArticulatedComponent {
 
-  public Turret(final TurretSubsystemConfig config, final TurretMotorIO turretMotorIO) {
-    super(config, new TurretInputsAutoLogged(), turretMotorIO);
+  private Alert invalidEncoder1Alert =
+      new Alert(
+          pb.makePath("Encoder 1 value is invalid.  CRT solution cannot be found"),
+          AlertType.kError);
+  private Alert invalidEncoder2Alert =
+      new Alert(
+          pb.makePath("Encoder 2 value is invalid.  CRT solution cannot be found"),
+          AlertType.kError);
+
+  public Turret(
+      final TalonFXSubsystemConfig config,
+      final MotorIO turretMotorIO,
+      final CanCoderInputsAutoLogged cancoderInputs,
+      final CanCoderIO cancoderIO) {
+    super(config, new MotorInputsAutoLogged(), turretMotorIO, cancoderInputs, cancoderIO);
+    setDefaultCommand(otfCommand());
+    SmartDashboard.putBoolean("Turret Debug", false);
+    new Trigger(() -> SmartDashboard.getBoolean("Turret Debug", false))
+        .onTrue(
+            Turret.changeDefaultTurretCommand(
+                this, manualControl(), "disableTurret from SmartDashboard trigger"))
+        .onFalse(
+            Turret.changeDefaultTurretCommand(
+                this, otfCommand(), "enable Turret from smartDashboard trigger"));
   }
 
-  public static double turretPositionFromEncoders(double e1, double e2) {
-    // 1. Calculate the 'Difference' (The Phase)
-    double diff = e2 - e1;
-
-    // Normalize to [-180, 180]. This is the "Vernier Lock"
-    diff = MathUtil.inputModulus(diff, -180, 180);
-
-    // 2. Coarse Estimate (The "Big Picture")
-    // This uses the phase shift to guess the rough position.
-    double coarseAngle = diff * SLOPE;
-
-    // 3. The Ratio (How many times E1 spins per 1 Turret degree)
-    double encoderToTurretRatio = ENCODER_1_TO_TURRET_RATIO;
-
-    // 4. Lap Calculation (The "Fine" logic)
-    // We calculate how many full 360s E1 has likely traveled.
-    // 'expectedE1' is where the encoder SHOULD be if coarseAngle was perfect.
-    double expectedE1 = coarseAngle * encoderToTurretRatio;
-
-    // Determine the 'Lap' by finding how many 360s are between
-    // the expected position and the actual sensor reading (e1).
-    double lap = Math.round((expectedE1 - e1) / 360.0);
-
-    // 5. High-Resolution Output
-    // Combine the Lap (coarse) with the Sensor Reading (fine)
-    return (lap * 360.0 + e1) / encoderToTurretRatio;
+  public static void setDefaultTurretCommand(Turret turret, Command cmd, String name) {
+    Logger.recordOutput("CurrentTurretCommand", name);
+    var currentCmd = turret.getCurrentCommand();
+    if (currentCmd != null) {
+      turret.getCurrentCommand().cancel();
+      turret.removeDefaultCommand();
+    }
+    turret.setDefaultCommand(cmd);
   }
 
-  public static double convertToClosestBoundedTurretAngleDegrees(
-      double targetAngleDegrees, Rotation2d current) {
+  public static Command changeDefaultTurretCommand(Turret turret, Command cmd, String name) {
+    return Commands.runOnce(() -> setDefaultTurretCommand(turret, cmd, name)).ignoringDisable(true);
+  }
+
+  @AutoLogOutput
+  public Angle getTurretPositionFromEncoders(Angle e1, Angle e2) {
+    if (e1 == null || e2 == null) {
+      if (initialized) {
+        if (e1 == null) invalidEncoder1Alert.set(true);
+        if (e2 == null) invalidEncoder2Alert.set(true);
+      }
+      return Rotations.of(0);
+    }
+    invalidEncoder1Alert.set(false);
+    invalidEncoder2Alert.set(false);
+    Angle turretAngle =
+        CrtSolver.calculateAbsoluteMotorTurns(
+                e1,
+                e2,
+                LauncherConstants.Turret.pinionGearTeeth,
+                LauncherConstants.Turret.spurGear1Teeth)
+            .div(LauncherConstants.Turret.motorToTurretGearRatio);
+
+    Logger.recordOutput(this.pb.makePath("calculated_angle"), turretAngle);
+
+    return turretAngle;
+  }
+
+  public static Angle convertToClosestBoundedTurretAngleDegrees(Angle desiredAngle, Angle current) {
     // Normalize target to [-180, 180] first
-    double normalizedTarget = MathUtil.inputModulus(targetAngleDegrees, -180, 180);
-
-    // Get current position in degrees
-    double currentDegrees = current.getDegrees();
+    Angle normalizedTarget =
+        GeometryUtil.angleModulus(desiredAngle, Degrees.of(-180), Degrees.of(180));
 
     // Calculate the shortest path to the target (normalized to [-180, 180])
-    double diff = MathUtil.inputModulus(normalizedTarget - currentDegrees, -180, 180);
+
+    Angle diff =
+        GeometryUtil.angleModulus(
+            normalizedTarget.minus(current), Degrees.of(-180), Degrees.of(180));
 
     // Calculate the final absolute position
-    double finalPosition = currentDegrees + diff;
+    Angle finalPosition = current.plus(diff);
 
     // Check if final position is within limits, if not, try the other way around
-    if (finalPosition > FORWARD_LIMIT_DEGREES) {
-      finalPosition -= 360;
-    } else if (finalPosition < REVERSE_LIMIT_DEGREES) {
-      finalPosition += 360;
+    if (finalPosition.lt(forwardSoftLimit) && finalPosition.gt(reverseSoftLimit)) {
+      return finalPosition;
     }
 
-    return finalPosition;
+    Angle alternatePosition =
+        finalPosition.gt(forwardSoftLimit)
+            ? finalPosition.minus(Rotations.of(1))
+            : finalPosition.plus(Rotations.of(1));
+
+    if (alternatePosition.lt(forwardSoftLimit) && alternatePosition.gt(reverseSoftLimit)) {
+      return alternatePosition;
+    }
+
+    // If still not found, clamp the desired angle to the limits
+    return Util.clamp(desiredAngle, reverseSoftLimit, forwardSoftLimit);
   }
 
   /** Input should be robot relative (i.e. encoder-reported angle) */
   public Command setAngle(Supplier<Angle> desiredAngle) {
     return motionMagicSetpointCommand(
         () -> {
-          double commandedDegrees = desiredAngle.get().in(Degrees);
 
           // Convert the desired angle to a bounded angle that respects turret limits
-          double boundedAngleDegrees =
-              convertToClosestBoundedTurretAngleDegrees(
-                  commandedDegrees, getCurrentTurretRotation());
+          Angle boundedAngleDegrees =
+              convertToClosestBoundedTurretAngleDegrees(desiredAngle.get(), inputs.position);
 
-          Logger.recordOutput(pb.makePath("setpoint", "commandedDegrees"), commandedDegrees);
-          Logger.recordOutput(pb.makePath("setpoint", "boundedDegrees"), boundedAngleDegrees);
+          Logger.recordOutput(
+              pb.makePath("setpoint", "commandedAngle"), desiredAngle.get().in(Degrees));
+          Logger.recordOutput(pb.makePath("setpoint", "boundedAngle"), boundedAngleDegrees);
 
-          return convertSubsystemPositionToMotorPosition(Degrees.of(boundedAngleDegrees));
+          return boundedAngleDegrees;
         });
+  }
+
+  public Command manualControl() {
+    return Commands.sequence(
+        Commands.runOnce(() -> lastManualControlAngle = inputs.position),
+        setAngle(() -> lastManualControlAngle.plus(fudgeFactor)));
   }
 
   /**
@@ -115,16 +166,15 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
   public Command setAngleStopAtBounds(Supplier<Angle> desiredAngle) {
     return motionMagicSetpointCommand(
         () -> {
-          double commandedDegrees = desiredAngle.get().in(Degrees);
+          Angle commandedDegrees = desiredAngle.get();
 
           // Clamp directly to turret limits instead of wrapping
-          double clampedDegrees =
-              MathUtil.clamp(commandedDegrees, REVERSE_LIMIT_DEGREES, FORWARD_LIMIT_DEGREES);
+          Angle clampedDegrees = Util.clamp(commandedDegrees, reverseSoftLimit, forwardSoftLimit);
 
           Logger.recordOutput(pb.makePath("setpoint", "commandedDegrees"), commandedDegrees);
           Logger.recordOutput(pb.makePath("setpoint", "clampedDegrees"), clampedDegrees);
 
-          return convertSubsystemPositionToMotorPosition(Degrees.of(clampedDegrees));
+          return clampedDegrees;
         });
   }
 
@@ -139,16 +189,15 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
       Supplier<Angle> desiredAngle, Supplier<Double> velocityScale) {
     return motionMagicSetpointCommand(
         () -> {
-          double commandedDegrees = desiredAngle.get().in(Degrees);
+          Angle commandedDegrees = desiredAngle.get();
 
           // Clamp directly to turret limits instead of wrapping
-          double clampedDegrees =
-              MathUtil.clamp(commandedDegrees, REVERSE_LIMIT_DEGREES, FORWARD_LIMIT_DEGREES);
+          Angle clampedDegrees = Util.clamp(desiredAngle.get(), reverseSoftLimit, forwardSoftLimit);
 
           Logger.recordOutput(pb.makePath("setpoint", "commandedDegrees"), commandedDegrees);
           Logger.recordOutput(pb.makePath("setpoint", "clampedDegrees"), clampedDegrees);
 
-          return convertSubsystemPositionToMotorPosition(Degrees.of(clampedDegrees));
+          return clampedDegrees;
         },
         () -> {
           var mmConfig = new com.ctre.phoenix6.configs.MotionMagicConfigs();
@@ -168,23 +217,7 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
         0);
   }
 
-  /**
-   * Gets the current turret position computed from the dual encoder system.
-   *
-   * @return The computed turret position in degrees
-   */
-  public Angle getComputedTurretPosition() {
-    return Degrees.of(inputs.computedTurretPositionDegrees);
-  }
-
-  /**
-   * Gets the current turret position as a Rotation2d for use with bounded angle calculations.
-   *
-   * @return The current turret position as a Rotation2d
-   */
-  public Rotation2d getCurrentTurretRotation() {
-    return Rotation2d.fromDegrees(inputs.computedTurretPositionDegrees);
-  }
+  @AutoLogOutput public Angle fudgeFactor = Degrees.of(0);
 
   /**
    * Supplier that continuously calculates the on-the-fly turret angle. Uses the launch solution if
@@ -196,26 +229,31 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
         Angle targetAngle;
 
         if (solution.isValid()) {
-          targetAngle = Degrees.of(solution.turretFieldYaw().getDegrees());
-          Logger.recordOutput(super.pb.makePath("OTF", "response"), "using solution");
-        } else if (solution.effectiveDistanceMeters() <= 0.9) {
-          // invalid bc we're too close
-          Logger.recordOutput(super.pb.makePath("OTF", "response"), "hub shot");
+          Angle omegaCompensation =
+              RobotContainer.drive
+                  .getAngularSpeed()
+                  .times(LauncherConstants.Turret.OTF_OMEGA_LOOKAHEAD.get())
+                  .times(-1);
+          Angle predictedFieldYaw =
+              Degrees.of(solution.turretFieldYaw().getDegrees()).plus(omegaCompensation);
+
+          // Convert the field-relative yaw to robot-relative using the current robot heading.
+          // This must happen here (not in LaunchingSolutionManager) so we always use the
+          // robot's heading RIGHT NOW, not a projected or stale heading from a previous cycle.
           targetAngle =
-              Util.fieldToRobotRelative(
-                  LauncherConstants.Turret.staticHubAngle, RobotContainer.drive.getPose());
+              Util.fieldToRobotRelative(predictedFieldYaw, RobotContainer.drive.getPose());
+          Logger.recordOutput(
+              super.pb.makePath("OTF", "omegaCompensationDegrees"), omegaCompensation);
+          Logger.recordOutput(super.pb.makePath("OTF", "response"), "using solution");
         } else {
           Logger.recordOutput(super.pb.makePath("OTF", "response"), "stay at measured");
-          targetAngle = Degrees.of(inputs.computedTurretPositionDegrees);
+          targetAngle = inputs.position;
         }
 
-        targetAngle =
-            Degrees.of(
-                convertToClosestBoundedTurretAngleDegrees(
-                    targetAngle.in(Degrees), getCurrentTurretRotation()));
+        targetAngle = convertToClosestBoundedTurretAngleDegrees(targetAngle, inputs.position);
         Logger.recordOutput(super.pb.makePath("OTF", "solutionIsValid"), solution.isValid());
-        Logger.recordOutput(pb.makePath("OTF", "targetAngleDegrees"), targetAngle.in(Degrees));
-        return targetAngle;
+        Logger.recordOutput(pb.makePath("OTF", "targetAngleDegrees"), targetAngle);
+        return targetAngle.plus(fudgeFactor);
       };
 
   public final Supplier<Angle> hubAngleSupplier =
@@ -232,37 +270,34 @@ public class Turret extends MotorSubsystem<TurretInputsAutoLogged, TurretMotorIO
     return setAngle(otfAngleSupplier);
   }
 
-  public Command hubCommand(Supplier<Pose2d> robotPose) {
-    return setAngle(() -> Util.fieldToRobotRelative(hubAngleSupplier.get(), robotPose.get()));
-  }
-
-  @AutoLogOutput
-  public boolean atTarget() {
-    return this.inputs.isMotionMagicAtTarget;
+  @Override
+  public void initialize() {
+    super.initialize();
   }
 
   @Override
+  @TimeLogged("Performance/SubsystemPeriodic/Turret")
   public void periodic() {
-    super.periodic();
+    try (var ignored = PeriodicTimingLogger.time(this)) {
+      super.periodic();
 
-    // Read turret-specific inputs (includes dual encoder data)
-    io.readInputs(inputs);
-
-    // Log the goal pose for visualization
-    Pose3d goalPose = new Pose3d(FieldConstants.Hub.topCenterPoint, new Rotation3d());
-    Logger.recordOutput(pb.makePath("goalVector"), new Pose3d[] {this.getGlobalPose(), goalPose});
+      if (!initialized) {
+        initialize();
+      }
+    }
   }
 
   @Override
   public Transform3d getTransform3d() {
     // Use the computed turret position from the Vernier dual-encoder system (in degrees)
-    double turretAngleRadians = Degrees.of(inputs.computedTurretPositionDegrees).in(Radian);
     return config.initialTransform.plus(
-        new Transform3d(new Translation3d(), new Rotation3d(0, 0, turretAngleRadians)));
+        new Transform3d(new Translation3d(), new Rotation3d(0, 0, inputs.position.in(Radians))));
   }
 
   @Override
   public Translation3d getRelativeAngularVelocity() {
     return new Translation3d(0, 0, super.getCurrentVelocity().in(RadiansPerSecond));
   }
+
+  private Angle lastManualControlAngle = Degrees.of(0);
 }

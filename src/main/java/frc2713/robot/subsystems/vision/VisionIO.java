@@ -2,6 +2,7 @@ package frc2713.robot.subsystems.vision;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Time;
@@ -15,18 +16,24 @@ public interface VisionIO {
     public Pose2d pose = new Pose2d();
     // pose3d can be left unchanged for visualization
     public Pose3d pose3d = new Pose3d();
+    public Rotation2d rawYaw = new Rotation2d();
     public double timestamp;
     public Time latency;
 
     public int tagCount;
 
     public boolean applying;
-    public String reasoning;
+    public double lastAppliedTimestamp = 0;
+    public String reasoning = "";
 
     public Distance translationStdDev =
         VisionConstants.POSE_ESTIMATOR_STATE_STDEVS.translationalStDev();
     public Angle rotationStdDev = VisionConstants.POSE_ESTIMATOR_STATE_STDEVS.rotationalStDev();
+    public double subgraphError;
+    public double avgTagSize;
   }
 
   public default void updateInputs(VisionInputs inputs) {}
+
+  public default void setGyroAngle(Angle angle) {}
 }

@@ -1,0 +1,211 @@
+package frc2713.lib.util;
+
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+class UtilTest {
+
+  @Nested
+  class EpsilonEqualsDouble {
+
+    @Test
+    void equalValues_returnsTrue() {
+      assertTrue(Util.epsilonEquals(1.0, 1.0));
+      assertTrue(Util.epsilonEquals(0.0, 0.0));
+      assertTrue(Util.epsilonEquals(-3.14, -3.14));
+    }
+
+    @Test
+    void valuesWithinEpsilon_returnsTrue() {
+      assertTrue(Util.epsilonEquals(1.0, 1.0 + Util.EPSILON / 2));
+      assertTrue(Util.epsilonEquals(1.0, 1.0 - Util.EPSILON / 2));
+    }
+
+    @Test
+    void valuesOutsideEpsilon_returnsFalse() {
+      assertFalse(Util.epsilonEquals(1.0, 1.0 + Util.EPSILON * 2));
+      assertFalse(Util.epsilonEquals(1.0, 0.9));
+    }
+
+    @Test
+    void withCustomEpsilon_respectsEpsilon() {
+      assertTrue(Util.epsilonEquals(1.0, 1.0 + 0.01, 0.1));
+      assertFalse(Util.epsilonEquals(1.0, 1.0 + 0.01, 0.001));
+    }
+  }
+
+  @Nested
+  class EpsilonEqualsInt {
+
+    @Test
+    void equalValues_returnsTrue() {
+      assertTrue(Util.epsilonEquals(5, 5));
+      assertTrue(Util.epsilonEquals(0, 0));
+    }
+
+    @Test
+    void valuesWithinEpsilon_returnsTrue() {
+      assertTrue(Util.epsilonEquals(10, 11, 1));
+      assertTrue(Util.epsilonEquals(10, 9, 1));
+    }
+
+    @Test
+    void valuesOutsideEpsilon_returnsFalse() {
+      assertFalse(Util.epsilonEquals(10, 12, 1));
+      assertFalse(Util.epsilonEquals(10, 8, 1));
+    }
+  }
+
+  @Nested
+  class EpsilonEqualsAngle {
+
+    @Test
+    void equalAngles_returnsTrue() {
+      Angle a = Radians.of(1.0);
+      Angle b = Radians.of(1.0);
+      Angle eps = Radians.of(Util.EPSILON);
+      assertTrue(Util.epsilonEquals(a, b, eps));
+    }
+
+    @Test
+    void anglesWithinEpsilon_returnsTrue() {
+      Angle a = Radians.of(1.0);
+      Angle b = Radians.of(1.0 + Util.EPSILON / 2);
+      Angle eps = Radians.of(Util.EPSILON);
+      assertTrue(Util.epsilonEquals(a, b, eps));
+    }
+
+    @Test
+    void anglesOutsideEpsilon_returnsFalse() {
+      Angle a = Radians.of(1.0);
+      Angle b = Radians.of(1.5);
+      Angle eps = Radians.of(0.1);
+      assertFalse(Util.epsilonEquals(a, b, eps));
+    }
+  }
+
+  @Nested
+  class EpsilonEqualsAngularVelocity {
+
+    @Test
+    void equalVelocities_returnsTrue() {
+      AngularVelocity a = RadiansPerSecond.of(2.0);
+      AngularVelocity b = RadiansPerSecond.of(2.0);
+      AngularVelocity eps = RadiansPerSecond.of(Util.EPSILON);
+      assertTrue(Util.epsilonEquals(a, b, eps));
+    }
+
+    @Test
+    void velocitiesOutsideEpsilon_returnsFalse() {
+      AngularVelocity a = RadiansPerSecond.of(2.0);
+      AngularVelocity b = RadiansPerSecond.of(3.0);
+      AngularVelocity eps = RadiansPerSecond.of(0.1);
+      assertFalse(Util.epsilonEquals(a, b, eps));
+    }
+  }
+
+  @Nested
+  class Clamper {
+    @Test
+    void clampWithinRange() {
+      Angle cmd = Degrees.of(0);
+      Angle min = Degrees.of(-90);
+      Angle max = Degrees.of(90);
+      Angle results = Util.clamp(cmd, min, max);
+      assertTrue(Util.epsilonEquals(cmd.in(Radians), results.in(Radians)));
+    }
+  }
+
+  @Nested
+  class FieldToRobotRelative {
+
+    @Test
+    void robotFacingZero_returnsSameAngle() {
+      Pose2d robotPose = new Pose2d(0, 0, Rotation2d.kZero);
+      Angle fieldAngle = Radians.of(Math.PI / 4);
+      Angle result = Util.fieldToRobotRelative(fieldAngle, robotPose);
+      assertTrue(Util.epsilonEquals(fieldAngle, result, Radians.of(Util.EPSILON)));
+    }
+
+    @Test
+    void robotRotated90Degrees_convertsCorrectly() {
+      Pose2d robotPose = new Pose2d(0, 0, Rotation2d.fromDegrees(90));
+      Angle fieldAngle = Radians.of(Math.PI / 2); // 90 deg in field
+      Angle result = Util.fieldToRobotRelative(fieldAngle, robotPose);
+      // Robot-relative: field 90 - robot 90 = 0
+      assertTrue(Util.epsilonEquals(result, Radians.of(0), Radians.of(Util.EPSILON)));
+    }
+
+    @Test
+    void robotRotated180Degrees_convertsCorrectly() {
+      Pose2d robotPose = new Pose2d(0, 0, Rotation2d.kPi);
+      Angle fieldAngle = Radians.of(0);
+      Angle result = Util.fieldToRobotRelative(fieldAngle, robotPose);
+      // Robot-relative: 0 - 180 = -180 or 180 (same rotation)
+      double resultRad = result.in(Radians);
+      assertTrue(Math.abs(resultRad - Math.PI) < 0.01 || Math.abs(resultRad + Math.PI) < 0.01);
+    }
+  }
+
+  @Nested
+  class MapToUnitCircle {
+    @Test
+    void axisInputUnchanged() {
+      Translation2d result = Util.mapToUnitCircle(1.0, 0.0);
+      assertEquals(1.0, result.getX(), Util.EPSILON);
+      assertEquals(0.0, result.getY(), Util.EPSILON);
+      assertEquals(1.0, result.getNorm(), Util.EPSILON);
+    }
+
+    @Test
+    void diagonalInputGetsNormalizedToUnitMagnitude() {
+      Translation2d result = Util.mapToUnitCircle(1.0, 1.0);
+      assertEquals(1.0, result.getNorm(), Util.EPSILON);
+      assertEquals(result.getX(), result.getY(), Util.EPSILON);
+    }
+
+    @Test
+    void insideUnitCircleUnchanged() {
+      Translation2d result = Util.mapToUnitCircle(0.3, -0.4);
+      assertEquals(0.3, result.getX(), Util.EPSILON);
+      assertEquals(-0.4, result.getY(), Util.EPSILON);
+      assertEquals(0.5, result.getNorm(), Util.EPSILON);
+    }
+  }
+
+  @Nested
+  class NonLinearStickShaping {
+    @Test
+    void signedPowerSquaresAndPreservesSign() {
+      assertEquals(0.0625, Util.signedPower(0.25, 2.0), Util.EPSILON);
+      assertEquals(-0.0625, Util.signedPower(-0.25, 2.0), Util.EPSILON);
+      assertEquals(1.0, Util.signedPower(1.0, 2.0), Util.EPSILON);
+      assertEquals(-1.0, Util.signedPower(-1.0, 2.0), Util.EPSILON);
+    }
+
+    @Test
+    void squareWithSignOnScalarMatchesExpectedCurve() {
+      assertEquals(0.0625, Util.squareWithSign(0.25), Util.EPSILON);
+      assertEquals(-0.0625, Util.squareWithSign(-0.25), Util.EPSILON);
+    }
+
+    @Test
+    void squareWithSignOnVectorAppliesPerAxis() {
+      Translation2d result = Util.squareWithSign(0.25, -0.5);
+      assertEquals(0.0625, result.getX(), Util.EPSILON);
+      assertEquals(-0.25, result.getY(), Util.EPSILON);
+    }
+  }
+}

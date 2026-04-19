@@ -7,11 +7,20 @@
 
 package frc2713.robot;
 
-import edu.wpi.first.wpilibj.DriverStation;
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc2713.lib.energy.EnergyManagement;
+import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.generated.BuildConstants;
 import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
+import frc2713.robot.util.ShiftManager;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -69,6 +78,9 @@ public class Robot extends LoggedRobot {
     // Start AdvantageKit logger
     Logger.start();
 
+    // Set rio brownout volts
+    RobotController.setBrownoutVoltage(Volts.of(6.1));
+
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
     robotContainer = new RobotContainer();
@@ -79,7 +91,7 @@ public class Robot extends LoggedRobot {
   public void robotPeriodic() {
     // Optionally switch the thread to high priority to improve loop
     // timing (see the template project documentation for details)
-    // Threads.setCurrentThreadPriority(true, 99);
+    Threads.setCurrentThreadPriority(true, 99);
 
     // Runs the Scheduler. This is responsible for polling buttons, adding
     // newly-scheduled commands, running already-scheduled commands, removing
@@ -87,40 +99,38 @@ public class Robot extends LoggedRobot {
     // This must be called from the robot's periodic block in order for anything in
     // the Command-based framework to work.
     CommandScheduler.getInstance().run();
-    Logger.recordOutput("matchData/timeLeftInShift", RobotContainer.getTimeLeftInShift());
-    Logger.recordOutput("matchData/currentMatchPhase", RobotContainer.getCurrentPhase());
-    Logger.recordOutput("matchData/ourHubActive", RobotContainer.ourHubActive());
-    String autoWinner = RobotContainer.whoWonAuto();
-    Logger.recordOutput("matchData/whoWonAuto", autoWinner);
 
-    Logger.recordOutput(
-        "matchData/FirstActive",
-        autoWinner.equals("R") ? "0000FF" : autoWinner.equals("B") ? "FF0000" : "000000");
+    EnergyManagement.EnergyMonitor.log();
 
-    Logger.recordOutput(
-        "matchData/autoWinnerColor",
-        "#" + (autoWinner.equals("B") ? "0000FF" : autoWinner.equals("R") ? "FF0000" : "000000"));
-    Logger.recordOutput("matchData/time", DriverStation.getMatchTime());
+    FieldConstants.HoodRetractionZones.logZones();
 
-    RobotContainer.getAndPublishFuelHeading();
+    // Elastic
+    ShiftManager.periodic();
+
     // Return to non-RT thread priority (do not modify the first argument)
-    // Threads.setCurrentThreadPriority(false, 10);
+    Threads.setCurrentThreadPriority(false, 10);
   }
 
   /** This function is called once when the robot is disabled. */
   @Override
-  public void disabledInit() {
-    LaunchingSolutionManager.setFieldGoal(
-        FieldConstants.Hub.innerCenterPoint, FieldConstants.Hub.topCenterPoint);
-  }
+  public void disabledInit() {}
 
   /** This function is called periodically when disabled. */
   @Override
   public void disabledPeriodic() {
-    // Reset pose to vision pose if available whilst disabled
-    var visionPose = RobotContainer.vision.getPose();
-    if (visionPose.isPresent()) {
-      RobotContainer.drive.setPose(visionPose.get());
+    LaunchingSolutionManager.currentGoal =
+        AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint);
+
+    if (RobotContainer.flywheels != null) {
+      RobotContainer.flywheels.fudgeFactor = RotationsPerSecond.of(0.0);
+    }
+
+    if (RobotContainer.turret != null) {
+      RobotContainer.turret.fudgeFactor = Degrees.of(0.0);
+    }
+
+    if (RobotContainer.hood != null) {
+      RobotContainer.hood.fudgeFactor = Degrees.of(0.0);
     }
   }
 
@@ -149,6 +159,8 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
+
+    RobotContainer.drive.changeDriveCurrentLimits(Amps.of(60));
   }
 
   /** This function is called periodically during operator control. */
