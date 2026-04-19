@@ -1,0 +1,3 @@
+- Add fuels to a grid (filter chance as fuel data is read, add coordinate pairs directly to a grid object of some kind, and when added compute which grid they're in)
+- Compute grid cell clustering (using existing algorithm)
+- find average x-values and convert to angle (using existing algorithm)

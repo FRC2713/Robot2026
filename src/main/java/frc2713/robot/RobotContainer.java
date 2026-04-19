@@ -62,6 +62,7 @@ import frc2713.robot.subsystems.serializer.SerializerConstants;
 import frc2713.robot.subsystems.vision.Vision;
 import frc2713.robot.subsystems.vision.VisionIO;
 import frc2713.robot.subsystems.vision.VisionIOSLAMDunk;
+import frc2713.robot.subsystems.fuelDetector.FuelDetector;
 import java.util.Arrays;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -84,6 +85,7 @@ public class RobotContainer {
   public static DyeRotor dyeRotor;
   public static Feeder feeder;
   public static Vision vision;
+  public static FuelDetector fuelDetector;
 
   // Lazy loaders
   @SuppressWarnings("unused")
@@ -156,6 +158,7 @@ public class RobotContainer {
                 SerializerConstants.Feeder.config,
                 new TalonFXIO(SerializerConstants.Feeder.config));
         vision = new Vision(new VisionIOSLAMDunk());
+        fuelDetector = new FuelDetector();
         break;
 
       case SIM:
@@ -197,9 +200,9 @@ public class RobotContainer {
             new Feeder(
                 SerializerConstants.Feeder.config,
                 new SimTalonFXIO(SerializerConstants.Feeder.config));
-
         vision = new Vision(new VisionIOSLAMDunk()); // if jetson is connected to roboRio
         // vision = new Vision(new VisionIOLocalNT()); // if jetson is connected to laptop
+        fuelDetector = new FuelDetector();
         break;
 
       default:
@@ -238,6 +241,7 @@ public class RobotContainer {
         dyeRotor = new DyeRotor(new TalonFXSubsystemConfig(), new MotorIO() {});
         feeder = new Feeder(new TalonFXSubsystemConfig(), new MotorIO() {});
         vision = new Vision(new VisionIO() {});
+        fuelDetector = new FuelDetector();
         break;
     }
 

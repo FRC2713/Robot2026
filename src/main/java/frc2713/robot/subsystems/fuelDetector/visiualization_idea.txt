@@ -1,0 +1,6 @@
+- We have an x-value for a fuel cluster (or, more accurately, can compute its center)
+- The width of the camera frame is a fraction of a full circle (FOV / 360)
+- This means that the angle change of each pixel is (pixel x) * (FOV / (x resolution))
+- The center of the cluster is (center x) * (FOV / (x resolution))
+- The cosine of that value is the x of the fuel cluster
+- the sine of that angle is the y on the unit circle
