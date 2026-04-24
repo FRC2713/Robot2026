@@ -55,7 +55,7 @@ public class Turret extends MotorCancoderSubsystem<MotorInputsAutoLogged, MotorI
       final CanCoderInputsAutoLogged cancoderInputs,
       final CanCoderIO cancoderIO) {
     super(config, new MotorInputsAutoLogged(), turretMotorIO, cancoderInputs, cancoderIO);
-    setDefaultCommand(otfCommand());
+    // setDefaultCommand(otfCommand());
     SmartDashboard.putBoolean("Turret Debug", false);
     new Trigger(() -> SmartDashboard.getBoolean("Turret Debug", false))
         .onTrue(
