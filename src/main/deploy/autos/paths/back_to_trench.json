@@ -13,12 +13,6 @@
       }
     },
     {
-      "type": "rotation",
-      "rotation_radians": -1.5707963267948966,
-      "t_ratio": 0.6399827405687017,
-      "profiled_rotation": true
-    },
-    {
       "type": "waypoint",
       "translation_target": {
         "x_meters": 2.8,
@@ -43,7 +37,7 @@
     ],
     "max_velocity_meters_per_sec": [
       {
-        "value": 1.35,
+        "value": 1.0499999999999998,
         "start_ordinal": 0,
         "end_ordinal": 1
       }

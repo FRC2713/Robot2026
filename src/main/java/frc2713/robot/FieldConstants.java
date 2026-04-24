@@ -114,6 +114,16 @@ public class FieldConstants {
         new RectangleFieldRegion(
             new Translation2d(LinesVertical.neutralZoneNear, fieldWidth),
             new Translation2d(LinesVertical.neutralZoneFar, 0));
+
+    public static final RectangleFieldRegion btmFeedingRegion =
+        new RectangleFieldRegion(
+            new Translation2d(LinesVertical.neutralZoneNear, Hub.farRightCorner.getY()),
+            new Translation2d(LinesVertical.neutralZoneFar, 0));
+
+    public static final RectangleFieldRegion topFeedingRegion =
+        new RectangleFieldRegion(
+            new Translation2d(LinesVertical.neutralZoneNear, Hub.farLeftCorner.getY()),
+            new Translation2d(LinesVertical.neutralZoneFar, fieldWidth));
   }
 
   public static class AllianceZone {
@@ -642,6 +652,13 @@ public class FieldConstants {
             RED_RIGHT_DUCK_EXIT_ZONE.getBoundaryPoses());
         Logger.recordOutput("Field/FIELD_PLUS_HALF", FIELD_PLUS_HALF_METER.getBoundaryPoses());
         Logger.recordOutput("Field/FIELD_PLUS_ONE", FIELD_PLUS_METER.getBoundaryPoses());
+
+        Logger.recordOutput(
+            "Field/topFeedingRegion",
+            FieldConstants.NeutralZone.topFeedingRegion.getBoundaryPoses());
+        Logger.recordOutput(
+            "Field/btmFeedingRegion",
+            FieldConstants.NeutralZone.btmFeedingRegion.getBoundaryPoses());
       }
     }
   }

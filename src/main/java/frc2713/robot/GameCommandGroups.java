@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.FeetPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -56,7 +57,7 @@ public final class GameCommandGroups {
                   dyeRotor.feedWhenReady(
                       () -> flywheels.atTarget() && hood.atTarget(), Seconds.of(0.8)),
                   extension
-                      .maintainFuelPressureCommand(1.2)
+                      .maintainFuelPressureCommand(1.63)
                       .beforeStarting(Commands.waitSeconds(1))),
               () -> FieldConstants.NeutralZone.region.contains(drive.getPose().getTranslation()))
           .withName("Auto OTF Shooting");
@@ -97,7 +98,9 @@ public final class GameCommandGroups {
               hood.otfCommand(),
               turret.otfCommand(),
               flywheels.simulateLaunchFuelCommand(flywheels::atTarget),
-              feeder.feedWhenReady(flywheels::atTarget),
+              Commands.sequence(
+                  feeder.voltageCommand(() -> Volts.of(-12)).withTimeout(0.25),
+                  feeder.feedWhenReady(flywheels::atTarget)),
               dyeRotor.dynamicFeedWhenReady(
                   flywheels::atTarget)) // used to be dynamic but we slowed it way down
           .withName("OTF Shooting");

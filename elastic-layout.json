@@ -110,11 +110,11 @@
             }
           },
           {
-            "title": "Vision Pose",
+            "title": "Robot Pose",
             "x": 896.0,
             "y": 0.0,
             "width": 256.0,
-            "height": 512.0,
+            "height": 384.0,
             "type": "Field",
             "properties": {
               "topic": "/SmartDashboard/Vision/robot_on_field",
@@ -127,7 +127,24 @@
               "field_rotation": -90.0,
               "robot_color": 4278255360,
               "trajectory_color": 4294967295,
-              "show_robot_outside_widget": false
+              "show_robot_outside_widget": true
+            }
+          },
+          {
+            "title": "Is Slamdunk Updating?",
+            "x": 896.0,
+            "y": 384.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/Vision/SLAMDunkUpdates",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "X"
             }
           }
         ]
@@ -804,6 +821,56 @@
           }
         ],
         "containers": []
+      }
+    },
+    {
+      "name": "OTF Test Shot",
+      "grid_layout": {
+        "layouts": [],
+        "containers": [
+          {
+            "title": "Index Speed Rotation per Minute",
+            "x": 512.0,
+            "y": 128.0,
+            "width": 384.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/Tuning/Dye Rotor/Index Speed Rotation per Minute",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "PIDTest Rotation per Minute",
+            "x": 896.0,
+            "y": 128.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/Tuning/Flywheels/PIDTest Rotation per Minute",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Hood Static Hub Degree",
+            "x": 512.0,
+            "y": 256.0,
+            "width": 384.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/Tuning/Hood/Hood Static Hub Degree",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          }
+        ]
       }
     }
   ]

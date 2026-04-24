@@ -22,13 +22,12 @@ import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.commands.DriveCommands;
-import frc2713.robot.commands.autos.BLineMidwarsNoBump;
+import frc2713.robot.commands.autos.BLineMidwarsConservative;
 import frc2713.robot.commands.autos.BLineMidwarsOvercenter;
 import frc2713.robot.commands.autos.BLineTuning;
 import frc2713.robot.commands.autos.BumpTest;
 import frc2713.robot.commands.autos.Demo;
 import frc2713.robot.commands.autos.DriveTest;
-import frc2713.robot.commands.autos.Midwars;
 import frc2713.robot.commands.autos.NoIntake;
 import frc2713.robot.generated.TunerConstants;
 import frc2713.robot.oi.DevControls;
@@ -423,39 +422,44 @@ public class RobotContainer {
       autoChooser.addOption("Bump Test", BumpTest.getCommand());
     }
 
-    autoChooser.addDefaultOption(
-        "Bline Midwars - R", BLineMidwarsOvercenter.getCommand(() -> false));
-    autoChooser.addOption("Bline Midwars - L", BLineMidwarsOvercenter.getCommand(() -> true));
-    autoChooser.addOption("Bline No Bump - R", BLineMidwarsNoBump.getCommand(() -> false));
-    autoChooser.addOption("Bline No Bump - L", BLineMidwarsNoBump.getCommand(() -> true));
+    autoChooser.addDefaultOption("Midwars - R", BLineMidwarsOvercenter.getCommand(() -> false));
+    autoChooser.addOption("Midwars - L", BLineMidwarsOvercenter.getCommand(() -> true));
 
     autoChooser.addOption(
-        "Choreo Midwars - R",
-        Midwars.getRoutine(
-            choreoFactory,
-            false,
-            drive,
-            intakeExtension,
-            intakeRoller,
-            flywheels,
-            hood,
-            turret,
-            dyeRotor,
-            feeder));
-
+        "Conservative Midwars - R", BLineMidwarsConservative.getCommand(() -> false));
     autoChooser.addOption(
-        "Choreo Midwars - L",
-        Midwars.getRoutine(
-            choreoFactory,
-            true,
-            drive,
-            intakeExtension,
-            intakeRoller,
-            flywheels,
-            hood,
-            turret,
-            dyeRotor,
-            feeder));
+        "Conservative Midwars - L", BLineMidwarsConservative.getCommand(() -> true));
+
+    // autoChooser.addOption("No Bump - R", BLineMidwarsNoBump.getCommand(() -> false));
+    // autoChooser.addOption("No Bump - L", BLineMidwarsNoBump.getCommand(() -> true));
+
+    // autoChooser.addOption(
+    //     "Choreo Midwars - R",
+    //     Midwars.getRoutine(
+    //         choreoFactory,
+    //         false,
+    //         drive,
+    //         intakeExtension,
+    //         intakeRoller,
+    //         flywheels,
+    //         hood,
+    //         turret,
+    //         dyeRotor,
+    //         feeder));
+
+    // autoChooser.addOption(
+    //     "Choreo Midwars - L",
+    //     Midwars.getRoutine(
+    //         choreoFactory,
+    //         true,
+    //         drive,
+    //         intakeExtension,
+    //         intakeRoller,
+    //         flywheels,
+    //         hood,
+    //         turret,
+    //         dyeRotor,
+    //         feeder));
 
     autoChooser.addOption("NoIntake - R", NoIntake.getRoutine(choreoFactory, false, drive));
     autoChooser.addOption("NoIntake - L", NoIntake.getRoutine(choreoFactory, true, drive));

@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc2713.lib.io.AdvantageScopePathBuilder;
 import frc2713.lib.util.LoggedTunableNumber;
 import frc2713.robot.FieldConstants;
@@ -93,8 +94,10 @@ public class VisionIOSLAMDunk implements VisionIO {
 
     if (Timer.getFPGATimestamp() - lastTimestamp > WARN_AFTER_NO_UPDATES_FOR.in(Seconds)) {
       slamdunkAlert.set(true);
+      SmartDashboard.putBoolean("Vision/SLAMDunkUpdates", false);
     } else {
       slamdunkAlert.set(false);
+      SmartDashboard.putBoolean("Vision/SLAMDunkUpdates", true);
     }
 
     var poseArray = poseSub.get();
@@ -173,7 +176,7 @@ public class VisionIOSLAMDunk implements VisionIO {
         //         .getTranslation()
         //         .getDistance(inputs.pose3d.getTranslation()));
 
-        if (!FieldConstants.FIELD_PLUS_HALF_METER.contains(inputs.pose.getTranslation())) {
+        if (!FieldConstants.FIELD.contains(inputs.pose.getTranslation())) {
           inputs.reasoning = "Vision outside field";
           inputs.applying = false;
           return;
