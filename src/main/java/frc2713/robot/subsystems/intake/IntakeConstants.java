@@ -234,8 +234,12 @@ public final class IntakeConstants {
     public static final LoggedTunableMeasure<LinearVelocity> retractCruiseVelocity =
         new LoggedTunableMeasure<>(
             config.name + "/Retract Cruise Velocity", InchesPerSecond.of(10));
+
+    public static LoggedTunableMeasure<Distance> fuelPressureOscillatingDistance =
+        new LoggedTunableMeasure<>(
+            config.name + "/Fuel Pressure Oscillating Distance", Inches.of(5.));
     public static final LoggedTunableNumber fuelPressureScalingFactor =
-        new LoggedTunableNumber(config.name + "/Fuel Pressure Scaling", 1.1);
+        new LoggedTunableNumber(config.name + "/Fuel Pressure Scaling", 1.63);
 
     public static int MODEL_INDEX = 1;
     public static int PARENT_INDEX = 0; // drivetrain

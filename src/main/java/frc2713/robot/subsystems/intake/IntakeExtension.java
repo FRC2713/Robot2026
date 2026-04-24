@@ -118,7 +118,8 @@ public class IntakeExtension
   public Command maintainFuelPressureCommand(FuelPressureType fuelPressureType, double startDelay) {
     Logger.recordOutput(pb.makePath("maintatinFuelPressureMethod"), fuelPressureType);
     return switch (fuelPressureType) {
-      case SLOW_RETRACT -> retractingFuelPressure(1.63)
+      case SLOW_RETRACT -> retractingFuelPressure(
+              IntakeConstants.Extension.fuelPressureScalingFactor.get())
           .beforeStarting(Commands.waitSeconds(startDelay));
       case OSCILLATING -> oscilatingFuelPressure().beforeStarting(Commands.waitSeconds(startDelay));
     };
@@ -126,7 +127,8 @@ public class IntakeExtension
 
   public Command oscilatingFuelPressure() {
     return Commands.sequence(
-            setDistanceCommand(IntakeConstants.Extension.pidTestPosition).withTimeout(0.75),
+            setDistanceCommand(IntakeConstants.Extension.fuelPressureOscillatingDistance)
+                .withTimeout(0.75),
             extendCommand().withTimeout(0.75))
         .repeatedly()
         .withName("Maintain Fuel Pressure (Oscillating)");

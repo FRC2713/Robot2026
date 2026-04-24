@@ -50,16 +50,27 @@ public class DyeRotor extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
             LaunchingSolutionManager.getInstance().getSolution().effectiveDistanceMeters()));
   }
 
+  @AutoLogOutput(key = "Dye Rotor/DynamicIndexScaleFactor")
+  public double dynamicIndexScaleFactor(BooleanSupplier adjustSpeedForOtf) {
+    return adjustSpeedForOtf.getAsBoolean()
+        ? SerializerConstants.DyeRotor.indexingOTFScaleFactor.get()
+        : 1.0;
+  }
+
   public Command dynamicIndex() {
-    return setVelocity(this::dynamicIndexSpeed);
+    return dynamicIndex(() -> false);
+  }
+
+  public Command dynamicIndex(BooleanSupplier adjustSpeedForOtf) {
+    return setVelocity(() -> this.dynamicIndexSpeed().times(this.dynamicIndexScaleFactor(adjustSpeedForOtf)));
   }
 
   public Command stirFuel() {
     return setVelocity(SerializerConstants.DyeRotor.stirSpeed);
   }
 
-  public Command dynamicFeedWhenReady(BooleanSupplier isReady) {
-    return Commands.sequence(Commands.waitUntil(isReady), dynamicIndex());
+  public Command dynamicFeedWhenReady(BooleanSupplier isReady, BooleanSupplier adjustSpeedForOtf) {
+    return Commands.sequence(Commands.waitUntil(isReady), dynamicIndex(adjustSpeedForOtf));
   }
 
   public Command feedWhenReady(BooleanSupplier isReady) {

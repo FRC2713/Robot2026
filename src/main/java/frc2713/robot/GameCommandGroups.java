@@ -58,8 +58,8 @@ public final class GameCommandGroups {
                   dyeRotor.feedWhenReady(
                       () -> flywheels.atTarget() && hood.atTarget(), Seconds.of(0.8)),
                   extension.maintainFuelPressureCommand(
-                      FuelPressureType.OSCILLATING, 0.5)), // retract method had 1.0 delay
-              () -> FieldConstants.NeutralZone.region.contains(drive.getPovse().getTranslation()))
+                      FuelPressureType.OSCILLATING, 0.5)), // retract pressure type had 1.0 delay
+              () -> FieldConstants.NeutralZone.region.contains(drive.getPose().getTranslation()))
           .withName("Auto OTF Shooting");
     }
 
@@ -101,8 +101,7 @@ public final class GameCommandGroups {
               Commands.sequence(
                   feeder.voltageCommand(() -> Volts.of(-12)).withTimeout(0.25),
                   feeder.feedWhenReady(flywheels::atTarget)),
-              dyeRotor.dynamicFeedWhenReady(
-                  flywheels::atTarget)) // used to be dynamic but we slowed it way down
+              dyeRotor.dynamicFeedWhenReady(flywheels::atTarget, intakeRoller::isIntaking))
           .withName("OTF Shooting");
     }
     /** OTF shooting with drive limits. Use for driver/operator triggers. */
@@ -125,8 +124,7 @@ public final class GameCommandGroups {
               hood.otfCommand(),
               flywheels.simulateLaunchFuelCommand(flywheels::atTarget),
               feeder.feedWhenReady(flywheels::atTarget),
-              dyeRotor.dynamicFeedWhenReady(
-                  flywheels::atTarget)) // used to be dynamic but we slowed it way down
+              dyeRotor.dynamicFeedWhenReady(flywheels::atTarget, intakeRoller::isIntaking))
           .withName("OTF Shooting");
     }
 

@@ -20,6 +20,7 @@ import frc2713.lib.drivers.CANDeviceId;
 import frc2713.lib.dynamics.MoiUnits;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.LoggedTunableMeasure;
+import frc2713.lib.util.LoggedTunableNumber;
 import frc2713.lib.util.Util;
 
 public final class SerializerConstants {
@@ -66,6 +67,8 @@ public final class SerializerConstants {
 
     public static LoggedTunableMeasure<AngularVelocity> indexingSpeed =
         new LoggedTunableMeasure<AngularVelocity>("Dye Rotor/Index Speed", RPM.of(100));
+    public static LoggedTunableNumber indexingOTFScaleFactor =
+        new LoggedTunableNumber("Dye Rotor/Slowed Scale Factor", 0.75);
     public static LoggedTunableMeasure<AngularVelocity> stirSpeed =
         new LoggedTunableMeasure<AngularVelocity>("Dye Rotor/Stir Speed", RPM.of(30));
     public static AngularVelocity outdexingSpeed = RotationsPerSecond.of(-3);
