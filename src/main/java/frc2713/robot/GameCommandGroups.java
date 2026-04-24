@@ -13,6 +13,7 @@ import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.drive.DriveConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
+import frc2713.robot.subsystems.intake.IntakeExtension.FuelPressureType;
 import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.launcher.Flywheels;
 import frc2713.robot.subsystems.launcher.Hood;
@@ -56,10 +57,9 @@ public final class GameCommandGroups {
                       () -> flywheels.atTarget() && hood.atTarget(), Seconds.of(0.8)),
                   dyeRotor.feedWhenReady(
                       () -> flywheels.atTarget() && hood.atTarget(), Seconds.of(0.8)),
-                  extension
-                      .maintainFuelPressureCommand(1.63)
-                      .beforeStarting(Commands.waitSeconds(1))),
-              () -> FieldConstants.NeutralZone.region.contains(drive.getPose().getTranslation()))
+                  extension.maintainFuelPressureCommand(
+                      FuelPressureType.OSCILLATING, 0.5)), // retract method had 1.0 delay
+              () -> FieldConstants.NeutralZone.region.contains(drive.getPovse().getTranslation()))
           .withName("Auto OTF Shooting");
     }
 

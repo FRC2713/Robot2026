@@ -115,11 +115,24 @@ public class IntakeExtension
    *     the hopper volume by the same rate that fuel is leaving the hopper
    * @see LauncherConstants.launchRateVolumeInchesCubedPerSecond
    */
-  public Command maintainFuelPressureCommand() {
-    return maintainFuelPressureCommand(0.5);
+  public Command maintainFuelPressureCommand(FuelPressureType fuelPressureType, double startDelay) {
+    Logger.recordOutput(pb.makePath("maintatinFuelPressureMethod"), fuelPressureType);
+    return switch (fuelPressureType) {
+      case SLOW_RETRACT -> retractingFuelPressure(1.63)
+          .beforeStarting(Commands.waitSeconds(startDelay));
+      case OSCILLATING -> oscilatingFuelPressure().beforeStarting(Commands.waitSeconds(startDelay));
+    };
   }
 
-  public Command maintainFuelPressureCommand(double scaling) {
+  public Command oscilatingFuelPressure() {
+    return Commands.sequence(
+            setDistanceCommand(IntakeConstants.Extension.pidTestPosition).withTimeout(0.75),
+            extendCommand().withTimeout(0.75))
+        .repeatedly()
+        .withName("Maintain Fuel Pressure (Oscillating)");
+  }
+
+  public Command retractingFuelPressure(double scaling) {
     double volumeLostPerSecond = LauncherConstants.Flywheels.launchRateVolumeInchesCubedPerSecond;
     Logger.recordOutput(pb.makePath("volumeLostPerSecond (in^3)"), volumeLostPerSecond);
     Logger.recordOutput(
@@ -128,7 +141,7 @@ public class IntakeExtension
         InchesPerSecond.of(volumeLostPerSecond / IntakeConstants.Extension.volumePerInch * scaling)
             .times(IntakeConstants.Extension.fuelPressureScalingFactor.get());
     return setDistanceCommand(IntakeConstants.Extension.retractedPosition, () -> velocityToMaintain)
-        .withName("Maintain Fuel Pressure");
+        .withName("Maintain Fuel Pressure (Retract)");
   }
 
   public Command extendAndWaitCommand() {
@@ -165,5 +178,10 @@ public class IntakeExtension
     Distance distance = getCurrentPositionAsDistance();
 
     return new Transform3d(new Translation3d(distance.in(Meters), 0, 0), new Rotation3d());
+  }
+
+  public enum FuelPressureType {
+    SLOW_RETRACT,
+    OSCILLATING
   }
 }

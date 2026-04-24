@@ -138,7 +138,7 @@ public final class IntakeConstants {
       config.metersPerRotation = sprocketPitchDiameter.in(Meters) * Math.PI;
       var avgGains =
           new Slot0Configs()
-              .withKP(Util.modeDependentValue(5, 8))
+              .withKP(Util.modeDependentValue(5, 18))
               .withKI(0)
               .withKD(Util.modeDependentValue(0., 0.4))
               .withKS(0)
@@ -228,7 +228,7 @@ public final class IntakeConstants {
     public static LoggedTunableMeasure<Distance> extendedPosition =
         new LoggedTunableMeasure<>(config.name + "/Extended Position", Inches.of(11.0));
     public static LoggedTunableMeasure<Distance> pidTestPosition =
-        new LoggedTunableMeasure<>(config.name + "/PID Test Position", Inches.of(0));
+        new LoggedTunableMeasure<>(config.name + "/PID Test Position", Inches.of(5.));
     public static LoggedTunableMeasure<Distance> retractedPosition =
         new LoggedTunableMeasure<>(config.name + "/Retracted Position", Inches.of(0));
     public static final LoggedTunableMeasure<LinearVelocity> retractCruiseVelocity =
