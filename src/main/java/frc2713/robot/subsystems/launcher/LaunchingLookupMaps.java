@@ -52,8 +52,8 @@ public final class LaunchingLookupMaps {
     distanceToRpmMap.put(2.1, 2550.); // north shore: 2500
     distanceToRpmMap.put(3.36, 2750.); // north shore: 2713
     distanceToRpmMap.put(4.5, 3066.); // north shore: dne
-    distanceToRpmMap.put(5.0, 4000.); // dcmp:3333, north shore: 3250
-    distanceToRpmMap.put(6.03, 3750.); // north shore: 4200
+    distanceToRpmMap.put(5.0, 3800.); // dcmp:3333, north shore: 3250
+    distanceToRpmMap.put(6.03, 4266.); // north shore: 4200
 
     // Distance to az Corner (m) -> RPM (rpm)
     distanceToRpmAzMap.put(1.03, 2400.); // north shore: 2500

@@ -13,7 +13,7 @@ public class BLineSweepAndOutpost {
 
   private static Time wait1 = Seconds.of(0.0); // before routine starts
   private static Time wait2 = Seconds.of(0.5); // after going over bump
-  private static Time fuelPressureDelay = Seconds.of(10.0); // after going over bump
+  private static Time fuelPressureDelay = Seconds.of(10.0); // includes the time it takes to run the path :/
 
   public static Command getCommand() {
     return Commands.sequence(
