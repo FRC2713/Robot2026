@@ -51,8 +51,8 @@ public final class LaunchingLookupMaps {
     distanceToRpmMap.put(1.03, 2450.); // north shore: 2500
     distanceToRpmMap.put(2.1, 2550.); // north shore: 2500
     distanceToRpmMap.put(3.36, 2750.); // north shore: 2713
-    distanceToRpmMap.put(4.5, 3107.); // north shore: dne
-    distanceToRpmMap.put(5.0, 3200.); // north shore: 3250
+    distanceToRpmMap.put(4.5, 3066.); // north shore: dne
+    distanceToRpmMap.put(5.0, 4000.); // dcmp:3333, north shore: 3250
     distanceToRpmMap.put(6.03, 3750.); // north shore: 4200
 
     // Distance to az Corner (m) -> RPM (rpm)
@@ -61,7 +61,7 @@ public final class LaunchingLookupMaps {
     distanceToRpmAzMap.put(2.1, 2800.); // north shore: 2500
     distanceToRpmAzMap.put(3.36, 2933.); // north shore: 2713
     distanceToRpmAzMap.put(4.5, 3066.); // north shore: dne
-    distanceToRpmAzMap.put(5.0, 3333.); //  north shore: 3250
+    distanceToRpmAzMap.put(5.0, 4000.); // dcmp:3333, north shore: 3250
     distanceToRpmAzMap.put(6.03, 4266.); // north shore: 4200
 
     // Ball Velocity (ft/s) <-> RPM (rpm)

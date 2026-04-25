@@ -24,6 +24,7 @@ import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.commands.autos.BLineMidwarsConservative;
 import frc2713.robot.commands.autos.BLineMidwarsOvercenter;
+import frc2713.robot.commands.autos.BLineSweepAndOutpost;
 import frc2713.robot.commands.autos.BLineTuning;
 import frc2713.robot.commands.autos.BumpTest;
 import frc2713.robot.commands.autos.Demo;
@@ -429,6 +430,7 @@ public class RobotContainer {
         "Conservative Midwars - R", BLineMidwarsConservative.getCommand(() -> false));
     autoChooser.addOption(
         "Conservative Midwars - L", BLineMidwarsConservative.getCommand(() -> true));
+    autoChooser.addOption("Sweep And Outpost", BLineSweepAndOutpost.getCommand());
 
     // autoChooser.addOption("No Bump - R", BLineMidwarsNoBump.getCommand(() -> false));
     // autoChooser.addOption("No Bump - L", BLineMidwarsNoBump.getCommand(() -> true));

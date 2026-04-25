@@ -7,19 +7,20 @@ import frc2713.robot.GameCommandGroups;
 import frc2713.robot.RobotContainer;
 
 public class BLineDepotOnly {
-    
+
   public static Command getCommand() {
     return Commands.sequence(
         // Shoot preloaded fuel and wait
         GameCommandGroups.Launching.autoOtfShot(
-                    RobotContainer.drive,
-                    RobotContainer.flywheels,
-                    RobotContainer.hood,
-                    RobotContainer.turret,
-                    RobotContainer.feeder,
-                    RobotContainer.dyeRotor,
-                    RobotContainer.intakeExtension,
-                    RobotContainer.intakeRoller).withTimeout(1.0),
+                RobotContainer.drive,
+                RobotContainer.flywheels,
+                RobotContainer.hood,
+                RobotContainer.turret,
+                RobotContainer.feeder,
+                RobotContainer.dyeRotor,
+                RobotContainer.intakeExtension,
+                RobotContainer.intakeRoller)
+            .withTimeout(1.0),
         // Drive to Depot while intaking and prep shot
         RobotContainer.pathBuilder
             .withPoseReset(RobotContainer.drive::setPose)
@@ -67,4 +68,3 @@ public class BLineDepotOnly {
         Commands.run(() -> RobotContainer.drive.stop()));
   }
 }
-

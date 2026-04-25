@@ -140,8 +140,8 @@ public class FieldConstants {
             new Translation2d(LinesVertical.oppAllianceZone, fieldWidth),
             new Translation2d(fieldLength, 0));
 
-    public static final Translation3d bottomSideCornerTarget = new Translation3d(3.5, 2.1, 0.0);
-    public static final Translation3d topSideCornerTarget = new Translation3d(3.5, 6.1, 0.0);
+    public static final Translation3d bottomSideCornerTarget = new Translation3d(2.0, 2.1, 0.0);
+    public static final Translation3d topSideCornerTarget = new Translation3d(2.0, 6.1, 0.0);
     public static final CircularFieldRegion bottomPassingTarget =
         new CircularFieldRegion(
             new Translation2d(bottomSideCornerTarget.getX(), bottomSideCornerTarget.getY()), 2);

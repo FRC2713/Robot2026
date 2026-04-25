@@ -68,7 +68,7 @@ public final class SerializerConstants {
     public static LoggedTunableMeasure<AngularVelocity> indexingSpeed =
         new LoggedTunableMeasure<AngularVelocity>("Dye Rotor/Index Speed", RPM.of(100));
     public static LoggedTunableNumber indexingOTFScaleFactor =
-        new LoggedTunableNumber("Dye Rotor/Slowed Scale Factor", 0.75);
+        new LoggedTunableNumber("Dye Rotor/Slowed Scale Factor", 0.5);
     public static LoggedTunableMeasure<AngularVelocity> stirSpeed =
         new LoggedTunableMeasure<AngularVelocity>("Dye Rotor/Stir Speed", RPM.of(30));
     public static AngularVelocity outdexingSpeed = RotationsPerSecond.of(-3);

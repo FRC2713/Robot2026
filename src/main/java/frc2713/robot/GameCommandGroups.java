@@ -26,6 +26,7 @@ import frc2713.robot.subsystems.serializer.Feeder;
 import frc2713.robot.subsystems.serializer.SerializerConstants;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 /**
  * A Utility class holding common game actions in the form of command groups that can be shared
@@ -43,7 +44,8 @@ public final class GameCommandGroups {
         Feeder feeder,
         DyeRotor dyeRotor,
         IntakeExtension extension,
-        IntakeRoller intakeRoller) {
+        IntakeRoller intakeRoller,
+        Supplier<Double> fuelPressureDelay) {
       return Commands.either(
               Commands.print("[AUTO] Auto in neutral zone!"),
               Commands.parallel(
@@ -58,9 +60,41 @@ public final class GameCommandGroups {
                   dyeRotor.feedWhenReady(
                       () -> flywheels.atTarget() && hood.atTarget(), Seconds.of(0.8)),
                   extension.maintainFuelPressureCommand(
-                      FuelPressureType.OSCILLATING, 0.5)), // retract pressure type had 1.0 delay
+                      FuelPressureType.OSCILLATING,
+                      fuelPressureDelay.get())), // retract pressure type had 1.0 delay
               () -> FieldConstants.NeutralZone.region.contains(drive.getPose().getTranslation()))
           .withName("Auto OTF Shooting");
+    }
+
+    /** OTF shooting without drive limits. Use for auto routines. */
+    public static Command autoOtfShot(
+        Drive drive,
+        Flywheels flywheels,
+        Hood hood,
+        Turret turret,
+        Feeder feeder,
+        DyeRotor dyeRotor,
+        IntakeExtension extension,
+        IntakeRoller intakeRoller) {
+      return autoOtfShot(
+          drive, flywheels, hood, turret, feeder, dyeRotor, extension, intakeRoller, () -> 0.5);
+    }
+
+    /**
+     * OTF shooting without drive limits and a pressure delay longer than auto. Use for auto
+     * routines.
+     */
+    public static Command autoOtfShotNoPressure(
+        Drive drive,
+        Flywheels flywheels,
+        Hood hood,
+        Turret turret,
+        Feeder feeder,
+        DyeRotor dyeRotor,
+        IntakeExtension extension,
+        IntakeRoller intakeRoller) {
+      return autoOtfShot(
+          drive, flywheels, hood, turret, feeder, dyeRotor, extension, intakeRoller, () -> 30.0);
     }
 
     public static Command otfShotHoodProtect(

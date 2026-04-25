@@ -62,7 +62,8 @@ public class DyeRotor extends MotorSubsystem<MotorInputsAutoLogged, MotorIO>
   }
 
   public Command dynamicIndex(BooleanSupplier adjustSpeedForOtf) {
-    return setVelocity(() -> this.dynamicIndexSpeed().times(this.dynamicIndexScaleFactor(adjustSpeedForOtf)));
+    return setVelocity(
+        () -> this.dynamicIndexSpeed().times(this.dynamicIndexScaleFactor(adjustSpeedForOtf)));
   }
 
   public Command stirFuel() {
