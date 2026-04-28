@@ -434,7 +434,7 @@ public class RobotContainer {
     autoChooser.addOption(
         "Conservative Midwars - L", BLineMidwarsConservative.getCommand(() -> true));
     autoChooser.addOption("Sweep And Outpost", BLineSweepAndOutpost.getCommand());
-    autoChooser.addOption("Depot, End at Midline", BLineDepotOnly.getCommand());
+    autoChooser.addOption("Hub to Depot to Midline", BLineDepotOnly.getCommand());
     autoChooser.addOption("NoIntake - R", NoIntake.getRoutine(choreoFactory, false, drive));
     autoChooser.addOption("NoIntake - L", NoIntake.getRoutine(choreoFactory, true, drive));
   }
