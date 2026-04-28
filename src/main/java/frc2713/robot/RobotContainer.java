@@ -194,7 +194,9 @@ public class RobotContainer {
             new Feeder(
                 SerializerConstants.Feeder.config,
                 new SimTalonFXIO(SerializerConstants.Feeder.config));
-        vision = new Vision(new VisionIOSLAMDunk());
+
+        vision = new Vision(new VisionIOSLAMDunk()); // if jetson is connected to roboRio
+        // vision = new Vision(new VisionIOLocalNT()); // if jetson is connected to laptop
         break;
 
       default:
