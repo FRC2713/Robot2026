@@ -82,7 +82,7 @@ public final class GameCommandGroups {
 
     /**
      * OTF shooting without drive limits and a pressure delay longer than auto. Use for auto
-     * routines.
+     * routines where the intake needs to stay out.
      */
     public static Command autoOtfShotNoPressure(
         Drive drive,

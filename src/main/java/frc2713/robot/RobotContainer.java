@@ -22,6 +22,7 @@ import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.commands.DriveCommands;
+import frc2713.robot.commands.autos.BLineDepotOnly;
 import frc2713.robot.commands.autos.BLineMidwarsConservative;
 import frc2713.robot.commands.autos.BLineMidwarsOvercenter;
 import frc2713.robot.commands.autos.BLineSweepAndOutpost;
@@ -425,46 +426,15 @@ public class RobotContainer {
       autoChooser.addOption("Bump Test", BumpTest.getCommand());
     }
 
+    // Competition Autos
     autoChooser.addDefaultOption("Midwars - R", BLineMidwarsOvercenter.getCommand(() -> false));
     autoChooser.addOption("Midwars - L", BLineMidwarsOvercenter.getCommand(() -> true));
-
     autoChooser.addOption(
         "Conservative Midwars - R", BLineMidwarsConservative.getCommand(() -> false));
     autoChooser.addOption(
         "Conservative Midwars - L", BLineMidwarsConservative.getCommand(() -> true));
     autoChooser.addOption("Sweep And Outpost", BLineSweepAndOutpost.getCommand());
-
-    // autoChooser.addOption("No Bump - R", BLineMidwarsNoBump.getCommand(() -> false));
-    // autoChooser.addOption("No Bump - L", BLineMidwarsNoBump.getCommand(() -> true));
-
-    // autoChooser.addOption(
-    //     "Choreo Midwars - R",
-    //     Midwars.getRoutine(
-    //         choreoFactory,
-    //         false,
-    //         drive,
-    //         intakeExtension,
-    //         intakeRoller,
-    //         flywheels,
-    //         hood,
-    //         turret,
-    //         dyeRotor,
-    //         feeder));
-
-    // autoChooser.addOption(
-    //     "Choreo Midwars - L",
-    //     Midwars.getRoutine(
-    //         choreoFactory,
-    //         true,
-    //         drive,
-    //         intakeExtension,
-    //         intakeRoller,
-    //         flywheels,
-    //         hood,
-    //         turret,
-    //         dyeRotor,
-    //         feeder));
-
+    autoChooser.addOption("Depot, End at Midline", BLineDepotOnly.getCommand());
     autoChooser.addOption("NoIntake - R", NoIntake.getRoutine(choreoFactory, false, drive));
     autoChooser.addOption("NoIntake - L", NoIntake.getRoutine(choreoFactory, true, drive));
   }
