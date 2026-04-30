@@ -12,8 +12,6 @@ public class BLineTuning {
 
   public static Command getCommand() {
     return Commands.sequence(
-      RobotContainer.pathBuilder            
-        .withPoseReset(RobotContainer.drive::setPose)
-        .build(path));
+        RobotContainer.pathBuilder.withPoseReset(RobotContainer.drive::setPose).build(path));
   }
 }
