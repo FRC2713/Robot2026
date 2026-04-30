@@ -17,7 +17,7 @@ public class DriveConstants {
   public final class AutoConstants {
     public static final LoggedTunableGains positionTrajectoryController =
         new LoggedTunableGains(
-            "positionTraj", new Slot0Configs().withKP(1.8).withKD(0.0), new MotionMagicConfigs());
+            "positionTraj", new Slot0Configs().withKP(1.71).withKD(0.0), new MotionMagicConfigs());
     public static final LoggedTunableGains headingTrajectoryController =
         new LoggedTunableGains(
             "headingTraj", new Slot0Configs().withKP(6.5).withKD(0.2), new MotionMagicConfigs());
