@@ -221,7 +221,7 @@ public final class LauncherConstants {
       config.name = "Hood";
       config.talonCANID = new CANDeviceId(54, "canivore"); // Example CAN ID, replace with actual ID
 
-      config.fxConfig.Feedback.FeedbackRotorOffset = 0.;
+      config.fxConfig.Feedback.FeedbackRotorOffset = 0.067871;
 
       // PID gains for Motion Magic
       config.fxConfig.Slot0.kP = 400.0;
