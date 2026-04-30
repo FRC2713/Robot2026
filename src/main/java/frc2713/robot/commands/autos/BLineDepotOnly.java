@@ -20,7 +20,7 @@ public class BLineDepotOnly {
   // From trench entrance -> midline: 2.0s
 
   private static Time wait1 = Seconds.of(0.5); // before path starts
-  private static Time wait2 = Seconds.of(0.0); // shooting duration before going through trench
+  private static Time wait2 = Seconds.of(2.0); // shooting duration before going through trench
   private static Path startingPath = new Path("depot_only");
 
   public static Command getCommand() {
@@ -74,15 +74,12 @@ public class BLineDepotOnly {
         RobotContainer.pathBuilder
             .withPoseReset(pose -> {})
             .withStartingEvent(
-                GameCommandGroups.Launching.autoOtfShot(
+                GameCommandGroups.Launching.stopShootingAndRetractHood(
                     RobotContainer.drive,
-                    RobotContainer.flywheels,
-                    RobotContainer.hood,
-                    RobotContainer.turret,
                     RobotContainer.feeder,
                     RobotContainer.dyeRotor,
-                    RobotContainer.intakeExtension,
-                    RobotContainer.intakeRoller))
+                    RobotContainer.hood,
+                    RobotContainer.flywheels))
             .withEvent(
                 "intake_2",
                 Commands.parallel(

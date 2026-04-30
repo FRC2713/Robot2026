@@ -77,7 +77,7 @@ public final class GameCommandGroups {
         IntakeExtension extension,
         IntakeRoller intakeRoller) {
       return autoOtfShot(
-          drive, flywheels, hood, turret, feeder, dyeRotor, extension, intakeRoller, () -> 0.5);
+          drive, flywheels, hood, turret, feeder, dyeRotor, extension, intakeRoller, () -> 1.0);
     }
 
     /**
