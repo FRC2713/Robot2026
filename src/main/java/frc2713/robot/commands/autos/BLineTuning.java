@@ -11,6 +11,9 @@ public class BLineTuning {
   static Path path = new Path("3m_straight");
 
   public static Command getCommand() {
-    return Commands.sequence(RobotContainer.pathBuilder.build(path));
+    return Commands.sequence(
+      RobotContainer.pathBuilder            
+        .withPoseReset(RobotContainer.drive::setPose)
+        .build(path));
   }
 }
