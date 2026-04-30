@@ -47,29 +47,31 @@ public class BLineMidwarsTrenchified {
                 RobotContainer.intakeRoller)
             .withTimeout(4.5),
         GameCommandGroups.Launching.stopShootingAndRetractHood(
-            RobotContainer.drive,
-            RobotContainer.feeder,
-            RobotContainer.dyeRotor,
-            RobotContainer.hood,
-            RobotContainer.flywheels).withTimeout(0.25),
+                RobotContainer.drive,
+                RobotContainer.feeder,
+                RobotContainer.dyeRotor,
+                RobotContainer.hood,
+                RobotContainer.flywheels)
+            .withTimeout(0.25),
         // Drive through trench again
         RobotContainer.pathBuilder
             .withShouldMirror(shouldMirror)
             .withPoseReset(pose -> {})
-            .withEvent("intake",
-                    GameCommandGroups.Intaking.intake(
-                        RobotContainer.intakeExtension, RobotContainer.intakeRoller))
+            .withEvent(
+                "intake",
+                GameCommandGroups.Intaking.intake(
+                    RobotContainer.intakeExtension, RobotContainer.intakeRoller))
             .withEvent(
                 "shoot_2",
                 GameCommandGroups.Launching.autoOtfShot(
-                        RobotContainer.drive,
-                        RobotContainer.flywheels,
-                        RobotContainer.hood,
-                        RobotContainer.turret,
-                        RobotContainer.feeder,
-                        RobotContainer.dyeRotor,
-                        RobotContainer.intakeExtension,
-                        RobotContainer.intakeRoller))
+                    RobotContainer.drive,
+                    RobotContainer.flywheels,
+                    RobotContainer.hood,
+                    RobotContainer.turret,
+                    RobotContainer.feeder,
+                    RobotContainer.dyeRotor,
+                    RobotContainer.intakeExtension,
+                    RobotContainer.intakeRoller))
             .build(new Path("mid_wards_trenchified_second")),
         // Drive to trench while shooting
         GameCommandGroups.Launching.autoOtfShot(

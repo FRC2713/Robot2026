@@ -434,11 +434,14 @@ public class RobotContainer {
     autoChooser.addDefaultOption("Midwars - R", BLineMidwarsOvercenter.getCommand(() -> false));
     autoChooser.addOption("Midwars - L", BLineMidwarsOvercenter.getCommand(() -> true));
 
-    autoChooser.addOption("Midwars - Inside Out - R", BLineMidwarsBackwards.getCommand(() -> false));
+    autoChooser.addOption(
+        "Midwars - Inside Out - R", BLineMidwarsBackwards.getCommand(() -> false));
     autoChooser.addOption("Midwars - Inside Out - L", BLineMidwarsBackwards.getCommand(() -> true));
 
-    autoChooser.addOption("Midwars - Trenchified - R", BLineMidwarsTrenchified.getCommand(() -> false));
-    autoChooser.addOption("Midwars - Trenchified - L", BLineMidwarsTrenchified.getCommand(() -> true));
+    autoChooser.addOption(
+        "Midwars - Trenchified - R", BLineMidwarsTrenchified.getCommand(() -> false));
+    autoChooser.addOption(
+        "Midwars - Trenchified - L", BLineMidwarsTrenchified.getCommand(() -> true));
 
     autoChooser.addOption(
         "Midwars - Conservative - R", BLineMidwarsConservative.getCommand(() -> false));
