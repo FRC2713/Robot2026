@@ -11,6 +11,7 @@ public class BLineMidwarsConservative {
 
   public static Command getCommand(Supplier<Boolean> shouldMirror) {
     return Commands.sequence(
+        Commands.waitSeconds(6.5),
         // Drive through neutral zone with intake and shoot events
         RobotContainer.pathBuilder
             .withPoseReset(RobotContainer.drive::setPose)
