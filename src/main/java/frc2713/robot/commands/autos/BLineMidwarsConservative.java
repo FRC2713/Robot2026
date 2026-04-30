@@ -1,8 +1,10 @@
 package frc2713.robot.commands.autos;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.lib.BLine.Path;
+import frc2713.lib.util.WaitSupplierCommand;
 import frc2713.robot.GameCommandGroups;
 import frc2713.robot.RobotContainer;
 import java.util.function.Supplier;
@@ -11,7 +13,7 @@ public class BLineMidwarsConservative {
 
   public static Command getCommand(Supplier<Boolean> shouldMirror) {
     return Commands.sequence(
-        Commands.waitSeconds(6.5),
+        new WaitSupplierCommand(() -> SmartDashboard.getNumber("autoStartDelay", 0)),
         // Drive through neutral zone with intake and shoot events
         RobotContainer.pathBuilder
             .withPoseReset(RobotContainer.drive::setPose)

@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.lib.BLine.FollowPath;
@@ -276,6 +277,8 @@ public class RobotContainer {
 
     Path.setDefaultGlobalConstraints(
         new Path.DefaultGlobalConstraints(4.5, 12.0, 540, 860, 0.03, 2.0, 0.2));
+
+    SmartDashboard.putNumber("autoStartDelay", 0.0);
   }
 
   private void configureChoreoFactory() {
