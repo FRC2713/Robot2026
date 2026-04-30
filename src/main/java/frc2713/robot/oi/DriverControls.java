@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc2713.robot.GameCommandGroups;
 import frc2713.robot.commands.DriveCommands;
@@ -111,7 +112,7 @@ public class DriverControls {
         .leftTrigger(0.98)
         .onTrue(
             Commands.parallel(intakeExtension.extendCommand(), intakeRoller.intake())
-                .withName("Intaking"))
+                .withInterruptBehavior(InterruptionBehavior.kCancelIncoming).withName("Intaking"))
         .onFalse(Commands.parallel(intakeRoller.stop()).withName("Stop Intake"));
 
     controller
