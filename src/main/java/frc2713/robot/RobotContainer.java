@@ -155,7 +155,9 @@ public class RobotContainer {
             new Feeder(
                 SerializerConstants.Feeder.config,
                 new TalonFXIO(SerializerConstants.Feeder.config));
-        vision = new Vision(new VisionIOSLAMDunk());
+        //vision = new Vision(new VisionIOSLAMDunk());
+        vision = new Vision(new VisionIO() {}); // REVERT THIS
+
         break;
 
       case SIM:
