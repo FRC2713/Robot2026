@@ -73,7 +73,7 @@ public final class LauncherConstants {
       config.generalControlMode = GeneralControlMode.POSITION;
       config.acceptablePositionError = Degrees.of(3);
 
-      config.fxConfig.Feedback.FeedbackRotorOffset = 0.;
+      config.fxConfig.Feedback.FeedbackRotorOffset = 0.51123;
 
       config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
