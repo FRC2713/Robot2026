@@ -19,6 +19,11 @@
       "profiled_rotation": true
     },
     {
+      "type": "event_trigger",
+      "t_ratio": 0.8202804417940638,
+      "lib_key": "intake"
+    },
+    {
       "type": "waypoint",
       "translation_target": {
         "x_meters": 3.3585692879552616,
@@ -29,11 +34,6 @@
         "rotation_radians": 0.0,
         "profiled_rotation": true
       }
-    },
-    {
-      "type": "event_trigger",
-      "t_ratio": 0.018825289293580575,
-      "lib_key": "intake"
     },
     {
       "type": "waypoint",
