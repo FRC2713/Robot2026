@@ -135,7 +135,10 @@ public final class GameCommandGroups {
               Commands.sequence(
                   feeder.voltageCommand(() -> Volts.of(-12)).withTimeout(0.25),
                   feeder.feedWhenReady(flywheels::atTarget)),
-              dyeRotor.dynamicFeedWhenReady(flywheels::atTarget, intakeRoller::isIntaking))
+              Commands.either(
+                  dyeRotor.dynamicFeedWhenReady(flywheels::atTarget, intakeRoller::isIntaking),
+                  dyeRotor.feedWhenReady(flywheels::atTarget),
+                  () -> LaunchingSolutionManager.currentAction == LaunchingAction.SCORING))
           .withName("OTF Shooting");
     }
     /** OTF shooting with drive limits. Use for driver/operator triggers. */
