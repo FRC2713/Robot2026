@@ -20,7 +20,7 @@ public class BLineDepotOnly {
   // From trench entrance -> midline: 2.0s
 
   private static Time wait1 = Seconds.of(0.5); // before path starts
-  private static Time wait2 = Seconds.of(5.0); // shooting duration before going through trench
+  private static Time wait2 = Seconds.of(7.0); // shooting duration before going through trench
   private static Path startingPath = new Path("depot_only");
 
   public static Command getCommand() {
@@ -30,47 +30,16 @@ public class BLineDepotOnly {
         Commands.runOnce(
             () ->
                 RobotContainer.drive.setPose(AllianceFlipUtil.apply(startingPath.getStartPose()))),
-        // GameCommandGroups.Launching.autoOtfShot(
-        //         RobotContainer.drive,
-        //         RobotContainer.flywheels,
-        //         RobotContainer.hood,
-        //         RobotContainer.turret,
-        //         RobotContainer.feeder,
-        //         RobotContainer.dyeRotor,
-        //         RobotContainer.intakeExtension,
-        //         RobotContainer.intakeRoller)
-        //     .withTimeout(wait1.in(Seconds)),
-        // Drive to Depot while intaking and prep shot
+
+        // Drive to Depot while intaking
         RobotContainer.pathBuilder
             .withPoseReset(RobotContainer.drive::setPose)
             .withEvent(
                 "intake",
                 GameCommandGroups.Intaking.intake(
                     RobotContainer.intakeExtension, RobotContainer.intakeRoller))
-            // .withEvent(
-            //     "shoot",
-            //     GameCommandGroups.Launching.autoOtfShot(
-            //         RobotContainer.drive,
-            //         RobotContainer.flywheels,
-            //         RobotContainer.hood,
-            //         RobotContainer.turret,
-            //         RobotContainer.feeder,
-            //         RobotContainer.dyeRotor,
-            //         RobotContainer.intakeExtension,
-            //         RobotContainer.intakeRoller))
             .build(startingPath),
-        // // Pausing near depot to shoot
-        // GameCommandGroups.Launching.autoOtfShot(
-        //         RobotContainer.drive,
-        //         RobotContainer.flywheels,
-        //         RobotContainer.hood,
-        //         RobotContainer.turret,
-        //         RobotContainer.feeder,
-        //         RobotContainer.dyeRotor,
-        //         RobotContainer.intakeExtension,
-        //         RobotContainer.intakeRoller)
-        //     .withDeadline(Commands.waitSeconds(wait2.in(Seconds))),
-        // Drive to midline
+        // Drive to launch position
         RobotContainer.pathBuilder
             .withPoseReset(pose -> {})
             .withStartingEvent(
@@ -97,7 +66,9 @@ public class BLineDepotOnly {
                         RobotContainer.dyeRotor,
                         RobotContainer.intakeExtension,
                         RobotContainer.intakeRoller)
-                    .withDeadline(Commands.waitSeconds(wait2.in(Seconds)))),
+                    .withDeadline(Commands.waitSeconds(wait2.in(Seconds))).andThen(
+                        GameCommandGroups.Launching.stopShooting(RobotContainer.drive, RobotContainer.feeder, RobotContainer.dyeRotor, RobotContainer.flywheels).withTimeout(0.25)
+                    )),
         Commands.run(() -> RobotContainer.drive.stop()));
   }
 }
