@@ -34,11 +34,14 @@ public class BLineDepotOnly {
         // Drive to Depot while intaking
         RobotContainer.pathBuilder
             .withPoseReset(RobotContainer.drive::setPose)
-            .withEvent(
-                "intake",
-                GameCommandGroups.Intaking.intake(
-                    RobotContainer.intakeExtension, RobotContainer.intakeRoller))
+            // .withEvent(
+            //     "intake",
+            //     GameCommandGroups.Intaking.intake(
+            //         RobotContainer.intakeExtension, RobotContainer.intakeRoller))
             .build(startingPath),
+        GameCommandGroups.Intaking.intake(
+                RobotContainer.intakeExtension, RobotContainer.intakeRoller)
+            .withTimeout(1),
         // Drive to launch position
         RobotContainer.pathBuilder
             .withPoseReset(pose -> {})
@@ -57,18 +60,32 @@ public class BLineDepotOnly {
                         RobotContainer.intakeExtension, RobotContainer.intakeRoller)))
             .build(new Path("depot_only_second"))
             .andThen(
-                GameCommandGroups.Launching.autoOtfShot(
-                        RobotContainer.drive,
-                        RobotContainer.flywheels,
-                        RobotContainer.hood,
-                        RobotContainer.turret,
-                        RobotContainer.feeder,
-                        RobotContainer.dyeRotor,
-                        RobotContainer.intakeExtension,
-                        RobotContainer.intakeRoller)
-                    .withDeadline(Commands.waitSeconds(wait2.in(Seconds))).andThen(
-                        GameCommandGroups.Launching.stopShooting(RobotContainer.drive, RobotContainer.feeder, RobotContainer.dyeRotor, RobotContainer.flywheels).withTimeout(0.25)
-                    )),
+                Commands.sequence(
+                    GameCommandGroups.Launching.autoOtfShot(
+                            RobotContainer.drive,
+                            RobotContainer.flywheels,
+                            RobotContainer.hood,
+                            RobotContainer.turret,
+                            RobotContainer.feeder,
+                            RobotContainer.dyeRotor,
+                            RobotContainer.intakeExtension,
+                            RobotContainer.intakeRoller)
+                        .withDeadline(Commands.waitSeconds(wait2.in(Seconds))),
+                    GameCommandGroups.Launching.stopShootingAndRetractHood(
+                            RobotContainer.drive,
+                            RobotContainer.feeder,
+                            RobotContainer.dyeRotor,
+                            RobotContainer.hood,
+                            RobotContainer.flywheels)
+                        .withTimeout(0.25))),
+        // back to midline
+        RobotContainer.pathBuilder
+            .withPoseReset(pose -> {})
+            .withEvent(
+                "intake",
+                GameCommandGroups.Intaking.intake(
+                    RobotContainer.intakeExtension, RobotContainer.intakeRoller))
+            .build(new Path("depot_only_third")),
         Commands.run(() -> RobotContainer.drive.stop()));
   }
 }
