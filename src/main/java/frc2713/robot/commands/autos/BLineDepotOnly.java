@@ -3,10 +3,12 @@ package frc2713.robot.commands.autos;
 import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.lib.BLine.Path;
 import frc2713.lib.util.AllianceFlipUtil;
+import frc2713.lib.util.WaitSupplierCommand;
 import frc2713.robot.GameCommandGroups;
 import frc2713.robot.RobotContainer;
 
@@ -26,6 +28,7 @@ public class BLineDepotOnly {
   public static Command getCommand() {
 
     return Commands.sequence(
+        new WaitSupplierCommand(() -> SmartDashboard.getNumber("autoStartDelay", 0)),
         // Shoot preloaded fuel and wait
         Commands.runOnce(
             () ->
@@ -45,19 +48,11 @@ public class BLineDepotOnly {
         // Drive to launch position
         RobotContainer.pathBuilder
             .withPoseReset(pose -> {})
-            .withStartingEvent(
-                GameCommandGroups.Launching.stopShootingAndRetractHood(
-                    RobotContainer.drive,
-                    RobotContainer.feeder,
-                    RobotContainer.dyeRotor,
-                    RobotContainer.hood,
-                    RobotContainer.flywheels))
+            .withStartingEvent(RobotContainer.intakeRoller.intake())
             .withEvent(
                 "intake_2",
-                Commands.parallel(
-                    RobotContainer.hood.retract(),
-                    GameCommandGroups.Intaking.intake(
-                        RobotContainer.intakeExtension, RobotContainer.intakeRoller)))
+                GameCommandGroups.Intaking.intake(
+                    RobotContainer.intakeExtension, RobotContainer.intakeRoller))
             .build(new Path("depot_only_second"))
             .andThen(
                 Commands.sequence(

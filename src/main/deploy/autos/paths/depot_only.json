@@ -30,11 +30,6 @@
       "lib_key": "intake"
     },
     {
-      "type": "event_trigger",
-      "t_ratio": 1.0,
-      "lib_key": "shoot"
-    },
-    {
       "type": "waypoint",
       "translation_target": {
         "x_meters": 0.37629643942622304,
