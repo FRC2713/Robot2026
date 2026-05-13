@@ -425,10 +425,11 @@ public class RobotContainer {
           "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
       autoChooser.addOption("DriveTest", DriveTest.routine(choreoFactory));
-      autoChooser.addOption("DemoMode", Demo.demo());
       autoChooser.addOption("BLine Tuning", BLineTuning.getCommand());
       autoChooser.addOption("Bump Test", BumpTest.getCommand());
     }
+
+    autoChooser.addOption("DemoMode", Demo.demo());
 
     // Competition Autos
     autoChooser.addDefaultOption("Midwars - R", BLineMidwarsOvercenter.getCommand(() -> false));
