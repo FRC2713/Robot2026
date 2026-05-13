@@ -429,7 +429,9 @@ public class RobotContainer {
       autoChooser.addOption("Bump Test", BumpTest.getCommand());
     }
 
-    autoChooser.addOption("DemoMode", Demo.demo());
+    if (Constants.demoMode) {
+      autoChooser.addOption("DemoMode", Demo.demo());
+    }
 
     // Competition Autos
     autoChooser.addDefaultOption("Midwars - R", BLineMidwarsOvercenter.getCommand(() -> false));

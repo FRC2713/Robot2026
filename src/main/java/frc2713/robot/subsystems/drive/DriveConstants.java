@@ -43,6 +43,13 @@ public class DriveConstants {
           DegreesPerSecond.of(180.0),
           DegreesPerSecondPerSecond.of(3600.0));
 
+  public static final DriveLimits demoDriveLimits =
+      new DriveLimits(
+          FeetPerSecond.of(2.0),
+          FeetPerSecondPerSecond.of(40.0),
+          DegreesPerSecond.of(180.0),
+          DegreesPerSecondPerSecond.of(1800.0));
+
   public static final MomentOfInertia intakeExtendedMoi =
       MoiUnits.PoundSquareInches.of(29546.954784);
   public static final MomentOfInertia intakeRetractedMoi =

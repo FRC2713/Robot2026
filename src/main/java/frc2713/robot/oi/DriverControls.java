@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc2713.robot.Constants;
 import frc2713.robot.GameCommandGroups;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
@@ -151,17 +152,46 @@ public class DriverControls {
     new Trigger(() -> ShiftManager.getTimeLeftInShift(DriverStation.getMatchTime()) <= 5)
         .whileTrue(controller.RumbleForDuration(0.5));
     // shoot otf
-    controller
-        .rightBumper()
-        .whileTrue(
-            GameCommandGroups.Launching.otfShotHoodProtect(
-                    drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)
-                .withName("OTF Shooting"))
-        .onFalse(
-            Commands.parallel(
-                    GameCommandGroups.Launching.stopShootingAndRetractHood(
-                        drive, feeder, dyeRotor, hood, flywheels))
-                .withName("Stop Shooting"));
+
+    if (Constants.demoMode) {
+
+      controller
+          .rightBumper()
+          .onTrue(
+              GameCommandGroups.Launching.towerShot(
+                      drive,
+                      flywheels,
+                      hood,
+                      turret,
+                      feeder,
+                      dyeRotor,
+                      intakeExtension,
+                      intakeRoller)
+                  .withName("Static Tower Shot"))
+          .onFalse(
+              GameCommandGroups.Launching.stopShootingAndRetractHood(
+                      drive, feeder, dyeRotor, hood, flywheels)
+                  .withName("Stop Shooting + Hood Retract"));
+    } else {
+      controller
+          .rightBumper()
+          .whileTrue(
+              GameCommandGroups.Launching.otfShotHoodProtect(
+                      drive,
+                      flywheels,
+                      hood,
+                      turret,
+                      feeder,
+                      dyeRotor,
+                      intakeExtension,
+                      intakeRoller)
+                  .withName("OTF Shooting"))
+          .onFalse(
+              Commands.parallel(
+                      GameCommandGroups.Launching.stopShootingAndRetractHood(
+                          drive, feeder, dyeRotor, hood, flywheels))
+                  .withName("Stop Shooting"));
+    }
     controller
         .rightTrigger(0.98)
         .whileTrue(
