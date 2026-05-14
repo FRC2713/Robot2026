@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.lib.BLine.FollowPath;
@@ -22,14 +23,16 @@ import frc2713.lib.subsystem.KinematicsManager;
 import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 import frc2713.lib.util.AllianceFlipUtil;
 import frc2713.robot.commands.DriveCommands;
-import frc2713.robot.commands.autos.BLineMidwarsNoBump;
+import frc2713.robot.commands.autos.BLineDepotOnly;
+import frc2713.robot.commands.autos.BLineMidwarsBackwards;
+import frc2713.robot.commands.autos.BLineMidwarsConservative;
 import frc2713.robot.commands.autos.BLineMidwarsOvercenter;
+import frc2713.robot.commands.autos.BLineMidwarsTrenchified;
+import frc2713.robot.commands.autos.BLineSweepAndOutpost;
 import frc2713.robot.commands.autos.BLineTuning;
 import frc2713.robot.commands.autos.BumpTest;
 import frc2713.robot.commands.autos.Demo;
 import frc2713.robot.commands.autos.DriveTest;
-import frc2713.robot.commands.autos.Midwars;
-import frc2713.robot.commands.autos.NoIntake;
 import frc2713.robot.generated.TunerConstants;
 import frc2713.robot.oi.DevControls;
 import frc2713.robot.oi.DriverControls;
@@ -194,7 +197,9 @@ public class RobotContainer {
             new Feeder(
                 SerializerConstants.Feeder.config,
                 new SimTalonFXIO(SerializerConstants.Feeder.config));
-        vision = new Vision(new VisionIOSLAMDunk());
+
+        vision = new Vision(new VisionIOSLAMDunk()); // if jetson is connected to roboRio
+        // vision = new Vision(new VisionIOLocalNT()); // if jetson is connected to laptop
         break;
 
       default:
@@ -273,6 +278,8 @@ public class RobotContainer {
 
     Path.setDefaultGlobalConstraints(
         new Path.DefaultGlobalConstraints(4.5, 12.0, 540, 860, 0.03, 2.0, 0.2));
+
+    SmartDashboard.putNumber("autoStartDelay", 0.0);
   }
 
   private void configureChoreoFactory() {
@@ -418,47 +425,36 @@ public class RobotContainer {
           "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
       autoChooser.addOption("DriveTest", DriveTest.routine(choreoFactory));
-      autoChooser.addOption("DemoMode", Demo.demo());
       autoChooser.addOption("BLine Tuning", BLineTuning.getCommand());
       autoChooser.addOption("Bump Test", BumpTest.getCommand());
     }
 
-    autoChooser.addDefaultOption(
-        "Bline Midwars - R", BLineMidwarsOvercenter.getCommand(() -> false));
-    autoChooser.addOption("Bline Midwars - L", BLineMidwarsOvercenter.getCommand(() -> true));
-    autoChooser.addOption("Bline No Bump - R", BLineMidwarsNoBump.getCommand(() -> false));
-    autoChooser.addOption("Bline No Bump - L", BLineMidwarsNoBump.getCommand(() -> true));
+    if (Constants.demoMode) {
+      autoChooser.addOption("DemoMode", Demo.demo());
+    }
+
+    // Competition Autos
+    autoChooser.addDefaultOption("Midwars - R", BLineMidwarsOvercenter.getCommand(() -> false));
+    autoChooser.addOption("Midwars - L", BLineMidwarsOvercenter.getCommand(() -> true));
 
     autoChooser.addOption(
-        "Choreo Midwars - R",
-        Midwars.getRoutine(
-            choreoFactory,
-            false,
-            drive,
-            intakeExtension,
-            intakeRoller,
-            flywheels,
-            hood,
-            turret,
-            dyeRotor,
-            feeder));
+        "Midwars - Inside Out - R", BLineMidwarsBackwards.getCommand(() -> false));
+    autoChooser.addOption("Midwars - Inside Out - L", BLineMidwarsBackwards.getCommand(() -> true));
 
     autoChooser.addOption(
-        "Choreo Midwars - L",
-        Midwars.getRoutine(
-            choreoFactory,
-            true,
-            drive,
-            intakeExtension,
-            intakeRoller,
-            flywheels,
-            hood,
-            turret,
-            dyeRotor,
-            feeder));
+        "Midwars - Trenchified - R", BLineMidwarsTrenchified.getCommand(() -> false));
+    autoChooser.addOption(
+        "Midwars - Trenchified - L", BLineMidwarsTrenchified.getCommand(() -> true));
 
-    autoChooser.addOption("NoIntake - R", NoIntake.getRoutine(choreoFactory, false, drive));
-    autoChooser.addOption("NoIntake - L", NoIntake.getRoutine(choreoFactory, true, drive));
+    autoChooser.addOption(
+        "Midwars - Conservative - R", BLineMidwarsConservative.getCommand(() -> false));
+    autoChooser.addOption(
+        "Midwars - Conservative - L", BLineMidwarsConservative.getCommand(() -> true));
+    autoChooser.addOption("Sweep And Outpost", BLineSweepAndOutpost.getCommand());
+    autoChooser.addOption("Hub to Depot to Midline", BLineDepotOnly.getCommand());
+
+    // autoChooser.addOption("NoIntake - R", NoIntake.getRoutine(choreoFactory, false, drive));
+    // autoChooser.addOption("NoIntake - L", NoIntake.getRoutine(choreoFactory, true, drive));
   }
 
   /**

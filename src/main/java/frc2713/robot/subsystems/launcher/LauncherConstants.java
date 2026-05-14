@@ -29,6 +29,7 @@ import frc2713.lib.subsystem.TalonFXSubsystemConfig.GeneralControlMode;
 import frc2713.lib.util.LoggedTunableBoolean;
 import frc2713.lib.util.LoggedTunableMeasure;
 import frc2713.lib.util.Util;
+import frc2713.robot.Constants;
 import frc2713.robot.GamePieceConstants;
 
 public final class LauncherConstants {
@@ -73,7 +74,7 @@ public final class LauncherConstants {
       config.generalControlMode = GeneralControlMode.POSITION;
       config.acceptablePositionError = Degrees.of(3);
 
-      config.fxConfig.Feedback.FeedbackRotorOffset = 0.154297;
+      config.fxConfig.Feedback.FeedbackRotorOffset = 0.51123;
 
       config.fxConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
       config.fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -88,7 +89,8 @@ public final class LauncherConstants {
 
       // Motion Magic parameters
       config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 20.0 / 8; // rotations per second
-      config.fxConfig.MotionMagic.MotionMagicAcceleration = 50.0 / 4; // rotations per second^2
+      config.fxConfig.MotionMagic.MotionMagicAcceleration =
+          Constants.tuningMode ? 0.5 : 50.0 / 4; // rotations per second^2
       config.fxConfig.MotionMagic.MotionMagicJerk = 0.; // limit jerk for smooth motion
 
       // Gear ratio: motor rotations per turret rotation = GEAR_1/GEAR_0 = 120/60 = 2.0
@@ -109,6 +111,12 @@ public final class LauncherConstants {
                   Inches.of(0.5).in(Meters),
                   Inches.of(18.484119).in(Meters)),
               new Rotation3d(0, 0, manualOffset.in(Radians)));
+
+      config.fxConfig.CurrentLimits.StatorCurrentLimit = 100;
+      config.fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+
+      config.fxConfig.CurrentLimits.SupplyCurrentLimit = 45;
+      config.fxConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
     }
 
     static {
@@ -215,7 +223,7 @@ public final class LauncherConstants {
       config.name = "Hood";
       config.talonCANID = new CANDeviceId(54, "canivore"); // Example CAN ID, replace with actual ID
 
-      config.fxConfig.Feedback.FeedbackRotorOffset = -0.700684;
+      config.fxConfig.Feedback.FeedbackRotorOffset = 0.067871;
 
       // PID gains for Motion Magic
       config.fxConfig.Slot0.kP = 400.0;
@@ -240,7 +248,8 @@ public final class LauncherConstants {
 
       // Motion Magic parameters
       config.fxConfig.MotionMagic.MotionMagicCruiseVelocity = 5; // rotations per second
-      config.fxConfig.MotionMagic.MotionMagicAcceleration = 500.0; // rotations per second^2
+      config.fxConfig.MotionMagic.MotionMagicAcceleration =
+          Constants.tuningMode ? 0.2 : 500.0; // rotations per second^2
       config.fxConfig.MotionMagic.MotionMagicJerk = 0; // no jerk limit
 
       config.unitToRotorRatio = gearRatio;

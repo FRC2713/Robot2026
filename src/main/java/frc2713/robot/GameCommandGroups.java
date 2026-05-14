@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.FeetPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -12,6 +13,7 @@ import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.drive.DriveConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
+import frc2713.robot.subsystems.intake.IntakeExtension.FuelPressureType;
 import frc2713.robot.subsystems.intake.IntakeRoller;
 import frc2713.robot.subsystems.launcher.Flywheels;
 import frc2713.robot.subsystems.launcher.Hood;
@@ -24,6 +26,7 @@ import frc2713.robot.subsystems.serializer.Feeder;
 import frc2713.robot.subsystems.serializer.SerializerConstants;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 /**
  * A Utility class holding common game actions in the form of command groups that can be shared
@@ -41,7 +44,8 @@ public final class GameCommandGroups {
         Feeder feeder,
         DyeRotor dyeRotor,
         IntakeExtension extension,
-        IntakeRoller intakeRoller) {
+        IntakeRoller intakeRoller,
+        Supplier<Double> fuelPressureDelay) {
       return Commands.either(
               Commands.print("[AUTO] Auto in neutral zone!"),
               Commands.parallel(
@@ -55,11 +59,42 @@ public final class GameCommandGroups {
                       () -> flywheels.atTarget() && hood.atTarget(), Seconds.of(0.8)),
                   dyeRotor.feedWhenReady(
                       () -> flywheels.atTarget() && hood.atTarget(), Seconds.of(0.8)),
-                  extension
-                      .maintainFuelPressureCommand(1.2)
-                      .beforeStarting(Commands.waitSeconds(1))),
+                  extension.maintainFuelPressureCommand(
+                      FuelPressureType.OSCILLATING,
+                      fuelPressureDelay.get())), // retract pressure type had 1.0 delay
               () -> FieldConstants.NeutralZone.region.contains(drive.getPose().getTranslation()))
           .withName("Auto OTF Shooting");
+    }
+
+    /** OTF shooting without drive limits. Use for auto routines. */
+    public static Command autoOtfShot(
+        Drive drive,
+        Flywheels flywheels,
+        Hood hood,
+        Turret turret,
+        Feeder feeder,
+        DyeRotor dyeRotor,
+        IntakeExtension extension,
+        IntakeRoller intakeRoller) {
+      return autoOtfShot(
+          drive, flywheels, hood, turret, feeder, dyeRotor, extension, intakeRoller, () -> 1.0);
+    }
+
+    /**
+     * OTF shooting without drive limits and a pressure delay longer than auto. Use for auto
+     * routines where the intake needs to stay out.
+     */
+    public static Command autoOtfShotNoPressure(
+        Drive drive,
+        Flywheels flywheels,
+        Hood hood,
+        Turret turret,
+        Feeder feeder,
+        DyeRotor dyeRotor,
+        IntakeExtension extension,
+        IntakeRoller intakeRoller) {
+      return autoOtfShot(
+          drive, flywheels, hood, turret, feeder, dyeRotor, extension, intakeRoller, () -> 30.0);
     }
 
     public static Command otfShotHoodProtect(
@@ -97,9 +132,13 @@ public final class GameCommandGroups {
               hood.otfCommand(),
               turret.otfCommand(),
               flywheels.simulateLaunchFuelCommand(flywheels::atTarget),
-              feeder.feedWhenReady(flywheels::atTarget),
-              dyeRotor.dynamicFeedWhenReady(
-                  flywheels::atTarget)) // used to be dynamic but we slowed it way down
+              Commands.sequence(
+                  feeder.voltageCommand(() -> Volts.of(-12)).withTimeout(0.25),
+                  feeder.feedWhenReady(flywheels::atTarget)),
+              Commands.either(
+                  dyeRotor.dynamicFeedWhenReady(flywheels::atTarget, intakeRoller::isIntaking),
+                  dyeRotor.feedWhenReady(flywheels::atTarget),
+                  () -> LaunchingSolutionManager.currentAction == LaunchingAction.SCORING))
           .withName("OTF Shooting");
     }
     /** OTF shooting with drive limits. Use for driver/operator triggers. */
@@ -122,8 +161,7 @@ public final class GameCommandGroups {
               hood.otfCommand(),
               flywheels.simulateLaunchFuelCommand(flywheels::atTarget),
               feeder.feedWhenReady(flywheels::atTarget),
-              dyeRotor.dynamicFeedWhenReady(
-                  flywheels::atTarget)) // used to be dynamic but we slowed it way down
+              dyeRotor.dynamicFeedWhenReady(flywheels::atTarget, intakeRoller::isIntaking))
           .withName("OTF Shooting");
     }
 

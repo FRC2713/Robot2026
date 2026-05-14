@@ -104,6 +104,18 @@ public class OperatorControls {
                 .withName("fudgeFacor reset"));
 
     controller
+        .rightBumper()
+        .whileTrue(
+            GameCommandGroups.Launching.otfShotHoodProtect(
+                    drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)
+                .withName("Operator OTF Shooting"))
+        .onFalse(
+            Commands.parallel(
+                    GameCommandGroups.Launching.stopShootingAndRetractHood(
+                        drive, feeder, dyeRotor, hood, flywheels))
+                .withName("Operator Stop Shooting"));
+
+    controller
         .leftBumper()
         .onTrue(intakeExtension.retractCommand())
         .onFalse(intakeExtension.extendCommand());
@@ -145,7 +157,7 @@ public class OperatorControls {
 
     controller.x().whileTrue(Commands.run(() -> RobotContainer.vision.hardResetDrivePose()));
 
-    new Trigger(() -> ShiftManager.getTimeLeftInShift(DriverStation.getMatchTime()) <= 2)
+    new Trigger(() -> ShiftManager.getTimeLeftInShift(DriverStation.getMatchTime()) <= 5)
         .whileTrue(controller.RumbleForDuration(0.5));
   }
 }

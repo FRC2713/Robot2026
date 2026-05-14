@@ -76,7 +76,8 @@ public class TunerConstants {
   // All swerve devices must share the same CAN bus
   public static final CANBus kCANBus = new CANBus("canivore", "./logs/example.hoot");
 
-  // Theoretical free speed (m/s) at 12 V applied output;
+  // Measured robot speed (m/s) at 12 V applied output;
+  // This is NOT the desired max robot speed - see MaxSpeed in RobotContainer instead;
   // This needs to be tuned to your individual robot
   public static final LinearVelocity kSpeedAt12Volts = MetersPerSecond.of(4.50);
 
@@ -136,7 +137,7 @@ public class TunerConstants {
   private static final int kFrontLeftDriveMotorId = 10;
   private static final int kFrontLeftSteerMotorId = 11;
   private static final int kFrontLeftEncoderId = 12;
-  private static final Angle kFrontLeftEncoderOffset = Rotations.of(0.393798828125);
+  private static final Angle kFrontLeftEncoderOffset = Rotations.of(-0.270751953125);
   private static final boolean kFrontLeftSteerMotorInverted = false;
   private static final boolean kFrontLeftEncoderInverted = true;
 
@@ -147,7 +148,7 @@ public class TunerConstants {
   private static final int kFrontRightDriveMotorId = 13;
   private static final int kFrontRightSteerMotorId = 14;
   private static final int kFrontRightEncoderId = 15;
-  private static final Angle kFrontRightEncoderOffset = Rotations.of(0.104248046875);
+  private static final Angle kFrontRightEncoderOffset = Rotations.of(0.12109375);
   private static final boolean kFrontRightSteerMotorInverted = false;
   private static final boolean kFrontRightEncoderInverted = true;
 
@@ -158,7 +159,7 @@ public class TunerConstants {
   private static final int kBackLeftDriveMotorId = 16;
   private static final int kBackLeftSteerMotorId = 17;
   private static final int kBackLeftEncoderId = 18;
-  private static final Angle kBackLeftEncoderOffset = Rotations.of(-0.400146484375);
+  private static final Angle kBackLeftEncoderOffset = Rotations.of(-0.394775390625);
   private static final boolean kBackLeftSteerMotorInverted = false;
   private static final boolean kBackLeftEncoderInverted = true;
 
@@ -169,7 +170,7 @@ public class TunerConstants {
   private static final int kBackRightDriveMotorId = 19;
   private static final int kBackRightSteerMotorId = 20;
   private static final int kBackRightEncoderId = 21;
-  private static final Angle kBackRightEncoderOffset = Rotations.of(-0.44384765625);
+  private static final Angle kBackRightEncoderOffset = Rotations.of(0.392333984375);
   private static final boolean kBackRightSteerMotorInverted = false;
   private static final boolean kBackRightEncoderInverted = true;
 
@@ -229,6 +230,16 @@ public class TunerConstants {
               kBackRightSteerMotorInverted,
               kBackRightEncoderInverted);
 
+  /**
+   * Creates a CommandSwerveDrivetrain instance. This should only be called once in your robot
+   * program,.
+   */
+  // public static CommandSwerveDrivetrain createDrivetrain() {
+  //     return new CommandSwerveDrivetrain(
+  //         DrivetrainConstants, FrontLeft, FrontRight, BackLeft, BackRight
+  //     );
+  // }
+
   /** Swerve Drive class utilizing CTR Electronics' Phoenix 6 API with the selected device types. */
   public static class TunerSwerveDrivetrain extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder> {
     /**
@@ -279,9 +290,9 @@ public class TunerConstants {
      * @param odometryUpdateFrequency The frequency to run the odometry loop. If unspecified or set
      *     to 0 Hz, this is 250 Hz on CAN FD, and 100 Hz on CAN 2.0.
      * @param odometryStandardDeviation The standard deviation for odometry calculation in the form
-     *     [x, y, theta]áµ€, with units in meters and radians
+     *     [x, y, theta]ᵀ, with units in meters and radians
      * @param visionStandardDeviation The standard deviation for vision calculation in the form [x,
-     *     y, theta]áµ€, with units in meters and radians
+     *     y, theta]ᵀ, with units in meters and radians
      * @param modules Constants for each specific module
      */
     public TunerSwerveDrivetrain(

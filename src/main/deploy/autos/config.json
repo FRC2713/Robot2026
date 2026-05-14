@@ -6,7 +6,7 @@
     },
     "protrusions": {
       "enabled": true,
-      "distance_meters": 0.305,
+      "distance_meters": 0.279,
       "side": "front",
       "default_state": "hidden",
       "show_on_event_keys": [

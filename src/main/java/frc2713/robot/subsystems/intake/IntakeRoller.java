@@ -12,6 +12,8 @@ import frc2713.lib.subsystem.TalonFXSubsystemConfig;
 
 public class IntakeRoller extends MotorFollowerSubsystem<MotorInputsAutoLogged, MotorIO> {
 
+  private boolean isIntaking = false;
+
   public IntakeRoller(
       final TalonFXSubsystemConfig leaderConfig,
       final TalonFXSubsystemConfig followerConfig,
@@ -28,16 +30,21 @@ public class IntakeRoller extends MotorFollowerSubsystem<MotorInputsAutoLogged, 
   }
 
   public Command intake() {
-    return voltageCommand(() -> Volts.of(10));
+    return voltageCommand(() -> Volts.of(10)).beforeStarting(() -> this.isIntaking = true);
     // return velocitySetpointCommand(IntakeConstants.Roller.intakeSpeed);
   }
 
   public Command stop() {
-    return voltageCommand(() -> Volts.of(0.0));
+    return voltageCommand(() -> Volts.of(0.0)).beforeStarting(() -> this.isIntaking = false);
   }
 
   public Command outtake() {
-    return voltageCommand(() -> IntakeConstants.Roller.outtakeVoltageDesired);
+    return voltageCommand(() -> IntakeConstants.Roller.outtakeVoltageDesired)
+        .beforeStarting(() -> this.isIntaking = false);
+  }
+
+  public boolean isIntaking() {
+    return isIntaking;
   }
 
   @Override

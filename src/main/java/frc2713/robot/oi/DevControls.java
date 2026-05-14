@@ -94,7 +94,8 @@ public class DevControls {
     //             Optional.of(FeetPerSecondPerSecond.of(12.0)),
     //             Optional.of(DegreesPerSecond.of(90.0)),
     //             Optional.of(DegreesPerSecondPerSecond.of(360.0))));
-    controller.b().onTrue(DriveCommands.clearDriveLimits(drive));
+    // controller.b().onTrue(DriveCommands.clearDriveLimits(drive));
+    controller.b().whileTrue(intakeExtension.oscilatingFuelPressure());
 
     controller
         .povLeft()
