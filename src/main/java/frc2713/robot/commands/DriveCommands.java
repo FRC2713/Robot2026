@@ -34,6 +34,7 @@ import frc2713.lib.util.Util;
 import frc2713.robot.Constants;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.drive.DriveConstants;
+import frc2713.robot.subsystems.fuelDetector.FuelDetector;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
@@ -192,6 +193,38 @@ public class DriveCommands {
 
         // Reset PID controller when command starts
         .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
+  }
+
+  /**
+   * Field relative drive command using joystick for linear control and the fuel detection
+   * algorithm's output on a PID controller for angular direction. If there's no fuel detected, uses
+   * standard teleop control
+   */
+  public static Command joystickDriveTowardsFuel(
+      Drive drive,
+      DoubleSupplier xSupplier,
+      DoubleSupplier ySupplier,
+      DoubleSupplier omegaSupplier,
+      FuelDetector fuelDetector) {
+    // Commands.either evaluates at compile time but Commands.select doesnt
+    return Commands.select(
+        java.util.Map.of(
+            // When fuel detected: use joystickDriveAtAngle with fuel heading
+            true,
+            joystickDriveAtAngle(
+                drive,
+                xSupplier,
+                ySupplier,
+                () -> {
+                  // Convert robot-relative fuel heading to field-relative
+                  Rotation2d fuelHeading = fuelDetector.getHeading();
+                  return drive.getRotation().plus(fuelHeading);
+                }),
+            // When no fuel: use normal joystick drive
+            false,
+            joystickDrive(drive, xSupplier, ySupplier, omegaSupplier)),
+        // Selector function: check fuel detection state every cycle
+        fuelDetector::hasUsableHeading);
   }
 
   public static Command driveOneMeter(Drive drive, double xOffset) {

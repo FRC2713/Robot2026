@@ -9,6 +9,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringSubscriber;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc2713.lib.util.DebouncedBooleanSupplier;
 import frc2713.robot.RobotContainer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,6 +23,11 @@ public class FuelDetector extends SubsystemBase {
   public final int kGridHeight = 3; // number of vertical grid cells - 1
   public static final int kImageWidth = 640;
   public static final int kImageHeight = 480;
+  public int nFuels = 0;
+
+  // (0.5s to take control, 0.0s to give it back)
+  private final DebouncedBooleanSupplier hasUsableFuel =
+      new DebouncedBooleanSupplier(() -> this.nFuels >= 1, 0.5, 0.0);
 
   public boolean
       isLimelights; // Does nothing unless legacy detection is activated. If legacy detecttion is
@@ -85,10 +91,15 @@ public class FuelDetector extends SubsystemBase {
     }
   }
 
+  public boolean hasUsableHeading() {
+    return hasUsableFuel.getAsBoolean();
+  }
+
   public void periodic() {
-    // get fuel information, call algorithm
-    // FuelCoordinates[] fuels = getDataFromNT();
-    // Logger.recordOutput("First Fuel Cluster", getRotation2D(fuels, !isLimelights).getDegrees());
+    hasUsableFuel.update();
+
+    Logger.recordOutput("FuelDetector/raw_has_fuel", hasUsableFuel.getRaw());
+    Logger.recordOutput("FuelDetector/debounced_has_fuel", hasUsableFuel.getAsBoolean());
   }
 
   public ArrayList<FuelCoordinates> filterByHighChance(FuelCoordinates[] inputs) {
@@ -205,8 +216,9 @@ public class FuelDetector extends SubsystemBase {
     }
 
     Logger.recordOutput("FuelDetector/is_limelights", isLimelights);
-    Logger.recordOutput("FuelDetector/n_fuels", isLimelights);
+    Logger.recordOutput("FuelDetector/n_fuels", fuels.length);
 
+    this.nFuels = fuels.length;
     return fuels;
   }
 

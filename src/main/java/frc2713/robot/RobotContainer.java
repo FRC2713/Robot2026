@@ -396,7 +396,7 @@ public class RobotContainer {
     //         () -> -driverControls.getLeftX() + -devControls.getLeftX(),
     //         () -> -driverControls.getRightX() + -devControls.getRightX()),
     //     "Dual Controller Drive");
-    driverControls.setToNormalDrive();
+    driverControls.setToFuelDetectDrive();
 
     // Comment these out when using dev controller
     // driverControls.setToNormalDrive();
