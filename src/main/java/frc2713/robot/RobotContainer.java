@@ -44,6 +44,7 @@ import frc2713.robot.subsystems.drive.GyroIOPigeon2;
 import frc2713.robot.subsystems.drive.ModuleIO;
 import frc2713.robot.subsystems.drive.ModuleIOSim;
 import frc2713.robot.subsystems.drive.ModuleIOTalonFX;
+import frc2713.robot.subsystems.fuelDetector.FuelDetector;
 import frc2713.robot.subsystems.intake.IntakeConstants;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
@@ -84,6 +85,7 @@ public class RobotContainer {
   public static DyeRotor dyeRotor;
   public static Feeder feeder;
   public static Vision vision;
+  public static FuelDetector fuelDetector;
 
   // Lazy loaders
   @SuppressWarnings("unused")
@@ -156,6 +158,8 @@ public class RobotContainer {
                 SerializerConstants.Feeder.config,
                 new TalonFXIO(SerializerConstants.Feeder.config));
         vision = new Vision(new VisionIOSLAMDunk());
+        fuelDetector = new FuelDetector();
+        fuelDetector = new FuelDetector();
         break;
 
       case SIM:
@@ -197,9 +201,8 @@ public class RobotContainer {
             new Feeder(
                 SerializerConstants.Feeder.config,
                 new SimTalonFXIO(SerializerConstants.Feeder.config));
-
-        vision = new Vision(new VisionIOSLAMDunk()); // if jetson is connected to roboRio
-        // vision = new Vision(new VisionIOLocalNT()); // if jetson is connected to laptop
+        vision = new Vision(new VisionIOSLAMDunk());
+        fuelDetector = new FuelDetector();
         break;
 
       default:
@@ -238,6 +241,7 @@ public class RobotContainer {
         dyeRotor = new DyeRotor(new TalonFXSubsystemConfig(), new MotorIO() {});
         feeder = new Feeder(new TalonFXSubsystemConfig(), new MotorIO() {});
         vision = new Vision(new VisionIO() {});
+        fuelDetector = new FuelDetector();
         break;
     }
 
@@ -392,7 +396,7 @@ public class RobotContainer {
     //         () -> -driverControls.getLeftX() + -devControls.getLeftX(),
     //         () -> -driverControls.getRightX() + -devControls.getRightX()),
     //     "Dual Controller Drive");
-    driverControls.setToNormalDrive();
+    driverControls.setToFuelDetectDrive();
 
     // Comment these out when using dev controller
     // driverControls.setToNormalDrive();

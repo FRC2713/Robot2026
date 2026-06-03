@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc2713.robot.Constants;
 import frc2713.robot.GameCommandGroups;
+import frc2713.robot.RobotContainer;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
@@ -232,6 +233,10 @@ public class DriverControls {
     DriveCommands.setDefaultDriveCommand(drive, this.normalDriveCmd(), "Default Joystick Drive");
   }
 
+  public void setToFuelDetectDrive() {
+    DriveCommands.setDefaultDriveCommand(drive, this.fuelDetectDrive(), "Fuel Detect Drive");
+  }
+
   public Command setToNormalDriveCmd() {
     return DriveCommands.changeDefaultDriveCommand(
         drive, this.normalDriveCmd(), "Default Joystick Drive");
@@ -258,5 +263,14 @@ public class DriverControls {
         () -> -controller.getLeftY(),
         () -> -controller.getLeftX(),
         () -> -controller.getRightX());
+  }
+
+  private Command fuelDetectDrive() {
+    return DriveCommands.joystickDriveTowardsFuel(
+        drive,
+        () -> -controller.getLeftY(),
+        () -> -controller.getLeftX(),
+        () -> -controller.getRightX(),
+        RobotContainer.fuelDetector);
   }
 }
