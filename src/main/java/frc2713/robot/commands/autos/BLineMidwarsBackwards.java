@@ -9,7 +9,7 @@ import frc2713.robot.GameCommandGroups;
 import frc2713.robot.RobotContainer;
 import java.util.function.Supplier;
 
-public class BLineMidwarsOvercenter {
+public class BLineMidwarsBackwards {
   // public static final
 
   public static Command getCommand(Supplier<Boolean> shouldMirror) {
@@ -87,7 +87,7 @@ public class BLineMidwarsOvercenter {
                         RobotContainer.intakeExtension,
                         RobotContainer.intakeRoller)
                     .repeatedly())
-            .build(new Path("mid_wards_overcenter_second")),
+            .build(new Path("mid_wards_overcenter_second_backwards")),
         // Drive to trench while shooting
         Commands.parallel(
             GameCommandGroups.Launching.autoOtfShot(

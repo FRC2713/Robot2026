@@ -8,9 +8,10 @@ import frc2713.robot.RobotContainer;
 public class BLineTuning {
 
   // Load Paths
-  static Path path = new Path("3m_90deg_2m");
+  static Path path = new Path("3m_straight");
 
   public static Command getCommand() {
-    return Commands.sequence(RobotContainer.pathBuilder.build(path));
+    return Commands.sequence(
+        RobotContainer.pathBuilder.withPoseReset(RobotContainer.drive::setPose).build(path));
   }
 }

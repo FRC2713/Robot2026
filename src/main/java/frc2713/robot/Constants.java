@@ -27,10 +27,12 @@ public final class Constants {
 
   // Set this to true to enable tunable numbers for all subsystems
   // Based off event branch: !BuildConstants.GIT_BRANCH.startsWith("event");
-  public static boolean tuningMode = false;
+  public static boolean tuningMode = true;
 
   // Set this to true to log performance data for each subsystem
   public static boolean logPerformanceData = false;
+
+  public static boolean demoMode = true;
 
   public static enum Mode {
     /** Running on a real robot. */

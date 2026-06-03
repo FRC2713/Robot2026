@@ -7,10 +7,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc2713.robot.Constants;
 import frc2713.robot.GameCommandGroups;
+import frc2713.robot.RobotContainer;
 import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
@@ -109,8 +112,9 @@ public class DriverControls {
     // intake fuel
     controller
         .leftTrigger(0.98)
-        .onTrue(
+        .whileTrue(
             Commands.parallel(intakeExtension.extendCommand(), intakeRoller.intake())
+                .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
                 .withName("Intaking"))
         .onFalse(Commands.parallel(intakeRoller.stop()).withName("Stop Intake"));
 
@@ -146,20 +150,55 @@ public class DriverControls {
                 Commands.run(() -> Drive.setStaticShotRotation())))
         .onFalse(setToNormalDriveCmd());
     // Rumble when <= 2 seconds left in the shift
-    new Trigger(() -> ShiftManager.getTimeLeftInShift(DriverStation.getMatchTime()) <= 2)
+    new Trigger(() -> ShiftManager.getTimeLeftInShift(DriverStation.getMatchTime()) <= 5)
         .whileTrue(controller.RumbleForDuration(0.5));
     // shoot otf
+
+    if (Constants.demoMode) {
+
+      controller
+          .rightBumper()
+          .onTrue(
+              GameCommandGroups.Launching.towerShot(
+                      drive,
+                      flywheels,
+                      hood,
+                      turret,
+                      feeder,
+                      dyeRotor,
+                      intakeExtension,
+                      intakeRoller)
+                  .withName("Static Tower Shot"))
+          .onFalse(
+              GameCommandGroups.Launching.stopShootingAndRetractHood(
+                      drive, feeder, dyeRotor, hood, flywheels)
+                  .withName("Stop Shooting + Hood Retract"));
+    } else {
+      controller
+          .rightBumper()
+          .whileTrue(
+              GameCommandGroups.Launching.otfShotHoodProtect(
+                      drive,
+                      flywheels,
+                      hood,
+                      turret,
+                      feeder,
+                      dyeRotor,
+                      intakeExtension,
+                      intakeRoller)
+                  .withName("OTF Shooting"))
+          .onFalse(
+              Commands.parallel(
+                      GameCommandGroups.Launching.stopShootingAndRetractHood(
+                          drive, feeder, dyeRotor, hood, flywheels))
+                  .withName("Stop Shooting"));
+    }
     controller
-        .rightBumper()
+        .rightTrigger(0.98)
         .whileTrue(
-            GameCommandGroups.Launching.otfShotHoodProtect(
-                    drive, flywheels, hood, turret, feeder, dyeRotor, intakeExtension, intakeRoller)
-                .withName("OTF Shooting"))
-        .onFalse(
-            Commands.parallel(
-                    GameCommandGroups.Launching.stopShootingAndRetractHood(
-                        drive, feeder, dyeRotor, hood, flywheels))
-                .withName("Stop Shooting"));
+            GameCommandGroups.OperatorOverriderrs.outtake(intakeExtension, intakeRoller, dyeRotor)
+                .withName("Outtake"))
+        .onFalse(Commands.parallel(intakeRoller.stop()).withName("Stop Intake"));
 
     // controller
     //     .a()
@@ -194,6 +233,10 @@ public class DriverControls {
     DriveCommands.setDefaultDriveCommand(drive, this.normalDriveCmd(), "Default Joystick Drive");
   }
 
+  public void setToFuelDetectDrive() {
+    DriveCommands.setDefaultDriveCommand(drive, this.fuelDetectDrive(), "Fuel Detect Drive");
+  }
+
   public Command setToNormalDriveCmd() {
     return DriveCommands.changeDefaultDriveCommand(
         drive, this.normalDriveCmd(), "Default Joystick Drive");
@@ -220,5 +263,14 @@ public class DriverControls {
         () -> -controller.getLeftY(),
         () -> -controller.getLeftX(),
         () -> -controller.getRightX());
+  }
+
+  private Command fuelDetectDrive() {
+    return DriveCommands.joystickDriveTowardsFuel(
+        drive,
+        () -> -controller.getLeftY(),
+        () -> -controller.getLeftX(),
+        () -> -controller.getRightX(),
+        RobotContainer.fuelDetector);
   }
 }

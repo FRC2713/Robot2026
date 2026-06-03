@@ -18,7 +18,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc2713.lib.energy.EnergyManagement;
 import frc2713.lib.util.AllianceFlipUtil;
+import frc2713.robot.commands.DriveCommands;
 import frc2713.robot.generated.BuildConstants;
+import frc2713.robot.subsystems.drive.DriveConstants;
 import frc2713.robot.subsystems.launcher.LaunchingSolutionManager;
 import frc2713.robot.util.ShiftManager;
 import org.littletonrobotics.junction.LogFileUtil;
@@ -161,6 +163,10 @@ public class Robot extends LoggedRobot {
     }
 
     RobotContainer.drive.changeDriveCurrentLimits(Amps.of(60));
+
+    if (Constants.tuningMode) {
+      DriveCommands.setDriveLimits(RobotContainer.drive, DriveConstants.demoDriveLimits).schedule();
+    }
   }
 
   /** This function is called periodically during operator control. */

@@ -9,8 +9,7 @@ import frc2713.robot.GameCommandGroups;
 import frc2713.robot.RobotContainer;
 import java.util.function.Supplier;
 
-public class BLineMidwarsOvercenter {
-  // public static final
+public class BLineMidwarsConservative {
 
   public static Command getCommand(Supplier<Boolean> shouldMirror) {
     return Commands.sequence(
@@ -34,7 +33,7 @@ public class BLineMidwarsOvercenter {
                     RobotContainer.dyeRotor,
                     RobotContainer.intakeExtension,
                     RobotContainer.intakeRoller))
-            .build(new Path("mid_wards_overcenter")),
+            .build(new Path("mid_wards_conservative")),
         // Pausing near hub to shoot
         GameCommandGroups.Launching.autoOtfShot(
                 RobotContainer.drive,
@@ -45,7 +44,7 @@ public class BLineMidwarsOvercenter {
                 RobotContainer.dyeRotor,
                 RobotContainer.intakeExtension,
                 RobotContainer.intakeRoller)
-            .withTimeout(0.5),
+            .withDeadline(Commands.waitSeconds(0.25)),
         // Drive to trench while shooting
         RobotContainer.pathBuilder
             .withPoseReset(pose -> {})
@@ -87,10 +86,9 @@ public class BLineMidwarsOvercenter {
                         RobotContainer.intakeExtension,
                         RobotContainer.intakeRoller)
                     .repeatedly())
-            .build(new Path("mid_wards_overcenter_second")),
+            .build(new Path("mid_wards_conservative_second")),
         // Drive to trench while shooting
-        Commands.parallel(
-            GameCommandGroups.Launching.autoOtfShot(
+        GameCommandGroups.Launching.autoOtfShot(
                 RobotContainer.drive,
                 RobotContainer.flywheels,
                 RobotContainer.hood,
@@ -98,10 +96,7 @@ public class BLineMidwarsOvercenter {
                 RobotContainer.feeder,
                 RobotContainer.dyeRotor,
                 RobotContainer.intakeExtension,
-                RobotContainer.intakeRoller),
-            RobotContainer.pathBuilder
-                .withShouldMirror(shouldMirror)
-                .withPoseReset(pose -> {})
-                .build(new Path("back_to_trench"))));
+                RobotContainer.intakeRoller)
+            .repeatedly());
   }
 }

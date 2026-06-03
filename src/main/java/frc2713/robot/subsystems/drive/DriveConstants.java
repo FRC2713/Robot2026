@@ -17,7 +17,7 @@ public class DriveConstants {
   public final class AutoConstants {
     public static final LoggedTunableGains positionTrajectoryController =
         new LoggedTunableGains(
-            "positionTraj", new Slot0Configs().withKP(1.8).withKD(0.0), new MotionMagicConfigs());
+            "positionTraj", new Slot0Configs().withKP(1.71).withKD(0.0), new MotionMagicConfigs());
     public static final LoggedTunableGains headingTrajectoryController =
         new LoggedTunableGains(
             "headingTraj", new Slot0Configs().withKP(6.5).withKD(0.2), new MotionMagicConfigs());
@@ -31,7 +31,7 @@ public class DriveConstants {
 
   public static final DriveLimits scoringDriveLimits =
       new DriveLimits(
-          FeetPerSecond.of(5.0),
+          FeetPerSecond.of(2.0),
           FeetPerSecondPerSecond.of(40.0),
           DegreesPerSecond.of(180.0),
           DegreesPerSecondPerSecond.of(1800.0));
@@ -42,6 +42,13 @@ public class DriveConstants {
           FeetPerSecondPerSecond.of(30.0),
           DegreesPerSecond.of(180.0),
           DegreesPerSecondPerSecond.of(3600.0));
+
+  public static final DriveLimits demoDriveLimits =
+      new DriveLimits(
+          FeetPerSecond.of(2.0),
+          FeetPerSecondPerSecond.of(40.0),
+          DegreesPerSecond.of(180.0),
+          DegreesPerSecondPerSecond.of(1800.0));
 
   public static final MomentOfInertia intakeExtendedMoi =
       MoiUnits.PoundSquareInches.of(29546.954784);
