@@ -36,6 +36,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
@@ -121,6 +122,9 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
       };
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, Pose2d.kZero);
+  // Camera simulation must not use the pose corrected by its own vision measurements.
+  private final SwerveDriveOdometry simulationOdometry =
+      new SwerveDriveOdometry(kinematics, rawGyroRotation, lastModulePositions);
 
   private final Field2d loggedPoseOnField = new Field2d(); // for elastic layout
   // private SwerveDrivePoseEstimator odometryPoseEstimator =
@@ -308,6 +312,9 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
 
         // Apply update
         poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+        if (Constants.currentMode == Mode.SIM) {
+          simulationOdometry.update(rawGyroRotation, modulePositions);
+        }
 
         loggedPoseOnField.setRobotPose(getPose());
 
@@ -566,6 +573,11 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
     return poseEstimator.getEstimatedPosition();
   }
 
+  /** Wheel/gyro simulation pose, independent of vision corrections. */
+  public Pose2d getSimulationPose() {
+    return simulationOdometry.getPoseMeters();
+  }
+
   // @AutoLogOutput(key = "Odometry/RobotNoVision")
   // public Pose2d getOdomPose() {
   //   return odometryPoseEstimator.getEstimatedPosition();
@@ -579,6 +591,7 @@ public class Drive extends SubsystemBase implements ArticulatedComponent {
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
     poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+    simulationOdometry.resetPosition(rawGyroRotation, getModulePositions(), pose);
     // odometryPoseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
   }
 

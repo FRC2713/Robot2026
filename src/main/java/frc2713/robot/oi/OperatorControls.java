@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc2713.robot.GameCommandGroups;
-import frc2713.robot.RobotContainer;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
@@ -154,8 +153,6 @@ public class OperatorControls {
         .a()
         .onTrue(
             Turret.changeDefaultTurretCommand(turret, turret.manualControl(), "Disable Turret"));
-
-    controller.x().whileTrue(Commands.run(() -> RobotContainer.vision.hardResetDrivePose()));
 
     new Trigger(() -> ShiftManager.getTimeLeftInShift(DriverStation.getMatchTime()) <= 5)
         .whileTrue(controller.RumbleForDuration(0.5));

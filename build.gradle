@@ -105,8 +105,6 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.34'
     annotationProcessor 'org.projectlombok:lombok:1.18.34'
 
-    implementation 'org.zeromq:jeromq:0.6.0'
-
     // Use local build path for development of Bline
     // implementation files('../BLine-Lib-2026/build/libs/BLine-Lib-0.8.4.jar')
 

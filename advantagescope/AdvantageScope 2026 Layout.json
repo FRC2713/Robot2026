@@ -63,7 +63,6 @@
             "/AdvantageKit/RealOutputs/TrajectoryFollowing",
             "/AdvantageKit/RealOutputs/Flywheels/fuel_trajectories",
             "/AdvantageKit/Turret/cancoder",
-            "/AdvantageKit/RealOutputs/SLAMDunk",
             "/AdvantageKit/RealOutputs/LaunchingSolutionManager/current solution",
             "/AdvantageKit/RealOutputs/LaunchingSolutionManager/current solution/turretFieldYaw",
             "/AdvantageKit/RealOutputs/Odometry",
@@ -115,19 +114,12 @@
             "/AdvantageKit/RealOutputs/Performance/SubsystemPeriodic/Flywheels",
             "/AdvantageKit/RealOutputs/Performance/SubsystemPeriodic/IntakeExtension",
             "/AdvantageKit/RealOutputs/Performance/SubsystemPeriodic/KinematicsManager",
-            "/AdvantageKit/Vision/Pose3d",
-            "/AdvantageKit/Vision/Pose",
-            "/AdvantageKit/Vision/Pose/rotation",
-            "/AdvantageKit/Vision/Pose3d/rotation",
-            "/AdvantageKit/Vision/Pose3d/translation",
-            "/AdvantageKit/Vision/Yaw",
             "/AdvantageKit/RealOutputs/Vision",
             "/Tuning/LaunchingSolutionManager",
             "/AdvantageKit/RealOutputs/LaunchingSolutionManager/itof debug",
             "/Tuning/Flywheels",
             "/Tuning/Flywheels/Gains",
             "/AdvantageKit/SystemStats",
-            "/slamdunk/pose_robot",
             "/AdvantageKit/RealOutputs/Odometry/Robot",
             "/AdvantageKit/RealOutputs/matchData",
             "/AdvantageKit/Vision",
@@ -139,7 +131,6 @@
             "/RealOutputs",
             "/AdvantageKit/Dye Rotor",
             "/AdvantageKit/Feeder",
-            "/slamdunk",
             "/Drive/Module0",
             "/Drive/Module1",
             "/AdvantageKit/Drive",
@@ -150,13 +141,10 @@
             "/Drive/Gyro",
             "/NetworkInputs",
             "/RealOutputs/Vision",
-            "/RealOutputs/Vision/SLAMDunk Array",
             "/RealOutputs/EnergyMonitor",
             "/RealOutputs/EnergyMonitor/Drive/Total",
             "/RealOutputs/EnergyMonitor/Flywheels",
             "/RealOutputs/EnergyMonitor/Flywheels/Total",
-            "/slamdunk/supercap_tags",
-            "/RealOutputs/Vision/SuperCap Array",
             "/Vision",
             "/DriverStation",
             "/AdvantageKit/RealOutputs/Dye Rotor",
@@ -166,7 +154,10 @@
             "/Flywheels",
             "/AdvantageKit/RealOutputs/LaunchingSolutionManager",
             "/AdvantageKit/RealOutputs/SwerveChassisSpeeds",
-            "/AdvantageKit/RealOutputs/SwerveChassisSpeeds/Measured"
+            "/AdvantageKit/RealOutputs/SwerveChassisSpeeds/Measured",
+            "/Vision/Camera0",
+            "/RealOutputs/Vision/Camera0",
+            "/RealOutputs/Vision/Summary"
           ]
         },
         "tabs": {
@@ -228,8 +219,8 @@
                   },
                   {
                     "type": "ghost",
-                    "logKey": "NT:/AdvantageKit/Vision/Pose3d",
-                    "logType": "Pose3d",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/Summary/RobotPosesAccepted",
+                    "logType": "Pose3d[]",
                     "visible": true,
                     "options": {
                       "model": "2713 2026 Robot",
@@ -267,8 +258,8 @@
                   },
                   {
                     "type": "ghost",
-                    "logKey": "/Vision/Pose3d",
-                    "logType": "Pose3d",
+                    "logKey": "/RealOutputs/Vision/Summary/RobotPosesAccepted",
+                    "logType": "Pose3d[]",
                     "visible": true,
                     "options": {
                       "model": "2713 2026 Robot",
@@ -508,7 +499,7 @@
                 "leftSources": [
                   {
                     "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/Vision/Latency",
+                    "logKey": "/RealOutputs/Vision/Camera0/RobotPosesAccepted/length",
                     "logType": "Number",
                     "visible": true,
                     "options": {
@@ -518,51 +509,11 @@
                   },
                   {
                     "type": "stepped",
-                    "logKey": "/Vision/Latency",
-                    "logType": "Number",
-                    "visible": false,
-                    "options": {
-                      "color": "#af2437",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/DistanceScaleFactor",
-                    "logType": "Number",
-                    "visible": false,
-                    "options": {
-                      "color": "#d993aa",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/countScaleFactor",
+                    "logKey": "/RealOutputs/Vision/Camera0/RobotPosesRejected/length",
                     "logType": "Number",
                     "visible": true,
                     "options": {
-                      "color": "#5f4528",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/Vision/TranslationStdDev",
-                    "logType": "Number",
-                    "visible": false,
-                    "options": {
-                      "color": "#e5b31b",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "stepped",
-                    "logKey": "/Drive/Gyro/YawPosition/value",
-                    "logType": "Number",
-                    "visible": false,
-                    "options": {
-                      "color": "#80588e",
+                      "color": "#af2437",
                       "size": "normal"
                     }
                   }
@@ -570,61 +521,11 @@
                 "rightSources": [
                   {
                     "type": "stepped",
-                    "logKey": "/Vision/TagCount",
+                    "logKey": "/Vision/Camera0/TagIds/length",
                     "logType": "Number",
                     "visible": true,
                     "options": {
                       "color": "#80588e",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "stepped",
-                    "logKey": "/RealOutputs/Odometry/normalizezdDistance",
-                    "logType": "Number",
-                    "visible": false,
-                    "options": {
-                      "color": "#3b875a",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "stepped",
-                    "logKey": "/SystemStats/BatteryVoltage",
-                    "logType": "Number",
-                    "visible": false,
-                    "options": {
-                      "color": "#2b66a2",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/Vision/TagCount",
-                    "logType": "Number",
-                    "visible": true,
-                    "options": {
-                      "color": "#af2437",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "stepped",
-                    "logKey": "/Vision/SubgraphError",
-                    "logType": "Number",
-                    "visible": false,
-                    "options": {
-                      "color": "#e48b32",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "stepped",
-                    "logKey": "/RealOutputs/Vision/SuperCap Array/length",
-                    "logType": "Number",
-                    "visible": true,
-                    "options": {
-                      "color": "#c0b487",
                       "size": "normal"
                     }
                   }
@@ -632,38 +533,20 @@
                 "discreteSources": [
                   {
                     "type": "stripes",
-                    "logKey": "NT:/AdvantageKit/Vision/Applying",
+                    "logKey": "/Vision/Camera0/Connected",
+                    "logType": "Boolean",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2"
+                    }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "/RealOutputs/Vision/Enabled",
                     "logType": "Boolean",
                     "visible": true,
                     "options": {
                       "color": "#e5b31b"
-                    }
-                  },
-                  {
-                    "type": "stripes",
-                    "logKey": "/Vision/Reasoning",
-                    "logType": "String",
-                    "visible": true,
-                    "options": {
-                      "color": "#e48b32"
-                    }
-                  },
-                  {
-                    "type": "stripes",
-                    "logKey": "NT:/AdvantageKit/Vision/Reasoning",
-                    "logType": "String",
-                    "visible": true,
-                    "options": {
-                      "color": "#c0b487"
-                    }
-                  },
-                  {
-                    "type": "stripes",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/Odometry/inFieldPlus",
-                    "logType": "Boolean",
-                    "visible": true,
-                    "options": {
-                      "color": "#858584"
                     }
                   }
                 ],
@@ -1164,16 +1047,6 @@
               "controllerUUID": "pienoz0ikyb1eubj0ecwmmoxetfu91ah",
               "renderer": null,
               "controlsHeight": 200
-            },
-            {
-              "type": 5,
-              "title": "Console",
-              "controller": "/RealOutputs/Vision/SuperCapReplyError",
-              "controllerUUID": "z2lerc6kceijjrc7d9sj5lv2xeo3dyh0",
-              "renderer": {
-                "highlight": false
-              },
-              "controlsHeight": 0
             },
             {
               "type": 1,
@@ -2025,44 +1898,7 @@
               "type": 6,
               "title": "Statistics",
               "controller": {
-                "sources": [
-                  {
-                    "type": "independent",
-                    "logKey": "NT:/AdvantageKit/Vision/Pose3d/translation/x",
-                    "logType": "Number",
-                    "visible": true,
-                    "options": {
-                      "color": "#2b66a2"
-                    }
-                  },
-                  {
-                    "type": "independent",
-                    "logKey": "NT:/AdvantageKit/Vision/Pose3d/translation/y",
-                    "logType": "Number",
-                    "visible": true,
-                    "options": {
-                      "color": "#e5b31b"
-                    }
-                  },
-                  {
-                    "type": "independent",
-                    "logKey": "NT:/AdvantageKit/Vision/Pose3d/translation/z",
-                    "logType": "Number",
-                    "visible": true,
-                    "options": {
-                      "color": "#af2437"
-                    }
-                  },
-                  {
-                    "type": "independent",
-                    "logKey": "NT:/AdvantageKit/Vision/Yaw/value",
-                    "logType": "Number",
-                    "visible": true,
-                    "options": {
-                      "color": "#80588e"
-                    }
-                  }
-                ],
+                "sources": [],
                 "timeRange": "visible",
                 "rangeMin": 0,
                 "rangeMax": 10,
@@ -2559,7 +2395,7 @@
                 "discreteSources": [
                   {
                     "type": "stripes",
-                    "logKey": "NT:/AdvantageKit/Vision/Applying",
+                    "logKey": "NT:/AdvantageKit/Vision/Camera0/Connected",
                     "logType": "Boolean",
                     "visible": true,
                     "options": {

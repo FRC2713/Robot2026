@@ -1,59 +1,49 @@
+// Copyright 2021-2025 FRC 6328
+// http://github.com/Mechanical-Advantage
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// version 3 as published by the Free Software Foundation or
+// available in the root directory of this project.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+
 package frc2713.robot.subsystems.vision;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Radian;
-import static edu.wpi.first.units.Units.Seconds;
-
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Time;
-import frc2713.lib.util.LoggedTunableMeasure;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.util.Units;
+import frc2713.robot.FieldConstants;
 
 public class VisionConstants {
-  public static Distance MAX_POSE_JUMP = Meters.of(1);
-  public static LinearVelocity MAX_LINEAR_SPEED =
-      MetersPerSecond.of(0.02); // TODO: reasoning based on linear speed
-  public static AngularVelocity MAX_ANGULAR_SPEED =
-      DegreesPerSecond.of(30); // TODO: reasoning based on angular speed
+  // Use the same 2026 field variant as the rest of the robot. Upload this layout to each camera.
+  public static final AprilTagFieldLayout aprilTagLayout =
+      FieldConstants.defaultAprilTagType.getLayout();
 
-  public record PoseEstimatorErrorStDevs(Distance translationalStDev, Angle rotationalStDev) {
-    public PoseEstimatorErrorStDevs multiplyByRange(double range) {
-      return new PoseEstimatorErrorStDevs(this.translationalStDev.times(range), rotationalStDev);
-    }
+  // Must match the nickname configured in the PhotonVision web UI.
+  public static final String camera0Name = "camera_0";
 
-    public Matrix<N3, N1> toMatrix() {
-      return VecBuilder.fill(
-          this.translationalStDev.in(Meters),
-          this.translationalStDev.in(Meters),
-          this.rotationalStDev.in(Radian));
-    }
-  }
+  // TODO: Replace the mounting dimensions with measured extrinsics.
+  // WPILib robot frame: +X forward, +Y left, +Z up, angles in radians.
+  public static final Transform3d robotToCamera0 =
+      new Transform3d(
+          Units.inchesToMeters(12.564),
+          Units.inchesToMeters(8.0),
+          Units.inchesToMeters(7.523),
+          new Rotation3d(0.0, Units.degreesToRadians(-20.0), 0.0));
 
-  // Use a very large rotational standard deviation so that the pose estimator
-  // effectively ignores the rotation component of vision measurements and relies
-  // on other sensors (e.g., gyro/odometry) for heading, since vision rotation
-  // data is considered too unreliable/noisy for this robot.
-  public static final PoseEstimatorErrorStDevs POSE_ESTIMATOR_STATE_STDEVS =
-      new PoseEstimatorErrorStDevs(Meters.of(0.01), Degrees.of(5));
+  public static final double maxAmbiguity = 0.3;
+  public static final double maxZError = 0.75;
+  public static final double maxSingleTagDistanceMeters = 3.0;
 
-  public static PoseEstimatorErrorStDevs POSE_ESTIMATOR_STATE_LOW_TAGS_FAST_STDEVS =
-      new PoseEstimatorErrorStDevs(Meters.of(0.8), Degrees.of(999));
-
-  public static PoseEstimatorErrorStDevs POSE_ESTIMATOR_STATE_LOW_TAGS_SLOW_STDEVS =
-      new PoseEstimatorErrorStDevs(Meters.of(0.3), Degrees.of(999));
-
-  public static final LoggedTunableMeasure<Time> LATENCY_THRESHOLD =
-      new LoggedTunableMeasure<Time>("Vision/latencyThreshold", Seconds.of(0.2));
-
-  public static final String SLAMDUNK_IP = "10.27.13.201";
-  public static final String SUPERCAP_IPC_ADDRESS = "tcp://" + SLAMDUNK_IP + ":5809";
+  // Standard deviations at 1 meter and 1 tag, scaled by distance squared / tag count.
+  public static final double linearStdDevBaseline = 0.02;
+  public static final double angularStdDevBaseline = 0.06;
+  public static final boolean useVisionRotation = true;
+  public static final boolean useVisionRotationSingleTag = false;
+  public static final double[] cameraStdDevFactors = {1.0};
 }

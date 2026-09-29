@@ -60,8 +60,10 @@ import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 import frc2713.robot.subsystems.serializer.SerializerConstants;
 import frc2713.robot.subsystems.vision.Vision;
+import frc2713.robot.subsystems.vision.VisionConstants;
 import frc2713.robot.subsystems.vision.VisionIO;
-import frc2713.robot.subsystems.vision.VisionIOSLAMDunk;
+import frc2713.robot.subsystems.vision.VisionIOPhotonVision;
+import frc2713.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import java.util.Arrays;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -155,7 +157,11 @@ public class RobotContainer {
             new Feeder(
                 SerializerConstants.Feeder.config,
                 new TalonFXIO(SerializerConstants.Feeder.config));
-        vision = new Vision(new VisionIOSLAMDunk());
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIOPhotonVision(
+                    VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose));
         break;
 
       case SIM:
@@ -198,8 +204,14 @@ public class RobotContainer {
                 SerializerConstants.Feeder.config,
                 new SimTalonFXIO(SerializerConstants.Feeder.config));
 
-        vision = new Vision(new VisionIOSLAMDunk()); // if jetson is connected to roboRio
-        // vision = new Vision(new VisionIOLocalNT()); // if jetson is connected to laptop
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIOPhotonVisionSim(
+                    VisionConstants.camera0Name,
+                    VisionConstants.robotToCamera0,
+                    drive::getSimulationPose,
+                    drive::getPose));
         break;
 
       default:
@@ -237,7 +249,7 @@ public class RobotContainer {
             new IntakeExtension(new TalonFXSubsystemConfig(), new IntakeExtensionIO() {});
         dyeRotor = new DyeRotor(new TalonFXSubsystemConfig(), new MotorIO() {});
         feeder = new Feeder(new TalonFXSubsystemConfig(), new MotorIO() {});
-        vision = new Vision(new VisionIO() {});
+        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {});
         break;
     }
 
@@ -247,15 +259,7 @@ public class RobotContainer {
     // Set up controllers
     driverControls =
         new DriverControls(
-            drive,
-            flywheels,
-            turret,
-            hood,
-            intakeRoller,
-            intakeExtension,
-            dyeRotor,
-            feeder,
-            vision);
+            drive, flywheels, turret, hood, intakeRoller, intakeExtension, dyeRotor, feeder);
     devControls =
         new DevControls(
             drive, flywheels, turret, hood, intakeRoller, intakeExtension, dyeRotor, feeder);

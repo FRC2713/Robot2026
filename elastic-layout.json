@@ -131,14 +131,14 @@
             }
           },
           {
-            "title": "Is Slamdunk Updating?",
+            "title": "PhotonVision Connected",
             "x": 896.0,
             "y": 384.0,
             "width": 256.0,
             "height": 128.0,
             "type": "Boolean Box",
             "properties": {
-              "topic": "/SmartDashboard/Vision/SLAMDunkUpdates",
+              "topic": "/SmartDashboard/Vision/Connected",
               "period": 0.06,
               "data_type": "boolean",
               "true_color": 4283215696,
@@ -586,20 +586,6 @@
             "type": "Text Display",
             "properties": {
               "topic": "/Tuning/Flywheels/PIDTest Rotation per Minute",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "k",
-            "x": 768.0,
-            "y": 384.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/Tuning/Vision/k",
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
