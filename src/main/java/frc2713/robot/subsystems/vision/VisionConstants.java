@@ -26,6 +26,9 @@ public class VisionConstants {
 
   // Must match the nickname configured in the PhotonVision web UI.
   public static final String camera0Name = "camera_0";
+  public static final String camera1Name = "camera_1";
+  public static final String camera2Name = "camera_2";
+  public static final String camera3Name = "camera_3";
 
   // TODO: Replace the mounting dimensions with measured extrinsics.
   // WPILib robot frame: +X forward, +Y left, +Z up, angles in radians.
@@ -36,6 +39,11 @@ public class VisionConstants {
           Units.inchesToMeters(7.523),
           new Rotation3d(0.0, Units.degreesToRadians(-20.0), 0.0));
 
+  // TODO: Replace these placeholders with each camera's measured mounting transform.
+  public static final Transform3d robotToCamera1 = robotToCamera0;
+  public static final Transform3d robotToCamera2 = robotToCamera0;
+  public static final Transform3d robotToCamera3 = robotToCamera0;
+
   public static final double maxAmbiguity = 0.3;
   public static final double maxZError = 0.75;
   public static final double maxSingleTagDistanceMeters = 3.0;
@@ -45,5 +53,5 @@ public class VisionConstants {
   public static final double angularStdDevBaseline = 0.06;
   public static final boolean useVisionRotation = true;
   public static final boolean useVisionRotationSingleTag = false;
-  public static final double[] cameraStdDevFactors = {1.0};
+  public static final double[] cameraStdDevFactors = {1.0, 1.0, 1.0, 1.0};
 }

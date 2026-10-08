@@ -161,7 +161,13 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVision(
-                    VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose));
+                    VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose),
+                new VisionIOPhotonVision(
+                    VisionConstants.camera1Name, VisionConstants.robotToCamera1, drive::getPose),
+                new VisionIOPhotonVision(
+                    VisionConstants.camera2Name, VisionConstants.robotToCamera2, drive::getPose),
+                new VisionIOPhotonVision(
+                    VisionConstants.camera3Name, VisionConstants.robotToCamera3, drive::getPose));
         break;
 
       case SIM:
@@ -211,6 +217,21 @@ public class RobotContainer {
                     VisionConstants.camera0Name,
                     VisionConstants.robotToCamera0,
                     drive::getSimulationPose,
+                    drive::getPose),
+                new VisionIOPhotonVisionSim(
+                    VisionConstants.camera1Name,
+                    VisionConstants.robotToCamera1,
+                    drive::getSimulationPose,
+                    drive::getPose),
+                new VisionIOPhotonVisionSim(
+                    VisionConstants.camera2Name,
+                    VisionConstants.robotToCamera2,
+                    drive::getSimulationPose,
+                    drive::getPose),
+                new VisionIOPhotonVisionSim(
+                    VisionConstants.camera3Name,
+                    VisionConstants.robotToCamera3,
+                    drive::getSimulationPose,
                     drive::getPose));
         break;
 
@@ -249,7 +270,13 @@ public class RobotContainer {
             new IntakeExtension(new TalonFXSubsystemConfig(), new IntakeExtensionIO() {});
         dyeRotor = new DyeRotor(new TalonFXSubsystemConfig(), new MotorIO() {});
         feeder = new Feeder(new TalonFXSubsystemConfig(), new MotorIO() {});
-        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {});
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIO() {},
+                new VisionIO() {},
+                new VisionIO() {},
+                new VisionIO() {});
         break;
     }
 
