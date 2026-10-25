@@ -53,6 +53,22 @@ public class VisionIOSpectrum implements VisionIO {
 
     // No gates for initial benchtop testing - accept everything to debug
     var gates = GateSet.of();
+    // Recommended gates for competition:
+    // var gates = GateSet.of(
+    //     Gates.uniqueFrames(),
+    //     Gates.timeSynced(0.5),
+    //     Gates.maxAge(0.5),
+    //     Gates.notFromFuture(0.05),
+    //     Gates.excludedTags(),
+    //     Gates.insideField(0.5),
+    //     Gates.maxHeight(0.3),
+    //     Gates.maxTilt(20),
+    //     Gates.maxSingleTagAmbiguity(0.3),
+    //     Gates.maxDistance(4.5, 7.0),
+    //     Gates.maxReprojection(3.0),
+    //     Gates.maxYawRate(3.5),
+    //     Gates.headingAgreesWithGyro(15),
+    //     Gates.innovation(new Gates.InnovationConfig()));
     vision =
         builder
             .gates(gates)
@@ -112,38 +128,6 @@ public class VisionIOSpectrum implements VisionIO {
     Logger.recordOutput("Vision/AcceptedCount", update.accepted().size());
     Logger.recordOutput("Vision/RejectedCount", update.rejected().size());
     Logger.recordOutput("Vision/FrameCount", update.frames().size());
-
-    // Log raw camera inputs to see what PhotonVision is sending
-    for (var cam : vision.cameras()) {
-      var camInputs = cam.inputs();
-      Logger.recordOutput("Vision/" + cam.name() + "/connected", camInputs.connected);
-      Logger.recordOutput("Vision/" + cam.name() + "/resultCount", camInputs.resultCount);
-      Logger.recordOutput("Vision/" + cam.name() + "/frameCount", camInputs.frames.size());
-      // Log each frame's raw data
-      for (int i = 0; i < camInputs.frames.size(); i++) {
-        var frame = camInputs.frames.get(i);
-        Logger.recordOutput(
-            "Vision/" + cam.name() + "/frame" + i + "/tagCount", frame.tags().size());
-        Logger.recordOutput("Vision/" + cam.name() + "/frame" + i + "/seqId", frame.sequenceId());
-        if (frame.multiTagFieldToCamera() != null) {
-          Logger.recordOutput(
-              "Vision/" + cam.name() + "/frame" + i + "/multiTagFieldToCamera",
-              frame.multiTagFieldToCamera());
-        }
-        // Log first tag's raw camera-to-tag transform (this should change when you move camera!)
-        if (!frame.tags().isEmpty()) {
-          var tag = frame.tags().get(0);
-          Logger.recordOutput(
-              "Vision/" + cam.name() + "/frame" + i + "/tag" + tag.id() + "/camToTag",
-              tag.bestCameraToTag());
-        }
-      }
-    }
-
-    // Log the robotToCamera transform we're using
-    for (var cam : vision.cameras()) {
-      Logger.recordOutput("Vision/" + cam.name() + "/robotToCamera", cam.robotToCamera());
-    }
   }
 
   /**

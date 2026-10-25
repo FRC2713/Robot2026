@@ -70,7 +70,7 @@ public class VisionConstants {
   }
 
   // Names must match PhotonVision exactly.
-  // Poses from SLAMDUNK OnShape CAD - rotation vectors are axis-angle (magnitude = angle in radians)
+  // Poses from SLAMDUNK - rotation vectors are axis-angle
   public static final Map<String, Transform3d> CAMERA_POSES =
       Map.of(
           //   "front_1",
