@@ -61,7 +61,7 @@ import frc2713.robot.subsystems.serializer.Feeder;
 import frc2713.robot.subsystems.serializer.SerializerConstants;
 import frc2713.robot.subsystems.vision.Vision;
 import frc2713.robot.subsystems.vision.VisionIO;
-import frc2713.robot.subsystems.vision.VisionIOSLAMDunk;
+import frc2713.robot.subsystems.vision.VisionIOSpectrum;
 import java.util.Arrays;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -155,7 +155,8 @@ public class RobotContainer {
             new Feeder(
                 SerializerConstants.Feeder.config,
                 new TalonFXIO(SerializerConstants.Feeder.config));
-        vision = new Vision(new VisionIOSLAMDunk());
+        vision = new Vision(new VisionIOSpectrum());
+        // vision = new Vision(new VisionIOSLAMDunk());
         break;
 
       case SIM:
@@ -198,7 +199,8 @@ public class RobotContainer {
                 SerializerConstants.Feeder.config,
                 new SimTalonFXIO(SerializerConstants.Feeder.config));
 
-        vision = new Vision(new VisionIOSLAMDunk()); // if jetson is connected to roboRio
+        vision = new Vision(new VisionIOSpectrum());
+        // vision = new Vision(new VisionIOSLAMDunk()); // if jetson is connected to roboRio
         // vision = new Vision(new VisionIOLocalNT()); // if jetson is connected to laptop
         break;
 

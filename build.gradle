@@ -197,7 +197,8 @@ spotless {
     java {
         target fileTree(".") {
             include "**/*.java"
-            exclude "**/build/**", "**/build-*/**"
+            // SpectrumVision is vendored as-is (robot-vision/install.sh), don't reformat it
+            exclude "**/build/**", "**/build-*/**", "src/main/java/org/spectrum3847/**"
         }
         toggleOffOn()
         googleJavaFormat()
