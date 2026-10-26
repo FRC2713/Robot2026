@@ -72,15 +72,16 @@ public class BLineDepotOnly {
                             RobotContainer.dyeRotor,
                             RobotContainer.hood,
                             RobotContainer.flywheels)
-                        .withTimeout(0.25))),
+                        .withTimeout(0.25)))
         // back to midline
-        RobotContainer.pathBuilder
-            .withPoseReset(pose -> {})
-            .withEvent(
-                "intake",
-                GameCommandGroups.Intaking.intake(
-                    RobotContainer.intakeExtension, RobotContainer.intakeRoller))
-            .build(new Path("depot_only_third")),
-        Commands.run(() -> RobotContainer.drive.stop()));
+        // RobotContainer.pathBuilder
+        //     .withPoseReset(pose -> {})
+        //     .withEvent(
+        //         "intake",
+        //         GameCommandGroups.Intaking.intake(
+        //             RobotContainer.intakeExtension, RobotContainer.intakeRoller))
+        //     .build(new Path("depot_only_third")),
+        // Commands.run(() -> RobotContainer.drive.stop())
+        );
   }
 }
