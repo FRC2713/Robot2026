@@ -199,9 +199,8 @@ public class RobotContainer {
                 SerializerConstants.Feeder.config,
                 new SimTalonFXIO(SerializerConstants.Feeder.config));
 
-        vision = new Vision(new VisionIOSpectrum());
-        // vision = new Vision(new VisionIOSLAMDunk()); // if jetson is connected to roboRio
-        // vision = new Vision(new VisionIOLocalNT()); // if jetson is connected to laptop
+        vision = new Vision(new VisionIOSpectrum(drive::getSimulationPose));
+        // For bench testing with a physical Jetson, use new VisionIOSpectrum() instead.
         break;
 
       default:
