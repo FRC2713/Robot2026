@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc2713.robot.GameCommandGroups;
-import frc2713.robot.RobotContainer;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.subsystems.intake.IntakeExtension;
 import frc2713.robot.subsystems.intake.IntakeRoller;
@@ -52,7 +51,6 @@ public class Midwars {
             Commands.sequence(
                 Commands.print("[AUTO] Going to fuel"),
                 intakeFuelRight.resetOdometry(),
-                RobotContainer.vision.setGyroAngleCmd(intakeFuelRight),
                 intakeFuelRight.cmd()));
 
     intakeFuelRight

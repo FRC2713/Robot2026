@@ -60,8 +60,10 @@ import frc2713.robot.subsystems.serializer.DyeRotor;
 import frc2713.robot.subsystems.serializer.Feeder;
 import frc2713.robot.subsystems.serializer.SerializerConstants;
 import frc2713.robot.subsystems.vision.Vision;
+import frc2713.robot.subsystems.vision.VisionConstants;
 import frc2713.robot.subsystems.vision.VisionIO;
-import frc2713.robot.subsystems.vision.VisionIOSLAMDunk;
+import frc2713.robot.subsystems.vision.VisionIOPhotonVision;
+import frc2713.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import java.util.Arrays;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -104,6 +106,29 @@ public class RobotContainer {
   public static FollowPath.Builder pathBuilder;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  private static Vision createVision(Constants.Mode mode) {
+    var io =
+        VisionConstants.CAMERAS.stream()
+            .map(
+                config ->
+                    switch (mode) {
+                      case REAL -> new VisionIOPhotonVision(
+                          config.name(), config.robotToCamera(), drive::getPose);
+                      case SIM -> VisionConstants.USE_PHYSICAL_CAMERAS_IN_SIM
+                          ? new VisionIOPhotonVision(
+                              config.name(), config.robotToCamera(), drive::getPose)
+                          : new VisionIOPhotonVisionSim(
+                              config.name(),
+                              config.robotToCamera(),
+                              drive::getSimulationPose,
+                              drive::getPose);
+                      case REPLAY -> new VisionIO() {};
+                    })
+            .toArray(VisionIO[]::new);
+    return new Vision(
+        drive::addVisionMeasurement, drive::getPose, drive::setPose, VisionConstants.CAMERAS, io);
+  }
+
   public RobotContainer() {
     switch (Constants.currentMode) {
       case REAL:
@@ -155,7 +180,7 @@ public class RobotContainer {
             new Feeder(
                 SerializerConstants.Feeder.config,
                 new TalonFXIO(SerializerConstants.Feeder.config));
-        vision = new Vision(new VisionIOSLAMDunk());
+        vision = createVision(Constants.Mode.REAL);
         break;
 
       case SIM:
@@ -198,8 +223,7 @@ public class RobotContainer {
                 SerializerConstants.Feeder.config,
                 new SimTalonFXIO(SerializerConstants.Feeder.config));
 
-        vision = new Vision(new VisionIOSLAMDunk()); // if jetson is connected to roboRio
-        // vision = new Vision(new VisionIOLocalNT()); // if jetson is connected to laptop
+        vision = createVision(Constants.Mode.SIM);
         break;
 
       default:
@@ -237,7 +261,7 @@ public class RobotContainer {
             new IntakeExtension(new TalonFXSubsystemConfig(), new IntakeExtensionIO() {});
         dyeRotor = new DyeRotor(new TalonFXSubsystemConfig(), new MotorIO() {});
         feeder = new Feeder(new TalonFXSubsystemConfig(), new MotorIO() {});
-        vision = new Vision(new VisionIO() {});
+        vision = createVision(Constants.Mode.REPLAY);
         break;
     }
 
@@ -247,15 +271,7 @@ public class RobotContainer {
     // Set up controllers
     driverControls =
         new DriverControls(
-            drive,
-            flywheels,
-            turret,
-            hood,
-            intakeRoller,
-            intakeExtension,
-            dyeRotor,
-            feeder,
-            vision);
+            drive, flywheels, turret, hood, intakeRoller, intakeExtension, dyeRotor, feeder);
     devControls =
         new DevControls(
             drive, flywheels, turret, hood, intakeRoller, intakeExtension, dyeRotor, feeder);

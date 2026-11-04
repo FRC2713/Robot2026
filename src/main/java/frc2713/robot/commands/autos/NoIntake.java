@@ -5,7 +5,6 @@ import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc2713.robot.RobotContainer;
 import frc2713.robot.subsystems.drive.Drive;
 import frc2713.robot.util.AutoUtil;
 
@@ -20,10 +19,7 @@ public class NoIntake {
         .active()
         .onTrue(
             Commands.sequence(
-                Commands.print("[AUTO] No Intake"),
-                noIntake.resetOdometry(),
-                RobotContainer.vision.setGyroAngleCmd(noIntake),
-                noIntake.cmd()));
+                Commands.print("[AUTO] No Intake"), noIntake.resetOdometry(), noIntake.cmd()));
 
     noIntake.done().onTrue(Commands.run(() -> driveSubsystem.stop()));
 
