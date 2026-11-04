@@ -47,7 +47,7 @@ public class PhotonCameraIO implements CameraIO {
                         .getTable("photonvision")
                         .getSubTable(camera.getName())
                         .getDoubleArrayTopic("tagQuality")
-                        .subscribe(new double[0], NtOptions.everyValue(32));
+                        .subscribe(new double[0], NtOptions.everyValue(5));
         CameraCompat.requestEnabled(camera, true);
     }
 

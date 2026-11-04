@@ -73,26 +73,22 @@ public class VisionConstants {
   // Poses from SLAMDUNK - rotation vectors are axis-angle
   public static final Map<String, Transform3d> CAMERA_POSES =
       Map.of(
-          //   "front_1",
-          //   new Transform3d(
-          //       new Translation3d(0.063500, 0.302558, 0.502178),
-          //       fromAxisAngle(-1.3962634015954634, 0, 0)),
-          //   "right_2",
-          //   new Transform3d(
-          //       new Translation3d(0.362883, -0.149225, 0.518053),
-          //       fromAxisAngle(0.9813180646681502, 0.9813180646681504, 1.338348969126305)),
-          //   "back_3",
-          //   new Transform3d(
-          //       new Translation3d(0, -0.313595, 0.516118),
-          //       fromAxisAngle(1.2653637076958888, 0, 0)),
-          //   "left_4",
-          //   new Transform3d(
-          //       new Translation3d(-0.362883, -0.149225, 0.518053),
-          //       fromAxisAngle(-1.0796670529547816, -1.0796670529547816, 1.2866970891644645)),
-          "spare_thrifty",
+          // "Camera_1",
+          // new Transform3d(
+          //     new Translation3d(0.063500, 0.302558, 0.502178),
+          //     fromAxisAngle(-1.3962634015954634, 0, 0)),
+          // "Camera_2",
+          // new Transform3d(
+          //     new Translation3d(0.362883, -0.149225, 0.518053),
+          //     fromAxisAngle(0.9813180646681502, 0.9813180646681504, 1.338348969126305)),
+          "Camera_4",
           new Transform3d(
-              new Translation3d(0.063500, 0.302558, 0.502178),
-              fromAxisAngle(-1.3962634015954634, 0, 0)));
+              new Translation3d(0, -0.313595, 0.516118), fromAxisAngle(1.2653637076958888, 0, 0))
+          // "Camera_3",
+          // new Transform3d(
+          //     new Translation3d(-0.362883, -0.149225, 0.518053),
+          //     fromAxisAngle(-1.0796670529547816, -1.0796670529547816, 1.2866970891644645))
+          );
 
   // Record every camera to the Jetson's SSD (Rewind) from auto start until teleop ends
   public static final boolean REWIND_ENABLED = true;

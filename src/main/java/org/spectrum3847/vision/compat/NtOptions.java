@@ -8,6 +8,6 @@ public final class NtOptions {
 
     /** Every value, queued (up to {@code queue}), sampled every 10 ms: for per-frame data. */
     public static PubSubOption[] everyValue(int queue) {
-        return new PubSubOption[] {PubSubOption.sendAll(true), PubSubOption.pollStorage(queue), PubSubOption.periodic(0.01)};
+        return new PubSubOption[] {PubSubOption.sendAll(false),  PubSubOption.periodic(0.02)};
     }
 }
