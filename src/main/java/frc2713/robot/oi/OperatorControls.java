@@ -155,7 +155,7 @@ public class OperatorControls {
         .onTrue(
             Turret.changeDefaultTurretCommand(turret, turret.manualControl(), "Disable Turret"));
 
-    controller.x().whileTrue(Commands.run(() -> RobotContainer.vision.hardResetDrivePose()));
+    controller.x().onTrue(Commands.runOnce(() -> RobotContainer.vision.hardResetDrivePose()));
 
     new Trigger(() -> ShiftManager.getTimeLeftInShift(DriverStation.getMatchTime()) <= 5)
         .whileTrue(controller.RumbleForDuration(0.5));

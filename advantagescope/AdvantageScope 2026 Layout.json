@@ -63,7 +63,6 @@
             "/AdvantageKit/RealOutputs/TrajectoryFollowing",
             "/AdvantageKit/RealOutputs/Flywheels/fuel_trajectories",
             "/AdvantageKit/Turret/cancoder",
-            "/AdvantageKit/RealOutputs/SLAMDunk",
             "/AdvantageKit/RealOutputs/LaunchingSolutionManager/current solution",
             "/AdvantageKit/RealOutputs/LaunchingSolutionManager/current solution/turretFieldYaw",
             "/AdvantageKit/RealOutputs/Odometry",
@@ -115,12 +114,12 @@
             "/AdvantageKit/RealOutputs/Performance/SubsystemPeriodic/Flywheels",
             "/AdvantageKit/RealOutputs/Performance/SubsystemPeriodic/IntakeExtension",
             "/AdvantageKit/RealOutputs/Performance/SubsystemPeriodic/KinematicsManager",
-            "/AdvantageKit/Vision/Pose3d",
-            "/AdvantageKit/Vision/Pose",
-            "/AdvantageKit/Vision/Pose/rotation",
-            "/AdvantageKit/Vision/Pose3d/rotation",
-            "/AdvantageKit/Vision/Pose3d/translation",
-            "/AdvantageKit/Vision/Yaw",
+            "/AdvantageKit/RealOutputs/Vision/Summary/RobotPosesAccepted",
+            "/AdvantageKit/RealOutputs/Vision/Summary/RobotPosesAccepted",
+            "/AdvantageKit/RealOutputs/Vision/front_1/CameraPose/rotation",
+            "/AdvantageKit/RealOutputs/Vision/front_1/CameraPose/rotation",
+            "/AdvantageKit/RealOutputs/Vision/front_1/CameraPose/translation",
+            "/AdvantageKit/RealOutputs/Vision/front_1/CameraPose/rotation",
             "/AdvantageKit/RealOutputs/Vision",
             "/Tuning/LaunchingSolutionManager",
             "/AdvantageKit/RealOutputs/LaunchingSolutionManager/itof debug",
@@ -150,13 +149,11 @@
             "/Drive/Gyro",
             "/NetworkInputs",
             "/RealOutputs/Vision",
-            "/RealOutputs/Vision/SLAMDunk Array",
             "/RealOutputs/EnergyMonitor",
             "/RealOutputs/EnergyMonitor/Drive/Total",
             "/RealOutputs/EnergyMonitor/Flywheels",
             "/RealOutputs/EnergyMonitor/Flywheels/Total",
             "/slamdunk/supercap_tags",
-            "/RealOutputs/Vision/SuperCap Array",
             "/Vision",
             "/DriverStation",
             "/AdvantageKit/RealOutputs/Dye Rotor",
@@ -210,6 +207,46 @@
                     }
                   },
                   {
+                    "type": "vision",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/front_1/TagPoses",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/right_2/TagPoses",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff8800",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/back_3/TagPoses",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00bfff",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/left_4/TagPoses",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff00ff",
+                      "size": "normal"
+                    }
+                  },
+                  {
                     "type": "component",
                     "logKey": "NT:/AdvantageKit/RealOutputs/Kinematics/mechanismPoses",
                     "logType": "Pose3d[]",
@@ -228,8 +265,8 @@
                   },
                   {
                     "type": "ghost",
-                    "logKey": "NT:/AdvantageKit/Vision/Pose3d",
-                    "logType": "Pose3d",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/Summary/RobotPosesAccepted",
+                    "logType": "Pose3d[]",
                     "visible": true,
                     "options": {
                       "model": "2713 2026 Robot",
@@ -267,8 +304,8 @@
                   },
                   {
                     "type": "ghost",
-                    "logKey": "/Vision/Pose3d",
-                    "logType": "Pose3d",
+                    "logKey": "/RealOutputs/Vision/Summary/RobotPosesAccepted",
+                    "logType": "Pose3d[]",
                     "visible": true,
                     "options": {
                       "model": "2713 2026 Robot",
@@ -282,6 +319,46 @@
                     "visible": true,
                     "options": {
                       "model": "2713 2026 Robot"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "/RealOutputs/Vision/front_1/TagPoses",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "/RealOutputs/Vision/right_2/TagPoses",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff8800",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "/RealOutputs/Vision/back_3/TagPoses",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00bfff",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "/RealOutputs/Vision/left_4/TagPoses",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff00ff",
+                      "size": "normal"
                     }
                   },
                   {
@@ -303,7 +380,7 @@
                   },
                   {
                     "type": "ghost",
-                    "logKey": "/RealOutputs/Odometry/RobotNoVision",
+                    "logKey": "/RealOutputs/Odometry/SimulationPose",
                     "logType": "Pose2d",
                     "visible": false,
                     "options": {
@@ -338,6 +415,92 @@
                     "visible": true,
                     "options": {
                       "variant": "Fuel"
+                    }
+                  },
+                  {
+                    "type": "axes",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/front_1/CameraPose",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "axes",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/right_2/CameraPose",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "axes",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/back_3/CameraPose",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "axes",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/left_4/CameraPose",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/Summary/RobotPosesRejected",
+                    "logType": "Pose3d[]",
+                    "visible": false,
+                    "options": {
+                      "model": "2713 2026 Robot",
+                      "color": "#ff0000"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Odometry/SimulationPose",
+                    "logType": "Pose2d",
+                    "visible": false,
+                    "options": {
+                      "model": "2713 2026 Robot",
+                      "color": "#00bfff"
+                    }
+                  },
+                  {
+                    "type": "axes",
+                    "logKey": "/RealOutputs/Vision/front_1/CameraPose",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "axes",
+                    "logKey": "/RealOutputs/Vision/right_2/CameraPose",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "axes",
+                    "logKey": "/RealOutputs/Vision/back_3/CameraPose",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "axes",
+                    "logKey": "/RealOutputs/Vision/left_4/CameraPose",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "/RealOutputs/Vision/Summary/RobotPosesRejected",
+                    "logType": "Pose3d[]",
+                    "visible": false,
+                    "options": {
+                      "model": "2713 2026 Robot",
+                      "color": "#ff0000"
                     }
                   }
                 ],
@@ -508,7 +671,7 @@
                 "leftSources": [
                   {
                     "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/Vision/Latency",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/LatestAcceptedAgeSeconds",
                     "logType": "Number",
                     "visible": true,
                     "options": {
@@ -518,51 +681,11 @@
                   },
                   {
                     "type": "stepped",
-                    "logKey": "/Vision/Latency",
+                    "logKey": "/RealOutputs/Vision/LatestAcceptedAgeSeconds",
                     "logType": "Number",
                     "visible": false,
                     "options": {
-                      "color": "#af2437",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/DistanceScaleFactor",
-                    "logType": "Number",
-                    "visible": false,
-                    "options": {
-                      "color": "#d993aa",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/countScaleFactor",
-                    "logType": "Number",
-                    "visible": true,
-                    "options": {
-                      "color": "#5f4528",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/Vision/TranslationStdDev",
-                    "logType": "Number",
-                    "visible": false,
-                    "options": {
-                      "color": "#e5b31b",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "stepped",
-                    "logKey": "/Drive/Gyro/YawPosition/value",
-                    "logType": "Number",
-                    "visible": false,
-                    "options": {
-                      "color": "#80588e",
+                      "color": "#2b66a2",
                       "size": "normal"
                     }
                   }
@@ -570,61 +693,61 @@
                 "rightSources": [
                   {
                     "type": "stepped",
-                    "logKey": "/Vision/TagCount",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/AcceptedCount",
                     "logType": "Number",
                     "visible": true,
                     "options": {
-                      "color": "#80588e",
+                      "color": "#00ff00",
                       "size": "normal"
                     }
                   },
                   {
                     "type": "stepped",
-                    "logKey": "/RealOutputs/Odometry/normalizezdDistance",
-                    "logType": "Number",
-                    "visible": false,
-                    "options": {
-                      "color": "#3b875a",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "stepped",
-                    "logKey": "/SystemStats/BatteryVoltage",
-                    "logType": "Number",
-                    "visible": false,
-                    "options": {
-                      "color": "#2b66a2",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/Vision/TagCount",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/RejectedCount",
                     "logType": "Number",
                     "visible": true,
                     "options": {
-                      "color": "#af2437",
+                      "color": "#ff0000",
                       "size": "normal"
                     }
                   },
                   {
                     "type": "stepped",
-                    "logKey": "/Vision/SubgraphError",
-                    "logType": "Number",
-                    "visible": false,
-                    "options": {
-                      "color": "#e48b32",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "stepped",
-                    "logKey": "/RealOutputs/Vision/SuperCap Array/length",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/AppliedCount",
                     "logType": "Number",
                     "visible": true,
                     "options": {
-                      "color": "#c0b487",
+                      "color": "#00bfff",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "/RealOutputs/Vision/AcceptedCount",
+                    "logType": "Number",
+                    "visible": false,
+                    "options": {
+                      "color": "#00ff00",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "/RealOutputs/Vision/RejectedCount",
+                    "logType": "Number",
+                    "visible": false,
+                    "options": {
+                      "color": "#ff0000",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "/RealOutputs/Vision/AppliedCount",
+                    "logType": "Number",
+                    "visible": false,
+                    "options": {
+                      "color": "#00bfff",
                       "size": "normal"
                     }
                   }
@@ -632,7 +755,25 @@
                 "discreteSources": [
                   {
                     "type": "stripes",
-                    "logKey": "NT:/AdvantageKit/Vision/Applying",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/Connected",
+                    "logType": "Boolean",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00"
+                    }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/Enabled",
+                    "logType": "Boolean",
+                    "visible": true,
+                    "options": {
+                      "color": "#00bfff"
+                    }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/Applying",
                     "logType": "Boolean",
                     "visible": true,
                     "options": {
@@ -641,29 +782,47 @@
                   },
                   {
                     "type": "stripes",
-                    "logKey": "/Vision/Reasoning",
-                    "logType": "String",
-                    "visible": true,
-                    "options": {
-                      "color": "#e48b32"
-                    }
-                  },
-                  {
-                    "type": "stripes",
-                    "logKey": "NT:/AdvantageKit/Vision/Reasoning",
-                    "logType": "String",
-                    "visible": true,
-                    "options": {
-                      "color": "#c0b487"
-                    }
-                  },
-                  {
-                    "type": "stripes",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/Odometry/inFieldPlus",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/RewindRecording",
                     "logType": "Boolean",
                     "visible": true,
                     "options": {
-                      "color": "#858584"
+                      "color": "#ff00ff"
+                    }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "/RealOutputs/Vision/Connected",
+                    "logType": "Boolean",
+                    "visible": false,
+                    "options": {
+                      "color": "#00ff00"
+                    }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "/RealOutputs/Vision/Enabled",
+                    "logType": "Boolean",
+                    "visible": false,
+                    "options": {
+                      "color": "#00bfff"
+                    }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "/RealOutputs/Vision/Applying",
+                    "logType": "Boolean",
+                    "visible": false,
+                    "options": {
+                      "color": "#e5b31b"
+                    }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "/RealOutputs/Vision/RewindRecording",
+                    "logType": "Boolean",
+                    "visible": false,
+                    "options": {
+                      "color": "#ff00ff"
                     }
                   }
                 ],
@@ -1164,16 +1323,6 @@
               "controllerUUID": "pienoz0ikyb1eubj0ecwmmoxetfu91ah",
               "renderer": null,
               "controlsHeight": 200
-            },
-            {
-              "type": 5,
-              "title": "Console",
-              "controller": "/RealOutputs/Vision/SuperCapReplyError",
-              "controllerUUID": "z2lerc6kceijjrc7d9sj5lv2xeo3dyh0",
-              "renderer": {
-                "highlight": false
-              },
-              "controlsHeight": 0
             },
             {
               "type": 1,
@@ -2023,12 +2172,12 @@
             },
             {
               "type": 6,
-              "title": "Statistics",
+              "title": "Camera Position Statistics",
               "controller": {
                 "sources": [
                   {
                     "type": "independent",
-                    "logKey": "NT:/AdvantageKit/Vision/Pose3d/translation/x",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/front_1/CameraPose/translation/x",
                     "logType": "Number",
                     "visible": true,
                     "options": {
@@ -2037,7 +2186,7 @@
                   },
                   {
                     "type": "independent",
-                    "logKey": "NT:/AdvantageKit/Vision/Pose3d/translation/y",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/front_1/CameraPose/translation/y",
                     "logType": "Number",
                     "visible": true,
                     "options": {
@@ -2046,20 +2195,11 @@
                   },
                   {
                     "type": "independent",
-                    "logKey": "NT:/AdvantageKit/Vision/Pose3d/translation/z",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/front_1/CameraPose/translation/z",
                     "logType": "Number",
                     "visible": true,
                     "options": {
                       "color": "#af2437"
-                    }
-                  },
-                  {
-                    "type": "independent",
-                    "logKey": "NT:/AdvantageKit/Vision/Yaw/value",
-                    "logType": "Number",
-                    "visible": true,
-                    "options": {
-                      "color": "#80588e"
                     }
                   }
                 ],
@@ -2559,7 +2699,7 @@
                 "discreteSources": [
                   {
                     "type": "stripes",
-                    "logKey": "NT:/AdvantageKit/Vision/Applying",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/Applying",
                     "logType": "Boolean",
                     "visible": true,
                     "options": {

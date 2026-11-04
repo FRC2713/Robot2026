@@ -105,8 +105,6 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.34'
     annotationProcessor 'org.projectlombok:lombok:1.18.34'
 
-    implementation 'org.zeromq:jeromq:0.6.0'
-
     // Use local build path for development of Bline
     // implementation files('../BLine-Lib-2026/build/libs/BLine-Lib-0.8.4.jar')
 
@@ -197,8 +195,7 @@ spotless {
     java {
         target fileTree(".") {
             include "**/*.java"
-            // SpectrumVision is vendored as-is (robot-vision/install.sh), don't reformat it
-            exclude "**/build/**", "**/build-*/**", "src/main/java/org/spectrum3847/**"
+            exclude "**/build/**", "**/build-*/**"
         }
         toggleOffOn()
         googleJavaFormat()

@@ -12,7 +12,12 @@ class CameraMountsTest {
   @CsvSource({"front_1, 1, 0, 1", "right_2, 0, -1, -1", "back_3, -1, 0, -1", "left_4, 0, 1, 1"})
   void camerasSitOnTheirNamedSideAndLookOutward(
       String name, double outwardX, double outwardY, double cameraUpSign) {
-    var mount = VisionConstants.CAMERA_POSES.get(name);
+    var mount =
+        VisionConstants.CAMERAS.stream()
+            .filter(c -> c.name().equals(name))
+            .findFirst()
+            .orElseThrow()
+            .robotToCamera();
     // Check the physical side independently of the specific mounting measurements.
     double outwardPosition = mount.getX() * outwardX + mount.getY() * outwardY;
     double sidewaysPosition = -mount.getX() * outwardY + mount.getY() * outwardX;
